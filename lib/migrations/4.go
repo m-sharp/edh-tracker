@@ -12,7 +12,7 @@ const (
 		player_id INT,
 		commander VARCHAR(256),
 		retired BOOL DEFAULT FALSE,
-		ctime DATETIME,
+		ctime DATETIME DEFAULT NOW(),
 		FOREIGN KEY (player_id) REFERENCES player(id) ON DELETE CASCADE
 	);`
 	destroyDeckTable = `DROP TABLE deck;`

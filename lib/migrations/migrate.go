@@ -77,7 +77,8 @@ func RunAll(ctx context.Context, client *lib.DBClient, log *zap.Logger) error {
 }
 
 func rollback(ctx context.Context, client *lib.DBClient, log *zap.Logger, toRollback ...Migration) error {
-	for i, migration := range toRollback {
+	for i := len(toRollback); i > 0; i-- {
+		migration := toRollback[i-1]
 		log = log.With(zap.Int("Migration Number", i))
 		log.Debug("Rolling back migration")
 		if err := migration.Downgrade(ctx, client); err != nil {
@@ -128,5 +129,10 @@ func getAllMigrations() map[int]Migration {
 		1: &Migration1{},
 		2: &Migration2{},
 		3: &Migration3{},
+		4: &Migration4{},
+		5: &Migration5{},
+		6: &Migration6{},
+		7: &Migration7{},
+		8: &Migration8{},
 	}
 }
