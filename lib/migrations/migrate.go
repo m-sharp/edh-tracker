@@ -15,6 +15,7 @@ import (
 
 const (
 	increment = `INSERT INTO migration (success, ctime) VALUES (1, ?);`
+	// ToDo: Can't delete and select from the same table in one go
 	decrement = `DELETE FROM migration WHERE ID=(SELECT MAX(id) FROM migration);`
 
 	countMigrations = `SELECT COUNT(*) FROM migration;`
