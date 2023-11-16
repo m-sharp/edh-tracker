@@ -2,18 +2,17 @@ package migrations
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/m-sharp/edh-tracker/lib"
 )
 
 const (
-	dropGames        = `DELETE * FROM game;`
-	insertResultTmpl = `INSERT INTO game_result (game_id, deck_id, place, kill_count) VALUES (
-		(SELECT id FROM game where description = "%s"),
-		(SELECT id FROM deck where commander = "%s" AND player_id = (SELECT id FROM player where name = "%s")),
-		%d,
-		%d
+	dropGames    = `DELETE * FROM game;`
+	insertResult = `INSERT INTO game_result (game_id, deck_id, place, kill_count) VALUES (
+		(SELECT id FROM game where description = ?),
+		(SELECT id FROM deck where commander = ? AND player_id = (SELECT id FROM player where name = ?)),
+		?,
+		?
 	);`
 )
 
@@ -929,9 +928,16 @@ func (m *Migration8) Upgrade(ctx context.Context, client *lib.DBClient) error {
 
 	for game, resultInfos := range gameResultSeeds {
 		for _, result := range resultInfos {
-			query := fmt.Sprintf(insertResultTmpl, game, result.Commander, result.Player, result.Place, result.Kills)
-			if _, err := client.Db.ExecContext(ctx, query); err != nil {
-				return lib.NewDBError(query, err)
+			if _, err := client.Db.ExecContext(
+				ctx,
+				insertResult,
+				game,
+				result.Commander,
+				result.Player,
+				result.Place,
+				result.Kills,
+			); err != nil {
+				return lib.NewDBError(insertResult, err)
 			}
 		}
 	}

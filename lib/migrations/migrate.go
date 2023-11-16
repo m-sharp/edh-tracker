@@ -15,8 +15,8 @@ import (
 
 const (
 	increment = `INSERT INTO migration (success, ctime) VALUES (1, ?);`
-	// ToDo: Can't delete and select from the same table in one go
-	decrement = `DELETE FROM migration WHERE ID=(SELECT MAX(id) FROM migration);`
+	getMaxID  = `SELECT MAX(id) FROM migration;`
+	decrement = `DELETE FROM migration WHERE ID=?;`
 
 	countMigrations = `SELECT COUNT(*) FROM migration;`
 	checkForTable   = `SELECT COUNT(*)
@@ -119,7 +119,16 @@ func incrementMigrationTable(ctx context.Context, client *lib.DBClient) error {
 }
 
 func decrementMigrationTable(ctx context.Context, client *lib.DBClient) error {
-	if _, err := client.Db.ExecContext(ctx, decrement); err != nil {
+	result, err := client.Db.QueryContext(ctx, getMaxID)
+	if err != nil {
+		return lib.NewDBError(getMaxID, err)
+	}
+	maxId := 0
+	if err := result.Scan(maxId); err != nil {
+		return lib.NewDBError(getMaxID, fmt.Errorf("failed to scan max ID result: %w", err))
+	}
+
+	if _, err := client.Db.ExecContext(ctx, decrement, maxId); err != nil {
 		return lib.NewDBError(decrement, err)
 	}
 	return nil
