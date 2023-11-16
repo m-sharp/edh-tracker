@@ -12,10 +12,10 @@ const (
 
 var (
 	playerSeeds = []string{
-		`INSERT INTO player (name, ctime) VALUES ("Mike", now());`,
-		`INSERT INTO player (name, ctime) VALUES ("Tom", now());`,
-		`INSERT INTO player (name, ctime) VALUES ("Dillon", now());`,
-		`INSERT INTO player (name, ctime) VALUES ("Peter", now());`,
+		`INSERT INTO player (name) VALUES ("Mike");`,
+		`INSERT INTO player (name) VALUES ("Tom");`,
+		`INSERT INTO player (name) VALUES ("Dillon");`,
+		`INSERT INTO player (name) VALUES ("Peter");`,
 	}
 )
 

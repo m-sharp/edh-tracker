@@ -10,7 +10,7 @@ const (
 	createPlayerTable = `CREATE TABLE player(
 		id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
 		name VARCHAR(256),
-		ctime DATETIME
+		ctime DATETIME DEFAULT NOW()
 	);`
 	destroyPlayerTable = `DROP TABLE player;`
 )

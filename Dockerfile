@@ -10,6 +10,8 @@ RUN mkdir /edh-tracker
 WORKDIR /edh-tracker
 RUN mkdir app/
 
+COPY web/ web/
+
 COPY go.mod .
 COPY go.sum .
 COPY main.go .

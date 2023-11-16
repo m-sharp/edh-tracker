@@ -9,6 +9,7 @@ import (
 
 	"github.com/m-sharp/edh-tracker/lib"
 	"github.com/m-sharp/edh-tracker/lib/migrations"
+	"github.com/m-sharp/edh-tracker/web"
 )
 
 func main() {
@@ -21,6 +22,12 @@ func main() {
 	client := getDBClient(cfg, logger)
 	if err := migrations.RunAll(ctx, client, logger); err != nil {
 		log.Fatal("Failed to run DB migrations", zap.Error(err))
+	}
+
+	apiRouter := web.NewApiRouter(cfg, logger, client)
+	server := web.NewWebServer(cfg, logger, apiRouter)
+	if err := server.Serve(); err != nil {
+		logger.Fatal("Server stopped listening", zap.Error(err))
 	}
 }
 
