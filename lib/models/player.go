@@ -53,8 +53,8 @@ func (p *PlayerProvider) GetAll(ctx context.Context) ([]Player, error) {
 	return players, nil
 }
 
-func (p *PlayerProvider) Add(ctx context.Context, newPlayer *Player) error {
-	result, err := p.client.Db.ExecContext(ctx, InsertPlayer, newPlayer.Name)
+func (p *PlayerProvider) Add(ctx context.Context, name string) error {
+	result, err := p.client.Db.ExecContext(ctx, InsertPlayer, name)
 	if err != nil {
 		return fmt.Errorf("failed to insert Player record: %w", err)
 	}
