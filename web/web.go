@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"
 
@@ -37,17 +38,16 @@ func (s *Server) setupRoutes() {
 }
 
 func (s *Server) Serve() error {
-	//isDev := isDevelopment(s.cfg)
-	//csrfSecret, err := s.cfg.Get(lib.CSRFSecret)
-	//if err != nil {
-	//	return fmt.Errorf("failed to get CSRF Secret from config: %w", err)
-	//}
+	isDev := isDevelopment(s.cfg)
+	csrfSecret, err := s.cfg.Get(lib.CSRFSecret)
+	if err != nil {
+		return fmt.Errorf("failed to get CSRF Secret from config: %w", err)
+	}
 
 	s.log.Info("Now listening!", zap.Int("Port", Port))
 	return http.ListenAndServe(
 		fmt.Sprintf(":%d", Port),
-		s.router,
-		//csrf.Protect([]byte(csrfSecret), csrf.Secure(!isDev))(s.router),
+		csrf.Protect([]byte(csrfSecret), csrf.Secure(!isDev))(s.router),
 	)
 }
 
