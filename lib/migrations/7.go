@@ -14,8 +14,7 @@ const (
 		place INT,
 		kill_count INT DEFAULT 0,
 		FOREIGN KEY (game_id) REFERENCES game(id) ON DELETE CASCADE,
-		FOREIGN KEY (deck_id) REFERENCES deck(id) ON DELETE CASCADE,
-		CONSTRAINT PLACE_MIN_MAX_CHECK CHECK(place BETWEEN 1 AND 4)
+		FOREIGN KEY (deck_id) REFERENCES deck(id) ON DELETE CASCADE
 	);`
 	destroyGameResultTable = `DROP TABLE game_result;`
 )

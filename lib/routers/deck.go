@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-	"strconv"
 
 	"go.uber.org/zap"
 
@@ -32,11 +31,6 @@ func (d *DeckRouter) GetRoutes() []*lib.Route {
 			Handler: d.GetAll,
 		},
 		{
-			Path:    "/api/decks-by-player",
-			Method:  http.MethodGet,
-			Handler: d.GetAllForPlayer,
-		},
-		{
 			Path:    "/api/deck",
 			Method:  http.MethodGet,
 			Handler: d.GetDeckById,
@@ -58,48 +52,24 @@ func (d *DeckRouter) GetRoutes() []*lib.Route {
 func (d *DeckRouter) GetAll(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	errMsg := "Failed to get Deck records"
+	playerId, _ := lib.GetQueryId(r, "player_id")
 
-	decks, err := d.provider.GetAll(ctx)
-	if err != nil {
-		lib.WriteError(d.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
-		return
-	}
-
-	marshalled, err := json.Marshal(decks)
-	if err != nil {
-		lib.WriteError(d.log, w, http.StatusInternalServerError, err, "Failed to marshall records as JSON", errMsg)
-		return
-	}
-
-	lib.WriteJson(d.log, w, marshalled)
-}
-
-func (d *DeckRouter) GetAllForPlayer(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-
-	playerIdStr := r.URL.Query().Get("player_id")
-	if playerIdStr == "" {
-		lib.WriteError(
-			d.log, w, http.StatusBadRequest, nil,
-			"No player_id query string specified", "missing player_id",
-		)
-		return
-	}
-
-	playerId, err := strconv.Atoi(playerIdStr)
-	if err != nil {
-		lib.WriteError(
-			d.log, w, http.StatusBadRequest, err,
-			"Failed to convert player_id to int", "bad player_id",
-		)
-		return
-	}
-
-	errMsg := "Failed to get Deck records"
-	decks, err := d.provider.GetAllForPlayer(ctx, playerId)
-	if err != nil {
-		lib.WriteError(d.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
-		return
+	var (
+		decks []models.Deck
+		err   error
+	)
+	if playerId != 0 {
+		decks, err = d.provider.GetAllForPlayer(ctx, playerId)
+		if err != nil {
+			lib.WriteError(d.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
+			return
+		}
+	} else {
+		decks, err = d.provider.GetAll(ctx)
+		if err != nil {
+			lib.WriteError(d.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
+			return
+		}
 	}
 
 	marshalled, err := json.Marshal(decks)
@@ -114,21 +84,9 @@ func (d *DeckRouter) GetAllForPlayer(w http.ResponseWriter, r *http.Request) {
 func (d *DeckRouter) GetDeckById(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	deckIdStr := r.URL.Query().Get("deck_id")
-	if deckIdStr == "" {
-		lib.WriteError(
-			d.log, w, http.StatusBadRequest, nil,
-			"No deck_id query string specified", "missing deck_id",
-		)
-		return
-	}
-
-	deckId, err := strconv.Atoi(deckIdStr)
+	deckId, err := lib.GetQueryId(r, "deck_id")
 	if err != nil {
-		lib.WriteError(
-			d.log, w, http.StatusBadRequest, err,
-			"Failed to convert deck_id to int", "bad deck_id",
-		)
+		lib.WriteError(d.log, w, http.StatusBadRequest, err, "Bad bad_id query string specified", err.Error())
 		return
 	}
 
@@ -186,21 +144,9 @@ func (d *DeckRouter) DeckCreate(w http.ResponseWriter, r *http.Request) {
 func (d *DeckRouter) RetireDeck(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	deckIdStr := r.URL.Query().Get("deck_id")
-	if deckIdStr == "" {
-		lib.WriteError(
-			d.log, w, http.StatusBadRequest, nil,
-			"No deck_id query string specified", "missing deck_id",
-		)
-		return
-	}
-
-	deckId, err := strconv.Atoi(deckIdStr)
+	deckId, err := lib.GetQueryId(r, "deck_id")
 	if err != nil {
-		lib.WriteError(
-			d.log, w, http.StatusBadRequest, err,
-			"Failed to convert deck_id to int", "bad deck_id",
-		)
+		lib.WriteError(d.log, w, http.StatusBadRequest, err, "Bad bad_id query string specified", err.Error())
 		return
 	}
 
