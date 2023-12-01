@@ -34,7 +34,8 @@ func NewWebServer(cfg *lib.Config, log *zap.Logger, api *ApiRouter) *Server {
 }
 
 func (s *Server) setupRoutes() {
-	// ToDo!
+	// ToDo: Try SPA handler? - https://github.com/gorilla/mux#serving-single-page-applications
+	s.router.PathPrefix("/app/").Handler(http.StripPrefix("/app/", http.FileServer(http.Dir("app/"))))
 }
 
 func (s *Server) Serve() error {
