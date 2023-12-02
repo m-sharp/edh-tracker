@@ -48,6 +48,7 @@ func (s *Server) Serve() error {
 	s.log.Info("Now listening!", zap.Int("Port", Port))
 	return http.ListenAndServe(
 		fmt.Sprintf(":%d", Port),
+		// ToDo: Posts from react will need help getting to token - https://github.com/gorilla/csrf#javascript-applications
 		csrf.Protect([]byte(csrfSecret), csrf.Secure(!isDev))(s.router),
 	)
 }

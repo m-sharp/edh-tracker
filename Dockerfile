@@ -1,5 +1,7 @@
 FROM node:18-alpine AS reactBuild
 
+# ToDo: Might be able to speed up builds by copying https://github.com/vercel/next.js/blob/canary/examples/with-docker/Dockerfile a bit more
+
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 

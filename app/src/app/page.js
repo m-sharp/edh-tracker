@@ -1,3 +1,4 @@
+// TODO: Redo a proper home page
 import Image from 'next/image'
 import styles from './page.module.css'
 
