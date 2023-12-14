@@ -10,3 +10,4 @@ module.exports = {
 // ToDo: Get a proper favicon.ico
 // ToDo: React integrated authentication? - https://nextjs.org/docs/app#how-can-i-handle-authentication-with-the-app-router
 // ToDo: Setup page <head>'s - https://nextjs.org/docs/app/building-your-application/routing/pages-and-layouts#modifying-head
+// ToDo: Allow for navigation to pages w/o `.html` at the end
