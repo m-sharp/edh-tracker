@@ -10,6 +10,7 @@ import (
 
 const (
 	GetAllPlayers = `SELECT id, name, ctime FROM player;`
+	GetPlayerByID = `SELECT id, name, ctime FROM player WHERE id = ?;`
 	InsertPlayer  = `INSERT INTO player (name) VALUES (?);`
 
 	playerValidationErr = "invalid Player: %s"
@@ -51,6 +52,22 @@ func (p *PlayerProvider) GetAll(ctx context.Context) ([]Player, error) {
 	}
 
 	return players, nil
+}
+
+func (p *PlayerProvider) GetById(ctx context.Context, playerId int) (*Player, error) {
+	var players []Player
+	if err := p.client.Db.SelectContext(ctx, &players, GetPlayerByID, playerId); err != nil {
+		return nil, fmt.Errorf("failed to get Player record for id %d: %w", playerId, err)
+	}
+
+	if len(players) == 0 || len(players) > 1 {
+		return nil, fmt.Errorf(
+			"unexpected number of players returned for ID %d: got %d, expected 1",
+			playerId, len(players),
+		)
+	}
+
+	return &players[0], nil
 }
 
 func (p *PlayerProvider) Add(ctx context.Context, name string) error {

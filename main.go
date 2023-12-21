@@ -4,72 +4,40 @@ import (
 	"context"
 	"log"
 
+	"github.com/gorilla/mux"
 	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 
 	"github.com/m-sharp/edh-tracker/lib"
 	"github.com/m-sharp/edh-tracker/lib/migrations"
-	"github.com/m-sharp/edh-tracker/web"
 )
 
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	cfg := getCfg()
-	logger := getLogger(cfg)
-
-	client := getDBClient(cfg, logger)
-	if err := migrations.RunAll(ctx, client, logger); err != nil {
-		log.Fatal("Failed to run DB migrations", zap.Error(err))
-	}
-
-	apiRouter := web.NewApiRouter(cfg, logger, client)
-	server := web.NewWebServer(cfg, logger, apiRouter)
-	if err := server.Serve(); err != nil {
-		logger.Fatal("Server stopped listening", zap.Error(err))
-	}
-}
-
-func getCfg() *lib.Config {
-	cfg, err := lib.NewConfig()
+	cfg, err := lib.NewConfig(lib.DBHost, lib.DBUsername, lib.DBPass, lib.DBPort)
 	if err != nil {
 		log.Fatalf("Error creating Config: %s", err.Error())
 	}
 
-	return cfg
-}
+	logger := lib.GetLogger(cfg)
 
-func getLogger(cfg *lib.Config) *zap.Logger {
-	dev, err := cfg.Get(lib.Development)
-	if err != nil {
-		dev = "false"
-	}
-
-	var logger *zap.Logger
-	if dev == "true" {
-		logger, err = zap.NewDevelopment()
-
-	} else {
-		conf := zap.NewProductionConfig()
-		conf.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
-		logger, err = conf.Build()
-	}
-	if err != nil {
-		log.Fatalf("Error creating Logger: %s", err.Error())
-	}
-
-	return logger
-}
-
-func getDBClient(cfg *lib.Config, log *zap.Logger) *lib.DBClient {
-	client, err := lib.NewDBClient(cfg, log)
+	client, err := lib.NewDBClient(cfg, logger)
 	if err != nil {
 		log.Fatal("Error creating DB client", zap.Error(err))
 	}
-	if err = client.CheckConnection(); err != nil {
-		log.Fatal("DB connection check failed", zap.Error(err))
+
+	if err := migrations.RunAll(ctx, client, logger); err != nil {
+		log.Fatal("Failed to run DB migrations", zap.Error(err))
 	}
 
-	return client
+	apiRouter := NewApiRouter(cfg, logger, client)
+	server := lib.NewWebServer(cfg, logger, func(router *mux.Router) {
+		// ToDo: Will need some auth for the app's connection eventually
+		apiRouter.SetupRoutes(router)
+	})
+
+	if err := server.Serve(); err != nil {
+		logger.Fatal("Server stopped listening", zap.Error(err))
+	}
 }

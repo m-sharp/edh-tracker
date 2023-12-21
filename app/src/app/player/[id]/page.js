@@ -1,23 +1,28 @@
 import { usePathname } from 'next/navigation'
 
-export const dynamicParams = false;
+export async function generateStaticParams() {
+    const res = await fetch("http://localhost:8080/api/players");
+    const players = await res.json();
 
-// Instead of prefetching from an API, for now use the next dynamic routing basically to just pass around IDs
-// ToDo: Eventually, split out the API web server from the frontend entirely and make use of all the fancy Next.js stuff
-export function generateStaticParams() {
-    // Generate no routes for the build
-    // ToDo: This just doesn't work with an empty array...Need to figure out a different way to pass contextual data between react pages besides route params
-    // return [{ id: '1' }, { id: '2' }, { id: '3' }];
-    return [{}];
+    return players.map((player) => ({
+        id: player.id.toString(),
+        name: player.name,
+        ctime: player.ctime,
+    }));
 }
 
-export default function Page({ params }) {
-    const pathname = usePathname();
+async function getPlayer(id) {
+    const res = await fetch(`http://localhost:8080/api/player?player_id=${id}`);
+    return res.json();
+}
+
+export default async function Page({ params }) {
+    const player = await getPlayer(params.id);
 
     return (
         <main>
-            <h1>Hello, Player {params.id}'s Page!</h1>
-            <p>Path name: {pathname}</p>
+            <h1>Hello, Player {player.name}&apos;s Page!</h1>
+            <p>Player created time: {player.ctime}</p>
         </main>
-    )
+    );
 }

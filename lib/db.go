@@ -70,7 +70,13 @@ func NewDBClient(cfg *Config, log *zap.Logger) (*DBClient, error) {
 	db.SetMaxOpenConns(maxConnCount)
 	db.SetMaxIdleConns(maxConnCount)
 
-	return &DBClient{log: log, Db: sqlx.NewDb(db, "mysql")}, nil
+	inst := &DBClient{log: log, Db: sqlx.NewDb(db, "mysql")}
+
+	if err := inst.CheckConnection(); err != nil {
+		return nil, fmt.Errorf("DB connection check failed: %w", err)
+	}
+
+	return inst, nil
 }
 
 func (d *DBClient) CheckConnection() error {
