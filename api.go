@@ -32,9 +32,9 @@ func (a *ApiRouter) SetupRoutes(router *mux.Router) {
 	for _, subRouter := range a.routers {
 		for _, route := range subRouter.GetRoutes() {
 			if route.MiddleWare != nil {
-				router.HandleFunc(route.Path, route.MiddleWare(route.Handler)).Methods(route.Method)
+				router.HandleFunc(route.Path, lib.CORSMiddleware(route.MiddleWare(route.Handler))).Methods(route.Method)
 			} else {
-				router.HandleFunc(route.Path, route.Handler).Methods(route.Method)
+				router.HandleFunc(route.Path, lib.CORSMiddleware(route.Handler)).Methods(route.Method)
 			}
 		}
 	}

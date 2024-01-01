@@ -73,13 +73,13 @@ func (p *PlayerRouter) GetPlayerById(w http.ResponseWriter, r *http.Request) {
 	}
 
 	errMsg := "Failed to get Player record"
-	players, err := p.provider.GetById(ctx, playerId)
+	player, err := p.provider.GetById(ctx, playerId)
 	if err != nil {
 		lib.WriteError(p.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
 		return
 	}
 
-	marshalled, err := json.Marshal(players)
+	marshalled, err := json.Marshal(player)
 	if err != nil {
 		lib.WriteError(p.log, w, http.StatusInternalServerError, err, "Failed to marshall records as JSON", errMsg)
 		return

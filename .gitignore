@@ -32,10 +32,6 @@ app/node_modules
 # testing
 /coverage
 
-# next.js
-app/.next/
-app/out/
-
 # production
 app/build
 

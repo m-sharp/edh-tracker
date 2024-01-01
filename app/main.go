@@ -1,11 +1,10 @@
 package main
 
 import (
-	"log"
-	"net/http"
-
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"
+	"log"
+	"net/http"
 
 	"github.com/m-sharp/edh-tracker/lib"
 )
@@ -20,10 +19,14 @@ func main() {
 
 	server := lib.NewWebServer(cfg, logger, func(router *mux.Router) {
 		// ToDo: Try SPA handler? - https://github.com/gorilla/mux#serving-single-page-applications
-		router.PathPrefix("/app/").Handler(http.StripPrefix("/app/", http.FileServer(http.Dir("app/"))))
+		router.PathPrefix("/").Handler(http.FileServer(http.Dir("app/")))
 	})
 
 	if err := server.Serve(); err != nil {
 		logger.Fatal("Server stopped listening", zap.Error(err))
 	}
 }
+
+// ToDo: Add sitemap.xml
+// ToDo: Add robots.txt
+// ToDo: Add a favicon.ico

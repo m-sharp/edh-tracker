@@ -8,7 +8,6 @@ WORKDIR /app
 
 COPY app/package.json .
 COPY app/package-lock.json .
-COPY app/next.config.js .
 COPY app/public/ public/
 COPY app/src/ src/
 
@@ -26,7 +25,7 @@ COPY go.sum .
 
 COPY app/main.go .
 COPY lib/ lib/
-COPY --from=reactBuild /app/out/ app/
+COPY --from=reactBuild /app/build/ app/
 
 RUN go build -o build/app .
 CMD ["build/app"]
