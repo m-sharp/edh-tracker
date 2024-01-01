@@ -1,8 +1,65 @@
+import {useEffect, useState} from "react";
 import {Link, useLoaderData} from "react-router-dom";
+
+import {Record} from "../common";
 
 export async function getPlayer({ params }) {
     const res = await fetch(`http://localhost:8080/api/player?player_id=${params.playerId}`);
     return res.json();
+}
+
+export default function Player() {
+    const player = useLoaderData();
+
+    return (
+        <div id="player">
+            <h1>{player.name}&apos;s Page!</h1>
+            <p>Player created time: {player.ctime}</p>
+            <p>Player Total Kills: {player.kills}</p>
+            <p>Player Record: <Record record={player.record}/></p>
+            <p>Player's Decks:</p>
+            <DeckDisplay player={player}/>
+        </div>
+    );
+}
+
+function DeckDisplay({ player }) {
+    const [data, setData] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        async function fetchData() {
+            try {
+                const playerDecks = await getDecksForPlayer(player.id);
+                setData(playerDecks);
+                setLoading(false);
+            } catch (error) {
+                setError(error);
+                setLoading(false);
+            }
+        }
+
+        fetchData();
+    }, []);
+
+    if (loading) {
+        // ToDo: Get a Spinner
+        return <span>Loading...</span>;
+    }
+    if (error) {
+        return <span>Error: {error.message}</span>;
+    }
+
+    return (
+        <ol>
+            {data.map(deck => (
+                <li key={deck.id}>
+                    <Link to={`/deck/${deck.id}`}>{deck.commander}</Link>
+                </li>
+            ))}
+        </ol>
+    );
 }
 
 async function getDecksForPlayer(id) {
@@ -16,27 +73,4 @@ async function getDecksForPlayer(id) {
         retired: deck.retired,
         ctime: deck.ctime,
     }));
-}
-
-export default function Player() {
-    const player = useLoaderData();
-
-    // ToDo: Need to figure out how to get at this - can't do an await here as the route element can't be a promise
-    // const playerDecks = await getDecksForPlayer(player.id);
-    // const decks = playerDecks.map(deck =>
-    //     <li key={deck.id}>
-    //         <Link to={`/deck/${deck.id}`}>{deck.commander}</Link>
-    //     </li>
-    // );
-
-    return (
-        <div id="player">
-            <h1>{player.name}&apos;s Page!</h1>
-            <p>Player created time: {player.ctime}</p>
-            <p>Player Total Kills: {player.kills}</p>
-            <p>Player Record: {player.record[1]} / {player.record[2]} / {player.record[3]} / {player.record[4]}</p>
-            {/*<p>Player's Decks:</p>*/}
-            {/*<ol>{decks}</ol>*/}
-        </div>
-    );
 }

@@ -10,9 +10,10 @@ export default function Deck() {
 
     return (
         <div id="deck">
+            {/*ToDo: Make this "Mike's Giada...*/}
             <h1>Deck #{deck.id} - {deck.commander}</h1>
             <p>PlayerID: {deck.player_id}</p>
-            <p>Retired: {deck.retired}</p>
+            <p>Retired: {deck.retired.toString()}</p>
             <p>Created At: {deck.ctime}</p>
         </div>
     )
