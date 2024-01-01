@@ -32,6 +32,11 @@ func (p *PlayerRouter) GetRoutes() []*lib.Route {
 		},
 		{
 			Path:    "/api/player",
+			Method:  http.MethodGet,
+			Handler: p.GetPlayerById,
+		},
+		{
+			Path:    "/api/player",
 			Method:  http.MethodPost,
 			Handler: p.PlayerCreate,
 		},
@@ -49,6 +54,32 @@ func (p *PlayerRouter) GetAll(w http.ResponseWriter, r *http.Request) {
 	}
 
 	marshalled, err := json.Marshal(players)
+	if err != nil {
+		lib.WriteError(p.log, w, http.StatusInternalServerError, err, "Failed to marshall records as JSON", errMsg)
+		return
+	}
+
+	lib.WriteJson(p.log, w, marshalled)
+}
+
+func (p *PlayerRouter) GetPlayerById(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	// TODO: Use route param instead?
+	playerId, err := lib.GetQueryId(r, "player_id")
+	if err != nil {
+		lib.WriteError(p.log, w, http.StatusBadRequest, err, "Bad player_id query string specified", err.Error())
+		return
+	}
+
+	errMsg := "Failed to get Player record"
+	player, err := p.provider.GetById(ctx, playerId)
+	if err != nil {
+		lib.WriteError(p.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
+		return
+	}
+
+	marshalled, err := json.Marshal(player)
 	if err != nil {
 		lib.WriteError(p.log, w, http.StatusInternalServerError, err, "Failed to marshall records as JSON", errMsg)
 		return

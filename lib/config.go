@@ -21,9 +21,6 @@ const (
 	devEnvVar   = "DEV"
 	Development = "Development"
 
-	csrfSecretEnvVar = "CSRFSEC"
-	CSRFSecret       = "CSRFSecret"
-
 	lookupErr = "ENVVAR for %q not found"
 )
 
@@ -31,12 +28,12 @@ type Config struct {
 	cfg map[string]string
 }
 
-func NewConfig() (*Config, error) {
+func NewConfig(requiredConfigs ...string) (*Config, error) {
 	c := &Config{
 		cfg: map[string]string{},
 	}
 
-	if err := c.Populate(); err != nil {
+	if err := c.Populate(requiredConfigs); err != nil {
 		return c, err
 	}
 
@@ -57,18 +54,17 @@ func (c *Config) Set(key, value string) {
 
 var (
 	lookupMap = map[string]string{
-		dbHostEnvVar:     DBHost,
-		dbUserEnvVar:     DBUsername,
-		dbPassEnvVar:     DBPass,
-		dbPortEnvVar:     DBPort,
-		csrfSecretEnvVar: CSRFSecret,
+		dbHostEnvVar: DBHost,
+		dbUserEnvVar: DBUsername,
+		dbPassEnvVar: DBPass,
+		dbPortEnvVar: DBPort,
 	}
 )
 
-func (c *Config) Populate() error {
+func (c *Config) Populate(requiredConfigs []string) error {
 	for envVarKey, cfgKey := range lookupMap {
 		val, ok := os.LookupEnv(envVarKey)
-		if !ok {
+		if !ok && contains(requiredConfigs, cfgKey) {
 			return fmt.Errorf(lookupErr, envVarKey)
 		}
 		c.cfg[cfgKey] = val
@@ -81,4 +77,14 @@ func (c *Config) Populate() error {
 	}
 
 	return nil
+}
+
+func contains(slice []string, target string) bool {
+	for _, elem := range slice {
+		if elem == target {
+			return true
+		}
+	}
+
+	return false
 }

@@ -1,4 +1,4 @@
-FROM golang:1.20.0-alpine3.17 as tracker
+FROM golang:1.20.0-alpine3.17 as TrackerAPI
 
 ENV DBHOST ""
 ENV DBUSER ""
@@ -6,17 +6,16 @@ ENV DBPASSWORD ""
 ENV DBPORT ""
 ENV CSRFSEC ""
 
-RUN mkdir /edh-tracker
 WORKDIR /edh-tracker
-RUN mkdir app/
+RUN mkdir build/
 
-COPY web/ web/
-
+COPY vendor/ vendor/
 COPY go.mod .
 COPY go.sum .
+
+COPY api.go .
 COPY main.go .
 COPY lib/ lib/
-COPY vendor/ vendor/
 
-RUN go build -o app/ ./...
-CMD ["app/edh-tracker"]
+RUN go build -o build/ .
+CMD ["build/edh-tracker"]

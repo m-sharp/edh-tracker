@@ -86,11 +86,11 @@ func (d *DeckRouter) GetDeckById(w http.ResponseWriter, r *http.Request) {
 
 	deckId, err := lib.GetQueryId(r, "deck_id")
 	if err != nil {
-		lib.WriteError(d.log, w, http.StatusBadRequest, err, "Bad bad_id query string specified", err.Error())
+		lib.WriteError(d.log, w, http.StatusBadRequest, err, "Bad deck_id query string specified", err.Error())
 		return
 	}
 
-	errMsg := "Failed to get Deck records"
+	errMsg := "Failed to get Deck record"
 	decks, err := d.provider.GetById(ctx, deckId)
 	if err != nil {
 		lib.WriteError(d.log, w, http.StatusInternalServerError, err, errMsg, errMsg)

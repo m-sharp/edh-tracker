@@ -25,6 +25,8 @@ var (
 		`INSERT INTO deck (player_id, commander, ctime) VALUES ((SELECT id FROM player where name = "Mike"), "Syr Gwyn, Hero of Ashvale", now());`,
 		`INSERT INTO deck (player_id, commander, ctime) VALUES ((SELECT id FROM player where name = "Mike"), "Admiral Beckett Brass", now());`,
 		`INSERT INTO deck (player_id, commander, ctime) VALUES ((SELECT id FROM player where name = "Mike"), "Giada, Font of Hope", now());`,
+		`INSERT INTO deck (player_id, commander, ctime) VALUES ((SELECT id FROM player where name = "Mike"), "Aragorn, King of Gondor", now());`,
+		`INSERT INTO deck (player_id, commander, ctime) VALUES ((SELECT id FROM player where name = "Mike"), "Thantis, the Warweaver", now());`,
 		// Tom Decks
 		`INSERT INTO deck (player_id, commander, ctime) VALUES ((SELECT id FROM player where name = "Tom"), "Zethi, Arcane Blademaster", now());`,
 		`INSERT INTO deck (player_id, commander, ctime) VALUES ((SELECT id FROM player where name = "Tom"), "Old Stickfingers", now());`,
@@ -41,6 +43,9 @@ var (
 		`INSERT INTO deck (player_id, commander, ctime) VALUES ((SELECT id FROM player where name = "Tom"), "Plargg and Nassari", now());`,
 		`INSERT INTO deck (player_id, commander, ctime) VALUES ((SELECT id FROM player where name = "Tom"), "Kazuul, Tyrant of the Cliffs", now());`,
 		`INSERT INTO deck (player_id, commander, ctime) VALUES ((SELECT id FROM player where name = "Tom"), "Azusa, Lost but Seeking", now());`,
+		`INSERT INTO deck (player_id, commander, ctime) VALUES ((SELECT id FROM player where name = "Tom"), "Feather, the Redeemed", now());`,
+		`INSERT INTO deck (player_id, commander, ctime) VALUES ((SELECT id FROM player where name = "Tom"), "Lurrus of the Dream-Den", now());`,
+		`INSERT INTO deck (player_id, commander, ctime) VALUES ((SELECT id FROM player where name = "Tom"), "Gyome, Master Chef", now());`,
 		// Dillon Decks
 		`INSERT INTO deck (player_id, commander, ctime) VALUES ((SELECT id FROM player where name = "Dillon"), "Jhoira, Weatherlight Captain", now());`,
 		`INSERT INTO deck (player_id, commander, ctime) VALUES ((SELECT id FROM player where name = "Dillon"), "Sakashima of a Thousand Faces", now());`,
@@ -52,6 +57,7 @@ var (
 		`INSERT INTO deck (player_id, commander, ctime) VALUES ((SELECT id FROM player where name = "Dillon"), "Sythis, Harvest's Hand", now());`,
 		`INSERT INTO deck (player_id, commander, ctime) VALUES ((SELECT id FROM player where name = "Dillon"), "Oona, Queen of the Fae", now());`,
 		`INSERT INTO deck (player_id, commander, ctime) VALUES ((SELECT id FROM player where name = "Dillon"), "Satoru Umezawa", now());`,
+		`INSERT INTO deck (player_id, commander, ctime) VALUES ((SELECT id FROM player where name = "Dillon"), "Magar of the Magic Strings", now());`,
 		// Peter Decks
 		`INSERT INTO deck (player_id, commander, ctime) VALUES ((SELECT id FROM player where name = "Peter"), "Thalisse, Reverent Medium", now());`,
 		`INSERT INTO deck (player_id, commander, ctime) VALUES ((SELECT id FROM player where name = "Peter"), "Atraxa, Praetor's Voice", now());`,
@@ -64,9 +70,11 @@ var (
 		`INSERT INTO deck (player_id, commander, ctime) VALUES ((SELECT id FROM player where name = "Peter"), "Ganax, Astral Hunter", now());`,
 		`INSERT INTO deck (player_id, commander, ctime) VALUES ((SELECT id FROM player where name = "Peter"), "Hofri Ghostforge", now());`,
 		`INSERT INTO deck (player_id, commander, ctime) VALUES ((SELECT id FROM player where name = "Peter"), "Sauron, the Dark Lord", now());`,
-		`INSERT INTO deck (player_id, commander, ctime) VALUES ((SELECT id FROM player where name = "Peter"), "Henzi 'Toolbox' Torre", now());`,
+		`INSERT INTO deck (player_id, commander, ctime) VALUES ((SELECT id FROM player where name = "Peter"), "Henzie 'Toolbox' Torre", now());`,
 		`INSERT INTO deck (player_id, commander, ctime) VALUES ((SELECT id FROM player where name = "Peter"), "Eriette of the Charmed Apple", now());`,
 		`INSERT INTO deck (player_id, commander, ctime) VALUES ((SELECT id FROM player where name = "Peter"), "Lord of the Nazgûl", now());`,
+		`INSERT INTO deck (player_id, commander, ctime) VALUES ((SELECT id FROM player where name = "Peter"), "Kumena, Tyrant of Orazca", now());`,
+		`INSERT INTO deck (player_id, commander, ctime) VALUES ((SELECT id FROM player where name = "Peter"), "Wyll, Blade of Frontiers", now());`,
 	}
 )
 

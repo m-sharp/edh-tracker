@@ -59,6 +59,16 @@ var (
 		`INSERT INTO game (description, ctime) VALUES ('Game 31', '2023-11-08');`,
 		`INSERT INTO game (description, ctime) VALUES ('Game 32', '2023-11-08');`,
 		`INSERT INTO game (description, ctime) VALUES ('Game 33', '2023-11-08');`,
+		`INSERT INTO game (description, ctime) VALUES ('Game 34', '2023-11-29');`,
+		`INSERT INTO game (description, ctime) VALUES ('Game 35', '2023-11-29');`,
+		`INSERT INTO game (description, ctime) VALUES ('Game 36', '2023-11-29');`,
+		`INSERT INTO game (description, ctime) VALUES ('Game 37', '2023-12-12');`,
+		`INSERT INTO game (description, ctime) VALUES ('Game 38', '2023-12-12');`,
+		`INSERT INTO game (description, ctime) VALUES ('Game 39', '2023-12-12');`,
+		`INSERT INTO game (description, ctime) VALUES ('Game 40', '2023-12-30');`,
+		`INSERT INTO game (description, ctime) VALUES ('Game 41', '2023-12-30');`,
+		`INSERT INTO game (description, ctime) VALUES ('Game 42', '2023-12-30');`,
+		`INSERT INTO game (description, ctime) VALUES ('Game 43', '2023-12-30');`,
 	}
 
 	gameResultSeeds = map[string][]resultInfo{
@@ -727,7 +737,7 @@ var (
 			},
 			{
 				Player:    "Peter",
-				Commander: `Henzi 'Toolbox' Torre`,
+				Commander: `Henzie 'Toolbox' Torre`,
 				Place:     2,
 				Kills:     0,
 			},
@@ -910,6 +920,266 @@ var (
 			{
 				Player:    "Peter",
 				Commander: "Lord of the Nazgûl",
+				Place:     1,
+				Kills:     2,
+			},
+		},
+		"Game 34": {
+			{
+				Player:    "Tom",
+				Commander: "Gyome, Master Chef",
+				Place:     4,
+				Kills:     0,
+			},
+			{
+				Player:    "Mike",
+				Commander: "Giada, Font of Hope",
+				Place:     3,
+				Kills:     1,
+			},
+			{
+				Player:    "Dillon",
+				Commander: "Satoru Umezawa",
+				Place:     1,
+				Kills:     1,
+			},
+			{
+				Player:    "Peter",
+				Commander: "The Ur-Dragon",
+				Place:     2,
+				Kills:     1,
+			},
+		},
+		"Game 35": {
+			{
+				Player:    "Tom",
+				Commander: "Feather, the Redeemed",
+				Place:     4,
+				Kills:     0,
+			},
+			{
+				Player:    "Mike",
+				Commander: "Aragorn, King of Gondor",
+				Place:     3,
+				Kills:     1,
+			},
+			{
+				Player:    "Dillon",
+				Commander: "Oona, Queen of the Fae",
+				Place:     2,
+				Kills:     1,
+			},
+			{
+				Player:    "Peter",
+				Commander: "Tazri, Beacon of Unity",
+				Place:     1,
+				Kills:     1,
+			},
+		},
+		"Game 36": {
+			{
+				Player:    "Tom",
+				Commander: "Lurrus of the Dream-Den",
+				Place:     2,
+				Kills:     0,
+			},
+			{
+				Player:    "Mike",
+				Commander: "Kathril, Aspect Warper",
+				Place:     2,
+				Kills:     0,
+			},
+			{
+				Player:    "Dillon",
+				Commander: "Sakashima of a Thousand Faces",
+				Place:     1,
+				Kills:     3,
+			},
+			{
+				Player:    "Peter",
+				Commander: `Henzie 'Toolbox' Torre`,
+				Place:     2,
+				Kills:     0,
+			},
+		},
+		"Game 37": {
+			{
+				Player:    "Tom",
+				Commander: "Feather, the Redeemed",
+				Place:     4,
+				Kills:     0,
+			},
+			{
+				Player:    "Mike",
+				Commander: "Rakdos, Lord of Riots",
+				Place:     2,
+				Kills:     0,
+			},
+			{
+				Player:    "Dillon",
+				Commander: "Arcades, the Stategist",
+				Place:     1,
+				Kills:     2,
+			},
+			{
+				Player:    "Peter",
+				Commander: "Umbris, Fear Manifest",
+				Place:     3,
+				Kills:     1,
+			},
+		},
+		"Game 38": {
+			{
+				Player:    "Tom",
+				Commander: "Azusa, Lost but Seeking",
+				Place:     2,
+				Kills:     0,
+			},
+			{
+				Player:    "Mike",
+				Commander: "Aragorn, King of Gondor",
+				Place:     1,
+				Kills:     3,
+			},
+			{
+				Player:    "Dillon",
+				Commander: "Oona, Queen of the Fae",
+				Place:     2,
+				Kills:     0,
+			},
+			{
+				Player:    "Peter",
+				Commander: "Thalisse, Reverent Medium",
+				Place:     2,
+				Kills:     0,
+			},
+		},
+		"Game 39": {
+			{
+				Player:    "Tom",
+				Commander: "Ruric Thar, the Unbowed",
+				Place:     3,
+				Kills:     0,
+			},
+			{
+				Player:    "Mike",
+				Commander: "Admiral Beckett Brass",
+				Place:     1,
+				Kills:     1,
+			},
+			{
+				Player:    "Dillon",
+				Commander: "Satoru Umezawa",
+				Place:     4,
+				Kills:     0,
+			},
+			{
+				Player:    "Peter",
+				Commander: "Ruxa, Patient Professor",
+				Place:     2,
+				Kills:     2,
+			},
+		},
+		"Game 40": {
+			{
+				Player:    "Tom",
+				Commander: "Feather, the Redeemed",
+				Place:     3,
+				Kills:     0,
+			},
+			{
+				Player:    "Mike",
+				Commander: "Tovolar, Dire Overlord",
+				Place:     1,
+				Kills:     2,
+			},
+			{
+				Player:    "Dillon",
+				Commander: "Magar of the Magic Strings",
+				Place:     2,
+				Kills:     1,
+			},
+			{
+				Player:    "Peter",
+				Commander: "Wyll, Blade of Frontiers",
+				Place:     4,
+				Kills:     0,
+			},
+		},
+		"Game 41": {
+			{
+				Player:    "Tom",
+				Commander: "Kazuul, Tyrant of the Cliffs",
+				Place:     4,
+				Kills:     0,
+			},
+			{
+				Player:    "Mike",
+				Commander: "Thantis, the Warweaver",
+				Place:     2,
+				Kills:     0,
+			},
+			{
+				Player:    "Dillon",
+				Commander: "Satoru Umezawa",
+				Place:     3,
+				Kills:     1,
+			},
+			{
+				Player:    "Peter",
+				Commander: "Umbris, Fear Manifest",
+				Place:     1,
+				Kills:     2,
+			},
+		},
+		"Game 42": {
+			{
+				Player:    "Tom",
+				Commander: "Kros, Defense Contractor",
+				Place:     4,
+				Kills:     0,
+			},
+			{
+				Player:    "Mike",
+				Commander: "Thantis, the Warweaver",
+				Place:     2,
+				Kills:     0,
+			},
+			{
+				Player:    "Dillon",
+				Commander: "Magar of the Magic Strings",
+				Place:     1,
+				Kills:     3,
+			},
+			{
+				Player:    "Peter",
+				Commander: "Kumena, Tyrant of Orazca",
+				Place:     2,
+				Kills:     0,
+			},
+		},
+		"Game 43": {
+			{
+				Player:    "Tom",
+				Commander: "Azusa, Lost but Seeking",
+				Place:     3,
+				Kills:     0,
+			},
+			{
+				Player:    "Mike",
+				Commander: "Raffine, Scheming Seer",
+				Place:     2,
+				Kills:     1,
+			},
+			{
+				Player:    "Dillon",
+				Commander: "Sakashima of a Thousand Faces",
+				Place:     4,
+				Kills:     0,
+			},
+			{
+				Player:    "Peter",
+				Commander: "Sauron, the Dark Lord",
 				Place:     1,
 				Kills:     2,
 			},
