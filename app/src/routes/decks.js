@@ -16,15 +16,15 @@ export async function getDecks() {
 export default function Decks() {
     const decks = useLoaderData();
 
-    const deckItems = decks.map(deck =>
-        <li key={deck.id}>
-            <Link to={`/deck/${deck.id}`}>{deck.commander}</Link>
-        </li>
-    );
-
     return (
         <div id="decks">
-            <ul>{deckItems}</ul>
+            <ul>
+                {decks.map(deck => (
+                    <li key={deck.id}>
+                        <Link to={`/deck/${deck.id}`}>{deck.commander}</Link>
+                    </li>
+                ))}
+            </ul>
         </div>
     );
 }

@@ -11,10 +11,14 @@ import (
 )
 
 const (
-	GetAllGames = `SELECT id, description, ctime FROM game;`
-	GetGameByID = `SELECT id, description, ctime FROM game WHERE id = ?;`
-
-	GetGameResultsByGameID = `SELECT id, game_id, deck_id, place, kill_count FROM game_result WHERE game_id = ?;`
+	GetAllGames      = `SELECT id, description, ctime FROM game;`
+	GetGameByID      = `SELECT id, description, ctime FROM game WHERE id = ?;`
+	GetGamesByDeckId = `SELECT game.id, game.description, game.ctime
+								FROM (game INNER JOIN game_result on game.id = game_result.game_id)
+							  WHERE game_result.deck_id = ?;`
+	GetGameResultsByGameID = `SELECT game_result.id, game_result.game_id, game_result.deck_id, game_result.place, game_result.kill_count, deck.commander
+								FROM (game_result INNER JOIN deck on game_result.deck_id = deck.id)
+							  WHERE game_id = ?;`
 
 	InsertGame       = `INSERT INTO game (description) VALUES (?);`
 	InsertGameResult = `INSERT INTO game_result (game_id, deck_id, place, kill_count) VALUES (?, ?, ?, ?);`
@@ -29,11 +33,13 @@ type Game struct {
 }
 
 type GameResult struct {
-	Id     int `json:"id" db:"id"`
-	GameId int `json:"game_id" db:"game_id"`
-	DeckId int `json:"deck_id" db:"deck_id"`
-	Place  int `json:"place" db:"place"`
-	Kills  int `json:"kill_count" db:"kill_count"`
+	Id        int    `json:"id" db:"id"`
+	GameId    int    `json:"game_id" db:"game_id"`
+	DeckId    int    `json:"deck_id" db:"deck_id"`
+	Commander string `json:"commander" db:"commander"`
+	Place     int    `json:"place" db:"place"`
+	Kills     int    `json:"kill_count" db:"kill_count"`
+	Points    int    `json:"points"`
 }
 
 func (g *GameResult) Validate() error {
@@ -85,13 +91,33 @@ func (g *GameProvider) GetAll(ctx context.Context) ([]GameDetails, error) {
 
 	var details []GameDetails
 	for _, game := range games {
-		var results []GameResult
-		if err := g.client.Db.SelectContext(ctx, &results, GetGameResultsByGameID, game.Id); err != nil {
-			return nil, fmt.Errorf("failed to get Game Results for Game %d: %w", game.Id, err)
+		results, err := g.getGameResults(ctx, game.Id)
+		if err != nil {
+			g.log.Warn("Failed to get game results for game, dropping from results", zap.Any("Game", game))
+			continue
 		}
 
-		if results == nil {
-			g.log.Warn("Game with no results found, dropping from results", zap.Any("Game", game))
+		details = append(details, GameDetails{Game: game, Results: results})
+	}
+
+	return details, nil
+}
+
+func (g *GameProvider) GetAllByDeck(ctx context.Context, deckId int) ([]GameDetails, error) {
+	var games []Game
+	if err := g.client.Db.SelectContext(ctx, &games, GetGamesByDeckId, deckId); err != nil {
+		return nil, fmt.Errorf("failed to get Game records: %w", err)
+	}
+
+	if games == nil {
+		return []GameDetails{}, nil
+	}
+
+	var details []GameDetails
+	for _, game := range games {
+		results, err := g.getGameResults(ctx, game.Id)
+		if err != nil {
+			g.log.Warn("Failed to get game results for game, dropping from results", zap.Any("Game", game))
 			continue
 		}
 
@@ -115,20 +141,33 @@ func (g *GameProvider) GetGameById(ctx context.Context, gameId int) (*GameDetail
 	}
 
 	game := games[0]
-
-	var results []GameResult
-	if err := g.client.Db.SelectContext(ctx, &results, GetGameResultsByGameID, game.Id); err != nil {
-		return nil, fmt.Errorf("failed to get Game Results for Game %d: %w", game.Id, err)
-	}
-
-	if results == nil {
-		return nil, fmt.Errorf("failed to get Game Results for Game %d: no results found", game.Id)
+	results, err := g.getGameResults(ctx, game.Id)
+	if err != nil {
+		return nil, err
 	}
 
 	return &GameDetails{
 		Game:    game,
 		Results: results,
 	}, nil
+}
+
+func (g *GameProvider) getGameResults(ctx context.Context, gameId int) ([]GameResult, error) {
+	var results []GameResult
+	if err := g.client.Db.SelectContext(ctx, &results, GetGameResultsByGameID, gameId); err != nil {
+		return nil, fmt.Errorf("failed to get Game Results for Game %d: %w", gameId, err)
+	}
+
+	if results == nil {
+		return nil, fmt.Errorf("failed to get Game Results for Game %d: no results found", gameId)
+	}
+
+	for i := 0; i < len(results); i++ {
+		target := results[i]
+		results[i].Points = getPointsForPlace(target.Kills, target.Place)
+	}
+
+	return results, nil
 }
 
 func (g *GameProvider) Add(ctx context.Context, description string, results ...GameResult) error {

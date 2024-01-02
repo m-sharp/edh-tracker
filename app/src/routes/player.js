@@ -14,10 +14,12 @@ export default function Player() {
     return (
         <div id="player">
             <h1>{player.name}&apos;s Page!</h1>
-            <p>Player created time: {player.ctime}</p>
-            <p>Player Total Kills: {player.kills}</p>
-            <p>Player Record: <Record record={player.record}/></p>
-            <p>Player's Decks:</p>
+            <p>Created At: {player.ctime}</p>
+            <p>Games Played: {player.games}</p>
+            <p>Record: <Record record={player.record}/></p>
+            <p>Total Kills: {player.kills}</p>
+            <p>Total Points: {player.points}</p>
+            <p>Decks:</p>
             <DeckDisplay player={player}/>
         </div>
     );

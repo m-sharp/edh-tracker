@@ -14,15 +14,15 @@ export async function getPlayers() {
 export default function Players() {
     const players = useLoaderData();
 
-    const playerItems = players.map(player =>
-        <li key={player.id}>
-            <Link to={`/player/${player.id}`}>{player.name}</Link>
-        </li>
-    );
-
     return (
         <div id="players">
-            <ul>{playerItems}</ul>
+            <ul>
+                {players.map(player => (
+                    <li key={player.id}>
+                        <Link to={`/player/${player.id}`}>{player.name}</Link>
+                    </li>
+                ))}
+            </ul>
         </div>
     );
 }

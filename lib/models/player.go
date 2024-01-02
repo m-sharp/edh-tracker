@@ -25,16 +25,9 @@ type Player struct {
 	CreatedAt time.Time `json:"ctime" db:"ctime"`
 }
 
-type gameStat struct {
-	GameID    int `db:"game_id"`
-	Place     int `db:"place"`
-	KillCount int `db:"kill_count"`
-}
-
 type PlayerWithStats struct {
 	Player
-	Record map[int]int `json:"record"`
-	Kills  int         `json:"kills"`
+	Stats
 }
 
 func (p *Player) Validate() error {
@@ -82,27 +75,15 @@ func (p *PlayerProvider) GetById(ctx context.Context, playerId int) (*PlayerWith
 		)
 	}
 
-	result := &PlayerWithStats{
-		Player: players[0],
-		// ToDo: Default to zero games here or in UI?
-		Record: map[int]int{},
-	}
-
-	var stats []gameStat
-	if err := p.client.Db.SelectContext(ctx, &stats, GetPlayerStats, playerId); err != nil {
+	var gameStats GameStats
+	if err := p.client.Db.SelectContext(ctx, &gameStats, GetPlayerStats, playerId); err != nil {
 		return nil, fmt.Errorf("failed to get Player statistics: %w", err)
 	}
 
-	for _, stat := range stats {
-		result.Kills += stat.KillCount
-		if _, ok := result.Record[stat.Place]; !ok {
-			result.Record[stat.Place] = 1
-		} else {
-			result.Record[stat.Place] += 1
-		}
-	}
-
-	return result, nil
+	return &PlayerWithStats{
+		Player: players[0],
+		Stats:  gameStats.ToStats(),
+	}, nil
 }
 
 func (p *PlayerProvider) Add(ctx context.Context, name string) error {

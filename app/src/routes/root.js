@@ -7,6 +7,7 @@ export default function Root() {
                 <ul>
                     <li><Link to={`/players`}>Players</Link></li>
                     <li><Link to={`/decks`}>Decks</Link></li>
+                    <li><Link to={`/games`}>Games</Link></li>
                 </ul>
             </nav>
             <hr />
