@@ -1,6 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { CssBaseline } from "@mui/material";
 
 import ErrorPage from "./routes/error"
 import Deck, { getDeck } from "./routes/deck";
@@ -55,6 +56,7 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById("root")).render(
     <StrictMode>
+        <CssBaseline enableColorScheme />
         <RouterProvider router={router} />
     </StrictMode>
 );

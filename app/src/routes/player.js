@@ -1,5 +1,6 @@
 import {useEffect, useState} from "react";
 import {Link, useLoaderData} from "react-router-dom";
+import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 
 import {Record} from "../common";
 
@@ -53,14 +54,42 @@ function DeckDisplay({ player }) {
         return <span>Error: {error.message}</span>;
     }
 
+    const columns = [
+        {
+            field: "commander",
+            headerName: "Commander",
+            renderCell: (params) => (
+                <Link to={`/deck/${params.row.id}`}>{params.row.commander}</Link>
+            ),
+            hideable: false,
+            flex: 1,
+        },
+        {
+            field: "ctime",
+            headerName: "Created At",
+            type: "dateTime",
+            valueGetter: ({ value }) => value && new Date(value),
+            minWidth: 250,
+        },
+        {
+            field: "retired",
+            headerName: "Is Retired",
+            type: "boolean",
+            width: 100,
+        },
+    ];
+
+    const rows = data.map(deck => ({
+        "id": deck.id,
+        "commander": deck.commander,
+        "retired": deck.retired,
+        "ctime": deck.ctime,
+    }));
+
     return (
-        <ol>
-            {data.map(deck => (
-                <li key={deck.id}>
-                    <Link to={`/deck/${deck.id}`}>{deck.commander}</Link>
-                </li>
-            ))}
-        </ol>
+        <div style={{ height: 500, width: "75%" }}>
+            <DataGrid rows={rows} columns={columns} slots={{toolbar: GridToolbar}} />
+        </div>
     );
 }
 

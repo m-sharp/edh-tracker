@@ -35,3 +35,9 @@ Magic the Gathering EDH Tracking for a pod of players using Go, MySQL, & React.
   - `DBUSER` - Username to connect to the database with.
   - `DBPASSWORD` - Password to connect to the database with.
   - `DBPORT` - Port to connect to database on.
+
+## Acknowledgements
+
+- Material Components from [https://mui.com/](https://mui.com/)
+- React SPA Routing from [https://reactrouter.com/](https://reactrouter.com/)
+- Fonts and Icons from [https://fonts.google.com/](https://fonts.google.com/)
