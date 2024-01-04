@@ -48,7 +48,7 @@ func NewPlayerProvider(client *lib.DBClient) *PlayerProvider {
 	}
 }
 
-func (p *PlayerProvider) GetAll(ctx context.Context) ([]Player, error) {
+func (p *PlayerProvider) GetAll(ctx context.Context) ([]PlayerWithStats, error) {
 	var players []Player
 	if err := p.client.Db.SelectContext(ctx, &players, GetAllPlayers); err != nil {
 		return nil, fmt.Errorf("failed to get Player records: %w", err)
@@ -56,10 +56,20 @@ func (p *PlayerProvider) GetAll(ctx context.Context) ([]Player, error) {
 
 	// Return an empty list instead of nil
 	if players == nil {
-		return []Player{}, nil
+		return []PlayerWithStats{}, nil
 	}
 
-	return players, nil
+	var withStats []PlayerWithStats
+	for _, player := range players {
+		var gameStats GameStats
+		if err := p.client.Db.SelectContext(ctx, &gameStats, GetPlayerStats, player.Id); err != nil {
+			return nil, fmt.Errorf("failed to get Player statistics: %w", err)
+		}
+
+		withStats = append(withStats, PlayerWithStats{Player: player, Stats: gameStats.ToStats()})
+	}
+
+	return withStats, nil
 }
 
 func (p *PlayerProvider) GetById(ctx context.Context, playerId int) (*PlayerWithStats, error) {

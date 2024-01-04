@@ -8,6 +8,7 @@ export async function getGame({ params }) {
 export default function Game() {
     const game = useLoaderData();
 
+    // ToDo: on datagrid display, auto sort by winner - https://mui.com/x/react-data-grid/sorting/#initialize-the-sort-model
     return (
         <div id="game">
             <h1>Game #{game.id} Results</h1>

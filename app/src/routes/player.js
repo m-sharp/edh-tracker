@@ -1,5 +1,6 @@
 import {useEffect, useState} from "react";
 import {Link, useLoaderData} from "react-router-dom";
+import Skeleton from '@mui/material/Skeleton';
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 
 import {Record} from "../common";
@@ -47,8 +48,7 @@ function DeckDisplay({ player }) {
     }, []);
 
     if (loading) {
-        // ToDo: Get a Spinner
-        return <span>Loading...</span>;
+        return <Skeleton variant="rounded" animation="wave" height={500} width={"75%"} />
     }
     if (error) {
         return <span>Error: {error.message}</span>;
@@ -79,6 +79,7 @@ function DeckDisplay({ player }) {
         },
     ];
 
+    // ToDo: Necessary?
     const rows = data.map(deck => ({
         "id": deck.id,
         "commander": deck.commander,
@@ -86,6 +87,7 @@ function DeckDisplay({ player }) {
         "ctime": deck.ctime,
     }));
 
+    // ToDo: Style DataGrid - https://mui.com/x/react-data-grid/style
     return (
         <div style={{ height: 500, width: "75%" }}>
             <DataGrid rows={rows} columns={columns} slots={{toolbar: GridToolbar}} />
