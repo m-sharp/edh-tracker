@@ -1,9 +1,9 @@
-import {useEffect, useState} from "react";
-import {Link, useLoaderData} from "react-router-dom";
-import Skeleton from '@mui/material/Skeleton';
-import { DataGrid, GridToolbar } from '@mui/x-data-grid';
+import { useEffect, useState } from "react";
+import { useLoaderData } from "react-router-dom";
+import Skeleton from "@mui/material/Skeleton";
+import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 
-import {Record} from "../common";
+import { CommanderColumn, CreatedAtColumn, Record, StatColumns } from "../common";
 
 export async function getPlayer({ params }) {
     const res = await fetch(`http://localhost:8080/api/player?player_id=${params.playerId}`);
@@ -42,7 +42,7 @@ function DeckDisplay({ player }) {
                 setError(error);
                 setLoading(false);
             }
-        }
+        };
 
         fetchData();
     }, []);
@@ -55,22 +55,9 @@ function DeckDisplay({ player }) {
     }
 
     const columns = [
-        {
-            field: "commander",
-            headerName: "Commander",
-            renderCell: (params) => (
-                <Link to={`/deck/${params.row.id}`}>{params.row.commander}</Link>
-            ),
-            hideable: false,
-            flex: 1,
-        },
-        {
-            field: "ctime",
-            headerName: "Created At",
-            type: "dateTime",
-            valueGetter: ({ value }) => value && new Date(value),
-            minWidth: 250,
-        },
+        CommanderColumn,
+        ...StatColumns,
+        CreatedAtColumn,
         {
             field: "retired",
             headerName: "Is Retired",
@@ -79,31 +66,24 @@ function DeckDisplay({ player }) {
         },
     ];
 
-    // ToDo: Necessary?
-    const rows = data.map(deck => ({
-        "id": deck.id,
-        "commander": deck.commander,
-        "retired": deck.retired,
-        "ctime": deck.ctime,
-    }));
-
     // ToDo: Style DataGrid - https://mui.com/x/react-data-grid/style
     return (
         <div style={{ height: 500, width: "75%" }}>
-            <DataGrid rows={rows} columns={columns} slots={{toolbar: GridToolbar}} />
+            <DataGrid
+                rows={data}
+                columns={columns}
+                slots={{toolbar: GridToolbar}}
+                initialState={{
+                    sorting: {
+                        sortModel: [{field: "commander", sort: "asc"}]
+                    }
+                }}
+            />
         </div>
     );
 }
 
 async function getDecksForPlayer(id) {
     const res = await fetch(`http://localhost:8080/api/decks?player_id=${id}`);
-    const decks = await res.json();
-
-    return decks.map((deck) => ({
-        id: deck.id.toString(),
-        player_id: deck.player_id,
-        commander: deck.commander,
-        retired: deck.retired,
-        ctime: deck.ctime,
-    }));
+    return await res.json();
 }

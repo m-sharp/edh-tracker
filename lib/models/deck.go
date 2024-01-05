@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	GetAllDecks       = `SELECT id, player_id, commander, retired, ctime FROM deck;`
+	GetAllDecks       = `SELECT id, player_id, commander, retired, ctime FROM deck WHERE retired = 0;`
 	GetDecksForPlayer = `SELECT id, player_id, commander, retired, ctime FROM deck WHERE player_id = ?;`
 	GetDeckByID       = `SELECT deck.id, deck.player_id, deck.commander, deck.retired, deck.ctime, player.name
 							FROM (deck INNER JOIN player on deck.player_id = player.id)
@@ -67,7 +67,7 @@ func NewDeckProvider(client *lib.DBClient) *DeckProvider {
 	}
 }
 
-func (d *DeckProvider) GetAll(ctx context.Context) ([]Deck, error) {
+func (d *DeckProvider) GetAll(ctx context.Context) ([]DeckWithStats, error) {
 	var decks []Deck
 	if err := d.client.Db.SelectContext(ctx, &decks, GetAllDecks); err != nil {
 		return nil, fmt.Errorf("failed to get Deck records: %w", err)
@@ -75,13 +75,26 @@ func (d *DeckProvider) GetAll(ctx context.Context) ([]Deck, error) {
 
 	// Return an empty list instead of nil
 	if decks == nil {
-		return []Deck{}, nil
+		return []DeckWithStats{}, nil
 	}
 
-	return decks, nil
+	var result []DeckWithStats
+	for _, deck := range decks {
+		var gameStats GameStats
+		if err := d.client.Db.SelectContext(ctx, &gameStats, GetDeckStats, deck.Id); err != nil {
+			return nil, fmt.Errorf("failed to get Deck statistics: %w", err)
+		}
+
+		result = append(result, DeckWithStats{
+			Deck:  deck,
+			Stats: gameStats.ToStats(),
+		})
+	}
+
+	return result, nil
 }
 
-func (d *DeckProvider) GetAllForPlayer(ctx context.Context, playerId int) ([]Deck, error) {
+func (d *DeckProvider) GetAllForPlayer(ctx context.Context, playerId int) ([]DeckWithStats, error) {
 	var decks []Deck
 	if err := d.client.Db.SelectContext(ctx, &decks, GetDecksForPlayer, playerId); err != nil {
 		return nil, fmt.Errorf("failed to get Deck records for player %d: %w", playerId, err)
@@ -89,10 +102,23 @@ func (d *DeckProvider) GetAllForPlayer(ctx context.Context, playerId int) ([]Dec
 
 	// Return an empty list instead of nil
 	if decks == nil {
-		return []Deck{}, nil
+		return []DeckWithStats{}, nil
 	}
 
-	return decks, nil
+	var result []DeckWithStats
+	for _, deck := range decks {
+		var gameStats GameStats
+		if err := d.client.Db.SelectContext(ctx, &gameStats, GetDeckStats, deck.Id); err != nil {
+			return nil, fmt.Errorf("failed to get Deck statistics: %w", err)
+		}
+
+		result = append(result, DeckWithStats{
+			Deck:  deck,
+			Stats: gameStats.ToStats(),
+		})
+	}
+
+	return result, nil
 }
 
 func (d *DeckProvider) GetById(ctx context.Context, deckId int) (*DeckWithStats, error) {

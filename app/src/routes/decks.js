@@ -1,30 +1,34 @@
-import {Link, useLoaderData} from "react-router-dom";
+import { useLoaderData } from "react-router-dom";
+import { DataGrid, GridToolbar } from "@mui/x-data-grid";
+
+import { CommanderColumn, CreatedAtColumn, StatColumns } from "../common";
 
 export async function getDecks() {
     const res = await fetch(`http://localhost:8080/api/decks`);
-    const decks = await res.json();
-
-    return decks.map((deck) => ({
-        id: deck.id.toString(),
-        player_id: deck.player_id,
-        commander: deck.commander,
-        retired: deck.retired,
-        ctime: deck.ctime,
-    }));
+    return await res.json();
 }
 
 export default function Decks() {
     const decks = useLoaderData();
 
+    const columns = [
+        CommanderColumn,
+        ...StatColumns,
+        CreatedAtColumn,
+    ];
+
     return (
-        <div id="decks">
-            <ul>
-                {decks.map(deck => (
-                    <li key={deck.id}>
-                        <Link to={`/deck/${deck.id}`}>{deck.commander}</Link>
-                    </li>
-                ))}
-            </ul>
+        <div id="decks" style={{height: 500, width: "75%"}}>
+            <DataGrid
+                rows={decks}
+                columns={columns}
+                slots={{toolbar: GridToolbar}}
+                initialState={{
+                    sorting: {
+                        sortModel: [{field: "points", sort: "desc"}],
+                    },
+                }}
+            />
         </div>
     );
 }
