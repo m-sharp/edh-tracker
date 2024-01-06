@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
 import { useLoaderData } from "react-router-dom";
 import Skeleton from "@mui/material/Skeleton";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 
-import { CommanderColumn, CreatedAtColumn, Record, StatColumns } from "../common";
+import { AsyncComponentHelper } from "../common";
+import { CommanderColumn, CreatedAtColumn, Record, StatColumns } from "../stats";
 
 export async function getPlayer({ params }) {
     const res = await fetch(`http://localhost:8080/api/player?player_id=${params.playerId}`);
@@ -16,7 +16,7 @@ export default function Player() {
     return (
         <div id="player">
             <h1>{player.name}&apos;s Page!</h1>
-            <p>Created At: {player.ctime}</p>
+            <p>Created At: {new Date(player.ctime).toLocaleString()}</p>
             <p>Games Played: {player.games}</p>
             <p>Record: <Record record={player.record}/></p>
             <p>Total Kills: {player.kills}</p>
@@ -28,30 +28,13 @@ export default function Player() {
 }
 
 function DeckDisplay({ player }) {
-    const [data, setData] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-
-    useEffect(() => {
-        async function fetchData() {
-            try {
-                const playerDecks = await getDecksForPlayer(player.id);
-                setData(playerDecks);
-                setLoading(false);
-            } catch (error) {
-                setError(error);
-                setLoading(false);
-            }
-        };
-
-        fetchData();
-    }, []);
+    const {data, loading, error} = AsyncComponentHelper(getDecksForPlayer(player.id));
 
     if (loading) {
-        return <Skeleton variant="rounded" animation="wave" height={500} width={"75%"} />
+        return <Skeleton variant="rounded" animation="wave" height={500} width={"75%"} />;
     }
     if (error) {
-        return <span>Error: {error.message}</span>;
+        return <span>Error Loading Player's Decks: {error.message}</span>;
     }
 
     const columns = [

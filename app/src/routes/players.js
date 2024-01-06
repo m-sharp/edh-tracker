@@ -1,7 +1,7 @@
 import { Link, useLoaderData } from "react-router-dom";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 
-import { CreatedAtColumn, StatColumns } from "../common";
+import { CreatedAtColumn, StatColumns } from "../stats";
 
 export async function getPlayers() {
     const res = await fetch(`http://localhost:8080/api/players`);

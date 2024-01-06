@@ -1,7 +1,7 @@
 import { useLoaderData } from "react-router-dom";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 
-import { CommanderColumn, CreatedAtColumn, StatColumns } from "../common";
+import { CommanderColumn, CreatedAtColumn, StatColumns } from "../stats";
 
 export async function getDecks() {
     const res = await fetch(`http://localhost:8080/api/decks`);
