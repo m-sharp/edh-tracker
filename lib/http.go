@@ -10,7 +10,6 @@ import (
 
 type MiddlewareFunc func(nextHandler http.HandlerFunc) http.HandlerFunc
 
-// ToDo: Unnecessary?
 func CORSMiddleware(nextHandler http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Access-Control-Allow-Origin", "*")
