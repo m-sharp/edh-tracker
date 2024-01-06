@@ -27,6 +27,15 @@ func CORSMiddleware(nextHandler http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
+// GNUMiddleware adds the X-Clacks-Overhead header to keep names alive (https://wiki.lspace.org/GNU_Terry_Pratchett)
+func GNUMiddleware(nextHandler http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("X-Clacks-Overhead", "GNU Steve Harp, GNU Terry Pratchett")
+
+		nextHandler(w, r)
+	}
+}
+
 type Route struct {
 	Path       string
 	Method     string

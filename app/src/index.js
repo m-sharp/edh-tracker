@@ -6,8 +6,8 @@ import { CssBaseline } from "@mui/material";
 import ErrorPage from "./routes/error"
 import Deck, { getDeck } from "./routes/deck";
 import Decks, { getDecks } from "./routes/decks";
-import Game, {getGame} from "./routes/game";
-import Games, {getGames} from "./routes/games";
+import Game, { getGame } from "./routes/game";
+import Games, { getGames } from "./routes/games";
 import Player, { getPlayer } from "./routes/player";
 import Players, { getPlayers } from "./routes/players";
 import Root from "./routes/root";
