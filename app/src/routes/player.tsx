@@ -1,5 +1,6 @@
 import { ReactElement } from "react";
 import { useLoaderData } from "react-router-dom";
+import { Box } from "@mui/material";
 import Skeleton from "@mui/material/Skeleton";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import { LoaderFunctionArgs } from "@remix-run/router/utils";
@@ -27,16 +28,21 @@ export default function View(): ReactElement {
     const player = useLoaderData() as Player;
 
     return (
-        <div id="player">
-            <h1>{player.name}&apos;s Page!</h1>
-            <p>Created At: {new Date(player.ctime).toLocaleString()}</p>
-            <p>Games Played: {player.games}</p>
-            <p>Record: <Record record={player.record}/></p>
-            <p>Total Kills: {player.kills}</p>
-            <p>Total Points: {player.points}</p>
-            <p>Decks:</p>
+        <Box id="player" sx={{display: "flex", flexDirection: "column", alignItems: "center"}}>
+            <Box sx={{display: "flex", flexDirection: "column", alignItems: "center"}}>
+                <h1>{player.name}</h1>
+                <Record record={player.record}/>
+            </Box>
+            <Box sx={{width: "100%", display: "flex", flexDirection: "row", justifyContent: "space-evenly", py: 3}}>
+                <span><strong>Games Played:</strong> {player.games}</span>
+                <span><strong>Total Kills:</strong> {player.kills}</span>
+                <span><strong>Total Points:</strong> {player.points}</span>
+            </Box>
             <DeckDisplay player={player}/>
-        </div>
+            <Box sx={{width: "100%", display: "flex", justifyContent: "flex-end", pt: 1}}>
+                <em>Created at: {new Date(player.ctime).toLocaleString()}</em>
+            </Box>
+        </Box>
     );
 }
 
@@ -48,7 +54,7 @@ function DeckDisplay({ player }: DeckDisplayProps): ReactElement {
     const {data, loading, error} = AsyncComponentHelper(getDecksForPlayer(player.id));
 
     if (loading) {
-        return <Skeleton variant="rounded" animation="wave" height={500} width={"75%"} />;
+        return <Skeleton variant="rounded" animation="wave" height={750} />;
     }
     if (error) {
         return <span>Error Loading Player's Decks: {error.message}</span>;
@@ -57,6 +63,7 @@ function DeckDisplay({ player }: DeckDisplayProps): ReactElement {
     const columns = [
         CommanderColumn,
         ...StatColumns,
+        // ToDo: Hide CreatedAt columns and only display at bottom of details pages?
         CreatedAtColumn,
         {
             field: "retired",
@@ -68,7 +75,7 @@ function DeckDisplay({ player }: DeckDisplayProps): ReactElement {
 
     // ToDo: Style DataGrid - https://mui.com/x/react-data-grid/style
     return (
-        <div style={{ height: 500, width: "75%" }}>
+        <Box style={{ height: 750, width: "100%" }}>
             <DataGrid
                 rows={data}
                 columns={columns}
@@ -79,7 +86,7 @@ function DeckDisplay({ player }: DeckDisplayProps): ReactElement {
                     }
                 }}
             />
-        </div>
+        </Box>
     );
 }
 

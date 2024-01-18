@@ -1,5 +1,6 @@
 import { ReactElement } from "react";
 import { useLoaderData } from "react-router-dom";
+import { Box } from "@mui/material";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 
 import { Deck } from "./deck";
@@ -20,7 +21,7 @@ export default function Decks(): ReactElement {
     ];
 
     return (
-        <div id="decks" style={{height: 500, width: "75%"}}>
+        <Box id="decks" style={{height: 500}}>
             <DataGrid
                 rows={decks}
                 columns={columns}
@@ -31,6 +32,6 @@ export default function Decks(): ReactElement {
                     },
                 }}
             />
-        </div>
+        </Box>
     );
 }

@@ -50,18 +50,16 @@ export function MatchesDisplay({ games, targetCommander }: MatchesDisplayProps):
     ];
 
     return (
-        <div id="matches" style={{height: 500, width: "75%"}}>
-            <DataGrid
-                rows={games}
-                columns={columns}
-                slots={{toolbar: GridToolbar}}
-                initialState={{
-                    sorting: {
-                        sortModel: [{field: "id", sort: "asc"}],
-                    },
-                }}
-            />
-        </div>
+        <DataGrid
+            rows={games}
+            columns={columns}
+            slots={{toolbar: GridToolbar}}
+            initialState={{
+                sorting: {
+                    sortModel: [{field: "id", sort: "asc"}],
+                },
+            }}
+        />
     );
 }
 
@@ -70,6 +68,7 @@ interface MatchUpDisplayProps {
     targetCommander: string;
 }
 
+// ToDo: Make this and the containing DataGrid more mobile friendly
 export function MatchUpDisplay({ results, targetCommander }: MatchUpDisplayProps): ReactElement {
     results.sort((a, b) => {
         if (a.place < b.place) {

@@ -1,5 +1,6 @@
 import { ReactElement } from "react";
 import { Link, useLoaderData } from "react-router-dom";
+import { Box } from "@mui/material";
 import { DataGrid, GridColDef, GridToolbar } from "@mui/x-data-grid";
 
 import { Player } from "./player";
@@ -22,13 +23,14 @@ export default function View(): ReactElement {
             ),
             hideable: false,
             flex: 1,
+            minWidth: 100,
         },
         ...StatColumns,
         CreatedAtColumn,
     ];
 
     return (
-        <div id="players" style={{height: 500, width: "75%"}}>
+        <Box id="players" sx={{height: 500}}>
             <DataGrid
                 rows={players}
                 columns={columns}
@@ -39,6 +41,6 @@ export default function View(): ReactElement {
                     },
                 }}
             />
-        </div>
+        </Box>
     );
 }

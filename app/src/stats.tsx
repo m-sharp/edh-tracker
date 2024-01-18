@@ -56,25 +56,26 @@ export const StatColumns: Array<GridColDef> = [
             <Record record={params.row.record} />
         ),
         sortComparator: RecordComparator,
+        flex: 1,
         minWidth: 150,
     },
     {
         field: "kills",
         headerName: "Total Kills",
         type: "number",
-        minWidth: 100,
+        minWidth: 125,
     },
     {
         field: "points",
         headerName: "Total Points",
         type: "number",
-        minWidth: 100,
+        minWidth: 150,
     },
     {
         field: "games",
         headerName: "Games Played",
         type: "number",
-        minWidth: 100,
+        minWidth: 150,
     },
 ];
 
@@ -87,6 +88,7 @@ export const CommanderColumn: GridColDef = {
     ),
     hideable: false,
     flex: 1,
+    minWidth: 200,
 };
 
 // CreatedAtColumn is a DataGrid column definition for a ctime datetime.
@@ -95,5 +97,5 @@ export const CreatedAtColumn: GridColDef = {
     headerName: "Created At",
     type: "dateTime",
     valueGetter: ({ value }) => value && new Date(value),
-    minWidth: 225,
+    minWidth: 200,
 };
