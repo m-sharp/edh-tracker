@@ -1,17 +1,32 @@
+import { ReactElement } from "react";
 import { Link, useLoaderData } from "react-router-dom";
+import { LoaderFunctionArgs } from "@remix-run/router/utils";
 import Skeleton from "@mui/material/Skeleton";
 
 import { AsyncComponentHelper } from "../common";
-import { MatchesDisplay } from "../matches";
-import { Record } from "../stats";
+import { Game, MatchesDisplay } from "../matches";
+import { Record, RecordDict } from "../stats";
 
-export async function getDeck({ params }) {
+export interface Deck {
+    id: number;
+    player_id: number;
+    player_name: string;
+    commander: string;
+    retired: boolean;
+    ctime: string;
+    record: RecordDict;
+    games: number;
+    kills: number;
+    points: number;
+}
+
+export async function getDeck({ params }: LoaderFunctionArgs): Promise<Deck> {
     const res = await fetch(`http://localhost:8080/api/deck?deck_id=${params.deckId}`);
     return res.json();
 }
 
-export default function Deck() {
-    const deck = useLoaderData();
+export default function View(): ReactElement {
+    const deck = useLoaderData() as Deck;
 
     return (
         <div id="deck">
@@ -27,7 +42,11 @@ export default function Deck() {
     );
 }
 
-function MatchUpsForDeck({ deck }) {
+interface MatchUpsForDeckProps {
+    deck: Deck;
+}
+
+function MatchUpsForDeck({ deck }: MatchUpsForDeckProps): ReactElement {
     const {data, loading, error} = AsyncComponentHelper(getGamesForDeck(deck.id));
 
     if (loading) {
@@ -42,7 +61,7 @@ function MatchUpsForDeck({ deck }) {
     );
 }
 
-async function getGamesForDeck(id) {
+async function getGamesForDeck(id: number): Promise<Array<Game>> {
     const res = await fetch(`http://localhost:8080/api/games?deck_id=${id}`);
     return await res.json();
 }

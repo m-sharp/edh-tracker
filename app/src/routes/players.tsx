@@ -1,17 +1,19 @@
+import { ReactElement } from "react";
 import { Link, useLoaderData } from "react-router-dom";
-import { DataGrid, GridToolbar } from "@mui/x-data-grid";
+import { DataGrid, GridColDef, GridToolbar } from "@mui/x-data-grid";
 
+import { Player } from "./player";
 import { CreatedAtColumn, StatColumns } from "../stats";
 
-export async function getPlayers() {
+export async function getPlayers(): Promise<Array<Player>> {
     const res = await fetch(`http://localhost:8080/api/players`);
     return await res.json();
 }
 
-export default function Players() {
-    const players = useLoaderData();
+export default function View(): ReactElement {
+    const players = useLoaderData() as Array<Player>;
 
-    const columns = [
+    const columns: Array<GridColDef> = [
         {
             field: "name",
             headerName: "Player Name",

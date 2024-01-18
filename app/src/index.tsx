@@ -4,16 +4,17 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { CssBaseline } from "@mui/material";
 
 import ErrorPage from "./routes/error"
-import Deck, { getDeck } from "./routes/deck";
-import Decks, { getDecks } from "./routes/decks";
-import Game, { getGame } from "./routes/game";
-import Games, { getGames } from "./routes/games";
-import Player, { getPlayer } from "./routes/player";
-import Players, { getPlayers } from "./routes/players";
+import DeckView, { getDeck } from "./routes/deck";
+import DecksView, { getDecks } from "./routes/decks";
+import GameView, { getGame } from "./routes/game";
+import GamesView, { getGames } from "./routes/games";
+import PlayerView, { getPlayer } from "./routes/player";
+import PlayersView, { getPlayers } from "./routes/players";
 import Root from "./routes/root";
 
 import "./styles.css";
 
+// ToDo: Change to jsx declarations?
 const router = createBrowserRouter([
     {
         path: "/",
@@ -22,39 +23,39 @@ const router = createBrowserRouter([
         children: [
             {
                 path: "decks",
-                element: <Decks />,
+                element: <DecksView />,
                 loader: getDecks,
             },
             {
                 path: "deck/:deckId",
-                element: <Deck />,
+                element: <DeckView />,
                 loader: getDeck,
             },
             {
                 path: "games",
-                element: <Games />,
+                element: <GamesView />,
                 loader: getGames,
             },
             {
                 path: "game/:gameId",
-                element: <Game />,
+                element: <GameView />,
                 loader: getGame,
             },
             {
                 path: "players",
-                element: <Players />,
+                element: <PlayersView />,
                 loader: getPlayers,
             },
             {
                 path: "player/:playerId",
-                element: <Player />,
+                element: <PlayerView />,
                 loader: getPlayer,
             },
         ],
     },
 ]);
 
-createRoot(document.getElementById("root")).render(
+createRoot(document.getElementById("root") as HTMLElement).render(
     <StrictMode>
         <CssBaseline enableColorScheme />
         <RouterProvider router={router} />

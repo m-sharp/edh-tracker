@@ -1,10 +1,33 @@
+import { ReactElement } from "react";
 import { Link } from "react-router-dom";
-import { DataGrid, GridToolbar } from "@mui/x-data-grid";
+import { DataGrid, GridColDef, GridToolbar } from "@mui/x-data-grid";
 
 import { CreatedAtColumn } from "./stats";
 
-export function MatchesDisplay({ games, targetCommander }) {
-    const columns = [
+export interface Game {
+    id: number;
+    description: string;
+    ctime: string;
+    results: Array<GameResult>;
+}
+
+export interface GameResult {
+    id: number;
+    game_id: number;
+    deck_id: number;
+    commander: string;
+    place: number;
+    kill_count: number;
+    points: number;
+}
+
+interface MatchesDisplayProps {
+    games: Array<Game>;
+    targetCommander?: string;
+}
+
+export function MatchesDisplay({ games, targetCommander }: MatchesDisplayProps): ReactElement {
+    const columns: Array<GridColDef> = [
         {
             field: "id",
             headerName: "Game #",
@@ -17,7 +40,7 @@ export function MatchesDisplay({ games, targetCommander }) {
             field: "results",
             headerName: "Commanders (In Place Order)",
             renderCell: (params) => (
-                <MatchUpDisplay results={params.row.results} targetCommander={targetCommander} />
+                <MatchUpDisplay results={params.row.results} targetCommander={targetCommander || ""} />
             ),
             hideable: false,
             sortable: false,
@@ -42,7 +65,12 @@ export function MatchesDisplay({ games, targetCommander }) {
     );
 }
 
-export function MatchUpDisplay({ results, targetCommander }) {
+interface MatchUpDisplayProps {
+    results: Array<GameResult>;
+    targetCommander: string;
+}
+
+export function MatchUpDisplay({ results, targetCommander }: MatchUpDisplayProps): ReactElement {
     results.sort((a, b) => {
         if (a.place < b.place) {
             return -1;

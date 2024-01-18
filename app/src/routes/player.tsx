@@ -1,17 +1,30 @@
+import { ReactElement } from "react";
 import { useLoaderData } from "react-router-dom";
 import Skeleton from "@mui/material/Skeleton";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
+import { LoaderFunctionArgs } from "@remix-run/router/utils";
 
+import { Deck } from "./deck";
 import { AsyncComponentHelper } from "../common";
-import { CommanderColumn, CreatedAtColumn, Record, StatColumns } from "../stats";
+import { CommanderColumn, CreatedAtColumn, Record, RecordDict, StatColumns } from "../stats";
 
-export async function getPlayer({ params }) {
+export interface Player {
+    id: number;
+    name: string;
+    ctime: string;
+    record: RecordDict;
+    games: number;
+    kills: number;
+    points: number;
+}
+
+export async function getPlayer({ params }: LoaderFunctionArgs): Promise<Player> {
     const res = await fetch(`http://localhost:8080/api/player?player_id=${params.playerId}`);
     return res.json();
 }
 
-export default function Player() {
-    const player = useLoaderData();
+export default function View(): ReactElement {
+    const player = useLoaderData() as Player;
 
     return (
         <div id="player">
@@ -27,7 +40,11 @@ export default function Player() {
     );
 }
 
-function DeckDisplay({ player }) {
+interface DeckDisplayProps {
+    player: Player;
+}
+
+function DeckDisplay({ player }: DeckDisplayProps): ReactElement {
     const {data, loading, error} = AsyncComponentHelper(getDecksForPlayer(player.id));
 
     if (loading) {
@@ -66,7 +83,7 @@ function DeckDisplay({ player }) {
     );
 }
 
-async function getDecksForPlayer(id) {
+async function getDecksForPlayer(id: number): Promise<Deck> {
     const res = await fetch(`http://localhost:8080/api/decks?player_id=${id}`);
     return await res.json();
 }

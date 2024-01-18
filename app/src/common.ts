@@ -1,15 +1,21 @@
 import { useEffect, useState } from "react";
 
-export function AsyncComponentHelper(fetcher) {
-    const [data, setData] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+interface AsyncResp {
+    data: any;
+    loading: boolean;
+    error: any;
+}
+
+export function AsyncComponentHelper(fetcher: Promise<any>): AsyncResp {
+    const [data, setData] = useState<any>(null);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [error, setError] = useState<any>(null);
 
     useEffect(() => {
         async function fetchData() {
             try {
-                const games = await fetcher;
-                setData(games);
+                const objs = await fetcher;
+                setData(objs);
                 setLoading(false);
             } catch (error) {
                 setError(error);

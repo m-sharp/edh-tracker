@@ -10,6 +10,7 @@ import (
 )
 
 const (
+	// ToDo: Include player name?
 	GetAllDecks       = `SELECT id, player_id, commander, retired, ctime FROM deck WHERE retired = 0;`
 	GetDecksForPlayer = `SELECT id, player_id, commander, retired, ctime FROM deck WHERE player_id = ?;`
 	GetDeckByID       = `SELECT deck.id, deck.player_id, deck.commander, deck.retired, deck.ctime, player.name

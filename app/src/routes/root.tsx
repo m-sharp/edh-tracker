@@ -1,6 +1,7 @@
+import { ReactElement } from "react";
 import { Outlet, Link } from "react-router-dom";
 
-export default function Root() {
+export default function Root(): ReactElement {
     // ToDo: https://mui.com/material-ui/react-app-bar/
     // ToDo: https://mui.com/material-ui/react-drawer/
     return (
