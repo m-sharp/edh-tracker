@@ -1,6 +1,8 @@
 package main
 
 import (
+	"net/http"
+
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"
 
@@ -31,6 +33,11 @@ func NewApiRouter(cfg *lib.Config, log *zap.Logger, client *lib.DBClient) *ApiRo
 func (a *ApiRouter) SetupRoutes(router *mux.Router) {
 	for _, subRouter := range a.routers {
 		for _, route := range subRouter.GetRoutes() {
+			// Handle CORS preflight requests
+			if route.Method == http.MethodPost {
+				router.HandleFunc(route.Path, lib.CORSMiddleware(lib.CORSPreflightHandler)).Methods(http.MethodOptions)
+			}
+
 			if route.MiddleWare != nil {
 				router.HandleFunc(
 					route.Path,

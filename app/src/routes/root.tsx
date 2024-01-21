@@ -26,6 +26,7 @@ export default function Root(): ReactElement {
 
 // ToDo: Add mobile menu icon and link menu
 // ToDo: Link button click should propagate down to <Link>
+// ToDo: Make a mapped list of nav links for ease of update
 function DrawerAppBar(): ReactElement {
     return (
         <AppBar position="fixed">
@@ -54,6 +55,9 @@ function DrawerAppBar(): ReactElement {
                         </Button>
                         <Button sx={{ my: 2, color: 'white', display: 'block' }}>
                             <Link to={`/games`} style={{color: "white"}}>Games</Link>
+                        </Button>
+                        <Button sx={{ my: 2, color: 'white', display: 'block' }}>
+                            <Link to={`/new-game`} style={{color: "white"}}>Add New Game</Link>
                         </Button>
                     </Box>
                 </Toolbar>

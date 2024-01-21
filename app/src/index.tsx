@@ -8,6 +8,7 @@ import DeckView, { getDeck } from "./routes/deck";
 import DecksView, { getDecks } from "./routes/decks";
 import GameView, { getGame } from "./routes/game";
 import GamesView, { getGames } from "./routes/games";
+import NewGameView, { createGame } from "./routes/new";
 import PlayerView, { getPlayer } from "./routes/player";
 import PlayersView, { getPlayers } from "./routes/players";
 import Root from "./routes/root";
@@ -50,6 +51,11 @@ const router = createBrowserRouter([
                 element: <PlayerView />,
                 loader: getPlayer,
             },
+            {
+                path: "new-game",
+                element: <NewGameView />,
+                action: createGame,
+            }
         ],
     },
 ]);
