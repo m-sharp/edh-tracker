@@ -31,14 +31,14 @@ export default function View(): ReactElement {
         <Box id="player" sx={{display: "flex", flexDirection: "column", alignItems: "center"}}>
             <Box sx={{display: "flex", flexDirection: "column", alignItems: "center"}}>
                 <h1>{player.name}</h1>
-                <Record record={player.record}/>
+                <Record record={player.record} />
             </Box>
             <Box sx={{width: "100%", display: "flex", flexDirection: "row", justifyContent: "space-evenly", py: 3}}>
                 <span><strong>Games Played:</strong> {player.games}</span>
                 <span><strong>Total Kills:</strong> {player.kills}</span>
                 <span><strong>Total Points:</strong> {player.points}</span>
             </Box>
-            <DeckDisplay player={player}/>
+            <DeckDisplay player={player} />
             <Box sx={{width: "100%", display: "flex", justifyContent: "flex-end", pt: 1}}>
                 <em>Player created at: {new Date(player.ctime).toLocaleString()}</em>
             </Box>

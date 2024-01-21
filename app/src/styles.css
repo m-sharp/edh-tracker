@@ -1,3 +1,7 @@
 .match .match-up:last-child .vs {
     display: none;
 }
+
+.info-column-item {
+    margin: 1em 0;
+}

@@ -1,5 +1,6 @@
 import { ReactElement } from "react";
 import { Link, useLoaderData } from "react-router-dom";
+import { Box } from "@mui/material";
 import { DataGrid, GridColDef, GridToolbar } from "@mui/x-data-grid";
 import { LoaderFunctionArgs } from "@remix-run/router/utils";
 
@@ -44,11 +45,11 @@ export default function View(): ReactElement {
     ];
 
     return (
-        <div id="game">
+        <Box id="game" sx={{display: "flex", flexDirection: "column", alignItems: "center"}}>
             <h1>Game #{game.id}</h1>
-            <p>Game Played On: {new Date(game.ctime).toLocaleString()}</p>
+            <em>{new Date(game.ctime).toLocaleString()}</em>
             <p>Description: {game.description}</p>
-            <div style={{height: 355, width: "75%"}}>
+            <Box sx={{height: 355, width: "100%"}}>
                 <DataGrid
                     rows={game.results}
                     columns={columns}
@@ -59,7 +60,7 @@ export default function View(): ReactElement {
                         },
                     }}
                 />
-            </div>
-        </div>
+            </Box>
+        </Box>
     );
 }
