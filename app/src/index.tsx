@@ -14,7 +14,6 @@ import Root from "./routes/root";
 
 import "./styles.css";
 
-// ToDo: Change to jsx declarations?
 const router = createBrowserRouter([
     {
         path: "/",
