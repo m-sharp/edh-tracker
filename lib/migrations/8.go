@@ -218,7 +218,7 @@ var (
 			{
 				Player:    "Dillon",
 				Commander: "Jhoira, Weatherlight Captain",
-				Place:     1,
+				Place:     4,
 				Kills:     1,
 			},
 			{

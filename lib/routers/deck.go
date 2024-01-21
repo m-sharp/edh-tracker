@@ -55,7 +55,7 @@ func (d *DeckRouter) GetAll(w http.ResponseWriter, r *http.Request) {
 	playerId, _ := lib.GetQueryId(r, "player_id")
 
 	var (
-		decks []models.Deck
+		decks []models.DeckWithStats
 		err   error
 	)
 	if playerId != 0 {

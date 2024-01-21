@@ -48,11 +48,24 @@ func (g *GameRouter) GetRoutes() []*lib.Route {
 func (g *GameRouter) GetAll(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	errMsg := "Failed to get Game records"
+	deckId, _ := lib.GetQueryId(r, "deck_id")
 
-	games, err := g.provider.GetAll(ctx)
-	if err != nil {
-		lib.WriteError(g.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
-		return
+	var (
+		games []models.GameDetails
+		err   error
+	)
+	if deckId != 0 {
+		games, err = g.provider.GetAllByDeck(ctx, deckId)
+		if err != nil {
+			lib.WriteError(g.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
+			return
+		}
+	} else {
+		games, err = g.provider.GetAll(ctx)
+		if err != nil {
+			lib.WriteError(g.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
+			return
+		}
 	}
 
 	marshalled, err := json.Marshal(games)

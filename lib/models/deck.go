@@ -10,9 +10,15 @@ import (
 )
 
 const (
-	GetAllDecks       = `SELECT id, player_id, commander, retired, ctime FROM deck;`
+	// ToDo: Include player name?
+	GetAllDecks       = `SELECT id, player_id, commander, retired, ctime FROM deck WHERE retired = 0;`
 	GetDecksForPlayer = `SELECT id, player_id, commander, retired, ctime FROM deck WHERE player_id = ?;`
-	GetDeckByID       = `SELECT id, player_id, commander, retired, ctime FROM deck WHERE id = ?;`
+	GetDeckByID       = `SELECT deck.id, deck.player_id, deck.commander, deck.retired, deck.ctime, player.name
+							FROM (deck INNER JOIN player on deck.player_id = player.id)
+						 WHERE deck.id = ?;`
+	GetDeckStats = `SELECT DISTINCT game_result.game_id, game_result.place, game_result.kill_count
+						FROM (game_result INNER JOIN deck on game_result.deck_id = deck.id)
+					WHERE deck.id = ?;`
 
 	DeckExists = `SELECT COUNT(*) FROM deck where player_id = ? AND commander = ?;`
 
@@ -28,11 +34,17 @@ var (
 )
 
 type Deck struct {
-	Id        int       `json:"id" db:"id"`
-	PlayerId  int       `json:"player_id" db:"player_id"`
-	Commander string    `json:"commander" db:"commander"`
-	Retired   bool      `json:"retired" db:"retired"`
-	CreatedAt time.Time `json:"ctime" db:"ctime"`
+	Id         int       `json:"id" db:"id"`
+	PlayerId   int       `json:"player_id" db:"player_id"`
+	PlayerName string    `json:"player_name,omitempty" db:"name"`
+	Commander  string    `json:"commander" db:"commander"`
+	Retired    bool      `json:"retired" db:"retired"`
+	CreatedAt  time.Time `json:"ctime" db:"ctime"`
+}
+
+type DeckWithStats struct {
+	Deck
+	Stats
 }
 
 func (d *Deck) Validate() error {
@@ -56,7 +68,7 @@ func NewDeckProvider(client *lib.DBClient) *DeckProvider {
 	}
 }
 
-func (d *DeckProvider) GetAll(ctx context.Context) ([]Deck, error) {
+func (d *DeckProvider) GetAll(ctx context.Context) ([]DeckWithStats, error) {
 	var decks []Deck
 	if err := d.client.Db.SelectContext(ctx, &decks, GetAllDecks); err != nil {
 		return nil, fmt.Errorf("failed to get Deck records: %w", err)
@@ -64,13 +76,26 @@ func (d *DeckProvider) GetAll(ctx context.Context) ([]Deck, error) {
 
 	// Return an empty list instead of nil
 	if decks == nil {
-		return []Deck{}, nil
+		return []DeckWithStats{}, nil
 	}
 
-	return decks, nil
+	var result []DeckWithStats
+	for _, deck := range decks {
+		var gameStats GameStats
+		if err := d.client.Db.SelectContext(ctx, &gameStats, GetDeckStats, deck.Id); err != nil {
+			return nil, fmt.Errorf("failed to get Deck statistics: %w", err)
+		}
+
+		result = append(result, DeckWithStats{
+			Deck:  deck,
+			Stats: gameStats.ToStats(),
+		})
+	}
+
+	return result, nil
 }
 
-func (d *DeckProvider) GetAllForPlayer(ctx context.Context, playerId int) ([]Deck, error) {
+func (d *DeckProvider) GetAllForPlayer(ctx context.Context, playerId int) ([]DeckWithStats, error) {
 	var decks []Deck
 	if err := d.client.Db.SelectContext(ctx, &decks, GetDecksForPlayer, playerId); err != nil {
 		return nil, fmt.Errorf("failed to get Deck records for player %d: %w", playerId, err)
@@ -78,13 +103,26 @@ func (d *DeckProvider) GetAllForPlayer(ctx context.Context, playerId int) ([]Dec
 
 	// Return an empty list instead of nil
 	if decks == nil {
-		return []Deck{}, nil
+		return []DeckWithStats{}, nil
 	}
 
-	return decks, nil
+	var result []DeckWithStats
+	for _, deck := range decks {
+		var gameStats GameStats
+		if err := d.client.Db.SelectContext(ctx, &gameStats, GetDeckStats, deck.Id); err != nil {
+			return nil, fmt.Errorf("failed to get Deck statistics: %w", err)
+		}
+
+		result = append(result, DeckWithStats{
+			Deck:  deck,
+			Stats: gameStats.ToStats(),
+		})
+	}
+
+	return result, nil
 }
 
-func (d *DeckProvider) GetById(ctx context.Context, deckId int) (*Deck, error) {
+func (d *DeckProvider) GetById(ctx context.Context, deckId int) (*DeckWithStats, error) {
 	var decks []Deck
 	if err := d.client.Db.SelectContext(ctx, &decks, GetDeckByID, deckId); err != nil {
 		return nil, fmt.Errorf("failed to get Deck record for id %d: %w", deckId, err)
@@ -97,7 +135,15 @@ func (d *DeckProvider) GetById(ctx context.Context, deckId int) (*Deck, error) {
 		)
 	}
 
-	return &decks[0], nil
+	var gameStats GameStats
+	if err := d.client.Db.SelectContext(ctx, &gameStats, GetDeckStats, deckId); err != nil {
+		return nil, fmt.Errorf("failed to get Deck statistics: %w", err)
+	}
+
+	return &DeckWithStats{
+		Deck:  decks[0],
+		Stats: gameStats.ToStats(),
+	}, nil
 }
 
 func (d *DeckProvider) Add(ctx context.Context, playerId int, commander string) error {

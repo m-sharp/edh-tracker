@@ -10,7 +10,6 @@ import (
 
 type MiddlewareFunc func(nextHandler http.HandlerFunc) http.HandlerFunc
 
-// ToDo: Unnecessary?
 func CORSMiddleware(nextHandler http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Access-Control-Allow-Origin", "*")
@@ -22,6 +21,15 @@ func CORSMiddleware(nextHandler http.HandlerFunc) http.HandlerFunc {
 			http.Error(w, "No Content", http.StatusNoContent)
 			return
 		}
+
+		nextHandler(w, r)
+	}
+}
+
+// GNUMiddleware adds the X-Clacks-Overhead header to keep names alive (https://wiki.lspace.org/GNU_Terry_Pratchett)
+func GNUMiddleware(nextHandler http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("X-Clacks-Overhead", "GNU Steve Harp, GNU Terry Pratchett")
 
 		nextHandler(w, r)
 	}
