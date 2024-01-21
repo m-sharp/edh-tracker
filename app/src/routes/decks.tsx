@@ -4,7 +4,7 @@ import { Box } from "@mui/material";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 
 import { Deck } from "./deck";
-import { CommanderColumn, CreatedAtColumn, StatColumns } from "../stats";
+import { CommanderColumn, StatColumns } from "../stats";
 
 export async function getDecks(): Promise<Array<Deck>> {
     const res = await fetch(`http://localhost:8080/api/decks`);
@@ -17,7 +17,6 @@ export default function Decks(): ReactElement {
     const columns = [
         CommanderColumn,
         ...StatColumns,
-        CreatedAtColumn,
     ];
 
     return (

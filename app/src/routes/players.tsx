@@ -4,7 +4,7 @@ import { Box } from "@mui/material";
 import { DataGrid, GridColDef, GridToolbar } from "@mui/x-data-grid";
 
 import { Player } from "./player";
-import { CreatedAtColumn, StatColumns } from "../stats";
+import { StatColumns } from "../stats";
 
 export async function getPlayers(): Promise<Array<Player>> {
     const res = await fetch(`http://localhost:8080/api/players`);
@@ -26,7 +26,6 @@ export default function View(): ReactElement {
             minWidth: 100,
         },
         ...StatColumns,
-        CreatedAtColumn,
     ];
 
     return (

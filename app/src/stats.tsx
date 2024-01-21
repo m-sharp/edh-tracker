@@ -90,12 +90,3 @@ export const CommanderColumn: GridColDef = {
     flex: 1,
     minWidth: 200,
 };
-
-// CreatedAtColumn is a DataGrid column definition for a ctime datetime.
-export const CreatedAtColumn: GridColDef = {
-    field: "ctime",
-    headerName: "Created At",
-    type: "dateTime",
-    valueGetter: ({ value }) => value && new Date(value),
-    minWidth: 200,
-};

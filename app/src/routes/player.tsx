@@ -7,7 +7,7 @@ import { LoaderFunctionArgs } from "@remix-run/router/utils";
 
 import { Deck } from "./deck";
 import { AsyncComponentHelper } from "../common";
-import { CommanderColumn, CreatedAtColumn, Record, RecordDict, StatColumns } from "../stats";
+import { CommanderColumn, Record, RecordDict, StatColumns } from "../stats";
 
 export interface Player {
     id: number;
@@ -40,7 +40,7 @@ export default function View(): ReactElement {
             </Box>
             <DeckDisplay player={player}/>
             <Box sx={{width: "100%", display: "flex", justifyContent: "flex-end", pt: 1}}>
-                <em>Created at: {new Date(player.ctime).toLocaleString()}</em>
+                <em>Player created at: {new Date(player.ctime).toLocaleString()}</em>
             </Box>
         </Box>
     );
@@ -63,8 +63,6 @@ function DeckDisplay({ player }: DeckDisplayProps): ReactElement {
     const columns = [
         CommanderColumn,
         ...StatColumns,
-        // ToDo: Hide CreatedAt columns and only display at bottom of details pages?
-        CreatedAtColumn,
         {
             field: "retired",
             headerName: "Is Retired",

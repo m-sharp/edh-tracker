@@ -2,8 +2,6 @@ import { ReactElement } from "react";
 import { Link } from "react-router-dom";
 import { DataGrid, GridColDef, GridToolbar } from "@mui/x-data-grid";
 
-import { CreatedAtColumn } from "./stats";
-
 export interface Game {
     id: number;
     description: string;
@@ -46,7 +44,6 @@ export function MatchesDisplay({ games, targetCommander }: MatchesDisplayProps):
             sortable: false,
             flex: 1,
         },
-        CreatedAtColumn,
     ];
 
     return (
