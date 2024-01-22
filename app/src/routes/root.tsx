@@ -10,6 +10,8 @@ import {
     Typography
 } from "@mui/material";
 
+import "../styles.css";
+
 export default function Root(): ReactElement {
     const location = useLocation();
 
@@ -24,9 +26,31 @@ export default function Root(): ReactElement {
     );
 }
 
+interface NavLink {
+    link: string;
+    text: string;
+}
+
+const navLinks: Array<NavLink> = [
+    {
+        link: "/players",
+        text: "Players",
+    },
+    {
+        link: "/decks",
+        text: "Decks",
+    },
+    {
+        link: "/games",
+        text: "Games",
+    },
+    {
+        link: "/new-game",
+        text: "Add New Game",
+    }
+]
+
 // ToDo: Add mobile menu icon and link menu
-// ToDo: Link button click should propagate down to <Link>
-// ToDo: Make a mapped list of nav links for ease of update
 function DrawerAppBar(): ReactElement {
     return (
         <AppBar position="fixed">
@@ -46,19 +70,16 @@ function DrawerAppBar(): ReactElement {
                     >
                         <Link to={`/`} style={{textDecoration: "none", color: "white"}}>EDH Tracker</Link>
                     </Typography>
-                    <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-                        <Button sx={{ my: 2, color: 'white', display: 'block' }}>
-                            <Link to={`/players`} style={{color: "white"}}>Players</Link>
-                        </Button>
-                        <Button sx={{ my: 2, color: 'white', display: 'block' }}>
-                            <Link to={`/decks`} style={{color: "white"}}>Decks</Link>
-                        </Button>
-                        <Button sx={{ my: 2, color: 'white', display: 'block' }}>
-                            <Link to={`/games`} style={{color: "white"}}>Games</Link>
-                        </Button>
-                        <Button sx={{ my: 2, color: 'white', display: 'block' }}>
-                            <Link to={`/new-game`} style={{color: "white"}}>Add New Game</Link>
-                        </Button>
+                    <Box sx={{flexGrow: 1, display:{ xs: "none", md: "flex" }}}>
+                        {navLinks.map(navLink => (
+                            <Button
+                                sx={{my: 2, color: "white", display: "block", textDecoration: "underline"}}
+                                component={Link}
+                                to={navLink.link}
+                            >
+                                {navLink.text}
+                            </Button>
+                        ))}
                     </Box>
                 </Toolbar>
             </Container>

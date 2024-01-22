@@ -1,6 +1,9 @@
 import { ReactElement } from "react";
 import { Form } from "react-router-dom";
-import { Box } from "@mui/material";
+import { Box, Button, TextField } from "@mui/material";
+import PublishIcon from '@mui/icons-material/Publish';
+
+import "../styles.css";
 
 interface CreateActionProps {
     request: Request;
@@ -53,45 +56,64 @@ export async function createGame({request}: CreateActionProps): Promise<null> {
 }
 
 export default function View(): ReactElement {
-    // TODO: Should have a repeater for each deck instance
-    // TODO: Subcomponent for deck input?
-    // TODO: Styling
-    // TODO: Textarea for description
+    // TODO: Required fields & validation?
     return (
-        <Box id="newGameForm" sx={{display: "flex"}}>
-            <h1>Add New Game Record</h1>
+        <Box id="newGameForm" sx={{display: "flex", flexDirection: "column", alignItems: "center"}}>
+            <h1>Add New Game</h1>
             <Form method="post">
-                <input
-                    type="text"
-                    name="description"
-                    placeholder="Add a game description!"
+                <TextField
+                    multiline
+                    label={"Game Description"}
+                    placeholder={"Add a game description!"}
+                    name={"description"}
+                    sx={{width: "50%"}}
                 />
-                <Box>
-                    <h2>Deck One</h2>
-                    <span>ID: <input type="number" name="deckOneId" /></span>
-                    <span>Place: <input type="number" name="deckOnePlace" min="1" max="4" /></span>
-                    <span>Kills: <input type="number" name="deckOneKills" max="4" /></span>
-                </Box>
-                <Box>
-                    <h2>Deck Two</h2>
-                    <span>ID: <input type="number" name="deckTwoId" /></span>
-                    <span>Place: <input type="number" name="deckTwoPlace" min="1" max="4" /></span>
-                    <span>Kills: <input type="number" name="deckTwoKills" max="4" /></span>
-                </Box>
-                <Box>
-                    <h2>Deck Three</h2>
-                    <span>ID: <input type="number" name="deckThreeId" /></span>
-                    <span>Place: <input type="number" name="deckThreePlace" min="1" max="4" /></span>
-                    <span>Kills: <input type="number" name="deckThreeKills" max="4" /></span>
-                </Box>
-                <Box>
-                    <h2>Deck Four</h2>
-                    <span>ID: <input type="number" name="deckFourId" /></span>
-                    <span>Place: <input type="number" name="deckFourPlace" min="1" max="4" /></span>
-                    <span>Kills: <input type="number" name="deckFourKills" max="4" /></span>
-                </Box>
-                <button type="submit">New</button>
+                <DeckInputs keyName={"One"} />
+                <DeckInputs keyName={"Two"} />
+                <DeckInputs keyName={"Three"} />
+                <DeckInputs keyName={"Four"} />
+                <Button
+                    variant={"contained"}
+                    type={"submit"}
+                    size={"large"}
+                    startIcon={<PublishIcon />}
+                    sx={{marginTop: 2}}
+                >
+                    Submit
+                </Button>
             </Form>
+        </Box>
+    );
+}
+
+interface DeckInputProps {
+    keyName: string;
+}
+
+function DeckInputs({keyName}: DeckInputProps): ReactElement {
+    return (
+        <Box sx={{display: "flex", flexDirection: "column", alignItems: "center", width: "100%"}}>
+            <h2>Deck {keyName}</h2>
+            <Box sx={{display: "flex", flexDirection: "row", justifyContent: "space-evenly", width: "100%"}}>
+                <TextField
+                    required
+                    name={`deck${keyName}Id`}
+                    type={"number"}
+                    helperText={"Deck ID"}
+                />
+                <TextField
+                    required
+                    name={`deck${keyName}Place`}
+                    type={"number"}
+                    helperText={"Finishing Place"}
+                />
+                <TextField
+                    required
+                    name={`deck${keyName}Kills`}
+                    type={"number"}
+                    helperText={"Kill Points"}
+                />
+            </Box>
         </Box>
     );
 }
