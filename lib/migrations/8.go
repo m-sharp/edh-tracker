@@ -69,6 +69,14 @@ var (
 		`INSERT INTO game (description, ctime) VALUES ('Game 41', '2023-12-30');`,
 		`INSERT INTO game (description, ctime) VALUES ('Game 42', '2023-12-30');`,
 		`INSERT INTO game (description, ctime) VALUES ('Game 43', '2023-12-30');`,
+		`INSERT INTO game (description, ctime) VALUES ('Game 44', '2024-1-3');`,
+		`INSERT INTO game (description, ctime) VALUES ('Game 45', '2024-1-3');`,
+		`INSERT INTO game (description, ctime) VALUES ('Game 46', '2024-1-3');`,
+		`INSERT INTO game (description, ctime) VALUES ('Game 47', '2024-1-24');`,
+		`INSERT INTO game (description, ctime) VALUES ('Game 48', '2024-1-24');`,
+		`INSERT INTO game (description, ctime) VALUES ('Game 49', '2024-1-24');`,
+		`INSERT INTO game (description, ctime) VALUES ('Game 50', '2024-2-15');`,
+		`INSERT INTO game (description, ctime) VALUES ('Game 51', '2024-2-15');`,
 	}
 
 	gameResultSeeds = map[string][]resultInfo{
@@ -1182,6 +1190,214 @@ var (
 				Commander: "Sauron, the Dark Lord",
 				Place:     1,
 				Kills:     2,
+			},
+		},
+		"Game 44": {
+			{
+				Player:    "Tom",
+				Commander: "The Master, Multiplied",
+				Place:     3,
+				Kills:     1,
+			},
+			{
+				Player:    "Mike",
+				Commander: "Grismold, the Dreadsower",
+				Place:     2,
+				Kills:     1,
+			},
+			{
+				Player:    "Dillon",
+				Commander: "Satoru Umezawa",
+				Place:     1,
+				Kills:     1,
+			},
+			{
+				Player:    "Peter",
+				Commander: "Atraxa, Grand Unifier",
+				Place:     4,
+				Kills:     0,
+			},
+		},
+		"Game 45": {
+			{
+				Player:    "Tom",
+				Commander: "Azusa, Lost but Seeking",
+				Place:     2,
+				Kills:     0,
+			},
+			{
+				Player:    "Mike",
+				Commander: "Thantis, the Warweaver",
+				Place:     2,
+				Kills:     0,
+			},
+			{
+				Player:    "Dillon",
+				Commander: "Oona, Queen of the Fae",
+				Place:     2,
+				Kills:     0,
+			},
+			{
+				Player:    "Peter",
+				Commander: "Kinnan, Bonder Prodigy",
+				Place:     1,
+				Kills:     3,
+			},
+		},
+		"Game 46": {
+			{
+				Player:    "Tom",
+				Commander: "Missy",
+				Place:     2,
+				Kills:     0,
+			},
+			{
+				Player:    "Mike",
+				Commander: "Aragorn, King of Gondor",
+				Place:     2,
+				Kills:     0,
+			},
+			{
+				Player:    "Dillon",
+				Commander: "Magar of the Magic Strings",
+				Place:     1,
+				Kills:     3,
+			},
+			{
+				Player:    "Peter",
+				Commander: "Eriette of the Charmed Apple",
+				Place:     2,
+				Kills:     0,
+			},
+		},
+		"Game 47": {
+			{
+				Player:    "Tom",
+				Commander: "Missy",
+				Place:     4,
+				Kills:     0,
+			},
+			{
+				Player:    "Mike",
+				Commander: "Grismold, the Dreadsower",
+				Place:     1,
+				Kills:     1,
+			},
+			{
+				Player:    "Dillon",
+				Commander: "Oona, Queen of the Fae",
+				Place:     2,
+				Kills:     1,
+			},
+			{
+				Player:    "Peter",
+				Commander: "Umbris, Fear Manifest",
+				Place:     3,
+				Kills:     1,
+			},
+		},
+		"Game 48": {
+			{
+				Player:    "Tom",
+				Commander: "Feather, the Redeemed",
+				Place:     2,
+				Kills:     0,
+			},
+			{
+				Player:    "Mike",
+				Commander: "Raffine, Scheming Seer",
+				Place:     3,
+				Kills:     0,
+			},
+			{
+				Player:    "Dillon",
+				Commander: "Magar of the Magic Strings",
+				Place:     3,
+				Kills:     0,
+			},
+			{
+				Player:    "Peter",
+				Commander: "Kinnan, Bonder Prodigy",
+				Place:     1,
+				Kills:     3,
+			},
+		},
+		"Game 49": {
+			{
+				Player:    "Tom",
+				Commander: "The Master, Multiplied",
+				Place:     1,
+				Kills:     3,
+			},
+			{
+				Player:    "Mike",
+				Commander: "Giada, Font of Hope",
+				Place:     2,
+				Kills:     0,
+			},
+			{
+				Player:    "Dillon",
+				Commander: "Satoru Umezawa",
+				Place:     2,
+				Kills:     0,
+			},
+			{
+				Player:    "Peter",
+				Commander: "Eriette of the Charmed Apple",
+				Place:     2,
+				Kills:     0,
+			},
+		},
+		"Game 50": {
+			{
+				Player:    "Tom",
+				Commander: "Kibo, Uktabi Prince",
+				Place:     3,
+				Kills:     0,
+			},
+			{
+				Player:    "Mike",
+				Commander: "Aragorn, King of Gondor",
+				Place:     1,
+				Kills:     2,
+			},
+			{
+				Player:    "Dillon",
+				Commander: "Sythis, Harvest's Hand",
+				Place:     2,
+				Kills:     1,
+			},
+			{
+				Player:    "Peter",
+				Commander: "The Scorpion God",
+				Place:     4,
+				Kills:     0,
+			},
+		},
+		"Game 51": {
+			{
+				Player:    "Tom",
+				Commander: "Kibo, Uktabi Prince",
+				Place:     2,
+				Kills:     0,
+			},
+			{
+				Player:    "Mike",
+				Commander: "Grismold, the Dreadsower",
+				Place:     2,
+				Kills:     0,
+			},
+			{
+				Player:    "Dillon",
+				Commander: "Tergrid, God of Fright",
+				Place:     2,
+				Kills:     0,
+			},
+			{
+				Player:    "Peter",
+				Commander: "Jaheira, Friend of the Forest",
+				Place:     1,
+				Kills:     3,
 			},
 		},
 	}
