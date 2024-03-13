@@ -2,14 +2,8 @@ import { ReactElement } from "react";
 import { Link, useLoaderData } from "react-router-dom";
 import { Box } from "@mui/material";
 import { DataGrid, GridColDef, GridToolbar } from "@mui/x-data-grid";
-import { LoaderFunctionArgs } from "@remix-run/router/utils";
 
-import { Game } from "../matches";
-
-export async function getGame({ params }: LoaderFunctionArgs): Promise<Game> {
-    const res = await fetch(`http://localhost:8080/api/game?game_id=${params.gameId}`);
-    return res.json();
-}
+import { Game } from "../types";
 
 export default function View(): ReactElement {
     const game = useLoaderData() as Game;

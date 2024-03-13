@@ -43,9 +43,6 @@ type GameResult struct {
 }
 
 func (g *GameResult) Validate() error {
-	if g.GameId == 0 {
-		return fmt.Errorf(gameResultValidationErr, "missing GameId")
-	}
 	if g.DeckId == 0 {
 		return fmt.Errorf(gameResultValidationErr, "missing DeckId")
 	}
