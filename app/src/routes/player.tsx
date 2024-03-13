@@ -1,7 +1,6 @@
 import { ReactElement } from "react";
 import { useLoaderData } from "react-router-dom";
-import { Box } from "@mui/material";
-import Skeleton from "@mui/material/Skeleton";
+import { Box, Skeleton } from "@mui/material";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import { LoaderFunctionArgs } from "@remix-run/router/utils";
 

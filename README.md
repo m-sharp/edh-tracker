@@ -13,8 +13,8 @@ Magic the Gathering EDH Tracking for a pod of players using Go, MySQL, & React.
 - Pull down npm dependencies with `cd app && npm install`
 - Build Docker images:
   - `docker build --build-arg PASS=REDACTED -t edh-tracker-db ./mysql/`
-  - `docker build -t registry.digitalocean.com/harp-do-registry/edh-tracker .`
-  - `docker build -f app/Dockerfile -t registry.digitalocean.com/harp-do-registry/edh-tracker-app .`
+  - `docker build -t edh-tracker .`
+  - `docker build -f app/Dockerfile -t edh-tracker-app .`
 - Run docker images:
   - Run DB: `docker run --detach --name=edh-tracker-db --publish 3306:3306 edh-tracker-db`
   - Run API server:
@@ -24,9 +24,9 @@ Magic the Gathering EDH Tracking for a pod of players using Go, MySQL, & React.
       --env DBUSER=root \ 
       --env DBPASSWORD=REDACTED \
       --env DBPORT=3306 \
-      --env DEV=1 registry.digitalocean.com/harp-do-registry/edh-tracker
+      --env DEV=1 edh-tracker
     ```
-  - Run React web app: `docker run -p 8081:8081 -it registry.digitalocean.com/harp-do-registry/edh-tracker-app:latest`
+  - Run React web app: `docker run -p 8081:8081 -it edh-tracker-app:latest`
 
 ## Required Environment Variables
 
@@ -40,4 +40,4 @@ Magic the Gathering EDH Tracking for a pod of players using Go, MySQL, & React.
 
 - Material Components from [https://mui.com/](https://mui.com/)
 - React SPA Routing from [https://reactrouter.com/](https://reactrouter.com/)
-- Fonts and Icons from [https://fonts.google.com/](https://fonts.google.com/)
+- Fonts from [https://fonts.google.com/](https://fonts.google.com/)

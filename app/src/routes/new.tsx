@@ -3,8 +3,6 @@ import { Form } from "react-router-dom";
 import { Box, Button, TextField } from "@mui/material";
 import PublishIcon from '@mui/icons-material/Publish';
 
-import "../styles.css";
-
 interface CreateActionProps {
     request: Request;
 }

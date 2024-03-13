@@ -9,8 +9,6 @@ import { AsyncComponentHelper } from "../common";
 import { Game, MatchesDisplay } from "../matches";
 import { Record, RecordDict } from "../stats";
 
-import "../styles.css";
-
 export interface Deck {
     id: number;
     player_id: number;
@@ -24,6 +22,7 @@ export interface Deck {
     points: number;
 }
 
+// ToDo: These endpoints either need to be relative or configurable somehow
 export async function getDeck({ params }: LoaderFunctionArgs): Promise<Deck> {
     const res = await fetch(`http://localhost:8080/api/deck?deck_id=${params.deckId}`);
     return res.json();
@@ -38,7 +37,7 @@ export default function View(): ReactElement {
                 <h1>{deck.commander}</h1>
                 <Record record={deck.record} />
                 <span className={"info-column-item"}>Owner - <Link to={`/player/${deck.player_id}`}>{deck.player_name}</Link></span>
-                {!deck.retired &&
+                {deck.retired &&
                     <Box sx={{display: "flex"}}><DeleteIcon /><span> Retired</span></Box>
                 }
             </Box>
