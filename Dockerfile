@@ -16,6 +16,7 @@ COPY go.sum .
 COPY api.go .
 COPY main.go .
 COPY lib/ lib/
+COPY data/ data/
 
 RUN go build -o build/ .
 CMD ["build/edh-tracker"]

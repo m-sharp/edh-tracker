@@ -7,29 +7,27 @@ import (
 )
 
 const (
-	createDeckTable = `CREATE TABLE deck(
+	createGameTable = `CREATE TABLE game(
 		id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-		player_id INT,
-		commander VARCHAR(256),
-		retired BOOL DEFAULT FALSE,
-		ctime DATETIME DEFAULT NOW(),
-		FOREIGN KEY (player_id) REFERENCES player(id) ON DELETE CASCADE
+		description VARCHAR(256),
+		ctime DATETIME DEFAULT NOW()
 	);`
-	destroyDeckTable = `DROP TABLE deck;`
+	destroyGameTable = `DROP TABLE game;`
 )
 
+// ToDo: Move this up in order
 type Migration4 struct{}
 
 func (m *Migration4) Upgrade(ctx context.Context, client *lib.DBClient) error {
-	if _, err := client.Db.ExecContext(ctx, createDeckTable); err != nil {
-		return lib.NewDBError(createDeckTable, err)
+	if _, err := client.Db.ExecContext(ctx, createGameTable); err != nil {
+		return lib.NewDBError(createGameTable, err)
 	}
 	return nil
 }
 
 func (m *Migration4) Downgrade(ctx context.Context, client *lib.DBClient) error {
-	if _, err := client.Db.ExecContext(ctx, destroyDeckTable); err != nil {
-		return lib.NewDBError(destroyDeckTable, err)
+	if _, err := client.Db.ExecContext(ctx, destroyGameTable); err != nil {
+		return lib.NewDBError(destroyGameTable, err)
 	}
 	return nil
 }
