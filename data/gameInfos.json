@@ -2662,7 +2662,7 @@
     ]
   },
   {
-    "date": "2024-01-15T00:00:00Z",
+    "date": "2025-01-15T00:00:00Z",
     "results": [
       {
         "player": "Tom",
@@ -2691,7 +2691,7 @@
     ]
   },
   {
-    "date": "2024-01-15T00:00:00Z",
+    "date": "2025-01-15T00:00:00Z",
     "results": [
       {
         "player": "Tom",
@@ -2720,7 +2720,7 @@
     ]
   },
   {
-    "date": "2024-01-24T00:00:00Z",
+    "date": "2025-01-24T00:00:00Z",
     "results": [
       {
         "player": "Tom",
@@ -2749,7 +2749,7 @@
     ]
   },
   {
-    "date": "2024-01-24T00:00:00Z",
+    "date": "2025-01-24T00:00:00Z",
     "results": [
       {
         "player": "Tom",
@@ -2778,7 +2778,7 @@
     ]
   },
   {
-    "date": "2024-01-29T00:00:00Z",
+    "date": "2025-01-29T00:00:00Z",
     "results": [
       {
         "player": "Tom",
@@ -2807,7 +2807,7 @@
     ]
   },
   {
-    "date": "2024-01-29T00:00:00Z",
+    "date": "2025-01-29T00:00:00Z",
     "results": [
       {
         "player": "Tom",
@@ -2831,6 +2831,93 @@
         "player": "Peter",
         "commander": "Ulalek, Fused Atrocity",
         "place": 2,
+        "kills": 0
+      }
+    ]
+  },
+  {
+    "date": "2025-01-29T00:00:00Z",
+    "results": [
+      {
+        "player": "Tom",
+        "commander": "Rendmaw, Creaking Nest",
+        "place": 3,
+        "kills": 0
+      },
+      {
+        "player": "Mike",
+        "commander": "Be'lakor, the Dark Master",
+        "place": 1,
+        "kills": 3
+      },
+      {
+        "player": "Michaela",
+        "commander": "Camellia, the Seedmiser",
+        "place": 2,
+        "kills": 0
+      },
+      {
+        "player": "Peter",
+        "commander": "Aminatou, Veil Piercer",
+        "place": 4,
+        "kills": 0
+      }
+    ]
+  },
+  {
+    "date": "2025-01-29T00:00:00Z",
+    "results": [
+      {
+        "player": "Tom",
+        "commander": "Gornog, the Red Reaper",
+        "place": 2,
+        "kills": 2
+      },
+      {
+        "player": "Mike",
+        "commander": "Rose Tyler",
+        "place": 4,
+        "kills": 0
+      },
+      {
+        "player": "Michaela",
+        "commander": "Glarb, Calamity's Augur",
+        "place": 1,
+        "kills": 0
+      },
+      {
+        "player": "Peter",
+        "commander": "Atraxa, Grand Unifier",
+        "place": 2,
+        "kills": 1
+      }
+    ]
+  },
+  {
+    "date": "2025-01-29T00:00:00Z",
+    "results": [
+      {
+        "player": "Tom",
+        "commander": "Rendmaw, Creaking Nest",
+        "place": 2,
+        "kills": 0
+      },
+      {
+        "player": "Mike",
+        "commander": "Miirym, Sentinel Wyrm",
+        "place": 4,
+        "kills": 0
+      },
+      {
+        "player": "Michaela",
+        "commander": "Glarb, Calamity's Augur",
+        "place": 1,
+        "kills": 3
+      },
+      {
+        "player": "Peter",
+        "commander": "Atraxa, Grand Unifier",
+        "place": 3,
         "kills": 0
       }
     ]
