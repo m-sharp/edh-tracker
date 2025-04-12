@@ -42,6 +42,11 @@ export interface GameResult {
     points: number;
 }
 
+export interface NewGameData {
+    players: Array<Player>;
+    decks: Array<Deck>;
+}
+
 export interface NewGame {
     description: string;
     results: Array<NewGameResult>;
@@ -49,6 +54,7 @@ export interface NewGame {
 
 export interface NewGameResult {
     deck_id: number;
+    player_id: number;
     place: number;
     kill_count: number;
 }

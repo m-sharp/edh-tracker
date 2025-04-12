@@ -6,6 +6,7 @@ import { CssBaseline } from "@mui/material";
 import {
     GetDeck, GetDecks,
     GetGame, GetGames,
+    GetNewDeckInfo,
     GetPlayer, GetPlayers,
 } from "./http";
 import ErrorPage from "./routes/error"
@@ -59,7 +60,7 @@ const router = createBrowserRouter([
             {
                 path: "new-game",
                 element: <NewGameView />,
-                loader: GetDecks,
+                loader: GetNewDeckInfo,
                 action: createGame,
             }
         ],

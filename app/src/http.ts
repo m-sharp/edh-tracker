@@ -1,6 +1,6 @@
 import { LoaderFunctionArgs } from "@remix-run/router/utils";
 
-import { Deck, Game, NewGame, Player } from "./types";
+import { Deck, Game, NewGame, NewGameData, Player } from "./types";
 
 // ToDo: These endpoints either need to be relative or configurable somehow
 // Player Methods
@@ -54,4 +54,15 @@ export async function PostGame(newGame: NewGame): Promise<Response> {
         },
         body: JSON.stringify(newGame),
     });
+}
+
+// Loaders
+export async function GetNewDeckInfo(): Promise<NewGameData> {
+    const decks = await GetDecks();
+    const players = await GetPlayers();
+
+    return {
+        decks,
+        players,
+    }
 }
