@@ -24,6 +24,10 @@ const (
 	insertDeck = `INSERT INTO deck (player_id, commander) VALUES (?, ?);`
 
 	insertGameResult = `INSERT INTO game_result (game_id, deck_id, place, kill_count) VALUES (?, ?, ?, ?);`
+
+	getRoleByName     = `SELECT id FROM user_role WHERE name = ?;`
+	getUserByPlayerID = `SELECT id FROM user WHERE player_id = ?;`
+	insertUser        = `INSERT INTO user (player_id, role_id) VALUES (?, ?);`
 )
 
 type Seeder struct {
@@ -70,6 +74,11 @@ func (s *Seeder) Run(ctx context.Context) error {
 			playerID, err := s.getOrInsertPlayer(ctx, result.Player)
 			if err != nil {
 				logger.Error("Error getting or inserting player", zap.Error(err))
+				return err
+			}
+
+			if err = s.getOrInsertUser(ctx, playerID); err != nil {
+				logger.Error("Error getting or inserting user", zap.Error(err))
 				return err
 			}
 
@@ -165,6 +174,24 @@ func (s *Seeder) insertDeck(ctx context.Context, playerID int64, commander strin
 func (s *Seeder) insertGameResult(ctx context.Context, gameID, deckID int64, place, kills int) error {
 	if _, err := s.client.Db.ExecContext(ctx, insertGameResult, gameID, deckID, place, kills); err != nil {
 		return fmt.Errorf("failed to insert game result record: %w", err)
+	}
+
+	return nil
+}
+
+func (s *Seeder) getOrInsertUser(ctx context.Context, playerID int64) error {
+	var roleID int64
+	if err := s.client.Db.QueryRowContext(ctx, getRoleByName, "player").Scan(&roleID); err != nil {
+		return fmt.Errorf("failed to get player role ID: %w", err)
+	}
+
+	var id int64
+	if err := s.client.Db.QueryRowContext(ctx, getUserByPlayerID, playerID).Scan(&id); errors.Is(err, sql.ErrNoRows) {
+		if _, err := s.client.Db.ExecContext(ctx, insertUser, playerID, roleID); err != nil {
+			return fmt.Errorf("failed to insert user record: %w", err)
+		}
+	} else if err != nil {
+		return fmt.Errorf("failed to get user for player_id %d: %w", playerID, err)
 	}
 
 	return nil

@@ -16,12 +16,12 @@ import (
 const (
 	increment = `INSERT INTO migration (success, ctime) VALUES (1, ?);`
 	getMaxID  = `SELECT MAX(id) FROM migration;`
-	decrement = `DELETE FROM migration WHERE ID=?;`
+	decrement = `DELETE FROM migration WHERE id=?;`
 
 	countMigrations = `SELECT COUNT(*) FROM migration;`
 	checkForTable   = `SELECT COUNT(*)
 		FROM information_schema.tables
-		WHERE table_schema = 'edh'
+		WHERE table_schema = ?
 		  AND table_name = 'migration'
 		LIMIT 1;`
 )
@@ -59,7 +59,7 @@ func RunAll(ctx context.Context, client *lib.DBClient, log *zap.Logger) error {
 		}
 
 		log.Debug("Running migration", zap.Int("Migration Number", i))
-		if err := migration.Upgrade(ctx, client); err != nil {
+		if err = migration.Upgrade(ctx, client); err != nil {
 			log.Error("Error running migration", zap.Int("Migration Number", i), zap.Error(err))
 			if innerErr := rollback(ctx, client, log, ran...); innerErr != nil {
 				log.Error("Failed to rollback migrations", zap.Int("Migration Number", i), zap.Error(err))
@@ -98,14 +98,14 @@ func rollback(ctx context.Context, client *lib.DBClient, log *zap.Logger, toRoll
 
 func GetCurrentMigrationCount(ctx context.Context, client *lib.DBClient) (int, error) {
 	var tableCheck int
-	if err := client.Db.QueryRowContext(ctx, checkForTable).Scan(&tableCheck); err != nil {
+	if err := client.Db.QueryRowContext(ctx, checkForTable, lib.DBName).Scan(&tableCheck); err != nil {
 		return 0, fmt.Errorf("error checking for migration table: %w", err)
 	} else if tableCheck == 0 {
 		return 0, nil
 	}
 
 	var result int
-	if err := client.Db.QueryRowContext(ctx, countMigrations).Scan(&result); err == sql.ErrNoRows {
+	if err := client.Db.QueryRowContext(ctx, countMigrations).Scan(&result); errors.Is(err, sql.ErrNoRows) {
 		return 0, nil
 	} else if err != nil {
 		return 0, fmt.Errorf("error getting current migration count: %w", err)
@@ -144,6 +144,7 @@ func getAllMigrations(log *zap.Logger, client *lib.DBClient) map[int]Migration {
 		4: &Migration4{},
 		5: &Migration5{},
 		6: &Migration6{},
+		7: &Migration7{},
 	}
 
 	// Always run last
