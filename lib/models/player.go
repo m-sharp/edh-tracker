@@ -26,9 +26,10 @@ type Player struct {
 	Name string `json:"name" db:"name"`
 }
 
-type PlayerWithStats struct {
+type PlayerInfo struct {
 	Player
 	Stats
+	PodIDs []int `json:"pod_ids"`
 }
 
 func (p *Player) Validate() error {
@@ -49,7 +50,10 @@ func NewPlayerProvider(client *lib.DBClient) *PlayerProvider {
 	}
 }
 
-func (p *PlayerProvider) GetAll(ctx context.Context) ([]PlayerWithStats, error) {
+func (p *PlayerProvider) GetAll(ctx context.Context) ([]PlayerInfo, error) {
+	// TODO: Will need to be locked down eventually as well. A single player requesting a list of other players in their pod should not:
+	//		a.) be able to see what pods the other players are in
+	//		b.) be able to ask about players in a pod they don't belong to
 	var players []Player
 	if err := p.client.Db.SelectContext(ctx, &players, GetAllPlayers); err != nil {
 		return nil, fmt.Errorf("failed to get Player records: %w", err)
@@ -57,23 +61,31 @@ func (p *PlayerProvider) GetAll(ctx context.Context) ([]PlayerWithStats, error) 
 
 	// Return an empty list instead of nil
 	if players == nil {
-		return []PlayerWithStats{}, nil
+		return []PlayerInfo{}, nil
 	}
 
-	var withStats []PlayerWithStats
+	var withStats []PlayerInfo
 	for _, player := range players {
 		var gameStats GameStats
 		if err := p.client.Db.SelectContext(ctx, &gameStats, GetPlayerStats, player.ID); err != nil {
 			return nil, fmt.Errorf("failed to get Player statistics: %w", err)
 		}
 
-		withStats = append(withStats, PlayerWithStats{Player: player, Stats: gameStats.ToStats()})
+		var podIDs []int
+		if err := p.client.Db.SelectContext(ctx, &podIDs, GetPodIDsByPlayerID, player.ID); err != nil {
+			return nil, fmt.Errorf("failed to get Pod IDs for player %d: %w", player.ID, err)
+		}
+		if podIDs == nil {
+			podIDs = []int{}
+		}
+
+		withStats = append(withStats, PlayerInfo{Player: player, Stats: gameStats.ToStats(), PodIDs: podIDs})
 	}
 
 	return withStats, nil
 }
 
-func (p *PlayerProvider) GetById(ctx context.Context, playerId int) (*PlayerWithStats, error) {
+func (p *PlayerProvider) GetById(ctx context.Context, playerId int) (*PlayerInfo, error) {
 	var players []Player
 	if err := p.client.Db.SelectContext(ctx, &players, GetPlayerByID, playerId); err != nil {
 		return nil, fmt.Errorf("failed to get Player record for id %d: %w", playerId, err)
@@ -91,9 +103,18 @@ func (p *PlayerProvider) GetById(ctx context.Context, playerId int) (*PlayerWith
 		return nil, fmt.Errorf("failed to get Player statistics: %w", err)
 	}
 
-	return &PlayerWithStats{
+	var podIDs []int
+	if err := p.client.Db.SelectContext(ctx, &podIDs, GetPodIDsByPlayerID, playerId); err != nil {
+		return nil, fmt.Errorf("failed to get Pod IDs for player %d: %w", playerId, err)
+	}
+	if podIDs == nil {
+		podIDs = []int{}
+	}
+
+	return &PlayerInfo{
 		Player: players[0],
 		Stats:  gameStats.ToStats(),
+		PodIDs: podIDs,
 	}, nil
 }
 

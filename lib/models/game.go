@@ -10,13 +10,14 @@ import (
 )
 
 const (
-	GetAllGames      = `SELECT id, description, created_at, updated_at, deleted_at FROM game WHERE deleted_at IS NULL;`
-	GetGameByID      = `SELECT id, description, created_at, updated_at, deleted_at FROM game WHERE id = ? AND deleted_at IS NULL;`
-	GetGamesByDeckId = `SELECT game.id, game.description, game.created_at, game.updated_at, game.deleted_at
+	GetGameByID      = `SELECT id, description, pod_id, created_at, updated_at, deleted_at FROM game WHERE id = ? AND deleted_at IS NULL;`
+	GetGamesByDeckId = `SELECT game.id, game.description, game.pod_id, game.created_at, game.updated_at, game.deleted_at
 							FROM (game INNER JOIN game_result on game.id = game_result.game_id)
 						  WHERE game_result.deck_id = ?
 						    AND game.deleted_at IS NULL
 						    AND game_result.deleted_at IS NULL;`
+	GetGamesByPodId = `SELECT id, description, pod_id, created_at, updated_at, deleted_at FROM game WHERE pod_id = ? AND deleted_at IS NULL;`
+
 	GetGameResultsByGameID = `SELECT game_result.id, game_result.game_id, game_result.deck_id,
 								game_result.place, game_result.kill_count,
 								game_result.created_at, game_result.updated_at, game_result.deleted_at,
@@ -24,7 +25,7 @@ const (
 							  FROM (game_result INNER JOIN deck on game_result.deck_id = deck.id)
 							  WHERE game_id = ? AND game_result.deleted_at IS NULL;`
 
-	InsertGame       = `INSERT INTO game (description) VALUES (?);`
+	InsertGame       = `INSERT INTO game (description, pod_id) VALUES (?, ?);`
 	InsertGameResult = `INSERT INTO game_result (game_id, deck_id, place, kill_count) VALUES (?, ?, ?, ?);`
 
 	SoftDeleteGame       = `UPDATE game SET deleted_at = NOW() WHERE id = ?;`
@@ -36,6 +37,7 @@ const (
 type Game struct {
 	Model
 	Description string `json:"description" db:"description"`
+	PodID       int    `json:"pod_id"      db:"pod_id"`
 }
 
 type GameResult struct {
@@ -82,9 +84,9 @@ func NewGameProvider(log *zap.Logger, client *lib.DBClient) *GameProvider {
 	}
 }
 
-func (g *GameProvider) GetAll(ctx context.Context) ([]GameDetails, error) {
+func (g *GameProvider) GetAllByPod(ctx context.Context, podId int) ([]GameDetails, error) {
 	var games []Game
-	if err := g.client.Db.SelectContext(ctx, &games, GetAllGames); err != nil {
+	if err := g.client.Db.SelectContext(ctx, &games, GetGamesByPodId, podId); err != nil {
 		return nil, fmt.Errorf("failed to get Game records: %w", err)
 	}
 
@@ -173,8 +175,8 @@ func (g *GameProvider) getGameResults(ctx context.Context, gameId int) ([]GameRe
 	return results, nil
 }
 
-func (g *GameProvider) Add(ctx context.Context, description string, results ...GameResult) error {
-	r, err := g.client.Db.ExecContext(ctx, InsertGame, description)
+func (g *GameProvider) Add(ctx context.Context, description string, podID int, results ...GameResult) error {
+	r, err := g.client.Db.ExecContext(ctx, InsertGame, description, podID)
 	if err != nil {
 		return fmt.Errorf("failed to insert Game record: %w", err)
 	}

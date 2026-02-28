@@ -14,8 +14,10 @@ import (
 	"github.com/m-sharp/edh-tracker/lib"
 )
 
+// TODO: Seeder should rely on existing provider methods as much as possible rather than its own queries
+// TODO: instance of doing complicated get or inserts, the seeder could just do inserts the first time and then save target ids in memory
 const (
-	insertGame = `INSERT INTO game (description, created_at) VALUES (?, ?);`
+	insertGame = `INSERT INTO game (description, created_at, pod_id) VALUES (?, ?, ?);`
 
 	getPlayer    = `SELECT id FROM player WHERE name = ?;`
 	insertPlayer = `INSERT INTO player (name) VALUES (?);`
@@ -28,6 +30,11 @@ const (
 	getRoleByName     = `SELECT id FROM user_role WHERE name = ?;`
 	getUserByPlayerID = `SELECT id FROM user WHERE player_id = ?;`
 	insertUser        = `INSERT INTO user (player_id, role_id) VALUES (?, ?);`
+
+	getPod          = `SELECT id FROM pod WHERE name = ?;`
+	insertPod       = `INSERT INTO pod (name) VALUES (?);`
+	getPlayerPod    = `SELECT id FROM player_pod WHERE pod_id = ? AND player_id = ?;`
+	insertPlayerPod = `INSERT INTO player_pod (pod_id, player_id) VALUES (?, ?);`
 )
 
 type Seeder struct {
@@ -57,11 +64,17 @@ func (s *Seeder) Run(ctx context.Context) error {
 
 	s.log.Info("Seeding Games", zap.Int("Count", len(games)))
 
+	podID, err := s.getOrInsertPod(ctx, "OG EDH Pod")
+	if err != nil {
+		s.log.Error("Error getting or inserting default pod", zap.Error(err))
+		return err
+	}
+
 	for i, game := range games {
 		logger := s.log.With(zap.Any("Game", game))
 
 		// Make a game record
-		gameID, err := s.insertGame(ctx, i+1, game.Date)
+		gameID, err := s.insertGame(ctx, i+1, game.Date, podID)
 		if err != nil {
 			logger.Error("Error inserting game record", zap.Error(err))
 			return err
@@ -79,6 +92,11 @@ func (s *Seeder) Run(ctx context.Context) error {
 
 			if err = s.getOrInsertUser(ctx, playerID); err != nil {
 				logger.Error("Error getting or inserting user", zap.Error(err))
+				return err
+			}
+
+			if err = s.getOrInsertPlayerPod(ctx, podID, playerID); err != nil {
+				logger.Error("Error getting or inserting player pod membership", zap.Error(err))
 				return err
 			}
 
@@ -102,12 +120,13 @@ func (s *Seeder) Run(ctx context.Context) error {
 	return nil
 }
 
-func (s *Seeder) insertGame(ctx context.Context, count int, date time.Time) (int64, error) {
+func (s *Seeder) insertGame(ctx context.Context, count int, date time.Time, podID int64) (int64, error) {
 	result, err := s.client.Db.ExecContext(
 		ctx,
 		insertGame,
 		fmt.Sprintf("Game %v", count),
 		date,
+		podID,
 	)
 	if err != nil {
 		return -1, fmt.Errorf("failed to insert game record: %w", err)
@@ -119,6 +138,36 @@ func (s *Seeder) insertGame(ctx context.Context, count int, date time.Time) (int
 	}
 
 	return lastId, nil
+}
+
+func (s *Seeder) getOrInsertPod(ctx context.Context, name string) (int64, error) {
+	var id int64
+	if err := s.client.Db.QueryRowContext(ctx, getPod, name).Scan(&id); errors.Is(err, sql.ErrNoRows) {
+		result, err := s.client.Db.ExecContext(ctx, insertPod, name)
+		if err != nil {
+			return -1, fmt.Errorf("failed to insert pod record: %w", err)
+		}
+		lastId, err := result.LastInsertId()
+		if err != nil {
+			return -1, fmt.Errorf("failed to get last inserted ID for new pod record: %w", err)
+		}
+		return lastId, nil
+	} else if err != nil {
+		return -1, fmt.Errorf("failed to get pod ID: %w", err)
+	}
+	return id, nil
+}
+
+func (s *Seeder) getOrInsertPlayerPod(ctx context.Context, podID, playerID int64) error {
+	var id int64
+	if err := s.client.Db.QueryRowContext(ctx, getPlayerPod, podID, playerID).Scan(&id); errors.Is(err, sql.ErrNoRows) {
+		if _, err := s.client.Db.ExecContext(ctx, insertPlayerPod, podID, playerID); err != nil {
+			return fmt.Errorf("failed to insert player_pod record: %w", err)
+		}
+	} else if err != nil {
+		return fmt.Errorf("failed to get player_pod for pod_id %d player_id %d: %w", podID, playerID, err)
+	}
+	return nil
 }
 
 func (s *Seeder) getOrInsertPlayer(ctx context.Context, name string) (int64, error) {

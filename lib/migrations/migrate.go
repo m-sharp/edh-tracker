@@ -148,6 +148,8 @@ func getAllMigrations(log *zap.Logger, client *lib.DBClient) map[int]Migration {
 		5: &Migration5{},
 		6: &Migration6{},
 		7: &Migration7{},
+		8: &Migration8{},
+		9: &Migration9{},
 	}
 
 	// Always run last

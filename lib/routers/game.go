@@ -48,7 +48,14 @@ func (g *GameRouter) GetRoutes() []*lib.Route {
 func (g *GameRouter) GetAll(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	errMsg := "Failed to get Game records"
+
+	podId, _ := lib.GetQueryId(r, "pod_id")
 	deckId, _ := lib.GetQueryId(r, "deck_id")
+
+	if podId == 0 && deckId == 0 {
+		lib.WriteError(g.log, w, http.StatusBadRequest, fmt.Errorf("missing required query param"), "Missing pod_id or deck_id query param", "pod_id or deck_id query param is required")
+		return
+	}
 
 	var (
 		games []models.GameDetails
@@ -61,7 +68,7 @@ func (g *GameRouter) GetAll(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
-		games, err = g.provider.GetAll(ctx)
+		games, err = g.provider.GetAllByPod(ctx, podId)
 		if err != nil {
 			lib.WriteError(g.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
 			return
@@ -134,7 +141,7 @@ func (g *GameRouter) GameCreate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Info("Saving new Game record")
-	if err := g.provider.Add(ctx, gameDetails.Description, gameDetails.Results...); err != nil {
+	if err := g.provider.Add(ctx, gameDetails.Description, gameDetails.PodID, gameDetails.Results...); err != nil {
 		lib.WriteError(log, w, http.StatusInternalServerError, err, "Failed to add Game record", errMsg)
 	}
 

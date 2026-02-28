@@ -24,6 +24,7 @@ func NewApiRouter(cfg *lib.Config, log *zap.Logger, client *lib.DBClient) *ApiRo
 			routers.NewPlayerRouter(log, client),
 			routers.NewDeckRouter(log, client),
 			routers.NewGameRouter(log, client),
+			routers.NewPodRouter(log, client),
 		},
 	}
 
