@@ -29,6 +29,7 @@ const (
 type Migration interface {
 	Upgrade(ctx context.Context, client *lib.DBClient) error
 	Downgrade(ctx context.Context, client *lib.DBClient) error
+	RecordMigration() bool
 }
 
 func RunAll(ctx context.Context, client *lib.DBClient, log *zap.Logger) error {
@@ -68,9 +69,11 @@ func RunAll(ctx context.Context, client *lib.DBClient, log *zap.Logger) error {
 		}
 		ran = append(ran, migration)
 
-		if err := incrementMigrationTable(ctx, client); err != nil {
-			log.Error("Failed to increment migration table", zap.Int("Migration Number", i), zap.Error(err))
-			return err
+		if migration.RecordMigration() {
+			if err := incrementMigrationTable(ctx, client); err != nil {
+				log.Error("Failed to increment migration table", zap.Int("Migration Number", i), zap.Error(err))
+				return err
+			}
 		}
 	}
 

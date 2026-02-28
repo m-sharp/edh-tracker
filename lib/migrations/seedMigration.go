@@ -29,3 +29,5 @@ func (s SeedMigration) Downgrade(ctx context.Context, client *lib.DBClient) erro
 	// There's no going back now...
 	return nil
 }
+
+func (s SeedMigration) RecordMigration() bool { return false }
