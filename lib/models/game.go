@@ -3,7 +3,6 @@ package models
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"go.uber.org/zap"
 
@@ -11,29 +10,36 @@ import (
 )
 
 const (
-	GetAllGames      = `SELECT id, description, ctime FROM game;`
-	GetGameByID      = `SELECT id, description, ctime FROM game WHERE id = ?;`
-	GetGamesByDeckId = `SELECT game.id, game.description, game.ctime
-								FROM (game INNER JOIN game_result on game.id = game_result.game_id)
-							  WHERE game_result.deck_id = ?;`
-	GetGameResultsByGameID = `SELECT game_result.id, game_result.game_id, game_result.deck_id, game_result.place, game_result.kill_count, deck.commander
-								FROM (game_result INNER JOIN deck on game_result.deck_id = deck.id)
-							  WHERE game_id = ?;`
+	GetAllGames      = `SELECT id, description, created_at, updated_at, deleted_at FROM game WHERE deleted_at IS NULL;`
+	GetGameByID      = `SELECT id, description, created_at, updated_at, deleted_at FROM game WHERE id = ? AND deleted_at IS NULL;`
+	GetGamesByDeckId = `SELECT game.id, game.description, game.created_at, game.updated_at, game.deleted_at
+							FROM (game INNER JOIN game_result on game.id = game_result.game_id)
+						  WHERE game_result.deck_id = ?
+						    AND game.deleted_at IS NULL
+						    AND game_result.deleted_at IS NULL;`
+	GetGameResultsByGameID = `SELECT game_result.id, game_result.game_id, game_result.deck_id,
+								game_result.place, game_result.kill_count,
+								game_result.created_at, game_result.updated_at, game_result.deleted_at,
+								deck.commander
+							  FROM (game_result INNER JOIN deck on game_result.deck_id = deck.id)
+							  WHERE game_id = ? AND game_result.deleted_at IS NULL;`
 
 	InsertGame       = `INSERT INTO game (description) VALUES (?);`
 	InsertGameResult = `INSERT INTO game_result (game_id, deck_id, place, kill_count) VALUES (?, ?, ?, ?);`
+
+	SoftDeleteGame       = `UPDATE game SET deleted_at = NOW() WHERE id = ?;`
+	SoftDeleteGameResult = `UPDATE game_result SET deleted_at = NOW() WHERE id = ?;`
 
 	gameResultValidationErr = "invalid Game Result: %s"
 )
 
 type Game struct {
-	Id          int       `json:"id" db:"id"`
-	Description string    `json:"description" db:"description"`
-	CreatedAt   time.Time `json:"ctime" db:"ctime"`
+	Model
+	Description string `json:"description" db:"description"`
 }
 
 type GameResult struct {
-	Id        int    `json:"id" db:"id"`
+	Model
 	GameId    int    `json:"game_id" db:"game_id"`
 	DeckId    int    `json:"deck_id" db:"deck_id"`
 	Commander string `json:"commander" db:"commander"`
@@ -88,7 +94,7 @@ func (g *GameProvider) GetAll(ctx context.Context) ([]GameDetails, error) {
 
 	var details []GameDetails
 	for _, game := range games {
-		results, err := g.getGameResults(ctx, game.Id)
+		results, err := g.getGameResults(ctx, game.ID)
 		if err != nil {
 			g.log.Warn("Failed to get game results for game, dropping from results", zap.Any("Game", game))
 			continue
@@ -112,7 +118,7 @@ func (g *GameProvider) GetAllByDeck(ctx context.Context, deckId int) ([]GameDeta
 
 	var details []GameDetails
 	for _, game := range games {
-		results, err := g.getGameResults(ctx, game.Id)
+		results, err := g.getGameResults(ctx, game.ID)
 		if err != nil {
 			g.log.Warn("Failed to get game results for game, dropping from results", zap.Any("Game", game))
 			continue
@@ -138,7 +144,7 @@ func (g *GameProvider) GetGameById(ctx context.Context, gameId int) (*GameDetail
 	}
 
 	game := games[0]
-	results, err := g.getGameResults(ctx, game.Id)
+	results, err := g.getGameResults(ctx, game.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -199,6 +205,41 @@ func (g *GameProvider) Add(ctx context.Context, description string, results ...G
 		if numAffected != 1 {
 			return fmt.Errorf("unexpected number of rows affected by Game Result insert: got %d, expected 1", numAffected)
 		}
+	}
+
+	return nil
+}
+
+// TODO: Soft deleting a game should also delete all associated GameResult records
+func (g *GameProvider) SoftDelete(ctx context.Context, id int) error {
+	result, err := g.client.Db.ExecContext(ctx, SoftDeleteGame, id)
+	if err != nil {
+		return fmt.Errorf("failed to soft-delete Game record: %w", err)
+	}
+
+	numAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get number of rows affected by soft-delete: %w", err)
+	}
+	if numAffected != 1 {
+		return fmt.Errorf("unexpected number of rows affected by Game soft-delete: got %d, expected 1", numAffected)
+	}
+
+	return nil
+}
+
+func (g *GameProvider) SoftDeleteResult(ctx context.Context, id int) error {
+	result, err := g.client.Db.ExecContext(ctx, SoftDeleteGameResult, id)
+	if err != nil {
+		return fmt.Errorf("failed to soft-delete GameResult record: %w", err)
+	}
+
+	numAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get number of rows affected by soft-delete: %w", err)
+	}
+	if numAffected != 1 {
+		return fmt.Errorf("unexpected number of rows affected by GameResult soft-delete: got %d, expected 1", numAffected)
 	}
 
 	return nil

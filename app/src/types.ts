@@ -8,7 +8,8 @@ export interface Deck {
     player_name: string;
     commander: string;
     retired: boolean;
-    ctime: string;
+    created_at: string;
+    updated_at: string;
     record: RecordDict;
     games: number;
     kills: number;
@@ -18,7 +19,8 @@ export interface Deck {
 export interface Player {
     id: number;
     name: string;
-    ctime: string;
+    created_at: string;
+    updated_at: string;
     record: RecordDict;
     games: number;
     kills: number;
@@ -28,7 +30,8 @@ export interface Player {
 export interface Game {
     id: number;
     description: string;
-    ctime: string;
+    created_at: string;
+    updated_at: string;
     results: Array<GameResult>;
 }
 
@@ -40,6 +43,8 @@ export interface GameResult {
     place: number;
     kill_count: number;
     points: number;
+    created_at: string;
+    updated_at: string;
 }
 
 export interface NewGameData {

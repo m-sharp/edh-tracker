@@ -15,13 +15,13 @@ import (
 )
 
 const (
-	insertGame = `INSERT INTO game (description, ctime) VALUES (?, ?);`
+	insertGame = `INSERT INTO game (description, created_at) VALUES (?, ?);`
 
 	getPlayer    = `SELECT id FROM player WHERE name = ?;`
 	insertPlayer = `INSERT INTO player (name) VALUES (?);`
 
 	getDeck    = `SELECT id FROM deck WHERE player_id = ? AND commander = ?;`
-	insertDeck = `INSERT INTO deck (player_id, commander, ctime) VALUES (?, ?, now());`
+	insertDeck = `INSERT INTO deck (player_id, commander) VALUES (?, ?);`
 
 	insertGameResult = `INSERT INTO game_result (game_id, deck_id, place, kill_count) VALUES (?, ?, ?, ?);`
 )

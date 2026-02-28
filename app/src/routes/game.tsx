@@ -41,7 +41,7 @@ export default function View(): ReactElement {
     return (
         <Box id="game" sx={{display: "flex", flexDirection: "column", alignItems: "center"}}>
             <h1>Game #{game.id}</h1>
-            <em>{new Date(game.ctime).toLocaleString()}</em>
+            <em>{new Date(game.created_at).toLocaleString()}</em>
             <p>Description: {game.description}</p>
             <Box sx={{height: 355, width: "100%"}}>
                 <DataGrid

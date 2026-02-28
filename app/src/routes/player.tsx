@@ -24,7 +24,7 @@ export default function View(): ReactElement {
             </Box>
             <DeckDisplay player={player} />
             <Box sx={{width: "100%", display: "flex", justifyContent: "flex-end", pt: 1}}>
-                <em>Player created at: {new Date(player.ctime).toLocaleString()}</em>
+                <em>Player created at: {new Date(player.created_at).toLocaleString()}</em>
             </Box>
         </Box>
     );

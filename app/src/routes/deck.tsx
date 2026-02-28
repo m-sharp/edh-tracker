@@ -30,7 +30,7 @@ export default function View(): ReactElement {
             </Box>
             <MatchUpsForDeck deck={deck} />
             <Box sx={{width: "100%", display: "flex", justifyContent: "flex-end", pt: 1}}>
-                <em>Deck created at: {new Date(deck.ctime).toLocaleString()}</em>
+                <em>Deck created at: {new Date(deck.created_at).toLocaleString()}</em>
             </Box>
         </Box>
     );

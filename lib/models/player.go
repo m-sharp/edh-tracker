@@ -3,26 +3,27 @@ package models
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/m-sharp/edh-tracker/lib"
 )
 
 const (
-	GetAllPlayers  = `SELECT id, name, ctime FROM player;`
-	GetPlayerByID  = `SELECT id, name, ctime FROM player WHERE id = ?;`
+	GetAllPlayers  = `SELECT id, name, created_at, updated_at, deleted_at FROM player WHERE deleted_at IS NULL;`
+	GetPlayerByID  = `SELECT id, name, created_at, updated_at, deleted_at FROM player WHERE id = ? AND deleted_at IS NULL;`
 	GetPlayerStats = `SELECT DISTINCT game_result.game_id, game_result.place, game_result.kill_count
 						FROM (game_result INNER JOIN deck on game_result.deck_id = deck.id)
-					  WHERE deck.player_id = ?;`
-	InsertPlayer = `INSERT INTO player (name) VALUES (?);`
+					  WHERE deck.player_id = ?
+					    AND deck.deleted_at IS NULL
+					    AND game_result.deleted_at IS NULL;`
+	InsertPlayer     = `INSERT INTO player (name) VALUES (?);`
+	SoftDeletePlayer = `UPDATE player SET deleted_at = NOW() WHERE id = ?;`
 
 	playerValidationErr = "invalid Player: %s"
 )
 
 type Player struct {
-	Id        int       `json:"id" db:"id"`
-	Name      string    `json:"name" db:"name"`
-	CreatedAt time.Time `json:"ctime" db:"ctime"`
+	Model
+	Name string `json:"name" db:"name"`
 }
 
 type PlayerWithStats struct {
@@ -62,7 +63,7 @@ func (p *PlayerProvider) GetAll(ctx context.Context) ([]PlayerWithStats, error) 
 	var withStats []PlayerWithStats
 	for _, player := range players {
 		var gameStats GameStats
-		if err := p.client.Db.SelectContext(ctx, &gameStats, GetPlayerStats, player.Id); err != nil {
+		if err := p.client.Db.SelectContext(ctx, &gameStats, GetPlayerStats, player.ID); err != nil {
 			return nil, fmt.Errorf("failed to get Player statistics: %w", err)
 		}
 
@@ -108,6 +109,23 @@ func (p *PlayerProvider) Add(ctx context.Context, name string) error {
 	}
 	if numAffected != 1 {
 		return fmt.Errorf("unexpected number of rows affected by Player insert: got %d, expected 1", numAffected)
+	}
+
+	return nil
+}
+
+func (p *PlayerProvider) SoftDelete(ctx context.Context, id int) error {
+	result, err := p.client.Db.ExecContext(ctx, SoftDeletePlayer, id)
+	if err != nil {
+		return fmt.Errorf("failed to soft-delete Player record: %w", err)
+	}
+
+	numAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get number of rows affected by soft-delete: %w", err)
+	}
+	if numAffected != 1 {
+		return fmt.Errorf("unexpected number of rows affected by Player soft-delete: got %d, expected 1", numAffected)
 	}
 
 	return nil

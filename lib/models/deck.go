@@ -4,27 +4,32 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/m-sharp/edh-tracker/lib"
 )
 
 const (
-	GetAllDecks = `SELECT deck.id, deck.player_id, player.name, deck.commander, deck.retired, deck.ctime
-							FROM (deck INNER JOIN player on deck.player_id = player.id) WHERE deck.retired = 0;`
-	GetDecksForPlayer = `SELECT id, player_id, commander, retired, ctime FROM deck WHERE player_id = ?;`
-	GetDeckByID       = `SELECT deck.id, deck.player_id, deck.commander, deck.retired, deck.ctime, player.name
-							FROM (deck INNER JOIN player on deck.player_id = player.id)
-						 WHERE deck.id = ?;`
+	GetAllDecks = `SELECT deck.id, deck.player_id, player.name, deck.commander, deck.retired,
+						deck.created_at, deck.updated_at, deck.deleted_at
+					FROM (deck INNER JOIN player on deck.player_id = player.id)
+					WHERE deck.retired = 0
+					  AND deck.deleted_at IS NULL
+					  AND player.deleted_at IS NULL;`
+	GetDecksForPlayer = `SELECT id, player_id, commander, retired, created_at, updated_at, deleted_at
+						 FROM deck WHERE player_id = ? AND deleted_at IS NULL;`
+	GetDeckByID = `SELECT deck.id, deck.player_id, deck.commander, deck.retired,
+						deck.created_at, deck.updated_at, deck.deleted_at, player.name
+					FROM (deck INNER JOIN player on deck.player_id = player.id)
+					WHERE deck.id = ? AND deck.deleted_at IS NULL AND player.deleted_at IS NULL;`
 	GetDeckStats = `SELECT DISTINCT game_result.game_id, game_result.place, game_result.kill_count
 						FROM (game_result INNER JOIN deck on game_result.deck_id = deck.id)
-					WHERE deck.id = ?;`
+					WHERE deck.id = ? AND game_result.deleted_at IS NULL;`
 
 	DeckExists = `SELECT COUNT(*) FROM deck where player_id = ? AND commander = ?;`
 
-	InsertDeck = `INSERT INTO deck (player_id, commander) VALUES (?, ?);`
-
-	RetireDeck = `UPDATE deck SET retired = TRUE WHERE id = ?;`
+	InsertDeck     = `INSERT INTO deck (player_id, commander) VALUES (?, ?);`
+	RetireDeck     = `UPDATE deck SET retired = TRUE WHERE id = ?;`
+	SoftDeleteDeck = `UPDATE deck SET deleted_at = NOW() WHERE id = ?;`
 
 	deckValidationErr = "invalid Deck: %s"
 )
@@ -34,12 +39,11 @@ var (
 )
 
 type Deck struct {
-	Id         int       `json:"id" db:"id"`
-	PlayerId   int       `json:"player_id" db:"player_id"`
-	PlayerName string    `json:"player_name,omitempty" db:"name"`
-	Commander  string    `json:"commander" db:"commander"`
-	Retired    bool      `json:"retired" db:"retired"`
-	CreatedAt  time.Time `json:"ctime" db:"ctime"`
+	Model
+	PlayerId   int    `json:"player_id" db:"player_id"`
+	PlayerName string `json:"player_name,omitempty" db:"name"`
+	Commander  string `json:"commander" db:"commander"`
+	Retired    bool   `json:"retired" db:"retired"`
 }
 
 type DeckWithStats struct {
@@ -82,7 +86,7 @@ func (d *DeckProvider) GetAll(ctx context.Context) ([]DeckWithStats, error) {
 	var result []DeckWithStats
 	for _, deck := range decks {
 		var gameStats GameStats
-		if err := d.client.Db.SelectContext(ctx, &gameStats, GetDeckStats, deck.Id); err != nil {
+		if err := d.client.Db.SelectContext(ctx, &gameStats, GetDeckStats, deck.ID); err != nil {
 			return nil, fmt.Errorf("failed to get Deck statistics: %w", err)
 		}
 
@@ -109,7 +113,7 @@ func (d *DeckProvider) GetAllForPlayer(ctx context.Context, playerId int) ([]Dec
 	var result []DeckWithStats
 	for _, deck := range decks {
 		var gameStats GameStats
-		if err := d.client.Db.SelectContext(ctx, &gameStats, GetDeckStats, deck.Id); err != nil {
+		if err := d.client.Db.SelectContext(ctx, &gameStats, GetDeckStats, deck.ID); err != nil {
 			return nil, fmt.Errorf("failed to get Deck statistics: %w", err)
 		}
 
@@ -184,6 +188,23 @@ func (d *DeckProvider) Retire(ctx context.Context, deckId int) error {
 	}
 	if numAffected != 1 {
 		return fmt.Errorf("unexpected number of rows affected by Deck retirement: got %d, expected 1", numAffected)
+	}
+
+	return nil
+}
+
+func (d *DeckProvider) SoftDelete(ctx context.Context, id int) error {
+	result, err := d.client.Db.ExecContext(ctx, SoftDeleteDeck, id)
+	if err != nil {
+		return fmt.Errorf("failed to soft-delete Deck record: %w", err)
+	}
+
+	numAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get number of rows affected by soft-delete: %w", err)
+	}
+	if numAffected != 1 {
+		return fmt.Errorf("unexpected number of rows affected by Deck soft-delete: got %d, expected 1", numAffected)
 	}
 
 	return nil
