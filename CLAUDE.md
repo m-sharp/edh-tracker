@@ -73,16 +73,74 @@ React Router data loaders (`loader` functions in `index.tsx`) fetch data before 
 
 ### Data Model
 
+#### Entity Relationships
+
 ```
-Player → has many Decks
-Deck → belongs to Player, has many GameResults
-Game → has many GameResults
-GameResult → belongs to Game + Deck; has place, kill_count, points
+Player ──→ many Decks
+       ──→ one User (optional)
+       ──→ many PlayerPods ──→ Pod
+
+Pod ──→ many Games
+    ──→ many PlayerPods ──→ Player
+
+Format ──→ many Decks
+       ──→ many Games
+
+Deck ──→ one Player
+     ──→ one Format
+     ──→ one DeckCommander (optional, via deck_commander join table)
+     ──→ many GameResults
+
+DeckCommander ──→ one Commander
+              ──→ one Commander (partner_commander_id, nullable)
+
+Game ──→ one Pod
+     ──→ one Format
+     ──→ many GameResults
+
+GameResult ──→ one Game
+           ──→ one Deck (includes commander info via JOIN)
 ```
 
-Points formula: `points = kills + place_bonus` where place bonuses are 3/2/1/0 for 1st–4th.
+#### Tables
 
-Stats (record, games, kills, points) are computed at query time in `lib/models/stats.go`, not stored in the DB.
+| Table | Key Columns |
+|---|---|
+| `player` | id, name, deleted_at |
+| `deck` | id, player_id, name, format_id, retired, deleted_at |
+| `game` | id, description, pod_id, format_id, deleted_at |
+| `game_result` | id, game_id, deck_id, place, kill_count, deleted_at |
+| `format` | id, name — seeded with `commander` and `other` |
+| `commander` | id, name (unique card name) |
+| `deck_commander` | id, deck_id, commander_id, partner_commander_id (nullable) |
+| `pod` | id, name, deleted_at |
+| `player_pod` | id, pod_id, player_id (join table, unique constraint) |
+| `user` | id, player_id, role_id, oauth_provider, oauth_subject, email, display_name, avatar_url |
+| `user_role` | id, name — seeded with `admin` and `player` |
+
+All tables use soft deletes (`deleted_at` nullable DATETIME) and track `created_at`/`updated_at`.
+
+#### Key Model Structs (`lib/models/`)
+
+- **`Deck`** — includes `Name`, `FormatID`, `FormatName`, `Retired`, and `Commanders *DeckCommanderEntry` (nullable, populated via LEFT JOIN on `deck_commander`)
+- **`DeckCommanderEntry`** — `CommanderID`, `CommanderName`, `PartnerCommanderID *int`, `PartnerCommanderName *string`
+- **`GameResult`** — includes `DeckName`, `CommanderName *string`, `PartnerCommanderName *string`, and computed `Points`
+- **`Game`** — includes `PodID` and `FormatID`
+- **`PlayerInfo`** — embeds `Player` + `Stats` + `PodIDs []int`
+- **`DeckWithStats`** — embeds `Deck` + `Stats`
+- **`Stats`** — `Record map[int]int` (place → count), `Games`, `Kills`, `Points` — computed at query time in `lib/models/stats.go`, never stored
+
+#### Points Formula
+
+`points = kills + place_bonus` where place bonuses are **3/2/1/0** for 1st–4th place.
+
+#### Format Validation
+
+When creating a game result, the deck's `format_id` must match the game's `format_id`, **except** when the format name is `"other"` (which skips the check).
+
+#### Nullable Fields & SQL Scanning
+
+Deck queries use LEFT JOIN to fetch commander data. `deckRow` is an internal scan struct using `sql.NullInt64`/`sql.NullString` for nullable commander fields, which are then converted to the `*DeckCommanderEntry` pointer on `Deck`.
 
 ### API Routes
 
@@ -90,5 +148,7 @@ All routes are prefixed `/api/`:
 - `GET/POST /players`, `GET /player?player_id=X`
 - `GET/POST /decks`, `GET /deck?deck_id=X`, `PATCH /deck?deck_id=X` (retire)
 - `GET/POST /games`, `GET /game?game_id=X`
+- `GET /formats`
+- `GET/POST /commander`
 
 Query params are used for filtering (e.g. `GET /decks?player_id=X` for player's decks).
