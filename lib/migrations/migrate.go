@@ -138,14 +138,15 @@ func decrementMigrationTable(ctx context.Context, client *lib.DBClient) error {
 
 func getAllMigrations() map[int]Migration {
 	return map[int]Migration{
-		1: &Migration1{},
-		2: &Migration2{},
-		3: &Migration3{},
-		4: &Migration4{},
-		5: &Migration5{},
-		6: &Migration6{},
-		7: &Migration7{},
-		8: &Migration8{},
-		9: &Migration9{},
+		1:  &Migration1{},
+		2:  &Migration2{},
+		3:  &Migration3{},
+		4:  &Migration4{},
+		5:  &Migration5{},
+		6:  &Migration6{},
+		7:  &Migration7{},
+		8:  &Migration8{},
+		9:  &Migration9{},
+		10: &Migration10{},
 	}
 }

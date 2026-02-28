@@ -60,6 +60,8 @@ The Go server is structured around three layers per entity:
 
 **Required env vars**: `DBHOST`, `DBUSER`, `DBPASSWORD`, `DBPORT`
 
+**Index convention**: Any column used in a WHERE clause that is not a primary key or foreign key must have an explicit index. Add indexes in a new migration whenever adding queries that filter on non-PK/FK columns.
+
 ### Frontend (`app/src/`)
 
 - `index.tsx` — React Router setup with all routes and their loaders

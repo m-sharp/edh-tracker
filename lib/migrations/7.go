@@ -59,4 +59,3 @@ func (m *Migration7) Downgrade(ctx context.Context, client *lib.DBClient) error 
 	}
 	return nil
 }
-

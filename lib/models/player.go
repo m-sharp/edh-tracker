@@ -8,10 +8,10 @@ import (
 )
 
 const (
-	GetAllPlayers  = `SELECT id, name, created_at, updated_at, deleted_at FROM player WHERE deleted_at IS NULL;`
-	GetPlayerByID  = `SELECT id, name, created_at, updated_at, deleted_at FROM player WHERE id = ? AND deleted_at IS NULL;`
+	GetAllPlayers   = `SELECT id, name, created_at, updated_at, deleted_at FROM player WHERE deleted_at IS NULL;`
+	GetPlayerByID   = `SELECT id, name, created_at, updated_at, deleted_at FROM player WHERE id = ? AND deleted_at IS NULL;`
 	GetPlayerByName = `SELECT id, name, created_at, updated_at, deleted_at FROM player WHERE name = ? AND deleted_at IS NULL LIMIT 1;`
-	GetPlayerStats = `SELECT DISTINCT game_result.game_id, game_result.place, game_result.kill_count
+	GetPlayerStats  = `SELECT DISTINCT game_result.game_id, game_result.place, game_result.kill_count
 						FROM (game_result INNER JOIN deck on game_result.deck_id = deck.id)
 					  WHERE deck.player_id = ?
 					    AND deck.deleted_at IS NULL
