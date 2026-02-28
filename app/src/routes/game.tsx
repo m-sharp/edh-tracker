@@ -16,13 +16,19 @@ export default function View(): ReactElement {
             minWidth: 100,
         },
         {
-            field: "commander",
-            headerName: "Commander",
+            field: "deck_name",
+            headerName: "Deck",
             renderCell: (params) => (
-                <Link to={`/deck/${params.row.deck_id}`}>{params.row.commander}</Link>
+                <Link to={`/deck/${params.row.deck_id}`}>{params.row.deck_name}</Link>
             ),
             hideable: false,
             flex: 1,
+        },
+        {
+            field: "commander_name",
+            headerName: "Commander",
+            flex: 1,
+            renderCell: (params) => params.row.commander_name ?? "—",
         },
         {
             field: "kill_count",

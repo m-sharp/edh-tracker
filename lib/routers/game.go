@@ -13,14 +13,18 @@ import (
 )
 
 type GameRouter struct {
-	log      *zap.Logger
-	gameRepo *models.GameProvider
+	log        *zap.Logger
+	gameRepo   *models.GameProvider
+	formatRepo *models.FormatProvider
+	deckRepo   *models.DeckProvider
 }
 
 func NewGameRouter(log *zap.Logger, repos *models.Repositories) *GameRouter {
 	return &GameRouter{
-		log:      log.Named("GameRouter"),
-		gameRepo: repos.Games,
+		log:        log.Named("GameRouter"),
+		gameRepo:   repos.Games,
+		formatRepo: repos.Formats,
+		deckRepo:   repos.Decks,
 	}
 }
 
@@ -140,9 +144,45 @@ func (g *GameRouter) GameCreate(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	format, err := g.formatRepo.GetById(ctx, gameDetails.FormatID)
+	if err != nil {
+		lib.WriteError(log, w, http.StatusInternalServerError, err, "Failed to look up format", errMsg)
+		return
+	}
+	if format == nil {
+		lib.WriteError(log, w, http.StatusBadRequest, nil, "Format not found", "Invalid format_id")
+		return
+	}
+
+	// For non-"other" formats, verify all decks share the game's format
+	if format.Name != "other" {
+		for _, result := range gameDetails.Results {
+			deck, err := g.deckRepo.GetById(ctx, result.DeckId)
+			if err != nil {
+				lib.WriteError(log, w, http.StatusInternalServerError, err, "Failed to look up deck", errMsg)
+				return
+			}
+			if deck == nil {
+				lib.WriteError(log, w, http.StatusBadRequest, nil,
+					fmt.Sprintf("Deck %d not found", result.DeckId),
+					fmt.Sprintf("Deck %d not found", result.DeckId),
+				)
+				return
+			}
+			if deck.FormatID != gameDetails.FormatID {
+				lib.WriteError(log, w, http.StatusBadRequest, nil,
+					fmt.Sprintf("Deck %d format does not match game format", result.DeckId),
+					fmt.Sprintf("Deck %d is not in the correct format for this game", result.DeckId),
+				)
+				return
+			}
+		}
+	}
+
 	log.Info("Saving new Game record")
-	if err := g.gameRepo.Add(ctx, gameDetails.Description, gameDetails.PodID, gameDetails.Results...); err != nil {
+	if err := g.gameRepo.Add(ctx, gameDetails.Description, gameDetails.PodID, gameDetails.FormatID, gameDetails.Results...); err != nil {
 		lib.WriteError(log, w, http.StatusInternalServerError, err, "Failed to add Game record", errMsg)
+		return
 	}
 
 	w.WriteHeader(http.StatusCreated)

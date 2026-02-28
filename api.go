@@ -26,6 +26,8 @@ func NewApiRouter(cfg *lib.Config, log *zap.Logger, repos *models.Repositories) 
 			routers.NewDeckRouter(log, repos),
 			routers.NewGameRouter(log, repos),
 			routers.NewPodRouter(log, repos),
+			routers.NewFormatRouter(log, repos),
+			routers.NewCommanderRouter(log, repos),
 		},
 	}
 

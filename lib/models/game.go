@@ -10,22 +10,28 @@ import (
 )
 
 const (
-	GetGameByID      = `SELECT id, description, pod_id, created_at, updated_at, deleted_at FROM game WHERE id = ? AND deleted_at IS NULL;`
-	GetGamesByDeckId = `SELECT game.id, game.description, game.pod_id, game.created_at, game.updated_at, game.deleted_at
+	GetGameByID      = `SELECT id, description, pod_id, format_id, created_at, updated_at, deleted_at FROM game WHERE id = ? AND deleted_at IS NULL;`
+	GetGamesByDeckId = `SELECT game.id, game.description, game.pod_id, game.format_id, game.created_at, game.updated_at, game.deleted_at
 							FROM (game INNER JOIN game_result on game.id = game_result.game_id)
 						  WHERE game_result.deck_id = ?
 						    AND game.deleted_at IS NULL
 						    AND game_result.deleted_at IS NULL;`
-	GetGamesByPodId = `SELECT id, description, pod_id, created_at, updated_at, deleted_at FROM game WHERE pod_id = ? AND deleted_at IS NULL;`
+	GetGamesByPodId = `SELECT id, description, pod_id, format_id, created_at, updated_at, deleted_at FROM game WHERE pod_id = ? AND deleted_at IS NULL;`
 
 	GetGameResultsByGameID = `SELECT game_result.id, game_result.game_id, game_result.deck_id,
+								deck.name    AS deck_name,
+								c.name       AS commander_name,
+								pc.name      AS partner_commander_name,
 								game_result.place, game_result.kill_count,
-								game_result.created_at, game_result.updated_at, game_result.deleted_at,
-								deck.commander
-							  FROM (game_result INNER JOIN deck on game_result.deck_id = deck.id)
-							  WHERE game_id = ? AND game_result.deleted_at IS NULL;`
+								game_result.created_at, game_result.updated_at, game_result.deleted_at
+							  FROM game_result
+							  INNER JOIN deck ON game_result.deck_id = deck.id
+							  LEFT JOIN deck_commander dc ON dc.deck_id = deck.id AND dc.deleted_at IS NULL
+							  LEFT JOIN commander c  ON dc.commander_id         = c.id  AND c.deleted_at  IS NULL
+							  LEFT JOIN commander pc ON dc.partner_commander_id = pc.id AND pc.deleted_at IS NULL
+							  WHERE game_result.game_id = ? AND game_result.deleted_at IS NULL;`
 
-	InsertGame       = `INSERT INTO game (description, pod_id) VALUES (?, ?);`
+	InsertGame       = `INSERT INTO game (description, pod_id, format_id) VALUES (?, ?, ?);`
 	InsertGameResult = `INSERT INTO game_result (game_id, deck_id, place, kill_count) VALUES (?, ?, ?, ?);`
 
 	SoftDeleteGame       = `UPDATE game SET deleted_at = NOW() WHERE id = ?;`
@@ -38,16 +44,19 @@ type Game struct {
 	Model
 	Description string `json:"description" db:"description"`
 	PodID       int    `json:"pod_id"      db:"pod_id"`
+	FormatID    int    `json:"format_id"   db:"format_id"`
 }
 
 type GameResult struct {
 	Model
-	GameId    int    `json:"game_id" db:"game_id"`
-	DeckId    int    `json:"deck_id" db:"deck_id"`
-	Commander string `json:"commander" db:"commander"`
-	Place     int    `json:"place" db:"place"`
-	Kills     int    `json:"kill_count" db:"kill_count"`
-	Points    int    `json:"points"`
+	GameId               int     `json:"game_id"    db:"game_id"`
+	DeckId               int     `json:"deck_id"    db:"deck_id"`
+	DeckName             string  `json:"deck_name"  db:"deck_name"`
+	CommanderName        *string `json:"commander_name,omitempty"         db:"commander_name"`
+	PartnerCommanderName *string `json:"partner_commander_name,omitempty" db:"partner_commander_name"`
+	Place                int     `json:"place"      db:"place"`
+	Kills                int     `json:"kill_count" db:"kill_count"`
+	Points               int     `json:"points"`
 }
 
 func (g *GameResult) Validate() error {
@@ -175,8 +184,8 @@ func (g *GameProvider) getGameResults(ctx context.Context, gameId int) ([]GameRe
 	return results, nil
 }
 
-func (g *GameProvider) Add(ctx context.Context, description string, podID int, results ...GameResult) error {
-	r, err := g.client.Db.ExecContext(ctx, InsertGame, description, podID)
+func (g *GameProvider) Add(ctx context.Context, description string, podID int, formatID int, results ...GameResult) error {
+	r, err := g.client.Db.ExecContext(ctx, InsertGame, description, podID, formatID)
 	if err != nil {
 		return fmt.Errorf("failed to insert Game record: %w", err)
 	}
@@ -213,6 +222,7 @@ func (g *GameProvider) Add(ctx context.Context, description string, podID int, r
 }
 
 // TODO: Soft deleting a game should also delete all associated GameResult records
+// TODO: Will need to look for other cascading deletes
 func (g *GameProvider) SoftDelete(ctx context.Context, id int) error {
 	result, err := g.client.Db.ExecContext(ctx, SoftDeleteGame, id)
 	if err != nil {

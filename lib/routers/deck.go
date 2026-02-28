@@ -12,14 +12,18 @@ import (
 )
 
 type DeckRouter struct {
-	log      *zap.Logger
-	deckRepo *models.DeckProvider
+	log               *zap.Logger
+	deckRepo          *models.DeckProvider
+	deckCommanderRepo *models.DeckCommanderProvider
+	formatRepo        *models.FormatProvider
 }
 
 func NewDeckRouter(log *zap.Logger, repos *models.Repositories) *DeckRouter {
 	return &DeckRouter{
-		log:      log.Named("DeckRouter"),
-		deckRepo: repos.Decks,
+		log:               log.Named("DeckRouter"),
+		deckRepo:          repos.Decks,
+		deckCommanderRepo: repos.DeckCommanders,
+		formatRepo:        repos.Formats,
 	}
 }
 
@@ -52,14 +56,14 @@ func (d *DeckRouter) GetRoutes() []*lib.Route {
 func (d *DeckRouter) GetAll(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	errMsg := "Failed to get Deck records"
-	playerId, _ := lib.GetQueryId(r, "player_id")
+	playerID, _ := lib.GetQueryId(r, "player_id")
 
 	var (
 		decks []models.DeckWithStats
 		err   error
 	)
-	if playerId != 0 {
-		decks, err = d.deckRepo.GetAllForPlayer(ctx, playerId)
+	if playerID != 0 {
+		decks, err = d.deckRepo.GetAllForPlayer(ctx, playerID)
 		if err != nil {
 			lib.WriteError(d.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
 			return
@@ -84,26 +88,34 @@ func (d *DeckRouter) GetAll(w http.ResponseWriter, r *http.Request) {
 func (d *DeckRouter) GetDeckById(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	deckId, err := lib.GetQueryId(r, "deck_id")
+	deckID, err := lib.GetQueryId(r, "deck_id")
 	if err != nil {
 		lib.WriteError(d.log, w, http.StatusBadRequest, err, "Bad deck_id query string specified", err.Error())
 		return
 	}
 
 	errMsg := "Failed to get Deck record"
-	decks, err := d.deckRepo.GetById(ctx, deckId)
+	deck, err := d.deckRepo.GetById(ctx, deckID)
 	if err != nil {
 		lib.WriteError(d.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
 		return
 	}
 
-	marshalled, err := json.Marshal(decks)
+	marshalled, err := json.Marshal(deck)
 	if err != nil {
 		lib.WriteError(d.log, w, http.StatusInternalServerError, err, "Failed to marshall records as JSON", errMsg)
 		return
 	}
 
 	lib.WriteJson(d.log, w, marshalled)
+}
+
+type newDeckRequest struct {
+	PlayerID           int    `json:"player_id"`
+	Name               string `json:"name"`
+	FormatID           int    `json:"format_id"`
+	CommanderID        *int   `json:"commander_id"`
+	PartnerCommanderID *int   `json:"partner_commander_id"`
 }
 
 func (d *DeckRouter) DeckCreate(w http.ResponseWriter, r *http.Request) {
@@ -116,26 +128,54 @@ func (d *DeckRouter) DeckCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var deck models.Deck
-	if err := json.Unmarshal(body, &deck); err != nil {
+	var req newDeckRequest
+	if err = json.Unmarshal(body, &req); err != nil {
 		lib.WriteError(d.log, w, http.StatusBadRequest, err, "Failed to unmarshal Deck body", errMsg)
 		return
 	}
-	log := d.log.With(zap.Int("PlayerId", deck.PlayerId), zap.String("Commander", deck.Commander))
 
-	if err := deck.Validate(); err != nil {
-		lib.WriteError(log, w, http.StatusBadRequest, err, "New Deck failed validation", errMsg)
+	log := d.log.With(zap.Int("PlayerID", req.PlayerID), zap.String("Name", req.Name), zap.Int("FormatID", req.FormatID))
+
+	if req.PlayerID == 0 {
+		lib.WriteError(log, w, http.StatusBadRequest, nil, "Missing player_id", "player_id is required")
+		return
+	}
+	if req.Name == "" {
+		lib.WriteError(log, w, http.StatusBadRequest, nil, "Missing deck name", "deck name is required")
+		return
+	}
+	if req.FormatID == 0 {
+		lib.WriteError(log, w, http.StatusBadRequest, nil, "Missing format_id", "format_id is required")
+		return
+	}
+
+	format, err := d.formatRepo.GetById(ctx, req.FormatID)
+	if err != nil {
+		lib.WriteError(log, w, http.StatusInternalServerError, err, "Failed to look up format", errMsg)
+		return
+	}
+	if format == nil {
+		lib.WriteError(log, w, http.StatusBadRequest, nil, "Format not found", "Invalid format_id")
+		return
+	}
+
+	if format.Name == "commander" && req.CommanderID == nil {
+		lib.WriteError(log, w, http.StatusBadRequest, nil, "Missing commander_id for commander-format deck", "commander_id is required for commander format")
 		return
 	}
 
 	log.Info("Saving new Deck record")
-	if _, err := d.deckRepo.Add(ctx, deck.PlayerId, deck.Commander); err != nil {
-		if err == models.ErrDeckExists {
-			lib.WriteError(log, w, http.StatusBadRequest, err, "Attempted to create preexisting deck", err.Error())
-		} else {
-			lib.WriteError(log, w, http.StatusInternalServerError, err, "Failed to add Deck record", errMsg)
-		}
+	deckID, err := d.deckRepo.Add(ctx, req.PlayerID, req.Name, req.FormatID)
+	if err != nil {
+		lib.WriteError(log, w, http.StatusInternalServerError, err, "Failed to add Deck record", errMsg)
 		return
+	}
+
+	if format.Name == "commander" {
+		if _, err = d.deckCommanderRepo.Add(ctx, deckID, *req.CommanderID, req.PartnerCommanderID); err != nil {
+			lib.WriteError(log, w, http.StatusInternalServerError, err, "Failed to add DeckCommander record", errMsg)
+			return
+		}
 	}
 
 	w.WriteHeader(http.StatusCreated)
@@ -144,14 +184,14 @@ func (d *DeckRouter) DeckCreate(w http.ResponseWriter, r *http.Request) {
 func (d *DeckRouter) RetireDeck(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	deckId, err := lib.GetQueryId(r, "deck_id")
+	deckID, err := lib.GetQueryId(r, "deck_id")
 	if err != nil {
-		lib.WriteError(d.log, w, http.StatusBadRequest, err, "Bad bad_id query string specified", err.Error())
+		lib.WriteError(d.log, w, http.StatusBadRequest, err, "Bad deck_id query string specified", err.Error())
 		return
 	}
 
 	errMsg := "Failed to retire deck"
-	if err := d.deckRepo.Retire(ctx, deckId); err != nil {
+	if err = d.deckRepo.Retire(ctx, deckID); err != nil {
 		lib.WriteError(d.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
 		return
 	}

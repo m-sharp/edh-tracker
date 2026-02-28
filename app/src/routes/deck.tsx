@@ -16,7 +16,7 @@ export default function View(): ReactElement {
     return (
         <Box id="deck" sx={{display: "flex", flexDirection: "column", alignItems: "center"}}>
             <Box sx={{display: "flex", flexDirection: "column", alignItems: "center"}}>
-                <h1>{deck.commander}</h1>
+                <h1>{deck.name}{deck.commanders && ` — ${deck.commanders.commander_name}`}</h1>
                 <Record record={deck.record} />
                 <span className={"info-column-item"}>Owner - <Link to={`/player/${deck.player_id}`}>{deck.player_name}</Link></span>
                 {deck.retired &&
@@ -52,7 +52,7 @@ function MatchUpsForDeck({ deck }: MatchUpsForDeckProps): ReactElement {
 
     return (
         <Box style={{height: 500, width: "100%"}}>
-            <MatchesDisplay games={data} targetCommander={deck.commander} />
+            <MatchesDisplay games={data} targetCommander={deck.commanders?.commander_name} />
         </Box>
     );
 }

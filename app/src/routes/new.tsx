@@ -13,7 +13,7 @@ import AddIcon from '@mui/icons-material/Add';
 import PublishIcon from '@mui/icons-material/Publish';
 
 import { PostGame } from "../http";
-import { Deck, NewGame, NewGameData, NewGameResult, Player } from "../types";
+import { Deck, Format, NewGame, NewGameData, NewGameResult, Player } from "../types";
 
 interface CreateActionProps {
     request: Request;
@@ -41,6 +41,7 @@ export default function View(): ReactElement {
     const newGameInfo = useLoaderData() as NewGameData;
     const submit = useSubmit();
 
+    const [formatID, setFormatID] = useState<number>(0);
     const [numPlayers, setNumPlayers] = useState<number>(2);
     const initResults: ResultsMap = {};
     for (let i=0; i<numPlayers; i++) {
@@ -53,12 +54,18 @@ export default function View(): ReactElement {
     }
 
     const [results, setResults] = useState<ResultsMap>(initResults);
+
+    const filteredDecks = formatID !== 0
+        ? newGameInfo.decks.filter((d) => d.format_id === formatID)
+        : newGameInfo.decks;
+
     let inputs: Array<ReactElement> = [];
     for (let i=0; i<numPlayers; i++) {
         inputs.push(<GameInput
+            key={i}
             resultKey={i}
             players={newGameInfo.players}
-            decks={newGameInfo.decks}
+            decks={filteredDecks}
             numOfPlayers={numPlayers}
             setResults={setResults}
         />)
@@ -73,6 +80,20 @@ export default function View(): ReactElement {
             <h1>Add New Game</h1>
             <Form method="post">
                 <Box sx={{display: "flex", flexDirection: "column", alignItems: "center", gap: "1em"}}>
+                    <Select
+                        label={"Format"}
+                        id={"format-select"}
+                        value={formatID === 0 ? "" : String(formatID)}
+                        displayEmpty
+                        onChange={(event: SelectChangeEvent) => {
+                            setFormatID(Number(event.target.value));
+                        }}
+                    >
+                        <MenuItem value="" disabled>Select Format</MenuItem>
+                        {newGameInfo.formats.map((format: Format) => (
+                            <MenuItem key={format.id} value={format.id}>{format.name}</MenuItem>
+                        ))}
+                    </Select>
                     <TextField
                         multiline
                         label={"Game Description"}
@@ -109,6 +130,8 @@ export default function View(): ReactElement {
                         e.preventDefault();
                         const result: NewGame = {
                             description: desc,
+                            format_id: formatID,
+                            pod_id: 0,
                             results: Object.values(results),
                         }
                         submit(result as {[key: string]: any}, {method: "post", encType: "application/json"});
@@ -166,7 +189,7 @@ function GameInput({resultKey, players, decks, numOfPlayers, setResults}: GameIn
                         onChange(setPlayerID, Number(event.target.value))
                     }}
                 >
-                    {players.map((player) => <MenuItem value={player.id}>{player.name}</MenuItem>)}
+                    {players.map((player) => <MenuItem key={player.id} value={player.id}>{player.name}</MenuItem>)}
                 </Select>
                 <Autocomplete
                     autoComplete
@@ -174,7 +197,7 @@ function GameInput({resultKey, players, decks, numOfPlayers, setResults}: GameIn
                     sx={{width: 300}}
                     disablePortal
                     options={decks}
-                    getOptionLabel={(deck: Deck) => `${deck.commander} (${deck.player_name})`}
+                    getOptionLabel={(deck: Deck) => `${deck.name}${deck.commanders ? ` (${deck.commanders.commander_name})` : ""} — ${deck.player_name}`}
                     getOptionKey={(deck: Deck) => deck.id}
                     onChange={(event: SyntheticEvent, value: Deck | null, _reason: string) => {
                         if (value === null) {

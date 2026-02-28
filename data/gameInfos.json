@@ -4,3448 +4,3570 @@
     "results": [
       {
         "player": "Peter",
-        "commander": "Thalisse, Reverent Medium",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Thalisse, Reverent Medium"
       },
       {
         "player": "Tom",
-        "commander": "Zethi, Arcane Blademaster",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Zethi, Arcane Blademaster"
       },
       {
         "player": "Mike",
-        "commander": "Go-Shintai of Life's Origin",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Go-Shintai of Life's Origin"
       },
       {
         "player": "Dillon",
-        "commander": "Jhoira, Weatherlight Captain",
         "place": 1,
-        "kills": 3
+        "kills": 3,
+        "name": "Jhoira, Weatherlight Captain"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2023-04-06T00:00:00Z",
     "results": [
       {
         "player": "Peter",
-        "commander": "Atraxa, Praetor's Voice",
         "place": 1,
-        "kills": 1
+        "kills": 1,
+        "name": "Atraxa, Praetor's Voice"
       },
       {
         "player": "Tom",
-        "commander": "Old Stickfingers",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Old Stickfingers"
       },
       {
         "player": "Mike",
-        "commander": "Rakdos, Lord of Riots",
         "place": 2,
-        "kills": 1
+        "kills": 1,
+        "name": "Rakdos, Lord of Riots"
       },
       {
         "player": "Dillon",
-        "commander": "Sakashima of a Thousand Faces",
         "place": 3,
-        "kills": 1
+        "kills": 1,
+        "name": "Sakashima of a Thousand Faces"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2023-04-06T00:00:00Z",
     "results": [
       {
         "player": "Peter",
-        "commander": "Tazri, Beacon of Unity",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Tazri, Beacon of Unity"
       },
       {
         "player": "Tom",
-        "commander": "Grothama, All-Devouring",
         "place": 2,
-        "kills": 1
+        "kills": 1,
+        "name": "Grothama, All-Devouring"
       },
       {
         "player": "Mike",
-        "commander": "Tovolar, Dire Overlord",
         "place": 1,
-        "kills": 1
+        "kills": 1,
+        "name": "Tovolar, Dire Overlord"
       },
       {
         "player": "Dillon",
-        "commander": "Nekusar, the Mindrazer",
         "place": 3,
-        "kills": 1
+        "kills": 1,
+        "name": "Nekusar, the Mindrazer"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2023-04-15T00:00:00Z",
     "results": [
       {
         "player": "Peter",
-        "commander": "Zimone and Dina",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Zimone and Dina"
       },
       {
         "player": "Tom",
-        "commander": "Dina, Soul Steeper",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Dina, Soul Steeper"
       },
       {
         "player": "Dillon",
-        "commander": "Tergrid, God of Fright",
         "place": 1,
-        "kills": 1
+        "kills": 1,
+        "name": "Tergrid, God of Fright"
       },
       {
         "player": "Mike",
-        "commander": "Go-Shintai of Life's Origin",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Go-Shintai of Life's Origin"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2023-04-15T00:00:00Z",
     "results": [
       {
         "player": "Peter",
-        "commander": "Ruxa, Patient Professor",
         "place": 1,
-        "kills": 3
+        "kills": 3,
+        "name": "Ruxa, Patient Professor"
       },
       {
         "player": "Tom",
-        "commander": "Sephara, Sky's Blade",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Sephara, Sky's Blade"
       },
       {
         "player": "Dillon",
-        "commander": "Sakashima of a Thousand Faces",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Sakashima of a Thousand Faces"
       },
       {
         "player": "Mike",
-        "commander": "Korvold, Fae-Cursed King",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Korvold, Fae-Cursed King"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2023-04-15T00:00:00Z",
     "results": [
       {
         "player": "Peter",
-        "commander": "The Scorpion God",
         "place": 3,
-        "kills": 1
+        "kills": 1,
+        "name": "The Scorpion God"
       },
       {
         "player": "Tom",
-        "commander": "Vadrik, Astral Archmage",
         "place": 1,
-        "kills": 1
+        "kills": 1,
+        "name": "Vadrik, Astral Archmage"
       },
       {
         "player": "Dillon",
-        "commander": "Jhoira, Weatherlight Captain",
         "place": 4,
-        "kills": 1
+        "kills": 1,
+        "name": "Jhoira, Weatherlight Captain"
       },
       {
         "player": "Mike",
-        "commander": "Korvold, Fae-Cursed King",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Korvold, Fae-Cursed King"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2023-04-15T00:00:00Z",
     "results": [
       {
         "player": "Peter",
-        "commander": "Tazri, Beacon of Unity",
         "place": 1,
-        "kills": 2
+        "kills": 2,
+        "name": "Tazri, Beacon of Unity"
       },
       {
         "player": "Tom",
-        "commander": "Grazilaxx, Illithid Scholar",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Grazilaxx, Illithid Scholar"
       },
       {
         "player": "Mike",
-        "commander": "Miirym, Sentinel Wyrm",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Miirym, Sentinel Wyrm"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2023-04-18T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Firesong and Sunspeaker",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Firesong and Sunspeaker"
       },
       {
         "player": "Mike",
-        "commander": "Zaxara, the Exemplary",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Zaxara, the Exemplary"
       },
       {
         "player": "Dillon",
-        "commander": "Tergrid, God of Fright",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Tergrid, God of Fright"
       },
       {
         "player": "Peter",
-        "commander": "Ruxa, Patient Professor",
         "place": 1,
-        "kills": 3
+        "kills": 3,
+        "name": "Ruxa, Patient Professor"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2023-04-18T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Atla Palani, Nest Tender",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Atla Palani, Nest Tender"
       },
       {
         "player": "Mike",
-        "commander": "Isshin, Two Heavens as One",
         "place": 1,
-        "kills": 2
+        "kills": 2,
+        "name": "Isshin, Two Heavens as One"
       },
       {
         "player": "Dillon",
-        "commander": "Magus Lucea Kane",
         "place": 2,
-        "kills": 1
+        "kills": 1,
+        "name": "Magus Lucea Kane"
       },
       {
         "player": "Peter",
-        "commander": "Zimone and Dina",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Zimone and Dina"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2023-04-18T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Sephara, Sky's Blade",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Sephara, Sky's Blade"
       },
       {
         "player": "Mike",
-        "commander": "Tovolar, Dire Overlord",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Tovolar, Dire Overlord"
       },
       {
         "player": "Dillon",
-        "commander": "Sakashima of a Thousand Faces",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Sakashima of a Thousand Faces"
       },
       {
         "player": "Peter",
-        "commander": "Thalisse, Reverent Medium",
         "place": 1,
-        "kills": 3
+        "kills": 3,
+        "name": "Thalisse, Reverent Medium"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2023-04-27T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Vadrik, Astral Archmage",
         "place": 3,
-        "kills": 1
+        "kills": 1,
+        "name": "Vadrik, Astral Archmage"
       },
       {
         "player": "Mike",
-        "commander": "Miirym, Sentinel Wyrm",
         "place": 1,
-        "kills": 1
+        "kills": 1,
+        "name": "Miirym, Sentinel Wyrm"
       },
       {
         "player": "Dillon",
-        "commander": "Kelsien, the Plague",
         "place": 3,
-        "kills": 1
+        "kills": 1,
+        "name": "Kelsien, the Plague"
       },
       {
         "player": "Peter",
-        "commander": "The Ur-Dragon",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "The Ur-Dragon"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2023-04-27T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Yurlok of Scorch Thrash",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Yurlok of Scorch Thrash"
       },
       {
         "player": "Mike",
-        "commander": "Kathril, Aspect Warper",
         "place": 1,
-        "kills": 3
+        "kills": 3,
+        "name": "Kathril, Aspect Warper"
       },
       {
         "player": "Dillon",
-        "commander": "Kelsien, the Plague",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Kelsien, the Plague"
       },
       {
         "player": "Peter",
-        "commander": "The Ur-Dragon",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "The Ur-Dragon"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2023-04-27T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Sephara, Sky's Blade",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Sephara, Sky's Blade"
       },
       {
         "player": "Mike",
-        "commander": "Rakdos, Lord of Riots",
         "place": 3,
-        "kills": 2
+        "kills": 2,
+        "name": "Rakdos, Lord of Riots"
       },
       {
         "player": "Dillon",
-        "commander": "Tergrid, God of Fright",
         "place": 1,
-        "kills": 1
+        "kills": 1,
+        "name": "Tergrid, God of Fright"
       },
       {
         "player": "Peter",
-        "commander": "Umbris, Fear Manifest",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Umbris, Fear Manifest"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2023-05-10T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Sephara, Sky's Blade",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Sephara, Sky's Blade"
       },
       {
         "player": "Mike",
-        "commander": "Raffine, Scheming Seer",
         "place": 1,
-        "kills": 2
+        "kills": 2,
+        "name": "Raffine, Scheming Seer"
       },
       {
         "player": "Dillon",
-        "commander": "Kelsien, the Plague",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Kelsien, the Plague"
       },
       {
         "player": "Peter",
-        "commander": "Ganax, Astral Hunter",
         "place": 3,
-        "kills": 1
+        "kills": 1,
+        "name": "Ganax, Astral Hunter"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2023-05-10T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Firesong and Sunspeaker",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Firesong and Sunspeaker"
       },
       {
         "player": "Mike",
-        "commander": "Kathril, Aspect Warper",
         "place": 2,
-        "kills": 1
+        "kills": 1,
+        "name": "Kathril, Aspect Warper"
       },
       {
         "player": "Dillon",
-        "commander": "Arcades, the Strategist",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Arcades, the Strategist"
       },
       {
         "player": "Peter",
-        "commander": "Zimone and Dina",
         "place": 1,
-        "kills": 2
+        "kills": 2,
+        "name": "Zimone and Dina"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2023-05-18T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Ruric Thar, the Unbowed",
         "place": 2,
-        "kills": 1
+        "kills": 1,
+        "name": "Ruric Thar, the Unbowed"
       },
       {
         "player": "Mike",
-        "commander": "Korvold, Fae-Cursed King",
         "place": 1,
-        "kills": 1
+        "kills": 1,
+        "name": "Korvold, Fae-Cursed King"
       },
       {
         "player": "Dillon",
-        "commander": "Tergrid, God of Fright",
         "place": 3,
-        "kills": 1
+        "kills": 1,
+        "name": "Tergrid, God of Fright"
       },
       {
         "player": "Peter",
-        "commander": "The Scorpion God",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "The Scorpion God"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2023-05-18T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Grazilaxx, Illithid Scholar",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Grazilaxx, Illithid Scholar"
       },
       {
         "player": "Mike",
-        "commander": "Raffine, Scheming Seer",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Raffine, Scheming Seer"
       },
       {
         "player": "Dillon",
-        "commander": "Sakashima of a Thousand Faces",
         "place": 2,
-        "kills": 2
+        "kills": 2,
+        "name": "Sakashima of a Thousand Faces"
       },
       {
         "player": "Peter",
-        "commander": "The Scorpion God",
         "place": 1,
-        "kills": 1
+        "kills": 1,
+        "name": "The Scorpion God"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2023-05-18T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Ruric Thar, the Unbowed",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Ruric Thar, the Unbowed"
       },
       {
         "player": "Mike",
-        "commander": "Raffine, Scheming Seer",
         "place": 1,
-        "kills": 3
+        "kills": 3,
+        "name": "Raffine, Scheming Seer"
       },
       {
         "player": "Dillon",
-        "commander": "Jhoira, Weatherlight Captain",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Jhoira, Weatherlight Captain"
       },
       {
         "player": "Peter",
-        "commander": "Umbris, Fear Manifest",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Umbris, Fear Manifest"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2023-05-24T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Ruric Thar, the Unbowed",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Ruric Thar, the Unbowed"
       },
       {
         "player": "Mike",
-        "commander": "Isshin, Two Heavens as One",
         "place": 1,
-        "kills": 1
+        "kills": 1,
+        "name": "Isshin, Two Heavens as One"
       },
       {
         "player": "Dillon",
-        "commander": "Sythis, Harvest's Hand",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Sythis, Harvest's Hand"
       },
       {
         "player": "Peter",
-        "commander": "Umbris, Fear Manifest",
         "place": 2,
-        "kills": 2
+        "kills": 2,
+        "name": "Umbris, Fear Manifest"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2023-05-24T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Kros, Defense Contractor",
         "place": 1,
-        "kills": 2
+        "kills": 2,
+        "name": "Kros, Defense Contractor"
       },
       {
         "player": "Mike",
-        "commander": "Raffine, Scheming Seer",
         "place": 2,
-        "kills": 1
+        "kills": 1,
+        "name": "Raffine, Scheming Seer"
       },
       {
         "player": "Dillon",
-        "commander": "Sythis, Harvest's Hand",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Sythis, Harvest's Hand"
       },
       {
         "player": "Peter",
-        "commander": "Ruxa, Patient Professor",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Ruxa, Patient Professor"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2023-05-24T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Dina, Soul Steeper",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Dina, Soul Steeper"
       },
       {
         "player": "Mike",
-        "commander": "Syr Gwyn, Hero of Ashvale",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Syr Gwyn, Hero of Ashvale"
       },
       {
         "player": "Dillon",
-        "commander": "Tergrid, God of Fright",
         "place": 1,
-        "kills": 3
+        "kills": 3,
+        "name": "Tergrid, God of Fright"
       },
       {
         "player": "Peter",
-        "commander": "Ruxa, Patient Professor",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Ruxa, Patient Professor"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2023-06-14T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Plargg and Nassari",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Plargg and Nassari"
       },
       {
         "player": "Mike",
-        "commander": "Admiral Beckett Brass",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Admiral Beckett Brass"
       },
       {
         "player": "Dillon",
-        "commander": "Sythis, Harvest's Hand",
         "place": 1,
-        "kills": 2
+        "kills": 2,
+        "name": "Sythis, Harvest's Hand"
       },
       {
         "player": "Peter",
-        "commander": "Hofri Ghostforge",
         "place": 2,
-        "kills": 1
+        "kills": 1,
+        "name": "Hofri Ghostforge"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2023-06-14T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Kros, Defense Contractor",
         "place": 3,
-        "kills": 1
+        "kills": 1,
+        "name": "Kros, Defense Contractor"
       },
       {
         "player": "Mike",
-        "commander": "Admiral Beckett Brass",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Admiral Beckett Brass"
       },
       {
         "player": "Dillon",
-        "commander": "Kelsien, the Plague",
         "place": 1,
-        "kills": 2
+        "kills": 2,
+        "name": "Kelsien, the Plague"
       },
       {
         "player": "Peter",
-        "commander": "Umbris, Fear Manifest",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Umbris, Fear Manifest"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2023-07-11T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Plargg and Nassari",
         "place": 1,
-        "kills": 3
+        "kills": 3,
+        "name": "Plargg and Nassari"
       },
       {
         "player": "Mike",
-        "commander": "Admiral Beckett Brass",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Admiral Beckett Brass"
       },
       {
         "player": "Dillon",
-        "commander": "Sythis, Harvest's Hand",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Sythis, Harvest's Hand"
       },
       {
         "player": "Peter",
-        "commander": "Ruxa, Patient Professor",
         "place": 3,
-        "kills": 1
+        "kills": 1,
+        "name": "Ruxa, Patient Professor"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2023-09-28T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Kazuul, Tyrant of the Cliffs",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Kazuul, Tyrant of the Cliffs"
       },
       {
         "player": "Mike",
-        "commander": "Kathril, Aspect Warper",
         "place": 1,
-        "kills": 3
+        "kills": 3,
+        "name": "Kathril, Aspect Warper"
       },
       {
         "player": "Dillon",
-        "commander": "Sakashima of a Thousand Faces",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Sakashima of a Thousand Faces"
       },
       {
         "player": "Peter",
-        "commander": "Sauron, the Dark Lord",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Sauron, the Dark Lord"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2023-09-28T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Azusa, Lost but Seeking",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Azusa, Lost but Seeking"
       },
       {
         "player": "Mike",
-        "commander": "Giada, Font of Hope",
         "place": 1,
-        "kills": 3
+        "kills": 3,
+        "name": "Giada, Font of Hope"
       },
       {
         "player": "Dillon",
-        "commander": "Tergrid, God of Fright",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Tergrid, God of Fright"
       },
       {
         "player": "Peter",
-        "commander": "Henzie \"Toolbox\" Torre",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Henzie \"Toolbox\" Torre"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2023-09-28T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Kazuul, Tyrant of the Cliffs",
         "place": 3,
-        "kills": 1
+        "kills": 1,
+        "name": "Kazuul, Tyrant of the Cliffs"
       },
       {
         "player": "Mike",
-        "commander": "Raffine, Scheming Seer",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Raffine, Scheming Seer"
       },
       {
         "player": "Dillon",
-        "commander": "Jhoira, Weatherlight Captain",
         "place": 1,
-        "kills": 1
+        "kills": 1,
+        "name": "Jhoira, Weatherlight Captain"
       },
       {
         "player": "Peter",
-        "commander": "Eriette of the Charmed Apple",
         "place": 2,
-        "kills": 1
+        "kills": 1,
+        "name": "Eriette of the Charmed Apple"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2023-11-02T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Kros, Defense Contractor",
         "place": 1,
-        "kills": 2
+        "kills": 2,
+        "name": "Kros, Defense Contractor"
       },
       {
         "player": "Mike",
-        "commander": "Tovolar, Dire Overlord",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Tovolar, Dire Overlord"
       },
       {
         "player": "Dillon",
-        "commander": "Oona, Queen of the Fae",
         "place": 2,
-        "kills": 1
+        "kills": 1,
+        "name": "Oona, Queen of the Fae"
       },
       {
         "player": "Peter",
-        "commander": "Lord of the Nazg\u00fbl",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Lord of the Nazg\u00fbl"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2023-11-02T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Azusa, Lost but Seeking",
         "place": 2,
-        "kills": 1
+        "kills": 1,
+        "name": "Azusa, Lost but Seeking"
       },
       {
         "player": "Mike",
-        "commander": "Miirym, Sentinel Wyrm",
         "place": 3,
-        "kills": 1
+        "kills": 1,
+        "name": "Miirym, Sentinel Wyrm"
       },
       {
         "player": "Dillon",
-        "commander": "Oona, Queen of the Fae",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Oona, Queen of the Fae"
       },
       {
         "player": "Peter",
-        "commander": "Eriette of the Charmed Apple",
         "place": 1,
-        "kills": 1
+        "kills": 1,
+        "name": "Eriette of the Charmed Apple"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2023-11-02T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Ruric Thar, the Unbowed",
         "place": 3,
-        "kills": 1
+        "kills": 1,
+        "name": "Ruric Thar, the Unbowed"
       },
       {
         "player": "Mike",
-        "commander": "Giada, Font of Hope",
         "place": 1,
-        "kills": 2
+        "kills": 2,
+        "name": "Giada, Font of Hope"
       },
       {
         "player": "Dillon",
-        "commander": "Sythis, Harvest's Hand",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Sythis, Harvest's Hand"
       },
       {
         "player": "Peter",
-        "commander": "Eriette of the Charmed Apple",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Eriette of the Charmed Apple"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2023-11-08T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Kazuul, Tyrant of the Cliffs",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Kazuul, Tyrant of the Cliffs"
       },
       {
         "player": "Mike",
-        "commander": "Zaxara, the Exemplary",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Zaxara, the Exemplary"
       },
       {
         "player": "Dillon",
-        "commander": "Satoru Umezawa",
         "place": 1,
-        "kills": 3
+        "kills": 3,
+        "name": "Satoru Umezawa"
       },
       {
         "player": "Peter",
-        "commander": "Sauron, the Dark Lord",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Sauron, the Dark Lord"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2023-11-08T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Kazuul, Tyrant of the Cliffs",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Kazuul, Tyrant of the Cliffs"
       },
       {
         "player": "Mike",
-        "commander": "Kathril, Aspect Warper",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Kathril, Aspect Warper"
       },
       {
         "player": "Dillon",
-        "commander": "Oona, Queen of the Fae",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Oona, Queen of the Fae"
       },
       {
         "player": "Peter",
-        "commander": "Sauron, the Dark Lord",
         "place": 1,
-        "kills": 3
+        "kills": 3,
+        "name": "Sauron, the Dark Lord"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2023-11-08T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Vadrik, Astral Archmage",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Vadrik, Astral Archmage"
       },
       {
         "player": "Mike",
-        "commander": "Giada, Font of Hope",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Giada, Font of Hope"
       },
       {
         "player": "Dillon",
-        "commander": "Satoru Umezawa",
         "place": 3,
-        "kills": 1
+        "kills": 1,
+        "name": "Satoru Umezawa"
       },
       {
         "player": "Peter",
-        "commander": "Lord of the Nazg\u00fbl",
         "place": 1,
-        "kills": 2
+        "kills": 2,
+        "name": "Lord of the Nazg\u00fbl"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2023-11-29T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Gyome, Master Chef",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Gyome, Master Chef"
       },
       {
         "player": "Mike",
-        "commander": "Giada, Font of Hope",
         "place": 3,
-        "kills": 1
+        "kills": 1,
+        "name": "Giada, Font of Hope"
       },
       {
         "player": "Dillon",
-        "commander": "Satoru Umezawa",
         "place": 1,
-        "kills": 1
+        "kills": 1,
+        "name": "Satoru Umezawa"
       },
       {
         "player": "Peter",
-        "commander": "The Ur-Dragon",
         "place": 2,
-        "kills": 1
+        "kills": 1,
+        "name": "The Ur-Dragon"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2023-11-29T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Feather, the Redeemed",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Feather, the Redeemed"
       },
       {
         "player": "Mike",
-        "commander": "Aragorn, King of Gondor",
         "place": 3,
-        "kills": 1
+        "kills": 1,
+        "name": "Aragorn, King of Gondor"
       },
       {
         "player": "Dillon",
-        "commander": "Oona, Queen of the Fae",
         "place": 2,
-        "kills": 1
+        "kills": 1,
+        "name": "Oona, Queen of the Fae"
       },
       {
         "player": "Peter",
-        "commander": "Tazri, Beacon of Unity",
         "place": 1,
-        "kills": 1
+        "kills": 1,
+        "name": "Tazri, Beacon of Unity"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2023-11-29T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Lurrus of the Dream-Den",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Lurrus of the Dream-Den"
       },
       {
         "player": "Mike",
-        "commander": "Kathril, Aspect Warper",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Kathril, Aspect Warper"
       },
       {
         "player": "Dillon",
-        "commander": "Sakashima of a Thousand Faces",
         "place": 1,
-        "kills": 3
+        "kills": 3,
+        "name": "Sakashima of a Thousand Faces"
       },
       {
         "player": "Peter",
-        "commander": "Henzie \"Toolbox\" Torre",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Henzie \"Toolbox\" Torre"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2023-12-12T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Feather, the Redeemed",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Feather, the Redeemed"
       },
       {
         "player": "Mike",
-        "commander": "Rakdos, Lord of Riots",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Rakdos, Lord of Riots"
       },
       {
         "player": "Dillon",
-        "commander": "Arcades, the Strategist",
         "place": 1,
-        "kills": 2
+        "kills": 2,
+        "name": "Arcades, the Strategist"
       },
       {
         "player": "Peter",
-        "commander": "Umbris, Fear Manifest",
         "place": 3,
-        "kills": 1
+        "kills": 1,
+        "name": "Umbris, Fear Manifest"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2023-12-12T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Azusa, Lost but Seeking",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Azusa, Lost but Seeking"
       },
       {
         "player": "Mike",
-        "commander": "Aragorn, King of Gondor",
         "place": 1,
-        "kills": 3
+        "kills": 3,
+        "name": "Aragorn, King of Gondor"
       },
       {
         "player": "Dillon",
-        "commander": "Oona, Queen of the Fae",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Oona, Queen of the Fae"
       },
       {
         "player": "Peter",
-        "commander": "Thalisse, Reverent Medium",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Thalisse, Reverent Medium"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2023-12-12T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Ruric Thar, the Unbowed",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Ruric Thar, the Unbowed"
       },
       {
         "player": "Mike",
-        "commander": "Admiral Beckett Brass",
         "place": 1,
-        "kills": 1
+        "kills": 1,
+        "name": "Admiral Beckett Brass"
       },
       {
         "player": "Dillon",
-        "commander": "Satoru Umezawa",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Satoru Umezawa"
       },
       {
         "player": "Peter",
-        "commander": "Ruxa, Patient Professor",
         "place": 2,
-        "kills": 2
+        "kills": 2,
+        "name": "Ruxa, Patient Professor"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2023-12-30T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Feather, the Redeemed",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Feather, the Redeemed"
       },
       {
         "player": "Mike",
-        "commander": "Tovolar, Dire Overlord",
         "place": 1,
-        "kills": 2
+        "kills": 2,
+        "name": "Tovolar, Dire Overlord"
       },
       {
         "player": "Dillon",
-        "commander": "Magar of the Magic Strings",
         "place": 2,
-        "kills": 1
+        "kills": 1,
+        "name": "Magar of the Magic Strings"
       },
       {
         "player": "Peter",
-        "commander": "Wyll, Blade of Frontiers",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Wyll, Blade of Frontiers"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2023-12-30T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Kazuul, Tyrant of the Cliffs",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Kazuul, Tyrant of the Cliffs"
       },
       {
         "player": "Mike",
-        "commander": "Thantis, the Warweaver",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Thantis, the Warweaver"
       },
       {
         "player": "Dillon",
-        "commander": "Satoru Umezawa",
         "place": 3,
-        "kills": 1
+        "kills": 1,
+        "name": "Satoru Umezawa"
       },
       {
         "player": "Peter",
-        "commander": "Umbris, Fear Manifest",
         "place": 1,
-        "kills": 2
+        "kills": 2,
+        "name": "Umbris, Fear Manifest"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2023-12-30T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Kros, Defense Contractor",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Kros, Defense Contractor"
       },
       {
         "player": "Mike",
-        "commander": "Thantis, the Warweaver",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Thantis, the Warweaver"
       },
       {
         "player": "Dillon",
-        "commander": "Magar of the Magic Strings",
         "place": 1,
-        "kills": 3
+        "kills": 3,
+        "name": "Magar of the Magic Strings"
       },
       {
         "player": "Peter",
-        "commander": "Kumena, Tyrant of Orazca",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Kumena, Tyrant of Orazca"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2023-12-30T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Azusa, Lost but Seeking",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Azusa, Lost but Seeking"
       },
       {
         "player": "Mike",
-        "commander": "Raffine, Scheming Seer",
         "place": 2,
-        "kills": 1
+        "kills": 1,
+        "name": "Raffine, Scheming Seer"
       },
       {
         "player": "Dillon",
-        "commander": "Sakashima of a Thousand Faces",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Sakashima of a Thousand Faces"
       },
       {
         "player": "Peter",
-        "commander": "Sauron, the Dark Lord",
         "place": 1,
-        "kills": 2
+        "kills": 2,
+        "name": "Sauron, the Dark Lord"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2024-01-03T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "The Master, Multiplied",
         "place": 3,
-        "kills": 1
+        "kills": 1,
+        "name": "The Master, Multiplied"
       },
       {
         "player": "Mike",
-        "commander": "Grismold, the Dreadsower",
         "place": 2,
-        "kills": 1
+        "kills": 1,
+        "name": "Grismold, the Dreadsower"
       },
       {
         "player": "Dillon",
-        "commander": "Satoru Umezawa",
         "place": 1,
-        "kills": 1
+        "kills": 1,
+        "name": "Satoru Umezawa"
       },
       {
         "player": "Peter",
-        "commander": "Atraxa, Grand Unifier",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Atraxa, Grand Unifier"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2024-01-03T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Azusa, Lost but Seeking",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Azusa, Lost but Seeking"
       },
       {
         "player": "Mike",
-        "commander": "Thantis, the Warweaver",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Thantis, the Warweaver"
       },
       {
         "player": "Dillon",
-        "commander": "Oona, Queen of the Fae",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Oona, Queen of the Fae"
       },
       {
         "player": "Peter",
-        "commander": "Kinnan, Bonder Prodigy",
         "place": 1,
-        "kills": 3
+        "kills": 3,
+        "name": "Kinnan, Bonder Prodigy"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2024-01-03T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Missy",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Missy"
       },
       {
         "player": "Mike",
-        "commander": "Aragorn, King of Gondor",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Aragorn, King of Gondor"
       },
       {
         "player": "Dillon",
-        "commander": "Magar of the Magic Strings",
         "place": 1,
-        "kills": 3
+        "kills": 3,
+        "name": "Magar of the Magic Strings"
       },
       {
         "player": "Peter",
-        "commander": "Eriette of the Charmed Apple",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Eriette of the Charmed Apple"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2024-01-24T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Missy",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Missy"
       },
       {
         "player": "Mike",
-        "commander": "Grismold, the Dreadsower",
         "place": 1,
-        "kills": 1
+        "kills": 1,
+        "name": "Grismold, the Dreadsower"
       },
       {
         "player": "Dillon",
-        "commander": "Oona, Queen of the Fae",
         "place": 2,
-        "kills": 1
+        "kills": 1,
+        "name": "Oona, Queen of the Fae"
       },
       {
         "player": "Peter",
-        "commander": "Umbris, Fear Manifest",
         "place": 3,
-        "kills": 1
+        "kills": 1,
+        "name": "Umbris, Fear Manifest"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2024-01-24T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Feather, the Redeemed",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Feather, the Redeemed"
       },
       {
         "player": "Mike",
-        "commander": "Raffine, Scheming Seer",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Raffine, Scheming Seer"
       },
       {
         "player": "Dillon",
-        "commander": "Magar of the Magic Strings",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Magar of the Magic Strings"
       },
       {
         "player": "Peter",
-        "commander": "Kinnan, Bonder Prodigy",
         "place": 1,
-        "kills": 3
+        "kills": 3,
+        "name": "Kinnan, Bonder Prodigy"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2024-01-24T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "The Master, Multiplied",
         "place": 1,
-        "kills": 3
+        "kills": 3,
+        "name": "The Master, Multiplied"
       },
       {
         "player": "Mike",
-        "commander": "Giada, Font of Hope",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Giada, Font of Hope"
       },
       {
         "player": "Dillon",
-        "commander": "Satoru Umezawa",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Satoru Umezawa"
       },
       {
         "player": "Peter",
-        "commander": "Eriette of the Charmed Apple",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Eriette of the Charmed Apple"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2024-02-15T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Kibo, Uktabi Prince",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Kibo, Uktabi Prince"
       },
       {
         "player": "Mike",
-        "commander": "Aragorn, King of Gondor",
         "place": 1,
-        "kills": 2
+        "kills": 2,
+        "name": "Aragorn, King of Gondor"
       },
       {
         "player": "Dillon",
-        "commander": "Sythis, Harvest's Hand",
         "place": 2,
-        "kills": 1
+        "kills": 1,
+        "name": "Sythis, Harvest's Hand"
       },
       {
         "player": "Peter",
-        "commander": "The Scorpion God",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "The Scorpion God"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2024-02-15T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Kibo, Uktabi Prince",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Kibo, Uktabi Prince"
       },
       {
         "player": "Mike",
-        "commander": "Grismold, the Dreadsower",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Grismold, the Dreadsower"
       },
       {
         "player": "Dillon",
-        "commander": "Tergrid, God of Fright",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Tergrid, God of Fright"
       },
       {
         "player": "Peter",
-        "commander": "Jaheira, Friend of the Forest",
         "place": 1,
-        "kills": 3
+        "kills": 3,
+        "name": "Jaheira, Friend of the Forest"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2024-03-17T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Missy",
         "place": 1,
-        "kills": 2
+        "kills": 2,
+        "name": "Missy"
       },
       {
         "player": "Mike",
-        "commander": "Grismold, the Dreadsower",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Grismold, the Dreadsower"
       },
       {
         "player": "Dillon",
-        "commander": "Magus Lucea Kane",
         "place": 2,
-        "kills": 1
+        "kills": 1,
+        "name": "Magus Lucea Kane"
       },
       {
         "player": "Peter",
-        "commander": "The Scorpion God",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "The Scorpion God"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2024-03-17T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Kibo, Uktabi Prince",
         "place": 1,
-        "kills": 2
+        "kills": 2,
+        "name": "Kibo, Uktabi Prince"
       },
       {
         "player": "Mike",
-        "commander": "Tovolar, Dire Overlord",
         "place": 4,
-        "kills": 1
+        "kills": 1,
+        "name": "Tovolar, Dire Overlord"
       },
       {
         "player": "Dillon",
-        "commander": "Obyra, Dreaming Duelist",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Obyra, Dreaming Duelist"
       },
       {
         "player": "Peter",
-        "commander": "Wyll, Blade of Frontiers",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Wyll, Blade of Frontiers"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2024-03-17T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Kros, Defense Contractor",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Kros, Defense Contractor"
       },
       {
         "player": "Mike",
-        "commander": "Raffine, Scheming Seer",
         "place": 1,
-        "kills": 3
+        "kills": 3,
+        "name": "Raffine, Scheming Seer"
       },
       {
         "player": "Dillon",
-        "commander": "Magar of the Magic Strings",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Magar of the Magic Strings"
       },
       {
         "player": "Peter",
-        "commander": "Wyll, Blade of Frontiers",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Wyll, Blade of Frontiers"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2024-03-17T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Kazuul, Tyrant of the Cliffs",
         "place": 2,
-        "kills": 1
+        "kills": 1,
+        "name": "Kazuul, Tyrant of the Cliffs"
       },
       {
         "player": "Mike",
-        "commander": "Isshin, Two Heavens as One",
         "place": 1,
-        "kills": 2
+        "kills": 2,
+        "name": "Isshin, Two Heavens as One"
       },
       {
         "player": "Dillon",
-        "commander": "Sythis, Harvest's Hand",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Sythis, Harvest's Hand"
       },
       {
         "player": "Peter",
-        "commander": "Jaheira, Friend of the Forest",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Jaheira, Friend of the Forest"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2024-03-27T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Marvo, Deep Operative",
         "place": 1,
-        "kills": 2
+        "kills": 2,
+        "name": "Marvo, Deep Operative"
       },
       {
         "player": "Mike",
-        "commander": "Kathril, Aspect Warper",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Kathril, Aspect Warper"
       },
       {
         "player": "Dillon",
-        "commander": "Obyra, Dreaming Duelist",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Obyra, Dreaming Duelist"
       },
       {
         "player": "Peter",
-        "commander": "Wyll, Blade of Frontiers",
         "place": 2,
-        "kills": 1
+        "kills": 1,
+        "name": "Wyll, Blade of Frontiers"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2024-03-27T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Feather, the Redeemed",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Feather, the Redeemed"
       },
       {
         "player": "Mike",
-        "commander": "Grismold, the Dreadsower",
         "place": 1,
-        "kills": 3
+        "kills": 3,
+        "name": "Grismold, the Dreadsower"
       },
       {
         "player": "Dillon",
-        "commander": "Magus Lucea Kane",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Magus Lucea Kane"
       },
       {
         "player": "Peter",
-        "commander": "The Ur-Dragon",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "The Ur-Dragon"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2024-03-27T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Azusa, Lost but Seeking",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Azusa, Lost but Seeking"
       },
       {
         "player": "Mike",
-        "commander": "Aragorn, King of Gondor",
         "place": 1,
-        "kills": 2
+        "kills": 2,
+        "name": "Aragorn, King of Gondor"
       },
       {
         "player": "Peter",
-        "commander": "Sauron, the Dark Lord",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Sauron, the Dark Lord"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2024-04-10T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Marvo, Deep Operative",
         "place": 1,
-        "kills": 0
+        "kills": 0,
+        "name": "Marvo, Deep Operative"
       },
       {
         "player": "Mike",
-        "commander": "Grismold, the Dreadsower",
         "place": 2,
-        "kills": 1
+        "kills": 1,
+        "name": "Grismold, the Dreadsower"
       },
       {
         "player": "Dillon",
-        "commander": "Judith, Carnage Connoisseur",
         "place": 2,
-        "kills": 2
+        "kills": 2,
+        "name": "Judith, Carnage Connoisseur"
       },
       {
         "player": "Peter",
-        "commander": "Henzie \"Toolbox\" Torre",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Henzie \"Toolbox\" Torre"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2024-04-10T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Kibo, Uktabi Prince",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Kibo, Uktabi Prince"
       },
       {
         "player": "Mike",
-        "commander": "Rakdos, Lord of Riots",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Rakdos, Lord of Riots"
       },
       {
         "player": "Dillon",
-        "commander": "Judith, Carnage Connoisseur",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Judith, Carnage Connoisseur"
       },
       {
         "player": "Peter",
-        "commander": "Umbris, Fear Manifest",
         "place": 1,
-        "kills": 3
+        "kills": 3,
+        "name": "Umbris, Fear Manifest"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2024-04-10T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Feather, the Redeemed",
         "place": 2,
-        "kills": 1
+        "kills": 1,
+        "name": "Feather, the Redeemed"
       },
       {
         "player": "Mike",
-        "commander": "Raffine, Scheming Seer",
         "place": 1,
-        "kills": 2
+        "kills": 2,
+        "name": "Raffine, Scheming Seer"
       },
       {
         "player": "Dillon",
-        "commander": "Magus Lucea Kane",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Magus Lucea Kane"
       },
       {
         "player": "Peter",
-        "commander": "Queen Allenal of Ruadach",
         "place": 1,
-        "kills": 3
+        "kills": 3,
+        "name": "Queen Allenal of Ruadach"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2024-04-16T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Atla Palani, Nest Tender",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Atla Palani, Nest Tender"
       },
       {
         "player": "Mike",
-        "commander": "Tovolar, Dire Overlord",
         "place": 1,
-        "kills": 2
+        "kills": 2,
+        "name": "Tovolar, Dire Overlord"
       },
       {
         "player": "Mike",
-        "commander": "Grismold, the Dreadsower",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Grismold, the Dreadsower"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2024-04-16T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Ruric Thar, the Unbowed",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Ruric Thar, the Unbowed"
       },
       {
         "player": "Mike",
-        "commander": "Kathril, Aspect Warper",
         "place": 1,
-        "kills": 2
+        "kills": 2,
+        "name": "Kathril, Aspect Warper"
       },
       {
         "player": "Mike",
-        "commander": "Grismold, the Dreadsower",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Grismold, the Dreadsower"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2024-04-16T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Vadrik, Astral Archmage",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Vadrik, Astral Archmage"
       },
       {
         "player": "Mike",
-        "commander": "Aragorn, King of Gondor",
         "place": 1,
-        "kills": 2
+        "kills": 2,
+        "name": "Aragorn, King of Gondor"
       },
       {
         "player": "Mike",
-        "commander": "Isshin, Two Heavens as One",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Isshin, Two Heavens as One"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2024-04-23T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Morska, Undersea Sleuth",
         "place": 1,
-        "kills": 2
+        "kills": 2,
+        "name": "Morska, Undersea Sleuth"
       },
       {
         "player": "Mike",
-        "commander": "Aragorn, King of Gondor",
         "place": 2,
-        "kills": 1
+        "kills": 1,
+        "name": "Aragorn, King of Gondor"
       },
       {
         "player": "Dillon",
-        "commander": "Hakbal of the Surging Soul",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Hakbal of the Surging Soul"
       },
       {
         "player": "Peter",
-        "commander": "Kumena, Tyrant of Orazca",
         "place": 1,
-        "kills": 3
+        "kills": 3,
+        "name": "Kumena, Tyrant of Orazca"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2024-04-23T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Marvo, Deep Operative",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Marvo, Deep Operative"
       },
       {
         "player": "Mike",
-        "commander": "Raffine, Scheming Seer",
         "place": 3,
-        "kills": 1
+        "kills": 1,
+        "name": "Raffine, Scheming Seer"
       },
       {
         "player": "Dillon",
-        "commander": "Hakbal of the Surging Soul",
         "place": 1,
-        "kills": 1
+        "kills": 1,
+        "name": "Hakbal of the Surging Soul"
       },
       {
         "player": "Peter",
-        "commander": "Kumena, Tyrant of Orazca",
         "place": 2,
-        "kills": 1
+        "kills": 1,
+        "name": "Kumena, Tyrant of Orazca"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2024-04-23T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Kazuul, Tyrant of the Cliffs",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Kazuul, Tyrant of the Cliffs"
       },
       {
         "player": "Mike",
-        "commander": "Giada, Font of Hope",
         "place": 1,
-        "kills": 2
+        "kills": 2,
+        "name": "Giada, Font of Hope"
       },
       {
         "player": "Peter",
-        "commander": "Hofri Ghostforge",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Hofri Ghostforge"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2024-05-10T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Morska, Undersea Sleuth",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Morska, Undersea Sleuth"
       },
       {
         "player": "Mike",
-        "commander": "Caesar, Legion's Emperor",
         "place": 1,
-        "kills": 3
+        "kills": 3,
+        "name": "Caesar, Legion's Emperor"
       },
       {
         "player": "Kyriakos",
-        "commander": "Anowon, the Ruin Thief",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Anowon, the Ruin Thief"
       },
       {
         "player": "Peter",
-        "commander": "Kaust, Eyes of the Glade",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Kaust, Eyes of the Glade"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2024-05-10T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Obeka, Splitter of Seconds",
         "place": 1,
-        "kills": 4
+        "kills": 4,
+        "name": "Obeka, Splitter of Seconds"
       },
       {
         "player": "Mike",
-        "commander": "Uril, the Miststalker",
         "place": 1,
-        "kills": 0
+        "kills": 0,
+        "name": "Uril, the Miststalker"
       },
       {
         "player": "Peter",
-        "commander": "Queen Allenal of Ruadach",
         "place": 1,
-        "kills": 0
+        "kills": 0,
+        "name": "Queen Allenal of Ruadach"
       },
       {
         "player": "Peter",
-        "commander": "Wyll, Blade of Frontiers",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Wyll, Blade of Frontiers"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2024-05-10T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Obeka, Splitter of Seconds",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Obeka, Splitter of Seconds"
       },
       {
         "player": "Mike",
-        "commander": "Uril, the Miststalker",
         "place": 1,
-        "kills": 3
+        "kills": 3,
+        "name": "Uril, the Miststalker"
       },
       {
         "player": "Peter",
-        "commander": "Queen Allenal of Ruadach",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Queen Allenal of Ruadach"
       },
       {
         "player": "Peter",
-        "commander": "Wyll, Blade of Frontiers",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Wyll, Blade of Frontiers"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2024-05-10T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Delney, Streetwise Lookout",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Delney, Streetwise Lookout"
       },
       {
         "player": "Mike",
-        "commander": "Be'lakor, the Dark Master",
         "place": 2,
-        "kills": 2
+        "kills": 2,
+        "name": "Be'lakor, the Dark Master"
       },
       {
         "player": "Peter",
-        "commander": "Kinnan, Bonder Prodigy",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Kinnan, Bonder Prodigy"
       },
       {
         "player": "Peter",
-        "commander": "Tazri, Beacon of Unity",
         "place": 1,
-        "kills": 1
+        "kills": 1,
+        "name": "Tazri, Beacon of Unity"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2024-05-15T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Obeka, Splitter of Seconds",
         "place": 2,
-        "kills": 1
+        "kills": 1,
+        "name": "Obeka, Splitter of Seconds"
       },
       {
         "player": "Mike",
-        "commander": "Grismold, the Dreadsower",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Grismold, the Dreadsower"
       },
       {
         "player": "Dillon",
-        "commander": "Judith, Carnage Connoisseur",
         "place": 1,
-        "kills": 2
+        "kills": 2,
+        "name": "Judith, Carnage Connoisseur"
       },
       {
         "player": "Peter",
-        "commander": "Umbris, Fear Manifest",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Umbris, Fear Manifest"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2024-05-15T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Delney, Streetwise Lookout",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Delney, Streetwise Lookout"
       },
       {
         "player": "Mike",
-        "commander": "Be'lakor, the Dark Master",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Be'lakor, the Dark Master"
       },
       {
         "player": "Dillon",
-        "commander": "Hakbal of the Surging Soul",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Hakbal of the Surging Soul"
       },
       {
         "player": "Peter",
-        "commander": "Jaheira, Friend of the Forest",
         "place": 1,
-        "kills": 3
+        "kills": 3,
+        "name": "Jaheira, Friend of the Forest"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2024-05-15T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Marvo, Deep Operative",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Marvo, Deep Operative"
       },
       {
         "player": "Mike",
-        "commander": "Uril, the Miststalker",
         "place": 1,
-        "kills": 3
+        "kills": 3,
+        "name": "Uril, the Miststalker"
       },
       {
         "player": "Dillon",
-        "commander": "Yuma, Proud Protector",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Yuma, Proud Protector"
       },
       {
         "player": "Peter",
-        "commander": "The Scorpion God",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "The Scorpion God"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2024-05-30T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Obeka, Splitter of Seconds",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Obeka, Splitter of Seconds"
       },
       {
         "player": "Mike",
-        "commander": "Grismold, the Dreadsower",
         "place": 2,
-        "kills": 2
+        "kills": 2,
+        "name": "Grismold, the Dreadsower"
       },
       {
         "player": "Dillon",
-        "commander": "Magus Lucea Kane",
         "place": 1,
-        "kills": 0
+        "kills": 0,
+        "name": "Magus Lucea Kane"
       },
       {
         "player": "Kyriakos",
-        "commander": "Isperia, Supreme Judge",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Isperia, Supreme Judge"
       },
       {
         "player": "Peter",
-        "commander": "Eriette of the Charmed Apple",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Eriette of the Charmed Apple"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2024-05-30T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "The Master, Multiplied",
         "place": 5,
-        "kills": 0
+        "kills": 0,
+        "name": "The Master, Multiplied"
       },
       {
         "player": "Mike",
-        "commander": "Giada, Font of Hope",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Giada, Font of Hope"
       },
       {
         "player": "Dillon",
-        "commander": "Judith, Carnage Connoisseur",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Judith, Carnage Connoisseur"
       },
       {
         "player": "Kyriakos",
-        "commander": "Anowon, the Ruin Thief",
         "place": 2,
-        "kills": 1
+        "kills": 1,
+        "name": "Anowon, the Ruin Thief"
       },
       {
         "player": "Peter",
-        "commander": "The Ur-Dragon",
         "place": 1,
-        "kills": 1
+        "kills": 1,
+        "name": "The Ur-Dragon"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2024-05-30T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Marvo, Deep Operative",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Marvo, Deep Operative"
       },
       {
         "player": "Mike",
-        "commander": "Raffine, Scheming Seer",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Raffine, Scheming Seer"
       },
       {
         "player": "Kyriakos",
-        "commander": "Isperia, Supreme Judge",
         "place": 1,
-        "kills": 3
+        "kills": 3,
+        "name": "Isperia, Supreme Judge"
       },
       {
         "player": "Peter",
-        "commander": "The Scorpion God",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "The Scorpion God"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2024-06-05T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Obeka, Splitter of Seconds",
         "place": 1,
-        "kills": 1
+        "kills": 1,
+        "name": "Obeka, Splitter of Seconds"
       },
       {
         "player": "Mike",
-        "commander": "Grismold, the Dreadsower",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Grismold, the Dreadsower"
       },
       {
         "player": "Dillon",
-        "commander": "Hakbal of the Surging Soul",
         "place": 3,
-        "kills": 1
+        "kills": 1,
+        "name": "Hakbal of the Surging Soul"
       },
       {
         "player": "Peter",
-        "commander": "Sauron, the Dark Lord",
         "place": 2,
-        "kills": 1
+        "kills": 1,
+        "name": "Sauron, the Dark Lord"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2024-06-13T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Missy",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Missy"
       },
       {
         "player": "Mike",
-        "commander": "Be'lakor, the Dark Master",
         "place": 1,
-        "kills": 3
+        "kills": 3,
+        "name": "Be'lakor, the Dark Master"
       },
       {
         "player": "Kyriakos",
-        "commander": "Marchesa, Dealer of Death",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Marchesa, Dealer of Death"
       },
       {
         "player": "Peter",
-        "commander": "Eriette of the Charmed Apple",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Eriette of the Charmed Apple"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2024-06-13T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Kibo, Uktabi Prince",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Kibo, Uktabi Prince"
       },
       {
         "player": "Mike",
-        "commander": "Tinybones, Trinket Thief",
         "place": 1,
-        "kills": 2
+        "kills": 2,
+        "name": "Tinybones, Trinket Thief"
       },
       {
         "player": "Kyriakos",
-        "commander": "Bonny Pall, Clearcutter",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Bonny Pall, Clearcutter"
       },
       {
         "player": "Peter",
-        "commander": "Sauron, the Dark Lord",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Sauron, the Dark Lord"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2024-06-20T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Progenitus",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Progenitus"
       },
       {
         "player": "Mike",
-        "commander": "Tinybones, Trinket Thief",
         "place": 2,
-        "kills": 2
+        "kills": 2,
+        "name": "Tinybones, Trinket Thief"
       },
       {
         "player": "Kyriakos",
-        "commander": "Troyan, Gutsy Explorer",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Troyan, Gutsy Explorer"
       },
       {
         "player": "Tom",
-        "commander": "Otrimi, the Ever-Playful",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Otrimi, the Ever-Playful"
       },
       {
         "player": "Peter",
-        "commander": "Ulalek, Fused Atrocity",
         "place": 1,
-        "kills": 0
+        "kills": 0,
+        "name": "Ulalek, Fused Atrocity"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2024-06-20T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Kami of the Crescent Moon",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Kami of the Crescent Moon"
       },
       {
         "player": "Mike",
-        "commander": "Aragorn, King of Gondor",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Aragorn, King of Gondor"
       },
       {
         "player": "Kyriakos",
-        "commander": "Felix Five-Boots",
         "place": 1,
-        "kills": 2
+        "kills": 2,
+        "name": "Felix Five-Boots"
       },
       {
         "player": "Dillon",
-        "commander": "Judith, Carnage Connoisseur",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Judith, Carnage Connoisseur"
       },
       {
         "player": "Peter",
-        "commander": "Ulalek, Fused Atrocity",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Ulalek, Fused Atrocity"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2024-06-20T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Otrimi, the Ever-Playful",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Otrimi, the Ever-Playful"
       },
       {
         "player": "Mike",
-        "commander": "Raffine, Scheming Seer",
         "place": 1,
-        "kills": 0
+        "kills": 0,
+        "name": "Raffine, Scheming Seer"
       },
       {
         "player": "Kyriakos",
-        "commander": "Marchesa, Dealer of Death",
         "place": 2,
-        "kills": 1
+        "kills": 1,
+        "name": "Marchesa, Dealer of Death"
       },
       {
         "player": "Tom",
-        "commander": "Progenitus",
         "place": 2,
-        "kills": 1
+        "kills": 1,
+        "name": "Progenitus"
       },
       {
         "player": "Peter",
-        "commander": "Wyll, Blade of Frontiers",
         "place": 5,
-        "kills": 0
+        "kills": 0,
+        "name": "Wyll, Blade of Frontiers"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2024-06-28T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Kami of the Crescent Moon",
         "place": 1,
-        "kills": 2
+        "kills": 2,
+        "name": "Kami of the Crescent Moon"
       },
       {
         "player": "Mike",
-        "commander": "Grismold, the Dreadsower",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Grismold, the Dreadsower"
       },
       {
         "player": "Kyriakos",
-        "commander": "Myrel, Shield of Argive",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Myrel, Shield of Argive"
       },
       {
         "player": "Michaela",
-        "commander": "Rose Tyler",
         "place": 2,
-        "kills": 1
+        "kills": 1,
+        "name": "Rose Tyler"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2024-06-28T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Obeka, Splitter of Seconds",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Obeka, Splitter of Seconds"
       },
       {
         "player": "Mike",
-        "commander": "Be'lakor, the Dark Master",
         "place": 1,
-        "kills": 3
+        "kills": 3,
+        "name": "Be'lakor, the Dark Master"
       },
       {
         "player": "Kyriakos",
-        "commander": "Troyan, Gutsy Explorer",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Troyan, Gutsy Explorer"
       },
       {
         "player": "Michaela",
-        "commander": "Rose Tyler",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Rose Tyler"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2024-06-28T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Otrimi, the Ever-Playful",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Otrimi, the Ever-Playful"
       },
       {
         "player": "Mike",
-        "commander": "Tovolar, Dire Overlord",
         "place": 3,
-        "kills": 1
+        "kills": 1,
+        "name": "Tovolar, Dire Overlord"
       },
       {
         "player": "Kyriakos",
-        "commander": "Felix Five-Boots",
         "place": 1,
-        "kills": 2
+        "kills": 2,
+        "name": "Felix Five-Boots"
       },
       {
         "player": "Michaela",
-        "commander": "Tegan Jovanka",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Tegan Jovanka"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2024-07-09T00:00:00Z",
     "results": [
       {
         "player": "Dillon",
-        "commander": "Magus Lucea Kane",
         "place": 3,
-        "kills": 1
+        "kills": 1,
+        "name": "Magus Lucea Kane"
       },
       {
         "player": "Mike",
-        "commander": "Najeela, the Blade-Blossom",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Najeela, the Blade-Blossom"
       },
       {
         "player": "Kyriakos",
-        "commander": "Myrel, Shield of Argive",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Myrel, Shield of Argive"
       },
       {
         "player": "Peter",
-        "commander": "Sorin of House Markov",
         "place": 1,
-        "kills": 2
+        "kills": 2,
+        "name": "Sorin of House Markov"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2024-07-09T00:00:00Z",
     "results": [
       {
         "player": "Dillon",
-        "commander": "Hakbal of the Surging Soul",
         "place": 1,
-        "kills": 3
+        "kills": 3,
+        "name": "Hakbal of the Surging Soul"
       },
       {
         "player": "Mike",
-        "commander": "Uril, the Miststalker",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Uril, the Miststalker"
       },
       {
         "player": "Kyriakos",
-        "commander": "Rex, Cyber-Hound",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Rex, Cyber-Hound"
       },
       {
         "player": "Peter",
-        "commander": "Ulalek, Fused Atrocity",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Ulalek, Fused Atrocity"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2024-09-04T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Kros, Defense Contractor",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Kros, Defense Contractor"
       },
       {
         "player": "Mike",
-        "commander": "Najeela, the Blade-Blossom",
         "place": 1,
-        "kills": 2
+        "kills": 2,
+        "name": "Najeela, the Blade-Blossom"
       },
       {
         "player": "Kyriakos",
-        "commander": "Troyan, Gutsy Explorer",
         "place": 2,
-        "kills": 1
+        "kills": 1,
+        "name": "Troyan, Gutsy Explorer"
       },
       {
         "player": "Peter",
-        "commander": "Baylen, the Haymaker",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Baylen, the Haymaker"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2024-09-04T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Kami of the Crescent Moon",
         "place": 3,
-        "kills": 1
+        "kills": 1,
+        "name": "Kami of the Crescent Moon"
       },
       {
         "player": "Mike",
-        "commander": "Tovolar, Dire Overlord",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Tovolar, Dire Overlord"
       },
       {
         "player": "Kyriakos",
-        "commander": "Marchesa, Dealer of Death",
         "place": 2,
-        "kills": 1
+        "kills": 1,
+        "name": "Marchesa, Dealer of Death"
       },
       {
         "player": "Peter",
-        "commander": "Sorin of House Markov",
         "place": 1,
-        "kills": 1
+        "kills": 1,
+        "name": "Sorin of House Markov"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2024-12-10T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Haktos the Unscarred",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Haktos the Unscarred"
       },
       {
         "player": "Mike",
-        "commander": "Raffine, Scheming Seer",
         "place": 1,
-        "kills": 1
+        "kills": 1,
+        "name": "Raffine, Scheming Seer"
       },
       {
         "player": "Mike",
-        "commander": "Grismold, the Dreadsower",
         "place": 2,
-        "kills": 2
+        "kills": 2,
+        "name": "Grismold, the Dreadsower"
       },
       {
         "player": "Peter",
-        "commander": "Sauron, the Dark Lord",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Sauron, the Dark Lord"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2024-12-10T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Marvo, Deep Operative",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Marvo, Deep Operative"
       },
       {
         "player": "Mike",
-        "commander": "Kathril, Aspect Warper",
         "place": 1,
-        "kills": 3
+        "kills": 3,
+        "name": "Kathril, Aspect Warper"
       },
       {
         "player": "Tom",
-        "commander": "Kenrith, the Returned King",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Kenrith, the Returned King"
       },
       {
         "player": "Peter",
-        "commander": "Wyll, Blade of Frontiers",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Wyll, Blade of Frontiers"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2025-01-15T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Haktos the Unscarred",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Haktos the Unscarred"
       },
       {
         "player": "Mike",
-        "commander": "Raffine, Scheming Seer",
         "place": 1,
-        "kills": 3
+        "kills": 3,
+        "name": "Raffine, Scheming Seer"
       },
       {
         "player": "Michaela",
-        "commander": "Hazel of the Rootbloom",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Hazel of the Rootbloom"
       },
       {
         "player": "Peter",
-        "commander": "General Kreat, the Boltbringer",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "General Kreat, the Boltbringer"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2025-01-15T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Obeka, Splitter of Seconds",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Obeka, Splitter of Seconds"
       },
       {
         "player": "Mike",
-        "commander": "Tinybones, Trinket Thief",
         "place": 2,
-        "kills": 1
+        "kills": 1,
+        "name": "Tinybones, Trinket Thief"
       },
       {
         "player": "Michaela",
-        "commander": "Ygra, Eater of All",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Ygra, Eater of All"
       },
       {
         "player": "Peter",
-        "commander": "Aminatou, Veil Piercer",
         "place": 1,
-        "kills": 2
+        "kills": 2,
+        "name": "Aminatou, Veil Piercer"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2025-01-24T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Haktos the Unscarred",
         "place": 2,
-        "kills": 1
+        "kills": 1,
+        "name": "Haktos the Unscarred"
       },
       {
         "player": "Mike",
-        "commander": "Najeela, the Blade-Blossom",
         "place": 1,
-        "kills": 2
+        "kills": 2,
+        "name": "Najeela, the Blade-Blossom"
       },
       {
         "player": "Kyriakos",
-        "commander": "Laughing Jasper Flint",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Laughing Jasper Flint"
       },
       {
         "player": "Peter",
-        "commander": "Valgavoth, Harrower of Souls",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Valgavoth, Harrower of Souls"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2025-01-24T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Marvo, Deep Operative",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Marvo, Deep Operative"
       },
       {
         "player": "Mike",
-        "commander": "Rose Tyler",
         "place": 1,
-        "kills": 3
+        "kills": 3,
+        "name": "Rose Tyler"
       },
       {
         "player": "Kyriakos",
-        "commander": "Felix Five-Boots",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Felix Five-Boots"
       },
       {
         "player": "Peter",
-        "commander": "General Kreat, the Boltbringer",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "General Kreat, the Boltbringer"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2025-01-29T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Gornog, the Red Reaper",
         "place": 2,
-        "kills": 1
+        "kills": 1,
+        "name": "Gornog, the Red Reaper"
       },
       {
         "player": "Mike",
-        "commander": "Syr Gwyn, Hero of Ashvale",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Syr Gwyn, Hero of Ashvale"
       },
       {
         "player": "Michaela",
-        "commander": "Camellia, the Seedmiser",
         "place": 1,
-        "kills": 2
+        "kills": 2,
+        "name": "Camellia, the Seedmiser"
       },
       {
         "player": "Peter",
-        "commander": "Ruxa, Patient Professor",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Ruxa, Patient Professor"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2025-01-29T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Otrimi, the Ever-Playful",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Otrimi, the Ever-Playful"
       },
       {
         "player": "Mike",
-        "commander": "Zaxara, the Exemplary",
         "place": 1,
-        "kills": 2
+        "kills": 2,
+        "name": "Zaxara, the Exemplary"
       },
       {
         "player": "Michaela",
-        "commander": "Rose Tyler",
         "place": 3,
-        "kills": 1
+        "kills": 1,
+        "name": "Rose Tyler"
       },
       {
         "player": "Peter",
-        "commander": "Ulalek, Fused Atrocity",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Ulalek, Fused Atrocity"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2025-02-25T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Rendmaw, Creaking Nest",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Rendmaw, Creaking Nest"
       },
       {
         "player": "Mike",
-        "commander": "Be'lakor, the Dark Master",
         "place": 1,
-        "kills": 3
+        "kills": 3,
+        "name": "Be'lakor, the Dark Master"
       },
       {
         "player": "Michaela",
-        "commander": "Camellia, the Seedmiser",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Camellia, the Seedmiser"
       },
       {
         "player": "Peter",
-        "commander": "Aminatou, Veil Piercer",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Aminatou, Veil Piercer"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2025-02-25T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Gornog, the Red Reaper",
         "place": 2,
-        "kills": 2
+        "kills": 2,
+        "name": "Gornog, the Red Reaper"
       },
       {
         "player": "Mike",
-        "commander": "Rose Tyler",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Rose Tyler"
       },
       {
         "player": "Michaela",
-        "commander": "Glarb, Calamity's Augur",
         "place": 1,
-        "kills": 0
+        "kills": 0,
+        "name": "Glarb, Calamity's Augur"
       },
       {
         "player": "Peter",
-        "commander": "Atraxa, Grand Unifier",
         "place": 2,
-        "kills": 1
+        "kills": 1,
+        "name": "Atraxa, Grand Unifier"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2025-02-25T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Rendmaw, Creaking Nest",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Rendmaw, Creaking Nest"
       },
       {
         "player": "Mike",
-        "commander": "Miirym, Sentinel Wyrm",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Miirym, Sentinel Wyrm"
       },
       {
         "player": "Michaela",
-        "commander": "Glarb, Calamity's Augur",
         "place": 1,
-        "kills": 3
+        "kills": 3,
+        "name": "Glarb, Calamity's Augur"
       },
       {
         "player": "Peter",
-        "commander": "Atraxa, Grand Unifier",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Atraxa, Grand Unifier"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2025-03-13T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Marchesa, the Black Rose",
         "place": 4,
-        "kills": 0
+        "kills": 0,
+        "name": "Marchesa, the Black Rose"
       },
       {
         "player": "Kyriakos",
-        "commander": "Jolrael, Voice of Zhalfir",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Jolrael, Voice of Zhalfir"
       },
       {
         "player": "Dillon",
-        "commander": "Magus Lucea Kane",
         "place": 2,
-        "kills": 1
+        "kills": 1,
+        "name": "Magus Lucea Kane"
       },
       {
         "player": "Peter",
-        "commander": "Ulalek, Fused Atrocity",
         "place": 1,
-        "kills": 2
+        "kills": 2,
+        "name": "Ulalek, Fused Atrocity"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2025-03-13T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Adrix and Nev, Twincasters",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Adrix and Nev, Twincasters"
       },
       {
         "player": "Kyriakos",
-        "commander": "Felix Five-Boots",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Felix Five-Boots"
       },
       {
         "player": "Peter",
-        "commander": "General Kreat, the Boltbringer",
         "place": 1,
-        "kills": 2
+        "kills": 2,
+        "name": "General Kreat, the Boltbringer"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2025-03-20T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Marchesa, the Black Rose",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Marchesa, the Black Rose"
       },
       {
         "player": "Mike",
-        "commander": "Edgar Markov",
         "place": 1,
-        "kills": 2
+        "kills": 2,
+        "name": "Edgar Markov"
       },
       {
         "player": "Peter",
-        "commander": "General Kreat, the Boltbringer",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "General Kreat, the Boltbringer"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2025-03-20T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Marchesa, the Black Rose",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Marchesa, the Black Rose"
       },
       {
         "player": "Mike",
-        "commander": "The Scarab God",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "The Scarab God"
       },
       {
         "player": "Peter",
-        "commander": "General Kreat, the Boltbringer",
         "place": 1,
-        "kills": 2
+        "kills": 2,
+        "name": "General Kreat, the Boltbringer"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2025-03-23T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Adrix and Nev, Twincasters",
         "place": 1,
-        "kills": 1
+        "kills": 1,
+        "name": "Adrix and Nev, Twincasters"
       },
       {
         "player": "Mike",
-        "commander": "Grismold, the Dreadsower",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Grismold, the Dreadsower"
       },
       {
         "player": "Peter",
-        "commander": "General Kreat, the Boltbringer",
         "place": 2,
-        "kills": 1
+        "kills": 1,
+        "name": "General Kreat, the Boltbringer"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2025-03-23T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Rendmaw, Creaking Nest",
         "place": 2,
-        "kills": 1
+        "kills": 1,
+        "name": "Rendmaw, Creaking Nest"
       },
       {
         "player": "Mike",
-        "commander": "Be'lakor, the Dark Master",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Be'lakor, the Dark Master"
       },
       {
         "player": "Peter",
-        "commander": "General Kreat, the Boltbringer",
         "place": 1,
-        "kills": 1
+        "kills": 1,
+        "name": "General Kreat, the Boltbringer"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2025-03-23T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Marchesa, the Black Rose",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "Marchesa, the Black Rose"
       },
       {
         "player": "Mike",
-        "commander": "Edgar Markov",
         "place": 1,
-        "kills": 2
+        "kills": 2,
+        "name": "Edgar Markov"
       },
       {
         "player": "Mike",
-        "commander": "The Scarab God",
         "place": 2,
-        "kills": 0
+        "kills": 0,
+        "name": "The Scarab God"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2025-03-23T00:00:00Z",
     "results": [
       {
         "player": "Tom",
-        "commander": "Adrix and Nev, Twincasters",
         "place": 3,
-        "kills": 0
+        "kills": 0,
+        "name": "Adrix and Nev, Twincasters"
       },
       {
         "player": "Mike",
-        "commander": "Be'lakor, the Dark Master",
         "place": 2,
-        "kills": 1
+        "kills": 1,
+        "name": "Be'lakor, the Dark Master"
       },
       {
         "player": "Mike",
-        "commander": "The Scarab God",
         "place": 1,
-        "kills": 1
+        "kills": 1,
+        "name": "The Scarab God"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2025-05-09T00:00:00Z",
     "results": [
       {
         "player": "Mike",
-        "commander": "Aragorn, King of Gondor",
-        "place": 3
+        "place": 3,
+        "name": "Aragorn, King of Gondor"
       },
       {
         "player": "Michaela",
-        "commander": "Eshki, Temur's Roar",
         "place": 1,
-        "kills": 1
+        "kills": 1,
+        "name": "Eshki, Temur's Roar"
       },
       {
         "player": "Kyriakos",
-        "commander": "Raggadragga, Goreguts Boss",
         "place": 2,
-        "kills": 1
+        "kills": 1,
+        "name": "Raggadragga, Goreguts Boss"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2025-05-09T00:00:00Z",
     "results": [
       {
         "player": "Mike",
-        "commander": "The Scarab God",
-        "place": 4
+        "place": 4,
+        "name": "The Scarab God"
       },
       {
         "player": "Michaela",
-        "commander": "Camellia, the Seedmiser",
-        "place": 3
+        "place": 3,
+        "name": "Camellia, the Seedmiser"
       },
       {
         "player": "Kyriakos",
-        "commander": "Shelob, Dread Weaver",
         "place": 1,
-        "kills": 1
+        "kills": 1,
+        "name": "Shelob, Dread Weaver"
       },
       {
         "player": "Tom",
-        "commander": "Liesa, Shroud of Dusk",
         "place": 2,
-        "kills": 1
+        "kills": 1,
+        "name": "Liesa, Shroud of Dusk"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2025-05-09T00:00:00Z",
     "results": [
       {
         "player": "Mike",
-        "commander": "Giada, Font of Hope",
-        "place": 3
+        "place": 3,
+        "name": "Giada, Font of Hope"
       },
       {
         "player": "Michaela",
-        "commander": "Eshki, Temur's Roar",
         "place": 1,
-        "kills": 2
+        "kills": 2,
+        "name": "Eshki, Temur's Roar"
       },
       {
         "player": "Kyriakos",
-        "commander": "Raggadragga, Goreguts Boss",
         "place": 2,
-        "kills": 1
+        "kills": 1,
+        "name": "Raggadragga, Goreguts Boss"
       },
       {
         "player": "Tom",
-        "commander": "Ivy, Gleeful Spellthief",
-        "place": 4
+        "place": 4,
+        "name": "Ivy, Gleeful Spellthief"
       },
       {
         "player": "Tom",
-        "commander": "Haktos the Unscarred",
         "place": 2,
-        "kills": 1
+        "kills": 1,
+        "name": "Haktos the Unscarred"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2025-07-29T00:00:00Z",
     "results": [
       {
         "player": "Mike",
-        "commander": "Grismold, the Dreadsower",
-        "place": 4
+        "place": 4,
+        "name": "Grismold, the Dreadsower"
       },
       {
         "player": "Kyriakos",
-        "commander": "Raggadragga, Goreguts Boss",
-        "place": 2
+        "place": 2,
+        "name": "Raggadragga, Goreguts Boss"
       },
       {
         "player": "Tom",
-        "commander": "Gornog, the Red Reaper",
         "place": 2,
-        "kills": 1
+        "kills": 1,
+        "name": "Gornog, the Red Reaper"
       },
       {
         "player": "Peter",
-        "commander": "Felothar the Steadfast",
         "place": 1,
-        "kills": 2
+        "kills": 2,
+        "name": "Felothar the Steadfast"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2025-07-29T00:00:00Z",
     "results": [
       {
         "player": "Mike",
-        "commander": "The Scarab God",
-        "place": 3
+        "place": 3,
+        "name": "The Scarab God"
       },
       {
         "player": "Kyriakos",
-        "commander": "Felix Five-Boots",
         "place": 2,
-        "kills": 2
+        "kills": 2,
+        "name": "Felix Five-Boots"
       },
       {
         "player": "Tom",
-        "commander": "Liesa, Shroud of Dusk",
-        "place": 3
+        "place": 3,
+        "name": "Liesa, Shroud of Dusk"
       },
       {
         "player": "Peter",
-        "commander": "Sorin of House Markov",
         "place": 1,
-        "kills": 1
+        "kills": 1,
+        "name": "Sorin of House Markov"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2025-07-29T00:00:00Z",
     "results": [
       {
         "player": "Mike",
-        "commander": "Raffine, Scheming Seer",
-        "place": 2
+        "place": 2,
+        "name": "Raffine, Scheming Seer"
       },
       {
         "player": "Kyriakos",
-        "commander": "Braids, Arisen Nightmare",
         "place": 1,
-        "kills": 2
+        "kills": 2,
+        "name": "Braids, Arisen Nightmare"
       },
       {
         "player": "Tom",
-        "commander": "Adrix and Nev, Twincasters",
         "place": 2,
-        "kills": 1
+        "kills": 1,
+        "name": "Adrix and Nev, Twincasters"
       },
       {
         "player": "Peter",
-        "commander": "Wyll, Blade of Frontiers",
-        "place": 4
+        "place": 4,
+        "name": "Wyll, Blade of Frontiers"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2025-08-01T00:00:00Z",
     "results": [
       {
         "player": "Kyriakos",
-        "commander": "Myrel, Shield of Argive",
-        "place": 2
+        "place": 2,
+        "name": "Myrel, Shield of Argive"
       },
       {
         "player": "Tom",
-        "commander": "Kami of the Crescent Moon",
         "place": 1,
-        "kills": 2
+        "kills": 2,
+        "name": "Kami of the Crescent Moon"
       },
       {
         "player": "Michaela",
-        "commander": "The Thirteenth Doctor",
-        "place": 3
+        "place": 3,
+        "name": "The Thirteenth Doctor"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2025-08-01T00:00:00Z",
     "results": [
       {
         "player": "Kyriakos",
-        "commander": "Rex, Cyber-Hound",
-        "place": 3
+        "place": 3,
+        "name": "Rex, Cyber-Hound"
       },
       {
         "player": "Tom",
-        "commander": "Adrix and Nev, Twincasters",
         "place": 1,
-        "kills": 2
+        "kills": 2,
+        "name": "Adrix and Nev, Twincasters"
       },
       {
         "player": "Michaela",
-        "commander": "The Thirteenth Doctor",
-        "place": 2
+        "place": 2,
+        "name": "The Thirteenth Doctor"
       }
-    ]
+    ],
+    "format": "commander"
   },
   {
     "date": "2025-08-27T00:00:00Z",
     "results": [
       {
         "player": "Mike",
-        "commander": "Hearthhull, the Worldseed",
         "place": 1,
-        "kills": 3
+        "kills": 3,
+        "name": "Hearthhull, the Worldseed"
       },
       {
         "player": "Tom",
-        "commander": "Kami of the Crescent Moon",
-        "place": 2
-      },
-      {
-        "player": "Michaela",
-        "commander": "The Thirteenth Doctor",
-        "place": 2
-      },
-      {
-        "player": "Peter",
-        "commander": "Valgavoth, Harrower of Souls",
-        "place": 2
-      }
-    ]
-  },
-  {
-    "date": "2025-12-12T00:00:00Z",
-    "results": [
-      {
-        "player": "Mike",
-        "commander": "Be'lakor, the Dark Master",
-        "place": 1,
-        "kills": 3
-      },
-      {
-        "player": "Tom",
-        "commander": "Liesa, Shroud of Dusk",
-        "place": 2
-      },
-      {
-        "player": "Michaela",
-        "commander": "Glarb, Calamity's Augur",
-        "place": 2
-      },
-      {
-        "player": "Peter",
-        "commander": "Umbris, Fear Manifest",
-        "place": 4
-      }
-    ]
-  },
-  {
-    "date": "2025-12-12T00:00:00Z",
-    "results": [
-      {
-        "player": "Mike",
-        "commander": "Hearthhull, the Worldseed",
-        "place": 1,
-        "kills": 3
-      },
-      {
-        "player": "Tom",
-        "commander": "Marchesa, the Black Rose",
-        "place": 2
-      },
-      {
-        "player": "Michaela",
-        "commander": "Glarb, Calamity's Augur",
-        "place": 3
-      },
-      {
-        "player": "Peter",
-        "commander": "Atraxa, Grand Unifier",
-        "place": 3
-      }
-    ]
-  },
-  {
-    "date": "2025-01-09T00:00:00Z",
-    "results": [
-      {
-        "player": "Mike",
-        "commander": "Aragorn, King of Gondor",
         "place": 2,
-        "kills": 2
+        "name": "Kami of the Crescent Moon"
       },
       {
         "player": "Michaela",
-        "commander": "Glarb, Calamity's Augur",
-        "place": 3
+        "place": 2,
+        "name": "The Thirteenth Doctor"
       },
       {
         "player": "Peter",
-        "commander": "Sai, Master Thopterist",
+        "place": 2,
+        "name": "Valgavoth, Harrower of Souls"
+      }
+    ],
+    "format": "commander"
+  },
+  {
+    "date": "2025-12-12T00:00:00Z",
+    "results": [
+      {
+        "player": "Mike",
         "place": 1,
-        "kills": 1
+        "kills": 3,
+        "name": "Be'lakor, the Dark Master"
       },
       {
         "player": "Tom",
-        "commander": "Rendmaw, Creaking Nest",
-        "place": 3
+        "place": 2,
+        "name": "Liesa, Shroud of Dusk"
+      },
+      {
+        "player": "Michaela",
+        "place": 2,
+        "name": "Glarb, Calamity's Augur"
+      },
+      {
+        "player": "Peter",
+        "place": 4,
+        "name": "Umbris, Fear Manifest"
       }
-    ]
+    ],
+    "format": "commander"
+  },
+  {
+    "date": "2025-12-12T00:00:00Z",
+    "results": [
+      {
+        "player": "Mike",
+        "place": 1,
+        "kills": 3,
+        "name": "Hearthhull, the Worldseed"
+      },
+      {
+        "player": "Tom",
+        "place": 2,
+        "name": "Marchesa, the Black Rose"
+      },
+      {
+        "player": "Michaela",
+        "place": 3,
+        "name": "Glarb, Calamity's Augur"
+      },
+      {
+        "player": "Peter",
+        "place": 3,
+        "name": "Atraxa, Grand Unifier"
+      }
+    ],
+    "format": "commander"
   },
   {
     "date": "2025-01-09T00:00:00Z",
     "results": [
       {
         "player": "Mike",
-        "commander": "Giada, Font of Hope",
-        "place": 2
+        "place": 2,
+        "kills": 2,
+        "name": "Aragorn, King of Gondor"
       },
       {
         "player": "Michaela",
-        "commander": "Camellia, the Seedmiser",
-        "place": 3
+        "place": 3,
+        "name": "Glarb, Calamity's Augur"
       },
       {
         "player": "Peter",
-        "commander": "Valgavoth, Harrower of Souls",
         "place": 1,
-        "kills": 2
+        "kills": 1,
+        "name": "Sai, Master Thopterist"
       },
       {
         "player": "Tom",
-        "commander": "Liesa, Shroud of Dusk",
-        "place": 4
+        "place": 3,
+        "name": "Rendmaw, Creaking Nest"
       }
-    ]
+    ],
+    "format": "commander"
+  },
+  {
+    "date": "2025-01-09T00:00:00Z",
+    "results": [
+      {
+        "player": "Mike",
+        "place": 2,
+        "name": "Giada, Font of Hope"
+      },
+      {
+        "player": "Michaela",
+        "place": 3,
+        "name": "Camellia, the Seedmiser"
+      },
+      {
+        "player": "Peter",
+        "place": 1,
+        "kills": 2,
+        "name": "Valgavoth, Harrower of Souls"
+      },
+      {
+        "player": "Tom",
+        "place": 4,
+        "name": "Liesa, Shroud of Dusk"
+      }
+    ],
+    "format": "commander"
   }
 ]

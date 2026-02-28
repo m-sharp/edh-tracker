@@ -14,18 +14,22 @@ import (
 const DefaultPodName = "OG EDH Pod"
 
 type Seeder struct {
-	log       *zap.Logger
-	repos     *models.Repositories
-	playerIDs map[string]int
-	deckIDs   map[string]int
+	log          *zap.Logger
+	repos        *models.Repositories
+	playerIDs    map[string]int
+	deckIDs      map[string]int
+	commanderIDs map[string]int
+	formatIDs    map[string]int
 }
 
 func NewSeeder(log *zap.Logger, repos *models.Repositories) *Seeder {
 	return &Seeder{
-		log:       log.Named("Seeder"),
-		repos:     repos,
-		playerIDs: map[string]int{},
-		deckIDs:   map[string]int{},
+		log:          log.Named("Seeder"),
+		repos:        repos,
+		playerIDs:    map[string]int{},
+		deckIDs:      map[string]int{},
+		commanderIDs: map[string]int{},
+		formatIDs:    map[string]int{},
 	}
 }
 
@@ -40,6 +44,15 @@ func (s *Seeder) Run(ctx context.Context) error {
 	if existing != nil {
 		s.log.Warn("Seed data already exists, skipping seeder", zap.String("Pod", DefaultPodName))
 		return nil
+	}
+
+	// Pre-load format IDs
+	formats, err := s.repos.Formats.GetAll(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to load formats: %w", err)
+	}
+	for _, f := range formats {
+		s.formatIDs[f.Name] = f.ID
 	}
 
 	data, err := os.ReadFile("./data/gameInfos.json")
@@ -68,6 +81,11 @@ func (s *Seeder) Run(ctx context.Context) error {
 	}
 
 	for i, game := range games {
+		formatID, ok := s.formatIDs[game.Format]
+		if !ok {
+			return fmt.Errorf("unknown format %q in game %d", game.Format, i+1)
+		}
+
 		var results []models.GameResult
 
 		for _, result := range game.Results {
@@ -76,9 +94,14 @@ func (s *Seeder) Run(ctx context.Context) error {
 				return fmt.Errorf("failed to get or create player %q: %w", result.Player, err)
 			}
 
-			deckID, err := s.getOrCreateDeck(ctx, playerID, result.Commander)
+			commanderID, err := s.getOrCreateCommander(ctx, result.Name)
 			if err != nil {
-				return fmt.Errorf("failed to get or create deck %q for player %d: %w", result.Commander, playerID, err)
+				return fmt.Errorf("failed to get or create commander %q: %w", result.Name, err)
+			}
+
+			deckID, err := s.getOrCreateDeck(ctx, playerID, result.Name, formatID, commanderID)
+			if err != nil {
+				return fmt.Errorf("failed to get or create deck %q for player %d: %w", result.Name, playerID, err)
 			}
 
 			results = append(results, models.GameResult{
@@ -89,7 +112,7 @@ func (s *Seeder) Run(ctx context.Context) error {
 		}
 
 		description := fmt.Sprintf("Game %d", i+1)
-		if err = s.repos.Games.Add(ctx, description, podID, results...); err != nil {
+		if err = s.repos.Games.Add(ctx, description, podID, formatID, results...); err != nil {
 			return fmt.Errorf("failed to insert game %d: %w", i+1, err)
 		}
 	}
@@ -120,15 +143,45 @@ func (s *Seeder) getOrCreatePlayer(ctx context.Context, name string, podID, role
 	return playerID, nil
 }
 
-func (s *Seeder) getOrCreateDeck(ctx context.Context, playerID int, commander string) (int, error) {
-	key := fmt.Sprintf("%d:%s", playerID, commander)
+func (s *Seeder) getOrCreateCommander(ctx context.Context, name string) (int, error) {
+	if id, ok := s.commanderIDs[name]; ok {
+		return id, nil
+	}
+
+	// Check if already exists in DB
+	existing, err := s.repos.Commanders.GetByName(ctx, name)
+	if err != nil {
+		return 0, fmt.Errorf("failed to look up commander %q: %w", name, err)
+	}
+	if existing != nil {
+		s.commanderIDs[name] = existing.ID
+		return existing.ID, nil
+	}
+
+	id, err := s.repos.Commanders.Add(ctx, name)
+	if err != nil {
+		return 0, fmt.Errorf("failed to add commander %q: %w", name, err)
+	}
+
+	s.commanderIDs[name] = id
+	return id, nil
+}
+
+func (s *Seeder) getOrCreateDeck(ctx context.Context, playerID int, name string, formatID int, commanderID int) (int, error) {
+	key := fmt.Sprintf("%d:%s", playerID, name)
 	if id, ok := s.deckIDs[key]; ok {
 		return id, nil
 	}
 
-	deckID, err := s.repos.Decks.Add(ctx, playerID, commander)
+	deckID, err := s.repos.Decks.Add(ctx, playerID, name, formatID)
 	if err != nil {
-		return 0, fmt.Errorf("failed to add deck %q for player %d: %w", commander, playerID, err)
+		return 0, fmt.Errorf("failed to add deck %q for player %d: %w", name, playerID, err)
+	}
+
+	// Create the DeckCommander association
+	// TODO: Add partners to seed data
+	if _, err = s.repos.DeckCommanders.Add(ctx, deckID, commanderID, nil); err != nil {
+		return 0, fmt.Errorf("failed to add deck_commander for deck %d: %w", deckID, err)
 	}
 
 	s.deckIDs[key] = deckID

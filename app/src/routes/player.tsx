@@ -64,7 +64,7 @@ function DeckDisplay({ player }: DeckDisplayProps): ReactElement {
                 slots={{toolbar: GridToolbar}}
                 initialState={{
                     sorting: {
-                        sortModel: [{field: "commander", sort: "asc"}]
+                        sortModel: [{field: "name", sort: "asc"}]
                     }
                 }}
             />

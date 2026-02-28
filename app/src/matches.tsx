@@ -21,7 +21,7 @@ export function MatchesDisplay({ games, targetCommander }: MatchesDisplayProps):
         },
         {
             field: "results",
-            headerName: "Commanders (In Place Order)",
+            headerName: "Decks (In Place Order)",
             renderCell: (params) => (
                 <MatchUpDisplay results={params.row.results} targetCommander={targetCommander || ""} />
             ),
@@ -66,7 +66,7 @@ export function MatchUpDisplay({ results, targetCommander }: MatchUpDisplayProps
         <span className="match">
             {results.map(result => (
                 <span className="match-up" key={result.id}>
-                    <span color={result.commander === targetCommander ? "blue" : "black"}>{result.commander}</span>
+                    <span color={result.commander_name === targetCommander ? "blue" : "black"}>{result.deck_name}{result.commander_name && ` — ${result.commander_name}`}</span>
                     <span className="vs"> VS </span>
                 </span>
             ))}
