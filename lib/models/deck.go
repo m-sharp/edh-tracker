@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	// ToDo: Include player name?
-	GetAllDecks       = `SELECT id, player_id, commander, retired, ctime FROM deck WHERE retired = 0;`
+	GetAllDecks = `SELECT deck.id, deck.player_id, player.name, deck.commander, deck.retired, deck.ctime
+							FROM (deck INNER JOIN player on deck.player_id = player.id) WHERE deck.retired = 0;`
 	GetDecksForPlayer = `SELECT id, player_id, commander, retired, ctime FROM deck WHERE player_id = ?;`
 	GetDeckByID       = `SELECT deck.id, deck.player_id, deck.commander, deck.retired, deck.ctime, player.name
 							FROM (deck INNER JOIN player on deck.player_id = player.id)

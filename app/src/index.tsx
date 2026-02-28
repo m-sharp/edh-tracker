@@ -3,13 +3,20 @@ import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { CssBaseline } from "@mui/material";
 
+import {
+    GetDeck, GetDecks,
+    GetGame, GetGames,
+    GetNewDeckInfo,
+    GetPlayer, GetPlayers,
+} from "./http";
 import ErrorPage from "./routes/error"
-import DeckView, { getDeck } from "./routes/deck";
-import DecksView, { getDecks } from "./routes/decks";
-import GameView, { getGame } from "./routes/game";
-import GamesView, { getGames } from "./routes/games";
-import PlayerView, { getPlayer } from "./routes/player";
-import PlayersView, { getPlayers } from "./routes/players";
+import DeckView from "./routes/deck";
+import DecksView from "./routes/decks";
+import GameView from "./routes/game";
+import GamesView from "./routes/games";
+import NewGameView, { createGame } from "./routes/new";
+import PlayerView from "./routes/player";
+import PlayersView from "./routes/players";
 import Root from "./routes/root";
 
 import "./styles.css";
@@ -23,33 +30,39 @@ const router = createBrowserRouter([
             {
                 path: "decks",
                 element: <DecksView />,
-                loader: getDecks,
+                loader: GetDecks,
             },
             {
                 path: "deck/:deckId",
                 element: <DeckView />,
-                loader: getDeck,
+                loader: GetDeck,
             },
             {
                 path: "games",
                 element: <GamesView />,
-                loader: getGames,
+                loader: GetGames,
             },
             {
                 path: "game/:gameId",
                 element: <GameView />,
-                loader: getGame,
+                loader: GetGame,
             },
             {
                 path: "players",
                 element: <PlayersView />,
-                loader: getPlayers,
+                loader: GetPlayers,
             },
             {
                 path: "player/:playerId",
                 element: <PlayerView />,
-                loader: getPlayer,
+                loader: GetPlayer,
             },
+            {
+                path: "new-game",
+                element: <NewGameView />,
+                loader: GetNewDeckInfo,
+                action: createGame,
+            }
         ],
     },
 ]);

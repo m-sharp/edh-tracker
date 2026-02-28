@@ -2,9 +2,7 @@ import { ReactElement } from "react";
 import { Link } from "react-router-dom";
 import { GridColDef } from "@mui/x-data-grid";
 
-export interface RecordDict {
-    [key: number]: number;
-}
+import { RecordDict } from "./types";
 
 interface RecordProps {
     record: RecordDict;

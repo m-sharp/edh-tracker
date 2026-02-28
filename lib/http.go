@@ -17,13 +17,17 @@ func CORSMiddleware(nextHandler http.HandlerFunc) http.HandlerFunc {
 		w.Header().Add("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
 		w.Header().Add("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 
-		if r.Method == "OPTIONS" {
-			http.Error(w, "No Content", http.StatusNoContent)
-			return
-		}
-
 		nextHandler(w, r)
 	}
+}
+
+func CORSPreflightHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodOptions {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	http.Error(w, "No Content", http.StatusNoContent)
 }
 
 // GNUMiddleware adds the X-Clacks-Overhead header to keep names alive (https://wiki.lspace.org/GNU_Terry_Pratchett)

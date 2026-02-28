@@ -1,33 +1,14 @@
 import { ReactElement } from "react";
 import { Link, useLoaderData } from "react-router-dom";
-import { LoaderFunctionArgs } from "@remix-run/router/utils";
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Box } from "@mui/material";
 import Skeleton from "@mui/material/Skeleton";
 
 import { AsyncComponentHelper } from "../common";
-import { Game, MatchesDisplay } from "../matches";
-import { Record, RecordDict } from "../stats";
-
-import "../styles.css";
-
-export interface Deck {
-    id: number;
-    player_id: number;
-    player_name: string;
-    commander: string;
-    retired: boolean;
-    ctime: string;
-    record: RecordDict;
-    games: number;
-    kills: number;
-    points: number;
-}
-
-export async function getDeck({ params }: LoaderFunctionArgs): Promise<Deck> {
-    const res = await fetch(`http://localhost:8080/api/deck?deck_id=${params.deckId}`);
-    return res.json();
-}
+import { GetGamesForDeck } from "../http";
+import { MatchesDisplay } from "../matches";
+import { Record } from "../stats";
+import { Deck } from "../types";
 
 export default function View(): ReactElement {
     const deck = useLoaderData() as Deck;
@@ -38,7 +19,7 @@ export default function View(): ReactElement {
                 <h1>{deck.commander}</h1>
                 <Record record={deck.record} />
                 <span className={"info-column-item"}>Owner - <Link to={`/player/${deck.player_id}`}>{deck.player_name}</Link></span>
-                {!deck.retired &&
+                {deck.retired &&
                     <Box sx={{display: "flex"}}><DeleteIcon /><span> Retired</span></Box>
                 }
             </Box>
@@ -55,8 +36,12 @@ export default function View(): ReactElement {
     );
 }
 
+interface MatchUpsForDeckProps {
+    deck: Deck;
+}
+
 function MatchUpsForDeck({ deck }: MatchUpsForDeckProps): ReactElement {
-    const {data, loading, error} = AsyncComponentHelper(getGamesForDeck(deck.id));
+    const {data, loading, error} = AsyncComponentHelper(GetGamesForDeck(deck.id));
 
     if (loading) {
         return <Skeleton variant="rounded" animation="wave" height={500} />;
@@ -70,13 +55,4 @@ function MatchUpsForDeck({ deck }: MatchUpsForDeckProps): ReactElement {
             <MatchesDisplay games={data} targetCommander={deck.commander} />
         </Box>
     );
-}
-
-interface MatchUpsForDeckProps {
-    deck: Deck;
-}
-
-async function getGamesForDeck(id: number): Promise<Array<Game>> {
-    const res = await fetch(`http://localhost:8080/api/games?deck_id=${id}`);
-    return await res.json();
 }

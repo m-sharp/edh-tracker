@@ -7,32 +7,29 @@ import (
 )
 
 const (
-	dropPlayers = `DELETE * FROM player;`
-)
-
-var (
-	playerSeeds = []string{
-		`INSERT INTO player (name) VALUES ("Mike");`,
-		`INSERT INTO player (name) VALUES ("Tom");`,
-		`INSERT INTO player (name) VALUES ("Dillon");`,
-		`INSERT INTO player (name) VALUES ("Peter");`,
-	}
+	createDeckTable = `CREATE TABLE deck(
+		id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+		player_id INT,
+		commander VARCHAR(256),
+		retired BOOL DEFAULT FALSE,
+		ctime DATETIME DEFAULT NOW(),
+		FOREIGN KEY (player_id) REFERENCES player(id) ON DELETE CASCADE
+	);`
+	destroyDeckTable = `DROP TABLE deck;`
 )
 
 type Migration3 struct{}
 
 func (m *Migration3) Upgrade(ctx context.Context, client *lib.DBClient) error {
-	for _, playerSeed := range playerSeeds {
-		if _, err := client.Db.ExecContext(ctx, playerSeed); err != nil {
-			return lib.NewDBError(playerSeed, err)
-		}
+	if _, err := client.Db.ExecContext(ctx, createDeckTable); err != nil {
+		return lib.NewDBError(createDeckTable, err)
 	}
 	return nil
 }
 
 func (m *Migration3) Downgrade(ctx context.Context, client *lib.DBClient) error {
-	if _, err := client.Db.ExecContext(ctx, dropPlayers); err != nil {
-		return lib.NewDBError(dropPlayers, err)
+	if _, err := client.Db.ExecContext(ctx, destroyDeckTable); err != nil {
+		return lib.NewDBError(destroyDeckTable, err)
 	}
 	return nil
 }

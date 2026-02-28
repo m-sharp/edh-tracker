@@ -40,7 +40,7 @@ func RunAll(ctx context.Context, client *lib.DBClient, log *zap.Logger) error {
 		return err
 	}
 
-	migrations := getAllMigrations()
+	migrations := getAllMigrations(log, client)
 	var sorted []int
 	for key := range migrations {
 		sorted = append(sorted, key)
@@ -73,7 +73,9 @@ func RunAll(ctx context.Context, client *lib.DBClient, log *zap.Logger) error {
 			return err
 		}
 	}
+
 	log.Info("Finished running migrations", zap.Int("Run Count", len(ran)))
+
 	return nil
 }
 
@@ -134,15 +136,17 @@ func decrementMigrationTable(ctx context.Context, client *lib.DBClient) error {
 	return nil
 }
 
-func getAllMigrations() map[int]Migration {
-	return map[int]Migration{
+func getAllMigrations(log *zap.Logger, client *lib.DBClient) map[int]Migration {
+	migrations := map[int]Migration{
 		1: &Migration1{},
 		2: &Migration2{},
 		3: &Migration3{},
 		4: &Migration4{},
 		5: &Migration5{},
-		6: &Migration6{},
-		7: &Migration7{},
-		8: &Migration8{},
 	}
+
+	// Always run last
+	migrations[len(migrations)+1] = NewSeedMigration(log, client)
+
+	return migrations
 }
