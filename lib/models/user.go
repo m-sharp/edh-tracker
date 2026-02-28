@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/m-sharp/edh-tracker/lib"
 )
@@ -111,6 +112,22 @@ func (u *UserProvider) Add(ctx context.Context, playerID, roleID int) (int, erro
 	}
 
 	return int(id), nil
+}
+
+func (u *UserProvider) BulkAdd(ctx context.Context, playerIDs []int, roleID int) error {
+	if len(playerIDs) == 0 {
+		return nil
+	}
+
+	query := "INSERT INTO user (player_id, role_id) VALUES " + strings.TrimSuffix(strings.Repeat("(?,?),", len(playerIDs)), ",")
+	args := make([]interface{}, 0, len(playerIDs)*2)
+	for _, id := range playerIDs {
+		args = append(args, id, roleID)
+	}
+	if _, err := u.client.Db.ExecContext(ctx, query, args...); err != nil {
+		return fmt.Errorf("failed to bulk insert User records: %w", err)
+	}
+	return nil
 }
 
 func (u *UserProvider) SoftDelete(ctx context.Context, id int) error {

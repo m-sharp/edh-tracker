@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/m-sharp/edh-tracker/lib"
 )
@@ -16,8 +17,9 @@ const (
 					  WHERE deck.player_id = ?
 					    AND deck.deleted_at IS NULL
 					    AND game_result.deleted_at IS NULL;`
-	InsertPlayer     = `INSERT INTO player (name) VALUES (?);`
-	SoftDeletePlayer = `UPDATE player SET deleted_at = NOW() WHERE id = ?;`
+	GetPlayersByNames = `SELECT id, name FROM player WHERE name IN (%s) AND deleted_at IS NULL`
+	InsertPlayer      = `INSERT INTO player (name) VALUES (?);`
+	SoftDeletePlayer  = `UPDATE player SET deleted_at = NOW() WHERE id = ?;`
 
 	playerValidationErr = "invalid Player: %s"
 )
@@ -150,6 +152,30 @@ func (p *PlayerProvider) Add(ctx context.Context, name string) (int, error) {
 	}
 
 	return int(id), nil
+}
+
+func (p *PlayerProvider) BulkAdd(ctx context.Context, names []string) ([]Player, error) {
+	if len(names) == 0 {
+		return []Player{}, nil
+	}
+
+	insertQuery := "INSERT INTO player (name) VALUES " + strings.TrimSuffix(strings.Repeat("(?),", len(names)), ",")
+	args := make([]interface{}, len(names))
+	for i, name := range names {
+		args[i] = name
+	}
+	if _, err := p.client.Db.ExecContext(ctx, insertQuery, args...); err != nil {
+		return nil, fmt.Errorf("failed to bulk insert Player records: %w", err)
+	}
+
+	inPlaceholders := strings.TrimSuffix(strings.Repeat("?,", len(names)), ",")
+	selectQuery := fmt.Sprintf(GetPlayersByNames, inPlaceholders)
+	var players []Player
+	if err := p.client.Db.SelectContext(ctx, &players, selectQuery, args...); err != nil {
+		return nil, fmt.Errorf("failed to select inserted Players: %w", err)
+	}
+
+	return players, nil
 }
 
 func (p *PlayerProvider) SoftDelete(ctx context.Context, id int) error {

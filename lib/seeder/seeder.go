@@ -14,23 +14,22 @@ import (
 const DefaultPodName = "OG EDH Pod"
 
 type Seeder struct {
-	log          *zap.Logger
-	repos        *models.Repositories
-	playerIDs    map[string]int
-	deckIDs      map[string]int
-	commanderIDs map[string]int
-	formatIDs    map[string]int
+	log   *zap.Logger
+	repos *models.Repositories
 }
 
 func NewSeeder(log *zap.Logger, repos *models.Repositories) *Seeder {
 	return &Seeder{
-		log:          log.Named("Seeder"),
-		repos:        repos,
-		playerIDs:    map[string]int{},
-		deckIDs:      map[string]int{},
-		commanderIDs: map[string]int{},
-		formatIDs:    map[string]int{},
+		log:   log.Named("Seeder"),
+		repos: repos,
 	}
+}
+
+// deckEntry holds the unique player+commander+format combinations found across all games.
+type deckEntry struct {
+	playerName    string
+	commanderName string
+	formatID      int
 }
 
 func (s *Seeder) Run(ctx context.Context) error {
@@ -46,33 +45,32 @@ func (s *Seeder) Run(ctx context.Context) error {
 		return nil
 	}
 
-	// Pre-load format IDs
+	// Pre-load format IDs from the database
 	formats, err := s.repos.Formats.GetAll(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to load formats: %w", err)
 	}
+	formatIDs := make(map[string]int)
 	for _, f := range formats {
-		s.formatIDs[f.Name] = f.ID
+		formatIDs[f.Name] = f.ID
 	}
 
+	// Load game data from JSON
 	data, err := os.ReadFile("./data/gameInfos.json")
 	if err != nil {
 		return fmt.Errorf("failed to read game info json file: %w", err)
 	}
-
 	var games []Game
 	if err = json.Unmarshal(data, &games); err != nil {
 		return fmt.Errorf("failed to unmarshal game info: %w", err)
 	}
-
 	s.log.Info("Seeding Games", zap.Int("Count", len(games)))
 
-	// Look up the player role once and cache the ID
+	// Look up the player role once
 	role, err := s.repos.Users.GetRoleByName(ctx, models.RolePlayer)
 	if err != nil {
 		return fmt.Errorf("failed to get player role: %w", err)
 	}
-	roleID := role.ID
 
 	// Create the default pod
 	podID, err := s.repos.Pods.Add(ctx, DefaultPodName)
@@ -80,110 +78,189 @@ func (s *Seeder) Run(ctx context.Context) error {
 		return fmt.Errorf("failed to create default pod: %w", err)
 	}
 
-	for i, game := range games {
-		formatID, ok := s.formatIDs[game.Format]
-		if !ok {
-			return fmt.Errorf("unknown format %q in game %d", game.Format, i+1)
-		}
+	// Pre-processing pass: collect unique players, commanders, and deck entries from game data
+	playerNames, commanderNames, deckEntries, err := s.collectEntities(games, formatIDs)
+	if err != nil {
+		return err
+	}
 
-		var results []models.GameResult
+	// Seed players, create user accounts, and add them to the pod
+	playerIDs, err := s.seedPlayersAndUsers(ctx, playerNames, podID, role.ID)
+	if err != nil {
+		return err
+	}
 
-		for _, result := range game.Results {
-			playerID, err := s.getOrCreatePlayer(ctx, result.Player, podID, roleID)
-			if err != nil {
-				return fmt.Errorf("failed to get or create player %q: %w", result.Player, err)
-			}
+	// Seed commanders
+	commanderIDs, err := s.seedCommanders(ctx, commanderNames)
+	if err != nil {
+		return err
+	}
 
-			commanderID, err := s.getOrCreateCommander(ctx, result.Name)
-			if err != nil {
-				return fmt.Errorf("failed to get or create commander %q: %w", result.Name, err)
-			}
+	// Seed decks and deck_commander associations
+	deckIDs, err := s.seedDecks(ctx, deckEntries, playerIDs, commanderIDs)
+	if err != nil {
+		return err
+	}
 
-			deckID, err := s.getOrCreateDeck(ctx, playerID, result.Name, formatID, commanderID)
-			if err != nil {
-				return fmt.Errorf("failed to get or create deck %q for player %d: %w", result.Name, playerID, err)
-			}
-
-			results = append(results, models.GameResult{
-				DeckId: deckID,
-				Place:  result.Place,
-				Kills:  result.Kills,
-			})
-		}
-
-		description := fmt.Sprintf("Game %d", i+1)
-		if err = s.repos.Games.Add(ctx, description, podID, formatID, results...); err != nil {
-			return fmt.Errorf("failed to insert game %d: %w", i+1, err)
-		}
+	// Seed games and their results
+	if err = s.seedGames(ctx, games, formatIDs, playerIDs, deckIDs, podID); err != nil {
+		return err
 	}
 
 	s.log.Info("Seeding complete", zap.Int("Games", len(games)))
 	return nil
 }
 
-func (s *Seeder) getOrCreatePlayer(ctx context.Context, name string, podID, roleID int) (int, error) {
-	if id, ok := s.playerIDs[name]; ok {
-		return id, nil
+// collectEntities performs a pre-processing pass over the raw game data to collect
+// unique player names, commander names, and deck entries (player+commander+format combos).
+func (s *Seeder) collectEntities(games []Game, formatIDs map[string]int) (playerNames, commanderNames []string, entries []deckEntry, err error) {
+	playerNameSet := map[string]struct{}{}
+	commanderNameSet := map[string]struct{}{}
+	deckKeySet := map[string]struct{}{}
+
+	for i, game := range games {
+		formatID, ok := formatIDs[game.Format]
+		if !ok {
+			return nil, nil, nil, fmt.Errorf("unknown format %q in game %d", game.Format, i+1)
+		}
+		for _, result := range game.Results {
+			playerNameSet[result.Player] = struct{}{}
+			commanderNameSet[result.Name] = struct{}{}
+			key := result.Player + ":" + result.Name
+			if _, exists := deckKeySet[key]; !exists {
+				deckKeySet[key] = struct{}{}
+				entries = append(entries, deckEntry{
+					playerName:    result.Player,
+					commanderName: result.Name,
+					formatID:      formatID,
+				})
+			}
+		}
 	}
 
-	playerID, err := s.repos.Players.Add(ctx, name)
-	if err != nil {
-		return 0, fmt.Errorf("failed to add player %q: %w", name, err)
+	playerNames = make([]string, 0, len(playerNameSet))
+	for name := range playerNameSet {
+		playerNames = append(playerNames, name)
+	}
+	commanderNames = make([]string, 0, len(commanderNameSet))
+	for name := range commanderNameSet {
+		commanderNames = append(commanderNames, name)
 	}
 
-	if _, err = s.repos.Users.Add(ctx, playerID, roleID); err != nil {
-		return 0, fmt.Errorf("failed to add user for player %d: %w", playerID, err)
-	}
-
-	if err = s.repos.Pods.AddPlayerToPod(ctx, podID, playerID); err != nil {
-		return 0, fmt.Errorf("failed to add player %d to pod %d: %w", playerID, podID, err)
-	}
-
-	s.playerIDs[name] = playerID
-	return playerID, nil
+	return playerNames, commanderNames, entries, nil
 }
 
-func (s *Seeder) getOrCreateCommander(ctx context.Context, name string) (int, error) {
-	if id, ok := s.commanderIDs[name]; ok {
-		return id, nil
-	}
-
-	// Check if already exists in DB
-	existing, err := s.repos.Commanders.GetByName(ctx, name)
+// seedPlayersAndUsers bulk-inserts players, creates their user accounts, and adds them to the pod.
+// Returns a name→ID map for use in subsequent seeding steps.
+func (s *Seeder) seedPlayersAndUsers(ctx context.Context, playerNames []string, podID, roleID int) (map[string]int, error) {
+	players, err := s.repos.Players.BulkAdd(ctx, playerNames)
 	if err != nil {
-		return 0, fmt.Errorf("failed to look up commander %q: %w", name, err)
-	}
-	if existing != nil {
-		s.commanderIDs[name] = existing.ID
-		return existing.ID, nil
+		return nil, fmt.Errorf("failed to bulk add players: %w", err)
 	}
 
-	id, err := s.repos.Commanders.Add(ctx, name)
-	if err != nil {
-		return 0, fmt.Errorf("failed to add commander %q: %w", name, err)
+	playerIDs := make(map[string]int, len(players))
+	playerIDSlice := make([]int, len(players))
+	for i, p := range players {
+		playerIDs[p.Name] = p.ID
+		playerIDSlice[i] = p.ID
 	}
 
-	s.commanderIDs[name] = id
-	return id, nil
+	if err = s.repos.Users.BulkAdd(ctx, playerIDSlice, roleID); err != nil {
+		return nil, fmt.Errorf("failed to bulk add users: %w", err)
+	}
+
+	if err = s.repos.Pods.BulkAddPlayers(ctx, podID, playerIDSlice); err != nil {
+		return nil, fmt.Errorf("failed to bulk add players to pod: %w", err)
+	}
+
+	return playerIDs, nil
 }
 
-func (s *Seeder) getOrCreateDeck(ctx context.Context, playerID int, name string, formatID int, commanderID int) (int, error) {
-	key := fmt.Sprintf("%d:%s", playerID, name)
-	if id, ok := s.deckIDs[key]; ok {
-		return id, nil
-	}
-
-	deckID, err := s.repos.Decks.Add(ctx, playerID, name, formatID)
+// seedCommanders bulk-inserts commanders and returns a name→ID map.
+func (s *Seeder) seedCommanders(ctx context.Context, commanderNames []string) (map[string]int, error) {
+	commanders, err := s.repos.Commanders.BulkAdd(ctx, commanderNames)
 	if err != nil {
-		return 0, fmt.Errorf("failed to add deck %q for player %d: %w", name, playerID, err)
+		return nil, fmt.Errorf("failed to bulk add commanders: %w", err)
 	}
 
-	// Create the DeckCommander association
-	// TODO: Add partners to seed data
-	if _, err = s.repos.DeckCommanders.Add(ctx, deckID, commanderID, nil); err != nil {
-		return 0, fmt.Errorf("failed to add deck_commander for deck %d: %w", deckID, err)
+	commanderIDs := make(map[string]int, len(commanders))
+	for _, c := range commanders {
+		commanderIDs[c.Name] = c.ID
 	}
 
-	s.deckIDs[key] = deckID
-	return deckID, nil
+	return commanderIDs, nil
+}
+
+// seedDecks bulk-inserts decks and their commander associations.
+// Returns a "playerID:deckName"→deckID map for use when building game results.
+func (s *Seeder) seedDecks(ctx context.Context, entries []deckEntry, playerIDs, commanderIDs map[string]int) (map[string]int, error) {
+	// Build the []Deck slice for bulk insertion
+	deckSlice := make([]models.Deck, len(entries))
+	for i, de := range entries {
+		deckSlice[i] = models.Deck{
+			PlayerID: playerIDs[de.playerName],
+			Name:     de.commanderName,
+			FormatID: de.formatID,
+		}
+	}
+
+	insertedDecks, err := s.repos.Decks.BulkAdd(ctx, deckSlice)
+	if err != nil {
+		return nil, fmt.Errorf("failed to bulk add decks: %w", err)
+	}
+
+	deckIDs := make(map[string]int, len(insertedDecks))
+	for _, d := range insertedDecks {
+		key := fmt.Sprintf("%d:%s", d.PlayerID, d.Name)
+		deckIDs[key] = d.ID
+	}
+
+	// Build the []DeckCommander slice and insert associations
+	dcSlice := make([]models.DeckCommander, len(entries))
+	for i, de := range entries {
+		playerID := playerIDs[de.playerName]
+		deckKey := fmt.Sprintf("%d:%s", playerID, de.commanderName)
+		dcSlice[i] = models.DeckCommander{
+			DeckID:      deckIDs[deckKey],
+			CommanderID: commanderIDs[de.commanderName],
+		}
+	}
+
+	if err = s.repos.DeckCommanders.BulkAdd(ctx, dcSlice); err != nil {
+		return nil, fmt.Errorf("failed to bulk add deck_commanders: %w", err)
+	}
+
+	return deckIDs, nil
+}
+
+// seedGames builds the GameDetails slice from raw game data and bulk-inserts games and results.
+func (s *Seeder) seedGames(ctx context.Context, games []Game, formatIDs, playerIDs, deckIDs map[string]int, podID int) error {
+	gameDetails := make([]models.GameDetails, len(games))
+	for i, game := range games {
+		formatID := formatIDs[game.Format]
+		results := make([]models.GameResult, len(game.Results))
+		for j, result := range game.Results {
+			playerID := playerIDs[result.Player]
+			deckKey := fmt.Sprintf("%d:%s", playerID, result.Name)
+			results[j] = models.GameResult{
+				DeckId: deckIDs[deckKey],
+				Place:  result.Place,
+				Kills:  result.Kills,
+			}
+		}
+		gameDetails[i] = models.GameDetails{
+			Game: models.Game{
+				Description: fmt.Sprintf("Game %d", i+1),
+				PodID:       podID,
+				FormatID:    formatID,
+			},
+			Results: results,
+		}
+	}
+
+	if err := s.repos.Games.BulkAdd(ctx, gameDetails); err != nil {
+		return fmt.Errorf("failed to bulk add games: %w", err)
+	}
+
+	return nil
 }

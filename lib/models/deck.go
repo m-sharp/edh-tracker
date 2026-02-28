@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strings"
 
 	"github.com/m-sharp/edh-tracker/lib"
 )
@@ -240,6 +241,43 @@ func (d *DeckProvider) Add(ctx context.Context, playerID int, name string, forma
 	}
 
 	return int(id), nil
+}
+
+func (d *DeckProvider) BulkAdd(ctx context.Context, decks []Deck) ([]Deck, error) {
+	if len(decks) == 0 {
+		return []Deck{}, nil
+	}
+
+	insertQuery := "INSERT INTO deck (player_id, name, format_id) VALUES " + strings.TrimSuffix(strings.Repeat("(?,?,?),", len(decks)), ",")
+	insertArgs := make([]interface{}, 0, len(decks)*3)
+	for _, deck := range decks {
+		insertArgs = append(insertArgs, deck.PlayerID, deck.Name, deck.FormatID)
+	}
+	if _, err := d.client.Db.ExecContext(ctx, insertQuery, insertArgs...); err != nil {
+		return nil, fmt.Errorf("failed to bulk insert Deck records: %w", err)
+	}
+
+	// Collect player IDs and names for the SELECT
+	playerIDArgs := make([]interface{}, len(decks))
+	nameArgs := make([]interface{}, len(decks))
+	for i, deck := range decks {
+		playerIDArgs[i] = deck.PlayerID
+		nameArgs[i] = deck.Name
+	}
+	inPlayerIDs := strings.TrimSuffix(strings.Repeat("?,", len(decks)), ",")
+	inNames := strings.TrimSuffix(strings.Repeat("?,", len(decks)), ",")
+	selectQuery := fmt.Sprintf(
+		"SELECT id, player_id, name FROM deck WHERE player_id IN (%s) AND name IN (%s) AND deleted_at IS NULL",
+		inPlayerIDs, inNames,
+	)
+	selectArgs := append(playerIDArgs, nameArgs...)
+
+	var rows []Deck
+	if err := d.client.Db.SelectContext(ctx, &rows, selectQuery, selectArgs...); err != nil {
+		return nil, fmt.Errorf("failed to select inserted Decks: %w", err)
+	}
+
+	return rows, nil
 }
 
 func (d *DeckProvider) Retire(ctx context.Context, deckID int) error {

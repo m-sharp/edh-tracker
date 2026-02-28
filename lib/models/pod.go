@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/m-sharp/edh-tracker/lib"
 )
@@ -130,6 +131,22 @@ func (p *PodProvider) Add(ctx context.Context, name string) (int, error) {
 	}
 
 	return int(id), nil
+}
+
+func (p *PodProvider) BulkAddPlayers(ctx context.Context, podID int, playerIDs []int) error {
+	if len(playerIDs) == 0 {
+		return nil
+	}
+
+	query := "INSERT INTO player_pod (pod_id, player_id) VALUES " + strings.TrimSuffix(strings.Repeat("(?,?),", len(playerIDs)), ",")
+	args := make([]interface{}, 0, len(playerIDs)*2)
+	for _, id := range playerIDs {
+		args = append(args, podID, id)
+	}
+	if _, err := p.client.Db.ExecContext(ctx, query, args...); err != nil {
+		return fmt.Errorf("failed to bulk insert PlayerPod records: %w", err)
+	}
+	return nil
 }
 
 func (p *PodProvider) AddPlayerToPod(ctx context.Context, podID, playerID int) error {

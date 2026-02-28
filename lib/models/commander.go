@@ -3,14 +3,16 @@ package models
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/m-sharp/edh-tracker/lib"
 )
 
 const (
-	GetCommanderByID   = `SELECT id, name, created_at, updated_at, deleted_at FROM commander WHERE id = ? AND deleted_at IS NULL LIMIT 1;`
-	GetCommanderByName = `SELECT id, name, created_at, updated_at, deleted_at FROM commander WHERE name = ? AND deleted_at IS NULL LIMIT 1;`
-	InsertCommander    = `INSERT INTO commander (name) VALUES (?);`
+	GetCommanderByID     = `SELECT id, name, created_at, updated_at, deleted_at FROM commander WHERE id = ? AND deleted_at IS NULL LIMIT 1;`
+	GetCommanderByName   = `SELECT id, name, created_at, updated_at, deleted_at FROM commander WHERE name = ? AND deleted_at IS NULL LIMIT 1;`
+	GetCommandersByNames = `SELECT id, name FROM commander WHERE name IN (%s) AND deleted_at IS NULL`
+	InsertCommander      = `INSERT INTO commander (name) VALUES (?);`
 )
 
 type Commander struct {
@@ -46,6 +48,30 @@ func (c *CommanderProvider) GetByName(ctx context.Context, name string) (*Comman
 		return nil, nil
 	}
 	return &commanders[0], nil
+}
+
+func (c *CommanderProvider) BulkAdd(ctx context.Context, names []string) ([]Commander, error) {
+	if len(names) == 0 {
+		return []Commander{}, nil
+	}
+
+	insertQuery := "INSERT INTO commander (name) VALUES " + strings.TrimSuffix(strings.Repeat("(?),", len(names)), ",")
+	args := make([]interface{}, len(names))
+	for i, name := range names {
+		args[i] = name
+	}
+	if _, err := c.client.Db.ExecContext(ctx, insertQuery, args...); err != nil {
+		return nil, fmt.Errorf("failed to bulk insert Commander records: %w", err)
+	}
+
+	inPlaceholders := strings.TrimSuffix(strings.Repeat("?,", len(names)), ",")
+	selectQuery := fmt.Sprintf(GetCommandersByNames, inPlaceholders)
+	var commanders []Commander
+	if err := c.client.Db.SelectContext(ctx, &commanders, selectQuery, args...); err != nil {
+		return nil, fmt.Errorf("failed to select inserted Commanders: %w", err)
+	}
+
+	return commanders, nil
 }
 
 func (c *CommanderProvider) Add(ctx context.Context, name string) (int, error) {

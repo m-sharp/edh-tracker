@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/m-sharp/edh-tracker/lib"
 )
@@ -37,6 +38,22 @@ func (d *DeckCommanderProvider) GetByDeckId(ctx context.Context, deckID int) (*D
 		return nil, nil
 	}
 	return &rows[0], nil
+}
+
+func (d *DeckCommanderProvider) BulkAdd(ctx context.Context, entries []DeckCommander) error {
+	if len(entries) == 0 {
+		return nil
+	}
+
+	query := "INSERT INTO deck_commander (deck_id, commander_id, partner_commander_id) VALUES " + strings.TrimSuffix(strings.Repeat("(?,?,?),", len(entries)), ",")
+	args := make([]interface{}, 0, len(entries)*3)
+	for _, e := range entries {
+		args = append(args, e.DeckID, e.CommanderID, e.PartnerCommanderID)
+	}
+	if _, err := d.client.Db.ExecContext(ctx, query, args...); err != nil {
+		return fmt.Errorf("failed to bulk insert DeckCommander records: %w", err)
+	}
+	return nil
 }
 
 func (d *DeckCommanderProvider) Add(ctx context.Context, deckID, commanderID int, partnerCommanderID *int) (int, error) {

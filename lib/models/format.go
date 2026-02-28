@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	GetAllFormats    = `SELECT id, name, created_at, updated_at, deleted_at FROM format WHERE deleted_at IS NULL;`
+	GetAllFormats   = `SELECT id, name, created_at, updated_at, deleted_at FROM format WHERE deleted_at IS NULL;`
 	GetFormatByID   = `SELECT id, name, created_at, updated_at, deleted_at FROM format WHERE id = ? AND deleted_at IS NULL LIMIT 1;`
 	GetFormatByName = `SELECT id, name, created_at, updated_at, deleted_at FROM format WHERE name = ? AND deleted_at IS NULL LIMIT 1;`
 )
