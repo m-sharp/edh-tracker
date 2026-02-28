@@ -2417,7 +2417,7 @@
       },
       {
         "player": "Kyriakos",
-        "commander": "Myrel, Shielf of Argive",
+        "commander": "Myrel, Shield of Argive",
         "place": 3,
         "kills": 0
       },
@@ -3109,6 +3109,342 @@
         "commander": "The Scarab God",
         "place": 1,
         "kills": 1
+      }
+    ]
+  },
+  {
+    "date": "2025-05-09T00:00:00Z",
+    "results": [
+      {
+        "player": "Mike",
+        "commander": "Aragorn, King of Gondor",
+        "place": 3
+      },
+      {
+        "player": "Michaela",
+        "commander": "Eshki, Temur's Roar",
+        "place": 1,
+        "kills": 1
+      },
+      {
+        "player": "Kyriakos",
+        "commander": "Raggadragga, Goreguts Boos",
+        "place": 2,
+        "kills": 1
+      }
+    ]
+  },
+  {
+    "date": "2025-05-09T00:00:00Z",
+    "results": [
+      {
+        "player": "Mike",
+        "commander": "The Scarab God",
+        "place": 4
+      },
+      {
+        "player": "Michaela",
+        "commander": "Camellia, the Seedmiser",
+        "place": 3
+      },
+      {
+        "player": "Kyriakos",
+        "commander": "Shelob, Dread Weaver",
+        "place": 1,
+        "kills": 1
+      },
+      {
+        "player": "Tom",
+        "commander": "Liesa, Shroud of Dusk",
+        "place": 2,
+        "kills": 1
+      }
+    ]
+  },
+  {
+    "date": "2025-05-09T00:00:00Z",
+    "results": [
+      {
+        "player": "Mike",
+        "commander": "Giada, Font of Hope",
+        "place": 3
+      },
+      {
+        "player": "Michaela",
+        "commander": "Eshki, Temur's Roar",
+        "place": 1,
+        "kills": 2
+      },
+      {
+        "player": "Kyriakos",
+        "commander": "Raggadragga, Goreguts Boos",
+        "place": 2,
+        "kills": 1
+      },
+      {
+        "player": "Tom",
+        "commander": "Ivy, Gleeful Spellthief",
+        "place": 4
+      },
+      {
+        "player": "Tom",
+        "commander": "Haktos the Unscarred",
+        "place": 2,
+        "kills": 1
+      }
+    ]
+  },
+  {
+    "date": "2025-07-29T00:00:00Z",
+    "results": [
+      {
+        "player": "Mike",
+        "commander": "Grismold, the Dreadsower",
+        "place": 4
+      },
+      {
+        "player": "Kyriakos",
+        "commander": "Raggadragga, Goreguts Boos",
+        "place": 2
+      },
+      {
+        "player": "Tom",
+        "commander": "Gornog, the Red Reaper",
+        "place": 2,
+        "kills": 1
+      },
+      {
+        "player": "Peter",
+        "commander": "Felothar the Steadfast",
+        "place": 1,
+        "kills": 2
+      }
+    ]
+  },
+  {
+    "date": "2025-07-29T00:00:00Z",
+    "results": [
+      {
+        "player": "Mike",
+        "commander": "The Scarab God",
+        "place": 3
+      },
+      {
+        "player": "Kyriakos",
+        "commander": "Felix Five-Boots",
+        "place": 2,
+        "kills": 2
+      },
+      {
+        "player": "Tom",
+        "commander": "Liesa, Shroud of Dusk",
+        "place": 3
+      },
+      {
+        "player": "Peter",
+        "commander": "Sorin of House Markov",
+        "place": 1,
+        "kills": 1
+      }
+    ]
+  },
+  {
+    "date": "2025-07-29T00:00:00Z",
+    "results": [
+      {
+        "player": "Mike",
+        "commander": "Raffine, Scheming Seer",
+        "place": 2
+      },
+      {
+        "player": "Kyriakos",
+        "commander": "Braids, Arisen Nightmare",
+        "place": 1,
+        "kills": 2
+      },
+      {
+        "player": "Tom",
+        "commander": "Adrix and Nev, Twincasters",
+        "place": 2,
+        "kills": 1
+      },
+      {
+        "player": "Peter",
+        "commander": "Wyll, Blade of Frontiers",
+        "place": 4
+      }
+    ]
+  },
+  {
+    "date": "2025-08-01T00:00:00Z",
+    "results": [
+      {
+        "player": "Kyriakos",
+        "commander": "Myrel, Shield of Argive",
+        "place": 2
+      },
+      {
+        "player": "Tom",
+        "commander": "Kami of the Crescent Moon",
+        "place": 1,
+        "kills": 2
+      },
+      {
+        "player": "Michaela",
+        "commander": "The Thirteenth Doctor",
+        "place": 3
+      }
+    ]
+  },
+  {
+    "date": "2025-08-01T00:00:00Z",
+    "results": [
+      {
+        "player": "Kyriakos",
+        "commander": "Rex, Cyber-Hound",
+        "place": 3
+      },
+      {
+        "player": "Tom",
+        "commander": "Adrix and Nev, Twincasters",
+        "place": 1,
+        "kills": 2
+      },
+      {
+        "player": "Michaela",
+        "commander": "The Thirteenth Doctor",
+        "place": 2
+      }
+    ]
+  },
+  {
+    "date": "2025-08-27T00:00:00Z",
+    "results": [
+      {
+        "player": "Mike",
+        "commander": "Hearthhull, the Worldseed",
+        "place": 1,
+        "kills": 3
+      },
+      {
+        "player": "Tom",
+        "commander": "Kami of the Crescent Moon",
+        "place": 2
+      },
+      {
+        "player": "Michaela",
+        "commander": "The Thirteenth Doctor",
+        "place": 2
+      },
+      {
+        "player": "Peter",
+        "commander": "Valgavoth, Harrower of Souls",
+        "place": 2
+      }
+    ]
+  },
+  {
+    "date": "2025-12-12T00:00:00Z",
+    "results": [
+      {
+        "player": "Mike",
+        "commander": "Be'lakor, the Dark Master",
+        "place": 1,
+        "kills": 3
+      },
+      {
+        "player": "Tom",
+        "commander": "Liesa, Shroud of Dusk",
+        "place": 2
+      },
+      {
+        "player": "Michaela",
+        "commander": "Glarb, Calamity's Augur",
+        "place": 2
+      },
+      {
+        "player": "Peter",
+        "commander": "Umbris, Fear Manifest",
+        "place": 4
+      }
+    ]
+  },
+  {
+    "date": "2025-12-12T00:00:00Z",
+    "results": [
+      {
+        "player": "Mike",
+        "commander": "Hearthhull, the Worldseed",
+        "place": 1,
+        "kills": 3
+      },
+      {
+        "player": "Tom",
+        "commander": "Marchesa, the Black Rose",
+        "place": 2
+      },
+      {
+        "player": "Michaela",
+        "commander": "Glarb, Calamity's Augur",
+        "place": 3
+      },
+      {
+        "player": "Peter",
+        "commander": "Atraxa, Grand Unifier",
+        "place": 3
+      }
+    ]
+  },
+  {
+    "date": "2025-01-09T00:00:00Z",
+    "results": [
+      {
+        "player": "Mike",
+        "commander": "Aragorn, King of Gondor",
+        "place": 2,
+        "kills": 2
+      },
+      {
+        "player": "Michaela",
+        "commander": "Glarb, Calamity's Augur",
+        "place": 3
+      },
+      {
+        "player": "Peter",
+        "commander": "Sai, Master Thopterist",
+        "place": 1,
+        "kills": 1
+      },
+      {
+        "player": "Tom",
+        "commander": "Rendmaw, Creaking Nest",
+        "place": 3
+      }
+    ]
+  },
+  {
+    "date": "2025-01-09T00:00:00Z",
+    "results": [
+      {
+        "player": "Mike",
+        "commander": "Giada, Font of Hope",
+        "place": 2
+      },
+      {
+        "player": "Michaela",
+        "commander": "Camellia, the Seedmiser",
+        "place": 3
+      },
+      {
+        "player": "Peter",
+        "commander": "Valgavoth, Harrower of Souls",
+        "place": 1,
+        "kills": 2
+      },
+      {
+        "player": "Tom",
+        "commander": "Liesa, Shroud of Dusk",
+        "place": 4
       }
     ]
   }

@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	dbName = "edh"
+	dbName = "pod_tracker"
 
 	openErr = "error opening mysql connection: %w"
 
