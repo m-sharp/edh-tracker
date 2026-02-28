@@ -12,14 +12,14 @@ import (
 )
 
 type PodRouter struct {
-	log      *zap.Logger
-	provider *models.PodProvider
+	log     *zap.Logger
+	podRepo *models.PodProvider
 }
 
-func NewPodRouter(log *zap.Logger, client *lib.DBClient) *PodRouter {
+func NewPodRouter(log *zap.Logger, repos *models.Repositories) *PodRouter {
 	return &PodRouter{
-		log:      log.Named("PodRouter"),
-		provider: models.NewPodProvider(client),
+		log:     log.Named("PodRouter"),
+		podRepo: repos.Pods,
 	}
 }
 
@@ -62,7 +62,7 @@ func (p *PodRouter) GetPod(w http.ResponseWriter, r *http.Request) {
 
 	if podId != 0 {
 		var pod *models.Pod
-		pod, err = p.provider.GetByID(ctx, podId)
+		pod, err = p.podRepo.GetByID(ctx, podId)
 		if err != nil {
 			lib.WriteError(p.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
 			return
@@ -70,7 +70,7 @@ func (p *PodRouter) GetPod(w http.ResponseWriter, r *http.Request) {
 		marshalled, err = json.Marshal(pod)
 	} else {
 		var pods []models.Pod
-		pods, err = p.provider.GetByPlayerID(ctx, playerId)
+		pods, err = p.podRepo.GetByPlayerID(ctx, playerId)
 		if err != nil {
 			lib.WriteError(p.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
 			return
@@ -109,7 +109,7 @@ func (p *PodRouter) PodCreate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Info("Saving new Pod record")
-	if err := p.provider.Add(ctx, pod.Name); err != nil {
+	if _, err := p.podRepo.Add(ctx, pod.Name); err != nil {
 		lib.WriteError(log, w, http.StatusInternalServerError, err, "Failed to add Pod record", errMsg)
 		return
 	}
@@ -140,7 +140,7 @@ func (p *PodRouter) AddPlayer(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Info("Adding Player to Pod")
-	if err := p.provider.AddPlayerToPod(ctx, playerPod.PodID, playerPod.PlayerID); err != nil {
+	if err := p.podRepo.AddPlayerToPod(ctx, playerPod.PodID, playerPod.PlayerID); err != nil {
 		lib.WriteError(log, w, http.StatusInternalServerError, err, "Failed to add Player to Pod", errMsg)
 		return
 	}

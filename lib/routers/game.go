@@ -14,13 +14,13 @@ import (
 
 type GameRouter struct {
 	log      *zap.Logger
-	provider *models.GameProvider
+	gameRepo *models.GameProvider
 }
 
-func NewGameRouter(log *zap.Logger, client *lib.DBClient) *GameRouter {
+func NewGameRouter(log *zap.Logger, repos *models.Repositories) *GameRouter {
 	return &GameRouter{
 		log:      log.Named("GameRouter"),
-		provider: models.NewGameProvider(log, client),
+		gameRepo: repos.Games,
 	}
 }
 
@@ -62,13 +62,13 @@ func (g *GameRouter) GetAll(w http.ResponseWriter, r *http.Request) {
 		err   error
 	)
 	if deckId != 0 {
-		games, err = g.provider.GetAllByDeck(ctx, deckId)
+		games, err = g.gameRepo.GetAllByDeck(ctx, deckId)
 		if err != nil {
 			lib.WriteError(g.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
 			return
 		}
 	} else {
-		games, err = g.provider.GetAllByPod(ctx, podId)
+		games, err = g.gameRepo.GetAllByPod(ctx, podId)
 		if err != nil {
 			lib.WriteError(g.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
 			return
@@ -94,7 +94,7 @@ func (g *GameRouter) GetGameById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	gameDetails, err := g.provider.GetGameById(ctx, gameId)
+	gameDetails, err := g.gameRepo.GetGameById(ctx, gameId)
 	if err != nil {
 		lib.WriteError(g.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
 		return
@@ -141,7 +141,7 @@ func (g *GameRouter) GameCreate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Info("Saving new Game record")
-	if err := g.provider.Add(ctx, gameDetails.Description, gameDetails.PodID, gameDetails.Results...); err != nil {
+	if err := g.gameRepo.Add(ctx, gameDetails.Description, gameDetails.PodID, gameDetails.Results...); err != nil {
 		lib.WriteError(log, w, http.StatusInternalServerError, err, "Failed to add Game record", errMsg)
 	}
 

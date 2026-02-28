@@ -34,4 +34,3 @@ func (m *Migration3) Downgrade(ctx context.Context, client *lib.DBClient) error 
 	return nil
 }
 
-func (m *Migration3) RecordMigration() bool { return true }

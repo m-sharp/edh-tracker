@@ -21,6 +21,9 @@ const (
 	devEnvVar   = "DEV"
 	Development = "Development"
 
+	seedEnvVar = "SEED"
+	Seed       = "Seed"
+
 	lookupErr = "ENVVAR for %q not found"
 )
 
@@ -74,6 +77,10 @@ func (c *Config) Populate(requiredConfigs []string) error {
 		c.cfg[Development] = "false"
 	} else {
 		c.cfg[Development] = "true"
+	}
+
+	if val, ok := os.LookupEnv(seedEnvVar); ok {
+		c.cfg[Seed] = val
 	}
 
 	return nil

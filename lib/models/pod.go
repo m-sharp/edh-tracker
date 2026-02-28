@@ -10,6 +10,7 @@ import (
 const (
 	GetAllPods        = `SELECT id, name, created_at, updated_at, deleted_at FROM pod WHERE deleted_at IS NULL;`
 	GetPodByID        = `SELECT id, name, created_at, updated_at, deleted_at FROM pod WHERE id = ? AND deleted_at IS NULL;`
+	GetPodByName      = `SELECT id, name, created_at, updated_at, deleted_at FROM pod WHERE name = ? AND deleted_at IS NULL LIMIT 1;`
 	GetPodsByPlayerID = `SELECT pod.id, pod.name, pod.created_at, pod.updated_at, pod.deleted_at
 						   FROM (pod INNER JOIN player_pod ON pod.id = player_pod.pod_id)
 						  WHERE player_pod.player_id = ?
@@ -98,21 +99,37 @@ func (p *PodProvider) GetByPlayerID(ctx context.Context, playerID int) ([]Pod, e
 	return pods, nil
 }
 
-func (p *PodProvider) Add(ctx context.Context, name string) error {
+func (p *PodProvider) GetByName(ctx context.Context, name string) (*Pod, error) {
+	var pods []Pod
+	if err := p.client.Db.SelectContext(ctx, &pods, GetPodByName, name); err != nil {
+		return nil, fmt.Errorf("failed to get Pod record for name %q: %w", name, err)
+	}
+	if len(pods) == 0 {
+		return nil, nil
+	}
+	return &pods[0], nil
+}
+
+func (p *PodProvider) Add(ctx context.Context, name string) (int, error) {
 	result, err := p.client.Db.ExecContext(ctx, InsertPod, name)
 	if err != nil {
-		return fmt.Errorf("failed to insert Pod record: %w", err)
+		return 0, fmt.Errorf("failed to insert Pod record: %w", err)
 	}
 
 	numAffected, err := result.RowsAffected()
 	if err != nil {
-		return fmt.Errorf("failed to get number of rows affected by insert: %w", err)
+		return 0, fmt.Errorf("failed to get number of rows affected by insert: %w", err)
 	}
 	if numAffected != 1 {
-		return fmt.Errorf("unexpected number of rows affected by Pod insert: got %d, expected 1", numAffected)
+		return 0, fmt.Errorf("unexpected number of rows affected by Pod insert: got %d, expected 1", numAffected)
 	}
 
-	return nil
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, fmt.Errorf("failed to get last insert ID for new Pod: %w", err)
+	}
+
+	return int(id), nil
 }
 
 func (p *PodProvider) AddPlayerToPod(ctx context.Context, podID, playerID int) error {

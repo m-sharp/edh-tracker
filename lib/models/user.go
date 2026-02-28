@@ -13,11 +13,13 @@ const (
 
 	GetUserByID       = `SELECT id, player_id, role_id, oauth_provider, oauth_subject, email, display_name, avatar_url, created_at, updated_at, deleted_at FROM user WHERE id = ? AND deleted_at IS NULL;`
 	GetUserByPlayerID = `SELECT id, player_id, role_id, oauth_provider, oauth_subject, email, display_name, avatar_url, created_at, updated_at, deleted_at FROM user WHERE player_id = ? AND deleted_at IS NULL;`
+	GetRoleByName     = `SELECT id, name, created_at, updated_at, deleted_at FROM user_role WHERE name = ?;`
 	InsertUser        = `INSERT INTO user (player_id, role_id) VALUES (?, ?);`
 	SoftDeleteUser    = `UPDATE user SET deleted_at = NOW() WHERE id = ?;`
 )
 
 // UserRole maps to the user_role lookup table.
+// TODO UserRole should have its own provider
 type UserRole struct {
 	Model
 	Name string `json:"name" db:"name"`
@@ -78,21 +80,37 @@ func (u *UserProvider) GetByPlayerID(ctx context.Context, playerID int) (*User, 
 	return &users[0], nil
 }
 
-func (u *UserProvider) Add(ctx context.Context, playerID, roleID int) error {
+func (u *UserProvider) GetRoleByName(ctx context.Context, name string) (*UserRole, error) {
+	var roles []UserRole
+	if err := u.client.Db.SelectContext(ctx, &roles, GetRoleByName, name); err != nil {
+		return nil, fmt.Errorf("failed to get UserRole record for name %q: %w", name, err)
+	}
+	if len(roles) == 0 {
+		return nil, fmt.Errorf("no UserRole found with name %q", name)
+	}
+	return &roles[0], nil
+}
+
+func (u *UserProvider) Add(ctx context.Context, playerID, roleID int) (int, error) {
 	result, err := u.client.Db.ExecContext(ctx, InsertUser, playerID, roleID)
 	if err != nil {
-		return fmt.Errorf("failed to insert User record: %w", err)
+		return 0, fmt.Errorf("failed to insert User record: %w", err)
 	}
 
 	numAffected, err := result.RowsAffected()
 	if err != nil {
-		return fmt.Errorf("failed to get number of rows affected by insert: %w", err)
+		return 0, fmt.Errorf("failed to get number of rows affected by insert: %w", err)
 	}
 	if numAffected != 1 {
-		return fmt.Errorf("unexpected number of rows affected by User insert: got %d, expected 1", numAffected)
+		return 0, fmt.Errorf("unexpected number of rows affected by User insert: got %d, expected 1", numAffected)
 	}
 
-	return nil
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, fmt.Errorf("failed to get last insert ID for new User: %w", err)
+	}
+
+	return int(id), nil
 }
 
 func (u *UserProvider) SoftDelete(ctx context.Context, id int) error {

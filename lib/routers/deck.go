@@ -13,13 +13,13 @@ import (
 
 type DeckRouter struct {
 	log      *zap.Logger
-	provider *models.DeckProvider
+	deckRepo *models.DeckProvider
 }
 
-func NewDeckRouter(log *zap.Logger, client *lib.DBClient) *DeckRouter {
+func NewDeckRouter(log *zap.Logger, repos *models.Repositories) *DeckRouter {
 	return &DeckRouter{
 		log:      log.Named("DeckRouter"),
-		provider: models.NewDeckProvider(client),
+		deckRepo: repos.Decks,
 	}
 }
 
@@ -59,13 +59,13 @@ func (d *DeckRouter) GetAll(w http.ResponseWriter, r *http.Request) {
 		err   error
 	)
 	if playerId != 0 {
-		decks, err = d.provider.GetAllForPlayer(ctx, playerId)
+		decks, err = d.deckRepo.GetAllForPlayer(ctx, playerId)
 		if err != nil {
 			lib.WriteError(d.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
 			return
 		}
 	} else {
-		decks, err = d.provider.GetAll(ctx)
+		decks, err = d.deckRepo.GetAll(ctx)
 		if err != nil {
 			lib.WriteError(d.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
 			return
@@ -91,7 +91,7 @@ func (d *DeckRouter) GetDeckById(w http.ResponseWriter, r *http.Request) {
 	}
 
 	errMsg := "Failed to get Deck record"
-	decks, err := d.provider.GetById(ctx, deckId)
+	decks, err := d.deckRepo.GetById(ctx, deckId)
 	if err != nil {
 		lib.WriteError(d.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
 		return
@@ -129,7 +129,7 @@ func (d *DeckRouter) DeckCreate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Info("Saving new Deck record")
-	if err := d.provider.Add(ctx, deck.PlayerId, deck.Commander); err != nil {
+	if _, err := d.deckRepo.Add(ctx, deck.PlayerId, deck.Commander); err != nil {
 		if err == models.ErrDeckExists {
 			lib.WriteError(log, w, http.StatusBadRequest, err, "Attempted to create preexisting deck", err.Error())
 		} else {
@@ -151,7 +151,7 @@ func (d *DeckRouter) RetireDeck(w http.ResponseWriter, r *http.Request) {
 	}
 
 	errMsg := "Failed to retire deck"
-	if err := d.provider.Retire(ctx, deckId); err != nil {
+	if err := d.deckRepo.Retire(ctx, deckId); err != nil {
 		lib.WriteError(d.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
 		return
 	}

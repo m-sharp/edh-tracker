@@ -150,30 +150,35 @@ func (d *DeckProvider) GetById(ctx context.Context, deckId int) (*DeckWithStats,
 	}, nil
 }
 
-func (d *DeckProvider) Add(ctx context.Context, playerId int, commander string) error {
+func (d *DeckProvider) Add(ctx context.Context, playerId int, commander string) (int, error) {
 	var preexisting int
 	if err := d.client.Db.QueryRowContext(ctx, DeckExists, playerId, commander).Scan(&preexisting); err != nil {
-		return fmt.Errorf("failed to check if player %d has preexisting deck for %s: %w", playerId, commander, err)
+		return 0, fmt.Errorf("failed to check if player %d has preexisting deck for %s: %w", playerId, commander, err)
 	}
 
 	if preexisting >= 1 {
-		return ErrDeckExists
+		return 0, ErrDeckExists
 	}
 
 	result, err := d.client.Db.ExecContext(ctx, InsertDeck, playerId, commander)
 	if err != nil {
-		return fmt.Errorf("failed to insert Deck record: %w", err)
+		return 0, fmt.Errorf("failed to insert Deck record: %w", err)
 	}
 
 	numAffected, err := result.RowsAffected()
 	if err != nil {
-		return fmt.Errorf("failed to get number of rows affected by insert: %w", err)
+		return 0, fmt.Errorf("failed to get number of rows affected by insert: %w", err)
 	}
 	if numAffected != 1 {
-		return fmt.Errorf("unexpected number of rows affected by Deck insert: got %d, expected 1", numAffected)
+		return 0, fmt.Errorf("unexpected number of rows affected by Deck insert: got %d, expected 1", numAffected)
 	}
 
-	return nil
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, fmt.Errorf("failed to get last insert ID for new Deck: %w", err)
+	}
+
+	return int(id), nil
 }
 
 func (d *DeckProvider) Retire(ctx context.Context, deckId int) error {

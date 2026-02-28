@@ -10,6 +10,7 @@ import (
 const (
 	GetAllPlayers  = `SELECT id, name, created_at, updated_at, deleted_at FROM player WHERE deleted_at IS NULL;`
 	GetPlayerByID  = `SELECT id, name, created_at, updated_at, deleted_at FROM player WHERE id = ? AND deleted_at IS NULL;`
+	GetPlayerByName = `SELECT id, name, created_at, updated_at, deleted_at FROM player WHERE name = ? AND deleted_at IS NULL LIMIT 1;`
 	GetPlayerStats = `SELECT DISTINCT game_result.game_id, game_result.place, game_result.kill_count
 						FROM (game_result INNER JOIN deck on game_result.deck_id = deck.id)
 					  WHERE deck.player_id = ?
@@ -118,21 +119,37 @@ func (p *PlayerProvider) GetById(ctx context.Context, playerId int) (*PlayerInfo
 	}, nil
 }
 
-func (p *PlayerProvider) Add(ctx context.Context, name string) error {
+func (p *PlayerProvider) GetByName(ctx context.Context, name string) (*Player, error) {
+	var players []Player
+	if err := p.client.Db.SelectContext(ctx, &players, GetPlayerByName, name); err != nil {
+		return nil, fmt.Errorf("failed to get Player record for name %q: %w", name, err)
+	}
+	if len(players) == 0 {
+		return nil, nil
+	}
+	return &players[0], nil
+}
+
+func (p *PlayerProvider) Add(ctx context.Context, name string) (int, error) {
 	result, err := p.client.Db.ExecContext(ctx, InsertPlayer, name)
 	if err != nil {
-		return fmt.Errorf("failed to insert Player record: %w", err)
+		return 0, fmt.Errorf("failed to insert Player record: %w", err)
 	}
 
 	numAffected, err := result.RowsAffected()
 	if err != nil {
-		return fmt.Errorf("failed to get number of rows affected by insert: %w", err)
+		return 0, fmt.Errorf("failed to get number of rows affected by insert: %w", err)
 	}
 	if numAffected != 1 {
-		return fmt.Errorf("unexpected number of rows affected by Player insert: got %d, expected 1", numAffected)
+		return 0, fmt.Errorf("unexpected number of rows affected by Player insert: got %d, expected 1", numAffected)
 	}
 
-	return nil
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, fmt.Errorf("failed to get last insert ID for new Player: %w", err)
+	}
+
+	return int(id), nil
 }
 
 func (p *PlayerProvider) SoftDelete(ctx context.Context, id int) error {

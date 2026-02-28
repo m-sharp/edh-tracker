@@ -29,7 +29,6 @@ const (
 type Migration interface {
 	Upgrade(ctx context.Context, client *lib.DBClient) error
 	Downgrade(ctx context.Context, client *lib.DBClient) error
-	RecordMigration() bool
 }
 
 func RunAll(ctx context.Context, client *lib.DBClient, log *zap.Logger) error {
@@ -41,7 +40,7 @@ func RunAll(ctx context.Context, client *lib.DBClient, log *zap.Logger) error {
 		return err
 	}
 
-	migrations := getAllMigrations(log, client)
+	migrations := getAllMigrations()
 	var sorted []int
 	for key := range migrations {
 		sorted = append(sorted, key)
@@ -69,11 +68,9 @@ func RunAll(ctx context.Context, client *lib.DBClient, log *zap.Logger) error {
 		}
 		ran = append(ran, migration)
 
-		if migration.RecordMigration() {
-			if err := incrementMigrationTable(ctx, client); err != nil {
-				log.Error("Failed to increment migration table", zap.Int("Migration Number", i), zap.Error(err))
-				return err
-			}
+		if err = incrementMigrationTable(ctx, client); err != nil {
+			log.Error("Failed to increment migration table", zap.Int("Migration Number", i), zap.Error(err))
+			return err
 		}
 	}
 
@@ -139,8 +136,8 @@ func decrementMigrationTable(ctx context.Context, client *lib.DBClient) error {
 	return nil
 }
 
-func getAllMigrations(log *zap.Logger, client *lib.DBClient) map[int]Migration {
-	migrations := map[int]Migration{
+func getAllMigrations() map[int]Migration {
+	return map[int]Migration{
 		1: &Migration1{},
 		2: &Migration2{},
 		3: &Migration3{},
@@ -151,9 +148,4 @@ func getAllMigrations(log *zap.Logger, client *lib.DBClient) map[int]Migration {
 		8: &Migration8{},
 		9: &Migration9{},
 	}
-
-	// Always run last
-	migrations[len(migrations)+1] = NewSeedMigration(log, client)
-
-	return migrations
 }
