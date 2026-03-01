@@ -144,11 +144,29 @@ Deck queries use LEFT JOIN to fetch commander data. `deckRow` is an internal sca
 
 ### API Routes
 
-All routes are prefixed `/api/`:
-- `GET/POST /players`, `GET /player?player_id=X`
-- `GET/POST /decks`, `GET /deck?deck_id=X`, `PATCH /deck?deck_id=X` (retire)
-- `GET/POST /games`, `GET /game?game_id=X`
-- `GET /formats`
-- `GET/POST /commander`
+All routes are prefixed `/api/`. The pattern is: **plural path for GET-all, singular path for GET-one and POST**.
 
-Query params are used for filtering (e.g. `GET /decks?player_id=X` for player's decks).
+| Method | Path | Notes |
+|---|---|---|
+| GET | `/api/players` | list all players with stats |
+| GET | `/api/player?player_id=X` | single player |
+| POST | `/api/player` | create player — 201, no body |
+| GET | `/api/decks` | list all active decks |
+| GET | `/api/deck?deck_id=X` | single deck |
+| POST | `/api/deck` | create deck |
+| PATCH | `/api/deck?deck_id=X` | retire deck |
+| GET | `/api/games` | list all games |
+| GET | `/api/game?game_id=X` | single game |
+| POST | `/api/game` | create game + results |
+| GET | `/api/formats` | list formats (`commander`, `other`) |
+| GET | `/api/commander` | list commanders |
+| POST | `/api/commander` | create commander |
+| GET | `/api/pod?pod_id=X` | single pod |
+| POST | `/api/pod` | create pod |
+| POST | `/api/pod/player` | add player to pod |
+
+Query params are used for filtering (e.g. `GET /api/decks?player_id=X` for a player's decks).
+
+### After Making API Changes
+
+After modifying routes, handlers, models, or migrations, run the `/smoke-test` skill to rebuild the Docker image and verify that core endpoints are responding correctly.
