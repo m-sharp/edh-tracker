@@ -13,7 +13,7 @@ import (
 
 type PlayerRouter struct {
 	log        *zap.Logger
-	playerRepo *models.PlayerProvider
+	playerRepo models.PlayerRepositoryInterface
 }
 
 func NewPlayerRouter(log *zap.Logger, repos *models.Repositories) *PlayerRouter {

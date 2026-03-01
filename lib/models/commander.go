@@ -20,15 +20,15 @@ type Commander struct {
 	Name string `json:"name" db:"name"`
 }
 
-type CommanderProvider struct {
+type CommanderRepository struct {
 	client *lib.DBClient
 }
 
-func NewCommanderProvider(client *lib.DBClient) *CommanderProvider {
-	return &CommanderProvider{client: client}
+func NewCommanderRepository(client *lib.DBClient) *CommanderRepository {
+	return &CommanderRepository{client: client}
 }
 
-func (c *CommanderProvider) GetById(ctx context.Context, id int) (*Commander, error) {
+func (c *CommanderRepository) GetById(ctx context.Context, id int) (*Commander, error) {
 	var commanders []Commander
 	if err := c.client.Db.SelectContext(ctx, &commanders, GetCommanderByID, id); err != nil {
 		return nil, fmt.Errorf("failed to get Commander record for id %d: %w", id, err)
@@ -39,7 +39,7 @@ func (c *CommanderProvider) GetById(ctx context.Context, id int) (*Commander, er
 	return &commanders[0], nil
 }
 
-func (c *CommanderProvider) GetByName(ctx context.Context, name string) (*Commander, error) {
+func (c *CommanderRepository) GetByName(ctx context.Context, name string) (*Commander, error) {
 	var commanders []Commander
 	if err := c.client.Db.SelectContext(ctx, &commanders, GetCommanderByName, name); err != nil {
 		return nil, fmt.Errorf("failed to get Commander record for name %q: %w", name, err)
@@ -50,7 +50,7 @@ func (c *CommanderProvider) GetByName(ctx context.Context, name string) (*Comman
 	return &commanders[0], nil
 }
 
-func (c *CommanderProvider) BulkAdd(ctx context.Context, names []string) ([]Commander, error) {
+func (c *CommanderRepository) BulkAdd(ctx context.Context, names []string) ([]Commander, error) {
 	if len(names) == 0 {
 		return []Commander{}, nil
 	}
@@ -74,7 +74,7 @@ func (c *CommanderProvider) BulkAdd(ctx context.Context, names []string) ([]Comm
 	return commanders, nil
 }
 
-func (c *CommanderProvider) Add(ctx context.Context, name string) (int, error) {
+func (c *CommanderRepository) Add(ctx context.Context, name string) (int, error) {
 	result, err := c.client.Db.ExecContext(ctx, InsertCommander, name)
 	if err != nil {
 		return 0, fmt.Errorf("failed to insert Commander record: %w", err)

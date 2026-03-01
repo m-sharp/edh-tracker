@@ -43,17 +43,17 @@ func (p *Player) Validate() error {
 	return nil
 }
 
-type PlayerProvider struct {
+type PlayerRepository struct {
 	client *lib.DBClient
 }
 
-func NewPlayerProvider(client *lib.DBClient) *PlayerProvider {
-	return &PlayerProvider{
+func NewPlayerRepository(client *lib.DBClient) *PlayerRepository {
+	return &PlayerRepository{
 		client: client,
 	}
 }
 
-func (p *PlayerProvider) GetAll(ctx context.Context) ([]PlayerInfo, error) {
+func (p *PlayerRepository) GetAll(ctx context.Context) ([]PlayerInfo, error) {
 	// TODO: Will need to be locked down eventually as well. A single player requesting a list of other players in their pod should not:
 	//		a.) be able to see what pods the other players are in
 	//		b.) be able to ask about players in a pod they don't belong to
@@ -88,7 +88,7 @@ func (p *PlayerProvider) GetAll(ctx context.Context) ([]PlayerInfo, error) {
 	return withStats, nil
 }
 
-func (p *PlayerProvider) GetById(ctx context.Context, playerId int) (*PlayerInfo, error) {
+func (p *PlayerRepository) GetById(ctx context.Context, playerId int) (*PlayerInfo, error) {
 	var players []Player
 	if err := p.client.Db.SelectContext(ctx, &players, GetPlayerByID, playerId); err != nil {
 		return nil, fmt.Errorf("failed to get Player record for id %d: %w", playerId, err)
@@ -121,7 +121,7 @@ func (p *PlayerProvider) GetById(ctx context.Context, playerId int) (*PlayerInfo
 	}, nil
 }
 
-func (p *PlayerProvider) GetByName(ctx context.Context, name string) (*Player, error) {
+func (p *PlayerRepository) GetByName(ctx context.Context, name string) (*Player, error) {
 	var players []Player
 	if err := p.client.Db.SelectContext(ctx, &players, GetPlayerByName, name); err != nil {
 		return nil, fmt.Errorf("failed to get Player record for name %q: %w", name, err)
@@ -132,7 +132,7 @@ func (p *PlayerProvider) GetByName(ctx context.Context, name string) (*Player, e
 	return &players[0], nil
 }
 
-func (p *PlayerProvider) Add(ctx context.Context, name string) (int, error) {
+func (p *PlayerRepository) Add(ctx context.Context, name string) (int, error) {
 	result, err := p.client.Db.ExecContext(ctx, InsertPlayer, name)
 	if err != nil {
 		return 0, fmt.Errorf("failed to insert Player record: %w", err)
@@ -154,7 +154,7 @@ func (p *PlayerProvider) Add(ctx context.Context, name string) (int, error) {
 	return int(id), nil
 }
 
-func (p *PlayerProvider) BulkAdd(ctx context.Context, names []string) ([]Player, error) {
+func (p *PlayerRepository) BulkAdd(ctx context.Context, names []string) ([]Player, error) {
 	if len(names) == 0 {
 		return []Player{}, nil
 	}
@@ -178,7 +178,7 @@ func (p *PlayerProvider) BulkAdd(ctx context.Context, names []string) ([]Player,
 	return players, nil
 }
 
-func (p *PlayerProvider) SoftDelete(ctx context.Context, id int) error {
+func (p *PlayerRepository) SoftDelete(ctx context.Context, id int) error {
 	result, err := p.client.Db.ExecContext(ctx, SoftDeletePlayer, id)
 	if err != nil {
 		return fmt.Errorf("failed to soft-delete Player record: %w", err)

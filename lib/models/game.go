@@ -35,21 +35,21 @@ type GameDetails struct {
 	Results []GameResult `json:"results"`
 }
 
-type GameProvider struct {
+type GameRepository struct {
 	log         *zap.Logger
 	client      *lib.DBClient
-	gameResults *GameResultProvider
+	gameResults *GameResultRepository
 }
 
-func NewGameProvider(log *zap.Logger, client *lib.DBClient, gameResults *GameResultProvider) *GameProvider {
-	return &GameProvider{
-		log:         log.Named("GameProvider"),
+func NewGameRepository(log *zap.Logger, client *lib.DBClient, gameResults *GameResultRepository) *GameRepository {
+	return &GameRepository{
+		log:         log.Named("GameRepository"),
 		client:      client,
 		gameResults: gameResults,
 	}
 }
 
-func (g *GameProvider) GetAllByPod(ctx context.Context, podId int) ([]GameDetails, error) {
+func (g *GameRepository) GetAllByPod(ctx context.Context, podId int) ([]GameDetails, error) {
 	var games []Game
 	if err := g.client.Db.SelectContext(ctx, &games, GetGamesByPodId, podId); err != nil {
 		return nil, fmt.Errorf("failed to get Game records: %w", err)
@@ -73,7 +73,7 @@ func (g *GameProvider) GetAllByPod(ctx context.Context, podId int) ([]GameDetail
 	return details, nil
 }
 
-func (g *GameProvider) GetAllByDeck(ctx context.Context, deckId int) ([]GameDetails, error) {
+func (g *GameRepository) GetAllByDeck(ctx context.Context, deckId int) ([]GameDetails, error) {
 	var games []Game
 	if err := g.client.Db.SelectContext(ctx, &games, GetGamesByDeckId, deckId); err != nil {
 		return nil, fmt.Errorf("failed to get Game records: %w", err)
@@ -97,7 +97,7 @@ func (g *GameProvider) GetAllByDeck(ctx context.Context, deckId int) ([]GameDeta
 	return details, nil
 }
 
-func (g *GameProvider) GetGameById(ctx context.Context, gameId int) (*GameDetails, error) {
+func (g *GameRepository) GetGameById(ctx context.Context, gameId int) (*GameDetails, error) {
 	var games []Game
 	if err := g.client.Db.SelectContext(ctx, &games, GetGameByID, gameId); err != nil {
 		return nil, fmt.Errorf("failed to get Game record for id %d: %w", gameId, err)
@@ -122,7 +122,7 @@ func (g *GameProvider) GetGameById(ctx context.Context, gameId int) (*GameDetail
 	}, nil
 }
 
-func (g *GameProvider) Add(ctx context.Context, description string, podID int, formatID int, results ...GameResult) error {
+func (g *GameRepository) Add(ctx context.Context, description string, podID int, formatID int, results ...GameResult) error {
 	r, err := g.client.Db.ExecContext(ctx, InsertGame, description, podID, formatID)
 	if err != nil {
 		return fmt.Errorf("failed to insert Game record: %w", err)
@@ -147,7 +147,7 @@ func (g *GameProvider) Add(ctx context.Context, description string, podID int, f
 	return g.gameResults.BulkAdd(ctx, results)
 }
 
-func (g *GameProvider) BulkAdd(ctx context.Context, games []GameDetails) error {
+func (g *GameRepository) BulkAdd(ctx context.Context, games []GameDetails) error {
 	if len(games) == 0 {
 		return nil
 	}
@@ -183,7 +183,7 @@ func (g *GameProvider) BulkAdd(ctx context.Context, games []GameDetails) error {
 
 // TODO: Soft deleting a game should also delete all associated GameResult records
 // TODO: Will need to look for other cascading deletes
-func (g *GameProvider) SoftDelete(ctx context.Context, id int) error {
+func (g *GameRepository) SoftDelete(ctx context.Context, id int) error {
 	result, err := g.client.Db.ExecContext(ctx, SoftDeleteGame, id)
 	if err != nil {
 		return fmt.Errorf("failed to soft-delete Game record: %w", err)

@@ -39,17 +39,17 @@ type User struct {
 	AvatarURL     *string `json:"avatar_url"     db:"avatar_url"`
 }
 
-type UserProvider struct {
+type UserRepository struct {
 	client *lib.DBClient
 }
 
-func NewUserProvider(client *lib.DBClient) *UserProvider {
-	return &UserProvider{
+func NewUserRepository(client *lib.DBClient) *UserRepository {
+	return &UserRepository{
 		client: client,
 	}
 }
 
-func (u *UserProvider) GetByID(ctx context.Context, id int) (*User, error) {
+func (u *UserRepository) GetByID(ctx context.Context, id int) (*User, error) {
 	var users []User
 	if err := u.client.Db.SelectContext(ctx, &users, GetUserByID, id); err != nil {
 		return nil, fmt.Errorf("failed to get User record for id %d: %w", id, err)
@@ -65,7 +65,7 @@ func (u *UserProvider) GetByID(ctx context.Context, id int) (*User, error) {
 	return &users[0], nil
 }
 
-func (u *UserProvider) GetByPlayerID(ctx context.Context, playerID int) (*User, error) {
+func (u *UserRepository) GetByPlayerID(ctx context.Context, playerID int) (*User, error) {
 	var users []User
 	if err := u.client.Db.SelectContext(ctx, &users, GetUserByPlayerID, playerID); err != nil {
 		return nil, fmt.Errorf("failed to get User record for player_id %d: %w", playerID, err)
@@ -81,7 +81,7 @@ func (u *UserProvider) GetByPlayerID(ctx context.Context, playerID int) (*User, 
 	return &users[0], nil
 }
 
-func (u *UserProvider) GetRoleByName(ctx context.Context, name string) (*UserRole, error) {
+func (u *UserRepository) GetRoleByName(ctx context.Context, name string) (*UserRole, error) {
 	var roles []UserRole
 	if err := u.client.Db.SelectContext(ctx, &roles, GetRoleByName, name); err != nil {
 		return nil, fmt.Errorf("failed to get UserRole record for name %q: %w", name, err)
@@ -92,7 +92,7 @@ func (u *UserProvider) GetRoleByName(ctx context.Context, name string) (*UserRol
 	return &roles[0], nil
 }
 
-func (u *UserProvider) Add(ctx context.Context, playerID, roleID int) (int, error) {
+func (u *UserRepository) Add(ctx context.Context, playerID, roleID int) (int, error) {
 	result, err := u.client.Db.ExecContext(ctx, InsertUser, playerID, roleID)
 	if err != nil {
 		return 0, fmt.Errorf("failed to insert User record: %w", err)
@@ -114,7 +114,7 @@ func (u *UserProvider) Add(ctx context.Context, playerID, roleID int) (int, erro
 	return int(id), nil
 }
 
-func (u *UserProvider) BulkAdd(ctx context.Context, playerIDs []int, roleID int) error {
+func (u *UserRepository) BulkAdd(ctx context.Context, playerIDs []int, roleID int) error {
 	if len(playerIDs) == 0 {
 		return nil
 	}
@@ -130,7 +130,7 @@ func (u *UserProvider) BulkAdd(ctx context.Context, playerIDs []int, roleID int)
 	return nil
 }
 
-func (u *UserProvider) SoftDelete(ctx context.Context, id int) error {
+func (u *UserRepository) SoftDelete(ctx context.Context, id int) error {
 	result, err := u.client.Db.ExecContext(ctx, SoftDeleteUser, id)
 	if err != nil {
 		return fmt.Errorf("failed to soft-delete User record: %w", err)

@@ -18,15 +18,15 @@ type Format struct {
 	Name string `json:"name" db:"name"`
 }
 
-type FormatProvider struct {
+type FormatRepository struct {
 	client *lib.DBClient
 }
 
-func NewFormatProvider(client *lib.DBClient) *FormatProvider {
-	return &FormatProvider{client: client}
+func NewFormatRepository(client *lib.DBClient) *FormatRepository {
+	return &FormatRepository{client: client}
 }
 
-func (f *FormatProvider) GetAll(ctx context.Context) ([]Format, error) {
+func (f *FormatRepository) GetAll(ctx context.Context) ([]Format, error) {
 	var formats []Format
 	if err := f.client.Db.SelectContext(ctx, &formats, GetAllFormats); err != nil {
 		return nil, fmt.Errorf("failed to get Format records: %w", err)
@@ -37,7 +37,7 @@ func (f *FormatProvider) GetAll(ctx context.Context) ([]Format, error) {
 	return formats, nil
 }
 
-func (f *FormatProvider) GetById(ctx context.Context, id int) (*Format, error) {
+func (f *FormatRepository) GetById(ctx context.Context, id int) (*Format, error) {
 	var formats []Format
 	if err := f.client.Db.SelectContext(ctx, &formats, GetFormatByID, id); err != nil {
 		return nil, fmt.Errorf("failed to get Format record for id %d: %w", id, err)
@@ -48,7 +48,7 @@ func (f *FormatProvider) GetById(ctx context.Context, id int) (*Format, error) {
 	return &formats[0], nil
 }
 
-func (f *FormatProvider) GetByName(ctx context.Context, name string) (*Format, error) {
+func (f *FormatRepository) GetByName(ctx context.Context, name string) (*Format, error) {
 	var formats []Format
 	if err := f.client.Db.SelectContext(ctx, &formats, GetFormatByName, name); err != nil {
 		return nil, fmt.Errorf("failed to get Format record for name %q: %w", name, err)

@@ -57,15 +57,15 @@ func (g *GameResult) Validate() error {
 	return nil
 }
 
-type GameResultProvider struct {
+type GameResultRepository struct {
 	client *lib.DBClient
 }
 
-func NewGameResultProvider(client *lib.DBClient) *GameResultProvider {
-	return &GameResultProvider{client: client}
+func NewGameResultRepository(client *lib.DBClient) *GameResultRepository {
+	return &GameResultRepository{client: client}
 }
 
-func (gr *GameResultProvider) GetByGameId(ctx context.Context, gameId int) ([]GameResult, error) {
+func (gr *GameResultRepository) GetByGameId(ctx context.Context, gameId int) ([]GameResult, error) {
 	var results []GameResult
 	if err := gr.client.Db.SelectContext(ctx, &results, GetGameResultsByGameID, gameId); err != nil {
 		return nil, fmt.Errorf("failed to get Game Results for Game %d: %w", gameId, err)
@@ -82,7 +82,7 @@ func (gr *GameResultProvider) GetByGameId(ctx context.Context, gameId int) ([]Ga
 	return results, nil
 }
 
-func (gr *GameResultProvider) BulkAdd(ctx context.Context, results []GameResult) error {
+func (gr *GameResultRepository) BulkAdd(ctx context.Context, results []GameResult) error {
 	if len(results) == 0 {
 		return nil
 	}
@@ -99,7 +99,7 @@ func (gr *GameResultProvider) BulkAdd(ctx context.Context, results []GameResult)
 	return nil
 }
 
-func (gr *GameResultProvider) SoftDelete(ctx context.Context, id int) error {
+func (gr *GameResultRepository) SoftDelete(ctx context.Context, id int) error {
 	result, err := gr.client.Db.ExecContext(ctx, SoftDeleteGameResult, id)
 	if err != nil {
 		return fmt.Errorf("failed to soft-delete GameResult record: %w", err)

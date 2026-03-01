@@ -54,15 +54,15 @@ func (pp *PlayerPod) Validate() error {
 	return nil
 }
 
-type PodProvider struct {
+type PodRepository struct {
 	client *lib.DBClient
 }
 
-func NewPodProvider(client *lib.DBClient) *PodProvider {
-	return &PodProvider{client: client}
+func NewPodRepository(client *lib.DBClient) *PodRepository {
+	return &PodRepository{client: client}
 }
 
-func (p *PodProvider) GetAll(ctx context.Context) ([]Pod, error) {
+func (p *PodRepository) GetAll(ctx context.Context) ([]Pod, error) {
 	var pods []Pod
 	if err := p.client.Db.SelectContext(ctx, &pods, GetAllPods); err != nil {
 		return nil, fmt.Errorf("failed to get Pod records: %w", err)
@@ -73,7 +73,7 @@ func (p *PodProvider) GetAll(ctx context.Context) ([]Pod, error) {
 	return pods, nil
 }
 
-func (p *PodProvider) GetByID(ctx context.Context, podID int) (*Pod, error) {
+func (p *PodRepository) GetByID(ctx context.Context, podID int) (*Pod, error) {
 	var pods []Pod
 	if err := p.client.Db.SelectContext(ctx, &pods, GetPodByID, podID); err != nil {
 		return nil, fmt.Errorf("failed to get Pod record for id %d: %w", podID, err)
@@ -89,7 +89,7 @@ func (p *PodProvider) GetByID(ctx context.Context, podID int) (*Pod, error) {
 	return &pods[0], nil
 }
 
-func (p *PodProvider) GetByPlayerID(ctx context.Context, playerID int) ([]Pod, error) {
+func (p *PodRepository) GetByPlayerID(ctx context.Context, playerID int) ([]Pod, error) {
 	var pods []Pod
 	if err := p.client.Db.SelectContext(ctx, &pods, GetPodsByPlayerID, playerID); err != nil {
 		return nil, fmt.Errorf("failed to get Pod records for player %d: %w", playerID, err)
@@ -100,7 +100,7 @@ func (p *PodProvider) GetByPlayerID(ctx context.Context, playerID int) ([]Pod, e
 	return pods, nil
 }
 
-func (p *PodProvider) GetByName(ctx context.Context, name string) (*Pod, error) {
+func (p *PodRepository) GetByName(ctx context.Context, name string) (*Pod, error) {
 	var pods []Pod
 	if err := p.client.Db.SelectContext(ctx, &pods, GetPodByName, name); err != nil {
 		return nil, fmt.Errorf("failed to get Pod record for name %q: %w", name, err)
@@ -111,7 +111,7 @@ func (p *PodProvider) GetByName(ctx context.Context, name string) (*Pod, error) 
 	return &pods[0], nil
 }
 
-func (p *PodProvider) Add(ctx context.Context, name string) (int, error) {
+func (p *PodRepository) Add(ctx context.Context, name string) (int, error) {
 	result, err := p.client.Db.ExecContext(ctx, InsertPod, name)
 	if err != nil {
 		return 0, fmt.Errorf("failed to insert Pod record: %w", err)
@@ -133,7 +133,7 @@ func (p *PodProvider) Add(ctx context.Context, name string) (int, error) {
 	return int(id), nil
 }
 
-func (p *PodProvider) BulkAddPlayers(ctx context.Context, podID int, playerIDs []int) error {
+func (p *PodRepository) BulkAddPlayers(ctx context.Context, podID int, playerIDs []int) error {
 	if len(playerIDs) == 0 {
 		return nil
 	}
@@ -149,7 +149,7 @@ func (p *PodProvider) BulkAddPlayers(ctx context.Context, podID int, playerIDs [
 	return nil
 }
 
-func (p *PodProvider) AddPlayerToPod(ctx context.Context, podID, playerID int) error {
+func (p *PodRepository) AddPlayerToPod(ctx context.Context, podID, playerID int) error {
 	result, err := p.client.Db.ExecContext(ctx, InsertPlayerPod, podID, playerID)
 	if err != nil {
 		return fmt.Errorf("failed to insert PlayerPod record: %w", err)

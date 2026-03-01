@@ -13,9 +13,9 @@ import (
 
 type DeckRouter struct {
 	log               *zap.Logger
-	deckRepo          *models.DeckProvider
-	deckCommanderRepo *models.DeckCommanderProvider
-	formatRepo        *models.FormatProvider
+	deckRepo          models.DeckRepositoryInterface
+	deckCommanderRepo models.DeckCommanderRepositoryInterface
+	formatRepo        models.FormatRepositoryInterface
 }
 
 func NewDeckRouter(log *zap.Logger, repos *models.Repositories) *DeckRouter {

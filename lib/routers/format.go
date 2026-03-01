@@ -12,7 +12,7 @@ import (
 
 type FormatRouter struct {
 	log        *zap.Logger
-	formatRepo *models.FormatProvider
+	formatRepo models.FormatRepositoryInterface
 }
 
 func NewFormatRouter(log *zap.Logger, repos *models.Repositories) *FormatRouter {

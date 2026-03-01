@@ -7,28 +7,28 @@ import (
 )
 
 type Repositories struct {
-	Players        *PlayerProvider
-	Decks          *DeckProvider
-	Games          *GameProvider
-	GameResults    *GameResultProvider
-	Pods           *PodProvider
-	Users          *UserProvider
-	Formats        *FormatProvider
-	Commanders     *CommanderProvider
-	DeckCommanders *DeckCommanderProvider
+	Players        *PlayerRepository
+	Decks          *DeckRepository
+	Games          *GameRepository
+	GameResults    *GameResultRepository
+	Pods           *PodRepository
+	Users          *UserRepository
+	Formats        *FormatRepository
+	Commanders     *CommanderRepository
+	DeckCommanders *DeckCommanderRepository
 }
 
 func NewRepositories(log *zap.Logger, client *lib.DBClient) *Repositories {
-	gameResults := NewGameResultProvider(client)
+	gameResults := NewGameResultRepository(client)
 	return &Repositories{
-		Players:        NewPlayerProvider(client),
-		Decks:          NewDeckProvider(client),
-		Games:          NewGameProvider(log, client, gameResults),
+		Players:        NewPlayerRepository(client),
+		Decks:          NewDeckRepository(client),
+		Games:          NewGameRepository(log, client, gameResults),
 		GameResults:    gameResults,
-		Pods:           NewPodProvider(client),
-		Users:          NewUserProvider(client),
-		Formats:        NewFormatProvider(client),
-		Commanders:     NewCommanderProvider(client),
-		DeckCommanders: NewDeckCommanderProvider(client),
+		Pods:           NewPodRepository(client),
+		Users:          NewUserRepository(client),
+		Formats:        NewFormatRepository(client),
+		Commanders:     NewCommanderRepository(client),
+		DeckCommanders: NewDeckCommanderRepository(client),
 	}
 }

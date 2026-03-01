@@ -13,7 +13,7 @@ import (
 
 type PodRouter struct {
 	log     *zap.Logger
-	podRepo *models.PodProvider
+	podRepo models.PodRepositoryInterface
 }
 
 func NewPodRouter(log *zap.Logger, repos *models.Repositories) *PodRouter {

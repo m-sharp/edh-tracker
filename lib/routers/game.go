@@ -14,9 +14,9 @@ import (
 
 type GameRouter struct {
 	log        *zap.Logger
-	gameRepo   *models.GameProvider
-	formatRepo *models.FormatProvider
-	deckRepo   *models.DeckProvider
+	gameRepo   models.GameRepositoryInterface
+	formatRepo models.FormatRepositoryInterface
+	deckRepo   models.DeckRepositoryInterface
 }
 
 func NewGameRouter(log *zap.Logger, repos *models.Repositories) *GameRouter {

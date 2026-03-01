@@ -21,15 +21,15 @@ type DeckCommander struct {
 	PartnerCommanderID *int `json:"partner_commander_id" db:"partner_commander_id"`
 }
 
-type DeckCommanderProvider struct {
+type DeckCommanderRepository struct {
 	client *lib.DBClient
 }
 
-func NewDeckCommanderProvider(client *lib.DBClient) *DeckCommanderProvider {
-	return &DeckCommanderProvider{client: client}
+func NewDeckCommanderRepository(client *lib.DBClient) *DeckCommanderRepository {
+	return &DeckCommanderRepository{client: client}
 }
 
-func (d *DeckCommanderProvider) GetByDeckId(ctx context.Context, deckID int) (*DeckCommander, error) {
+func (d *DeckCommanderRepository) GetByDeckId(ctx context.Context, deckID int) (*DeckCommander, error) {
 	var rows []DeckCommander
 	if err := d.client.Db.SelectContext(ctx, &rows, GetDeckCommanderByDeckId, deckID); err != nil {
 		return nil, fmt.Errorf("failed to get DeckCommander record for deck %d: %w", deckID, err)
@@ -40,7 +40,7 @@ func (d *DeckCommanderProvider) GetByDeckId(ctx context.Context, deckID int) (*D
 	return &rows[0], nil
 }
 
-func (d *DeckCommanderProvider) BulkAdd(ctx context.Context, entries []DeckCommander) error {
+func (d *DeckCommanderRepository) BulkAdd(ctx context.Context, entries []DeckCommander) error {
 	if len(entries) == 0 {
 		return nil
 	}
@@ -56,7 +56,7 @@ func (d *DeckCommanderProvider) BulkAdd(ctx context.Context, entries []DeckComma
 	return nil
 }
 
-func (d *DeckCommanderProvider) Add(ctx context.Context, deckID, commanderID int, partnerCommanderID *int) (int, error) {
+func (d *DeckCommanderRepository) Add(ctx context.Context, deckID, commanderID int, partnerCommanderID *int) (int, error) {
 	result, err := d.client.Db.ExecContext(ctx, InsertDeckCommander, deckID, commanderID, partnerCommanderID)
 	if err != nil {
 		return 0, fmt.Errorf("failed to insert DeckCommander record: %w", err)

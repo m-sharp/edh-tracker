@@ -140,17 +140,17 @@ func (d *Deck) Validate() error {
 	return nil
 }
 
-type DeckProvider struct {
+type DeckRepository struct {
 	client *lib.DBClient
 }
 
-func NewDeckProvider(client *lib.DBClient) *DeckProvider {
-	return &DeckProvider{
+func NewDeckRepository(client *lib.DBClient) *DeckRepository {
+	return &DeckRepository{
 		client: client,
 	}
 }
 
-func (d *DeckProvider) GetAll(ctx context.Context) ([]DeckWithStats, error) {
+func (d *DeckRepository) GetAll(ctx context.Context) ([]DeckWithStats, error) {
 	var rows []deckRow
 	if err := d.client.Db.SelectContext(ctx, &rows, GetAllDecks); err != nil {
 		return nil, fmt.Errorf("failed to get Deck records: %w", err)
@@ -173,7 +173,7 @@ func (d *DeckProvider) GetAll(ctx context.Context) ([]DeckWithStats, error) {
 	return result, nil
 }
 
-func (d *DeckProvider) GetAllForPlayer(ctx context.Context, playerID int) ([]DeckWithStats, error) {
+func (d *DeckRepository) GetAllForPlayer(ctx context.Context, playerID int) ([]DeckWithStats, error) {
 	var rows []deckRow
 	if err := d.client.Db.SelectContext(ctx, &rows, GetDecksForPlayer, playerID); err != nil {
 		return nil, fmt.Errorf("failed to get Deck records for player %d: %w", playerID, err)
@@ -196,7 +196,7 @@ func (d *DeckProvider) GetAllForPlayer(ctx context.Context, playerID int) ([]Dec
 	return result, nil
 }
 
-func (d *DeckProvider) GetById(ctx context.Context, deckID int) (*DeckWithStats, error) {
+func (d *DeckRepository) GetById(ctx context.Context, deckID int) (*DeckWithStats, error) {
 	var rows []deckRow
 	if err := d.client.Db.SelectContext(ctx, &rows, GetDeckByID, deckID); err != nil {
 		return nil, fmt.Errorf("failed to get Deck record for id %d: %w", deckID, err)
@@ -221,7 +221,7 @@ func (d *DeckProvider) GetById(ctx context.Context, deckID int) (*DeckWithStats,
 	}, nil
 }
 
-func (d *DeckProvider) Add(ctx context.Context, playerID int, name string, formatID int) (int, error) {
+func (d *DeckRepository) Add(ctx context.Context, playerID int, name string, formatID int) (int, error) {
 	result, err := d.client.Db.ExecContext(ctx, InsertDeck, playerID, name, formatID)
 	if err != nil {
 		return 0, fmt.Errorf("failed to insert Deck record: %w", err)
@@ -243,7 +243,7 @@ func (d *DeckProvider) Add(ctx context.Context, playerID int, name string, forma
 	return int(id), nil
 }
 
-func (d *DeckProvider) BulkAdd(ctx context.Context, decks []Deck) ([]Deck, error) {
+func (d *DeckRepository) BulkAdd(ctx context.Context, decks []Deck) ([]Deck, error) {
 	if len(decks) == 0 {
 		return []Deck{}, nil
 	}
@@ -280,7 +280,7 @@ func (d *DeckProvider) BulkAdd(ctx context.Context, decks []Deck) ([]Deck, error
 	return rows, nil
 }
 
-func (d *DeckProvider) Retire(ctx context.Context, deckID int) error {
+func (d *DeckRepository) Retire(ctx context.Context, deckID int) error {
 	result, err := d.client.Db.ExecContext(ctx, RetireDeck, deckID)
 	if err != nil {
 		return fmt.Errorf("failed to retire Deck: %w", err)
@@ -297,7 +297,7 @@ func (d *DeckProvider) Retire(ctx context.Context, deckID int) error {
 	return nil
 }
 
-func (d *DeckProvider) SoftDelete(ctx context.Context, id int) error {
+func (d *DeckRepository) SoftDelete(ctx context.Context, id int) error {
 	result, err := d.client.Db.ExecContext(ctx, SoftDeleteDeck, id)
 	if err != nil {
 		return fmt.Errorf("failed to soft-delete Deck record: %w", err)

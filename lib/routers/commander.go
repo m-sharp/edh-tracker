@@ -13,7 +13,7 @@ import (
 
 type CommanderRouter struct {
 	log           *zap.Logger
-	commanderRepo *models.CommanderProvider
+	commanderRepo models.CommanderRepositoryInterface
 }
 
 func NewCommanderRouter(log *zap.Logger, repos *models.Repositories) *CommanderRouter {
