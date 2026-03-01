@@ -12,14 +12,14 @@ import (
 )
 
 type PlayerRouter struct {
-	log      *zap.Logger
-	provider *models.PlayerProvider
+	log        *zap.Logger
+	playerRepo models.PlayerRepositoryInterface
 }
 
-func NewPlayerRouter(log *zap.Logger, client *lib.DBClient) *PlayerRouter {
+func NewPlayerRouter(log *zap.Logger, repos *models.Repositories) *PlayerRouter {
 	return &PlayerRouter{
-		log:      log.Named("PlayerRouter"),
-		provider: models.NewPlayerProvider(client),
+		log:        log.Named("PlayerRouter"),
+		playerRepo: repos.Players,
 	}
 }
 
@@ -47,7 +47,7 @@ func (p *PlayerRouter) GetAll(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	errMsg := "Failed to get Player records"
 
-	players, err := p.provider.GetAll(ctx)
+	players, err := p.playerRepo.GetAll(ctx)
 	if err != nil {
 		lib.WriteError(p.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
 		return
@@ -73,7 +73,7 @@ func (p *PlayerRouter) GetPlayerById(w http.ResponseWriter, r *http.Request) {
 	}
 
 	errMsg := "Failed to get Player record"
-	player, err := p.provider.GetById(ctx, playerId)
+	player, err := p.playerRepo.GetById(ctx, playerId)
 	if err != nil {
 		lib.WriteError(p.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
 		return
@@ -111,7 +111,7 @@ func (p *PlayerRouter) PlayerCreate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Info("Saving new Player record")
-	if err := p.provider.Add(ctx, player.Name); err != nil {
+	if _, err := p.playerRepo.Add(ctx, player.Name); err != nil {
 		lib.WriteError(log, w, http.StatusInternalServerError, err, "Failed to add Player record", errMsg)
 		return
 	}

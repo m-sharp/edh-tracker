@@ -1,10 +1,10 @@
-FROM golang:1.20.0-alpine3.17 as TrackerAPI
+FROM golang:1.26.0-alpine3.23 AS tracker_api
 
-ENV DBHOST ""
-ENV DBUSER ""
-ENV DBPASSWORD ""
-ENV DBPORT ""
-ENV CSRFSEC ""
+ENV DBHOST=""
+ENV DBUSER=""
+ENV DBPASSWORD=""
+ENV DBPORT=""
+ENV CSRFSEC=""
 
 WORKDIR /edh-tracker
 RUN mkdir build/

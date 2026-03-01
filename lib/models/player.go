@@ -3,31 +3,36 @@ package models
 import (
 	"context"
 	"fmt"
-	"time"
+	"strings"
 
 	"github.com/m-sharp/edh-tracker/lib"
 )
 
 const (
-	GetAllPlayers  = `SELECT id, name, ctime FROM player;`
-	GetPlayerByID  = `SELECT id, name, ctime FROM player WHERE id = ?;`
-	GetPlayerStats = `SELECT DISTINCT game_result.game_id, game_result.place, game_result.kill_count
+	GetAllPlayers   = `SELECT id, name, created_at, updated_at, deleted_at FROM player WHERE deleted_at IS NULL;`
+	GetPlayerByID   = `SELECT id, name, created_at, updated_at, deleted_at FROM player WHERE id = ? AND deleted_at IS NULL;`
+	GetPlayerByName = `SELECT id, name, created_at, updated_at, deleted_at FROM player WHERE name = ? AND deleted_at IS NULL LIMIT 1;`
+	GetPlayerStats  = `SELECT DISTINCT game_result.game_id, game_result.place, game_result.kill_count
 						FROM (game_result INNER JOIN deck on game_result.deck_id = deck.id)
-					  WHERE deck.player_id = ?;`
-	InsertPlayer = `INSERT INTO player (name) VALUES (?);`
+					  WHERE deck.player_id = ?
+					    AND deck.deleted_at IS NULL
+					    AND game_result.deleted_at IS NULL;`
+	GetPlayersByNames = `SELECT id, name FROM player WHERE name IN (%s) AND deleted_at IS NULL`
+	InsertPlayer      = `INSERT INTO player (name) VALUES (?);`
+	SoftDeletePlayer  = `UPDATE player SET deleted_at = NOW() WHERE id = ?;`
 
 	playerValidationErr = "invalid Player: %s"
 )
 
 type Player struct {
-	Id        int       `json:"id" db:"id"`
-	Name      string    `json:"name" db:"name"`
-	CreatedAt time.Time `json:"ctime" db:"ctime"`
+	Model
+	Name string `json:"name" db:"name"`
 }
 
-type PlayerWithStats struct {
+type PlayerInfo struct {
 	Player
 	Stats
+	PodIDs []int `json:"pod_ids"`
 }
 
 func (p *Player) Validate() error {
@@ -38,17 +43,20 @@ func (p *Player) Validate() error {
 	return nil
 }
 
-type PlayerProvider struct {
+type PlayerRepository struct {
 	client *lib.DBClient
 }
 
-func NewPlayerProvider(client *lib.DBClient) *PlayerProvider {
-	return &PlayerProvider{
+func NewPlayerRepository(client *lib.DBClient) *PlayerRepository {
+	return &PlayerRepository{
 		client: client,
 	}
 }
 
-func (p *PlayerProvider) GetAll(ctx context.Context) ([]PlayerWithStats, error) {
+func (p *PlayerRepository) GetAll(ctx context.Context) ([]PlayerInfo, error) {
+	// TODO: Will need to be locked down eventually as well. A single player requesting a list of other players in their pod should not:
+	//		a.) be able to see what pods the other players are in
+	//		b.) be able to ask about players in a pod they don't belong to
 	var players []Player
 	if err := p.client.Db.SelectContext(ctx, &players, GetAllPlayers); err != nil {
 		return nil, fmt.Errorf("failed to get Player records: %w", err)
@@ -56,23 +64,31 @@ func (p *PlayerProvider) GetAll(ctx context.Context) ([]PlayerWithStats, error) 
 
 	// Return an empty list instead of nil
 	if players == nil {
-		return []PlayerWithStats{}, nil
+		return []PlayerInfo{}, nil
 	}
 
-	var withStats []PlayerWithStats
+	var withStats []PlayerInfo
 	for _, player := range players {
 		var gameStats GameStats
-		if err := p.client.Db.SelectContext(ctx, &gameStats, GetPlayerStats, player.Id); err != nil {
+		if err := p.client.Db.SelectContext(ctx, &gameStats, GetPlayerStats, player.ID); err != nil {
 			return nil, fmt.Errorf("failed to get Player statistics: %w", err)
 		}
 
-		withStats = append(withStats, PlayerWithStats{Player: player, Stats: gameStats.ToStats()})
+		var podIDs []int
+		if err := p.client.Db.SelectContext(ctx, &podIDs, GetPodIDsByPlayerID, player.ID); err != nil {
+			return nil, fmt.Errorf("failed to get Pod IDs for player %d: %w", player.ID, err)
+		}
+		if podIDs == nil {
+			podIDs = []int{}
+		}
+
+		withStats = append(withStats, PlayerInfo{Player: player, Stats: gameStats.ToStats(), PodIDs: podIDs})
 	}
 
 	return withStats, nil
 }
 
-func (p *PlayerProvider) GetById(ctx context.Context, playerId int) (*PlayerWithStats, error) {
+func (p *PlayerRepository) GetById(ctx context.Context, playerId int) (*PlayerInfo, error) {
 	var players []Player
 	if err := p.client.Db.SelectContext(ctx, &players, GetPlayerByID, playerId); err != nil {
 		return nil, fmt.Errorf("failed to get Player record for id %d: %w", playerId, err)
@@ -90,24 +106,90 @@ func (p *PlayerProvider) GetById(ctx context.Context, playerId int) (*PlayerWith
 		return nil, fmt.Errorf("failed to get Player statistics: %w", err)
 	}
 
-	return &PlayerWithStats{
+	var podIDs []int
+	if err := p.client.Db.SelectContext(ctx, &podIDs, GetPodIDsByPlayerID, playerId); err != nil {
+		return nil, fmt.Errorf("failed to get Pod IDs for player %d: %w", playerId, err)
+	}
+	if podIDs == nil {
+		podIDs = []int{}
+	}
+
+	return &PlayerInfo{
 		Player: players[0],
 		Stats:  gameStats.ToStats(),
+		PodIDs: podIDs,
 	}, nil
 }
 
-func (p *PlayerProvider) Add(ctx context.Context, name string) error {
+func (p *PlayerRepository) GetByName(ctx context.Context, name string) (*Player, error) {
+	var players []Player
+	if err := p.client.Db.SelectContext(ctx, &players, GetPlayerByName, name); err != nil {
+		return nil, fmt.Errorf("failed to get Player record for name %q: %w", name, err)
+	}
+	if len(players) == 0 {
+		return nil, nil
+	}
+	return &players[0], nil
+}
+
+func (p *PlayerRepository) Add(ctx context.Context, name string) (int, error) {
 	result, err := p.client.Db.ExecContext(ctx, InsertPlayer, name)
 	if err != nil {
-		return fmt.Errorf("failed to insert Player record: %w", err)
+		return 0, fmt.Errorf("failed to insert Player record: %w", err)
 	}
 
 	numAffected, err := result.RowsAffected()
 	if err != nil {
-		return fmt.Errorf("failed to get number of rows affected by insert: %w", err)
+		return 0, fmt.Errorf("failed to get number of rows affected by insert: %w", err)
 	}
 	if numAffected != 1 {
-		return fmt.Errorf("unexpected number of rows affected by Player insert: got %d, expected 1", numAffected)
+		return 0, fmt.Errorf("unexpected number of rows affected by Player insert: got %d, expected 1", numAffected)
+	}
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, fmt.Errorf("failed to get last insert ID for new Player: %w", err)
+	}
+
+	return int(id), nil
+}
+
+func (p *PlayerRepository) BulkAdd(ctx context.Context, names []string) ([]Player, error) {
+	if len(names) == 0 {
+		return []Player{}, nil
+	}
+
+	insertQuery := "INSERT INTO player (name) VALUES " + strings.TrimSuffix(strings.Repeat("(?),", len(names)), ",")
+	args := make([]interface{}, len(names))
+	for i, name := range names {
+		args[i] = name
+	}
+	if _, err := p.client.Db.ExecContext(ctx, insertQuery, args...); err != nil {
+		return nil, fmt.Errorf("failed to bulk insert Player records: %w", err)
+	}
+
+	inPlaceholders := strings.TrimSuffix(strings.Repeat("?,", len(names)), ",")
+	selectQuery := fmt.Sprintf(GetPlayersByNames, inPlaceholders)
+	var players []Player
+	if err := p.client.Db.SelectContext(ctx, &players, selectQuery, args...); err != nil {
+		return nil, fmt.Errorf("failed to select inserted Players: %w", err)
+	}
+
+	return players, nil
+}
+
+func (p *PlayerRepository) SoftDelete(ctx context.Context, id int) error {
+	result, err := p.client.Db.ExecContext(ctx, SoftDeletePlayer, id)
+	if err != nil {
+		return fmt.Errorf("failed to soft-delete Player record: %w", err)
+	}
+
+	numAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get number of rows affected by soft-delete: %w", err)
+	}
+	if numAffected != 1 {
+		return fmt.Errorf("unexpected number of rows affected by Player soft-delete: got %d, expected 1", numAffected)
 	}
 
 	return nil

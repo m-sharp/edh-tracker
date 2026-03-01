@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	dbName = "edh"
+	DBName = "pod_tracker"
 
 	openErr = "error opening mysql connection: %w"
 
@@ -48,7 +48,7 @@ func NewDBClient(cfg *Config, log *zap.Logger) (*DBClient, error) {
 		zap.String("Username", username),
 		zap.String("Host", host),
 		zap.String("Port", port),
-		zap.String("Database", dbName),
+		zap.String("Database", DBName),
 	)
 
 	config := &mysql.Config{
@@ -56,7 +56,7 @@ func NewDBClient(cfg *Config, log *zap.Logger) (*DBClient, error) {
 		Passwd:    password,
 		Net:       "tcp",
 		Addr:      fmt.Sprintf("%s:%v", host, port),
-		DBName:    dbName,
+		DBName:    DBName,
 		ParseTime: true,
 	}
 

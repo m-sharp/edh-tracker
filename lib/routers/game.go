@@ -13,14 +13,18 @@ import (
 )
 
 type GameRouter struct {
-	log      *zap.Logger
-	provider *models.GameProvider
+	log        *zap.Logger
+	gameRepo   models.GameRepositoryInterface
+	formatRepo models.FormatRepositoryInterface
+	deckRepo   models.DeckRepositoryInterface
 }
 
-func NewGameRouter(log *zap.Logger, client *lib.DBClient) *GameRouter {
+func NewGameRouter(log *zap.Logger, repos *models.Repositories) *GameRouter {
 	return &GameRouter{
-		log:      log.Named("GameRouter"),
-		provider: models.NewGameProvider(log, client),
+		log:        log.Named("GameRouter"),
+		gameRepo:   repos.Games,
+		formatRepo: repos.Formats,
+		deckRepo:   repos.Decks,
 	}
 }
 
@@ -48,20 +52,27 @@ func (g *GameRouter) GetRoutes() []*lib.Route {
 func (g *GameRouter) GetAll(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	errMsg := "Failed to get Game records"
+
+	podId, _ := lib.GetQueryId(r, "pod_id")
 	deckId, _ := lib.GetQueryId(r, "deck_id")
+
+	if podId == 0 && deckId == 0 {
+		lib.WriteError(g.log, w, http.StatusBadRequest, fmt.Errorf("missing required query param"), "Missing pod_id or deck_id query param", "pod_id or deck_id query param is required")
+		return
+	}
 
 	var (
 		games []models.GameDetails
 		err   error
 	)
 	if deckId != 0 {
-		games, err = g.provider.GetAllByDeck(ctx, deckId)
+		games, err = g.gameRepo.GetAllByDeck(ctx, deckId)
 		if err != nil {
 			lib.WriteError(g.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
 			return
 		}
 	} else {
-		games, err = g.provider.GetAll(ctx)
+		games, err = g.gameRepo.GetAllByPod(ctx, podId)
 		if err != nil {
 			lib.WriteError(g.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
 			return
@@ -87,7 +98,7 @@ func (g *GameRouter) GetGameById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	gameDetails, err := g.provider.GetGameById(ctx, gameId)
+	gameDetails, err := g.gameRepo.GetGameById(ctx, gameId)
 	if err != nil {
 		lib.WriteError(g.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
 		return
@@ -133,9 +144,45 @@ func (g *GameRouter) GameCreate(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	format, err := g.formatRepo.GetById(ctx, gameDetails.FormatID)
+	if err != nil {
+		lib.WriteError(log, w, http.StatusInternalServerError, err, "Failed to look up format", errMsg)
+		return
+	}
+	if format == nil {
+		lib.WriteError(log, w, http.StatusBadRequest, nil, "Format not found", "Invalid format_id")
+		return
+	}
+
+	// For non-"other" formats, verify all decks share the game's format
+	if format.Name != "other" {
+		for _, result := range gameDetails.Results {
+			deck, err := g.deckRepo.GetById(ctx, result.DeckId)
+			if err != nil {
+				lib.WriteError(log, w, http.StatusInternalServerError, err, "Failed to look up deck", errMsg)
+				return
+			}
+			if deck == nil {
+				lib.WriteError(log, w, http.StatusBadRequest, nil,
+					fmt.Sprintf("Deck %d not found", result.DeckId),
+					fmt.Sprintf("Deck %d not found", result.DeckId),
+				)
+				return
+			}
+			if deck.FormatID != gameDetails.FormatID {
+				lib.WriteError(log, w, http.StatusBadRequest, nil,
+					fmt.Sprintf("Deck %d format does not match game format", result.DeckId),
+					fmt.Sprintf("Deck %d is not in the correct format for this game", result.DeckId),
+				)
+				return
+			}
+		}
+	}
+
 	log.Info("Saving new Game record")
-	if err := g.provider.Add(ctx, gameDetails.Description, gameDetails.Results...); err != nil {
+	if err := g.gameRepo.Add(ctx, gameDetails.Description, gameDetails.PodID, gameDetails.FormatID, gameDetails.Results...); err != nil {
 		lib.WriteError(log, w, http.StatusInternalServerError, err, "Failed to add Game record", errMsg)
+		return
 	}
 
 	w.WriteHeader(http.StatusCreated)

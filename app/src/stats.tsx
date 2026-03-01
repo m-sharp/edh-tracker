@@ -77,12 +77,15 @@ export const StatColumns: Array<GridColDef> = [
     },
 ];
 
-// CommanderColumn is a DataGrid column definition for a commander name string, formatted as a <Link />
+// CommanderColumn is a DataGrid column definition for a deck name, formatted as a <Link />
 export const CommanderColumn: GridColDef = {
-    field: "commander",
-    headerName: "Commander",
+    field: "name",
+    headerName: "Deck",
     renderCell: (params) => (
-        <Link to={`/deck/${params.row.id}`}>{params.row.commander}</Link>
+        <Link to={`/deck/${params.row.id}`}>
+            {params.row.name}
+            {params.row.commanders && ` (${params.row.commanders.commander_name})`}
+        </Link>
     ),
     hideable: false,
     flex: 1,

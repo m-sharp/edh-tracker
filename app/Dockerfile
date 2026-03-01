@@ -1,6 +1,6 @@
 # This Dockerfile should be run from the edh-tracker/ directory via the -f flag on docker build
 # ToDo: Might be able to speed up builds by copying https://github.com/vercel/next.js/blob/canary/examples/with-docker/Dockerfile a bit more
-FROM node:18-alpine AS reactBuild
+FROM node:18-alpine AS react_build
 
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
@@ -20,7 +20,7 @@ COPY app/src/ src/
 # Build app
 RUN npm run build
 
-FROM golang:1.20.0-alpine3.17 as goBuild
+FROM golang:1.26.0-alpine3.23 AS go_build
 
 WORKDIR /go-build
 RUN mkdir build/
@@ -37,11 +37,11 @@ COPY lib/ lib/
 # Build go webserver
 RUN go build -o build/web-server .
 
-FROM golang:1.20.0-alpine3.17 as app
+FROM golang:1.20.0-alpine3.17 AS app
 
 WORKDIR /edh-tracker
 
-COPY --from=goBuild /go-build/build/web-server .
-COPY --from=reactBuild /app/build/ app/
+COPY --from=go_build /go-build/build/web-server .
+COPY --from=react_build /app/build/ app/
 
 CMD ["./web-server"]

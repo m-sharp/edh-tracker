@@ -3,7 +3,7 @@ package models
 import (
 	"context"
 	"fmt"
-	"time"
+	"strings"
 
 	"go.uber.org/zap"
 
@@ -11,52 +11,23 @@ import (
 )
 
 const (
-	GetAllGames      = `SELECT id, description, ctime FROM game;`
-	GetGameByID      = `SELECT id, description, ctime FROM game WHERE id = ?;`
-	GetGamesByDeckId = `SELECT game.id, game.description, game.ctime
-								FROM (game INNER JOIN game_result on game.id = game_result.game_id)
-							  WHERE game_result.deck_id = ?;`
-	GetGameResultsByGameID = `SELECT game_result.id, game_result.game_id, game_result.deck_id, game_result.place, game_result.kill_count, deck.commander
-								FROM (game_result INNER JOIN deck on game_result.deck_id = deck.id)
-							  WHERE game_id = ?;`
+	GetGameByID      = `SELECT id, description, pod_id, format_id, created_at, updated_at, deleted_at FROM game WHERE id = ? AND deleted_at IS NULL;`
+	GetGamesByDeckId = `SELECT game.id, game.description, game.pod_id, game.format_id, game.created_at, game.updated_at, game.deleted_at
+							FROM (game INNER JOIN game_result on game.id = game_result.game_id)
+						  WHERE game_result.deck_id = ?
+						    AND game.deleted_at IS NULL
+						    AND game_result.deleted_at IS NULL;`
+	GetGamesByPodId = `SELECT id, description, pod_id, format_id, created_at, updated_at, deleted_at FROM game WHERE pod_id = ? AND deleted_at IS NULL;`
 
-	InsertGame       = `INSERT INTO game (description) VALUES (?);`
-	InsertGameResult = `INSERT INTO game_result (game_id, deck_id, place, kill_count) VALUES (?, ?, ?, ?);`
-
-	gameResultValidationErr = "invalid Game Result: %s"
+	InsertGame     = `INSERT INTO game (description, pod_id, format_id) VALUES (?, ?, ?);`
+	SoftDeleteGame = `UPDATE game SET deleted_at = NOW() WHERE id = ?;`
 )
 
 type Game struct {
-	Id          int       `json:"id" db:"id"`
-	Description string    `json:"description" db:"description"`
-	CreatedAt   time.Time `json:"ctime" db:"ctime"`
-}
-
-type GameResult struct {
-	Id        int    `json:"id" db:"id"`
-	GameId    int    `json:"game_id" db:"game_id"`
-	DeckId    int    `json:"deck_id" db:"deck_id"`
-	Commander string `json:"commander" db:"commander"`
-	Place     int    `json:"place" db:"place"`
-	Kills     int    `json:"kill_count" db:"kill_count"`
-	Points    int    `json:"points"`
-}
-
-func (g *GameResult) Validate() error {
-	if g.DeckId == 0 {
-		return fmt.Errorf(gameResultValidationErr, "missing DeckId")
-	}
-	if g.Place == 0 {
-		return fmt.Errorf(gameResultValidationErr, "missing Place")
-	}
-	if g.Place < 1 {
-		return fmt.Errorf(gameResultValidationErr, "Place cannot be less than 1")
-	}
-	if g.Kills < 0 {
-		return fmt.Errorf(gameResultValidationErr, "Kills cannot be less than 0")
-	}
-
-	return nil
+	Model
+	Description string `json:"description" db:"description"`
+	PodID       int    `json:"pod_id"      db:"pod_id"`
+	FormatID    int    `json:"format_id"   db:"format_id"`
 }
 
 type GameDetails struct {
@@ -64,21 +35,23 @@ type GameDetails struct {
 	Results []GameResult `json:"results"`
 }
 
-type GameProvider struct {
-	log    *zap.Logger
-	client *lib.DBClient
+type GameRepository struct {
+	log         *zap.Logger
+	client      *lib.DBClient
+	gameResults *GameResultRepository
 }
 
-func NewGameProvider(log *zap.Logger, client *lib.DBClient) *GameProvider {
-	return &GameProvider{
-		log:    log.Named("GameProvider"),
-		client: client,
+func NewGameRepository(log *zap.Logger, client *lib.DBClient, gameResults *GameResultRepository) *GameRepository {
+	return &GameRepository{
+		log:         log.Named("GameRepository"),
+		client:      client,
+		gameResults: gameResults,
 	}
 }
 
-func (g *GameProvider) GetAll(ctx context.Context) ([]GameDetails, error) {
+func (g *GameRepository) GetAllByPod(ctx context.Context, podId int) ([]GameDetails, error) {
 	var games []Game
-	if err := g.client.Db.SelectContext(ctx, &games, GetAllGames); err != nil {
+	if err := g.client.Db.SelectContext(ctx, &games, GetGamesByPodId, podId); err != nil {
 		return nil, fmt.Errorf("failed to get Game records: %w", err)
 	}
 
@@ -88,7 +61,7 @@ func (g *GameProvider) GetAll(ctx context.Context) ([]GameDetails, error) {
 
 	var details []GameDetails
 	for _, game := range games {
-		results, err := g.getGameResults(ctx, game.Id)
+		results, err := g.gameResults.GetByGameId(ctx, game.ID)
 		if err != nil {
 			g.log.Warn("Failed to get game results for game, dropping from results", zap.Any("Game", game))
 			continue
@@ -100,7 +73,7 @@ func (g *GameProvider) GetAll(ctx context.Context) ([]GameDetails, error) {
 	return details, nil
 }
 
-func (g *GameProvider) GetAllByDeck(ctx context.Context, deckId int) ([]GameDetails, error) {
+func (g *GameRepository) GetAllByDeck(ctx context.Context, deckId int) ([]GameDetails, error) {
 	var games []Game
 	if err := g.client.Db.SelectContext(ctx, &games, GetGamesByDeckId, deckId); err != nil {
 		return nil, fmt.Errorf("failed to get Game records: %w", err)
@@ -112,7 +85,7 @@ func (g *GameProvider) GetAllByDeck(ctx context.Context, deckId int) ([]GameDeta
 
 	var details []GameDetails
 	for _, game := range games {
-		results, err := g.getGameResults(ctx, game.Id)
+		results, err := g.gameResults.GetByGameId(ctx, game.ID)
 		if err != nil {
 			g.log.Warn("Failed to get game results for game, dropping from results", zap.Any("Game", game))
 			continue
@@ -124,7 +97,7 @@ func (g *GameProvider) GetAllByDeck(ctx context.Context, deckId int) ([]GameDeta
 	return details, nil
 }
 
-func (g *GameProvider) GetGameById(ctx context.Context, gameId int) (*GameDetails, error) {
+func (g *GameRepository) GetGameById(ctx context.Context, gameId int) (*GameDetails, error) {
 	var games []Game
 	if err := g.client.Db.SelectContext(ctx, &games, GetGameByID, gameId); err != nil {
 		return nil, fmt.Errorf("failed to get Game record for id %d: %w", gameId, err)
@@ -138,7 +111,7 @@ func (g *GameProvider) GetGameById(ctx context.Context, gameId int) (*GameDetail
 	}
 
 	game := games[0]
-	results, err := g.getGameResults(ctx, game.Id)
+	results, err := g.gameResults.GetByGameId(ctx, game.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -149,26 +122,8 @@ func (g *GameProvider) GetGameById(ctx context.Context, gameId int) (*GameDetail
 	}, nil
 }
 
-func (g *GameProvider) getGameResults(ctx context.Context, gameId int) ([]GameResult, error) {
-	var results []GameResult
-	if err := g.client.Db.SelectContext(ctx, &results, GetGameResultsByGameID, gameId); err != nil {
-		return nil, fmt.Errorf("failed to get Game Results for Game %d: %w", gameId, err)
-	}
-
-	if results == nil {
-		return nil, fmt.Errorf("failed to get Game Results for Game %d: no results found", gameId)
-	}
-
-	for i := 0; i < len(results); i++ {
-		target := results[i]
-		results[i].Points = getPointsForPlace(target.Kills, target.Place)
-	}
-
-	return results, nil
-}
-
-func (g *GameProvider) Add(ctx context.Context, description string, results ...GameResult) error {
-	r, err := g.client.Db.ExecContext(ctx, InsertGame, description)
+func (g *GameRepository) Add(ctx context.Context, description string, podID int, formatID int, results ...GameResult) error {
+	r, err := g.client.Db.ExecContext(ctx, InsertGame, description, podID, formatID)
 	if err != nil {
 		return fmt.Errorf("failed to insert Game record: %w", err)
 	}
@@ -186,19 +141,60 @@ func (g *GameProvider) Add(ctx context.Context, description string, results ...G
 		return fmt.Errorf("failed to get last insert ID: %w", err)
 	}
 
-	for _, result := range results {
-		r, err := g.client.Db.ExecContext(ctx, InsertGameResult, newId, result.DeckId, result.Place, result.Kills)
-		if err != nil {
-			return fmt.Errorf("failed to insert Game Result record: %w", err)
-		}
+	for i := range results {
+		results[i].GameId = int(newId)
+	}
+	return g.gameResults.BulkAdd(ctx, results)
+}
 
-		numAffected, err := r.RowsAffected()
-		if err != nil {
-			return fmt.Errorf("failed to get number of rows affected by insert: %w", err)
+func (g *GameRepository) BulkAdd(ctx context.Context, games []GameDetails) error {
+	if len(games) == 0 {
+		return nil
+	}
+
+	// Phase A: bulk insert all games
+	gameQuery := "INSERT INTO game (description, pod_id, format_id) VALUES " + strings.TrimSuffix(strings.Repeat("(?,?,?),", len(games)), ",")
+	gameArgs := make([]interface{}, 0, len(games)*3)
+	for _, game := range games {
+		gameArgs = append(gameArgs, game.Description, game.PodID, game.FormatID)
+	}
+	r, err := g.client.Db.ExecContext(ctx, gameQuery, gameArgs...)
+	if err != nil {
+		return fmt.Errorf("failed to bulk insert Game records: %w", err)
+	}
+	firstGameID, err := r.LastInsertId()
+	if err != nil {
+		return fmt.Errorf("failed to get last insert ID for bulk Game insert: %w", err)
+	}
+
+	// Phase B: flatten all results with sequential game IDs
+	var allResults []GameResult
+	for i, game := range games {
+		gameID := int(firstGameID) + i
+		for _, result := range game.Results {
+			result.GameId = gameID
+			allResults = append(allResults, result)
 		}
-		if numAffected != 1 {
-			return fmt.Errorf("unexpected number of rows affected by Game Result insert: got %d, expected 1", numAffected)
-		}
+	}
+
+	// Phase C: bulk insert all results via GameResultProvider
+	return g.gameResults.BulkAdd(ctx, allResults)
+}
+
+// TODO: Soft deleting a game should also delete all associated GameResult records
+// TODO: Will need to look for other cascading deletes
+func (g *GameRepository) SoftDelete(ctx context.Context, id int) error {
+	result, err := g.client.Db.ExecContext(ctx, SoftDeleteGame, id)
+	if err != nil {
+		return fmt.Errorf("failed to soft-delete Game record: %w", err)
+	}
+
+	numAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get number of rows affected by soft-delete: %w", err)
+	}
+	if numAffected != 1 {
+		return fmt.Errorf("unexpected number of rows affected by Game soft-delete: got %d, expected 1", numAffected)
 	}
 
 	return nil
