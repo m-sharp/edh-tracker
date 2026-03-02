@@ -9,22 +9,20 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/m-sharp/edh-tracker/lib"
-	"github.com/m-sharp/edh-tracker/lib/models"
+	"github.com/m-sharp/edh-tracker/lib/business"
+	"github.com/m-sharp/edh-tracker/lib/business/game"
+	"github.com/m-sharp/edh-tracker/lib/business/gameResult"
 )
 
 type GameRouter struct {
-	log        *zap.Logger
-	gameRepo   models.GameRepositoryInterface
-	formatRepo models.FormatRepositoryInterface
-	deckRepo   models.DeckRepositoryInterface
+	log   *zap.Logger
+	games game.Functions
 }
 
-func NewGameRouter(log *zap.Logger, repos *models.Repositories) *GameRouter {
+func NewGameRouter(log *zap.Logger, biz *business.Business) *GameRouter {
 	return &GameRouter{
-		log:        log.Named("GameRouter"),
-		gameRepo:   repos.Games,
-		formatRepo: repos.Formats,
-		deckRepo:   repos.Decks,
+		log:   log.Named("GameRouter"),
+		games: biz.Games,
 	}
 }
 
@@ -48,6 +46,13 @@ func (g *GameRouter) GetRoutes() []*lib.Route {
 	}
 }
 
+type createGameRequest struct {
+	Description string                   `json:"description"`
+	PodID       int                      `json:"pod_id"`
+	FormatID    int                      `json:"format_id"`
+	Results     []gameResult.InputEntity `json:"results"`
+}
+
 // ToDo: Eventually, this will probably need pagination
 func (g *GameRouter) GetAll(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -62,17 +67,17 @@ func (g *GameRouter) GetAll(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var (
-		games []models.GameDetails
+		games []game.Entity
 		err   error
 	)
 	if deckId != 0 {
-		games, err = g.gameRepo.GetAllByDeck(ctx, deckId)
+		games, err = g.games.GetAllByDeck(ctx, deckId)
 		if err != nil {
 			lib.WriteError(g.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
 			return
 		}
 	} else {
-		games, err = g.gameRepo.GetAllByPod(ctx, podId)
+		games, err = g.games.GetAllByPod(ctx, podId)
 		if err != nil {
 			lib.WriteError(g.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
 			return
@@ -98,13 +103,13 @@ func (g *GameRouter) GetGameById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	gameDetails, err := g.gameRepo.GetGameById(ctx, gameId)
+	gameEntity, err := g.games.GetByID(ctx, gameId)
 	if err != nil {
 		lib.WriteError(g.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
 		return
 	}
 
-	marshalled, err := json.Marshal(gameDetails)
+	marshalled, err := json.Marshal(gameEntity)
 	if err != nil {
 		lib.WriteError(g.log, w, http.StatusInternalServerError, err, "Failed to marshall records as JSON", errMsg)
 		return
@@ -123,18 +128,23 @@ func (g *GameRouter) GameCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var gameDetails models.GameDetails
-	if err := json.Unmarshal(body, &gameDetails); err != nil {
-		lib.WriteError(g.log, w, http.StatusBadRequest, err, "Failed to unmarshal GameDetails body", errMsg)
+	var req createGameRequest
+	if err = json.Unmarshal(body, &req); err != nil {
+		lib.WriteError(g.log, w, http.StatusBadRequest, err, "Failed to unmarshal Game body", errMsg)
 		return
 	}
 	log := g.log.With(
-		zap.String("GameDescription", gameDetails.Description),
-		zap.Any("GameResults", gameDetails.Results),
+		zap.String("GameDescription", req.Description),
+		zap.Any("GameResults", req.Results),
 	)
 
-	for _, result := range gameDetails.Results {
-		if err := result.Validate(); err != nil {
+	if len(req.Results) == 0 {
+		lib.WriteError(log, w, http.StatusBadRequest, nil, "No game results provided", "at least one game result is required")
+		return
+	}
+
+	for _, result := range req.Results {
+		if err = result.Validate(); err != nil {
 			lib.WriteError(
 				log, w, http.StatusBadRequest, err,
 				"Game result failed validation",
@@ -144,44 +154,9 @@ func (g *GameRouter) GameCreate(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	format, err := g.formatRepo.GetById(ctx, gameDetails.FormatID)
-	if err != nil {
-		lib.WriteError(log, w, http.StatusInternalServerError, err, "Failed to look up format", errMsg)
-		return
-	}
-	if format == nil {
-		lib.WriteError(log, w, http.StatusBadRequest, nil, "Format not found", "Invalid format_id")
-		return
-	}
-
-	// For non-"other" formats, verify all decks share the game's format
-	if format.Name != "other" {
-		for _, result := range gameDetails.Results {
-			deck, err := g.deckRepo.GetById(ctx, result.DeckId)
-			if err != nil {
-				lib.WriteError(log, w, http.StatusInternalServerError, err, "Failed to look up deck", errMsg)
-				return
-			}
-			if deck == nil {
-				lib.WriteError(log, w, http.StatusBadRequest, nil,
-					fmt.Sprintf("Deck %d not found", result.DeckId),
-					fmt.Sprintf("Deck %d not found", result.DeckId),
-				)
-				return
-			}
-			if deck.FormatID != gameDetails.FormatID {
-				lib.WriteError(log, w, http.StatusBadRequest, nil,
-					fmt.Sprintf("Deck %d format does not match game format", result.DeckId),
-					fmt.Sprintf("Deck %d is not in the correct format for this game", result.DeckId),
-				)
-				return
-			}
-		}
-	}
-
 	log.Info("Saving new Game record")
-	if err := g.gameRepo.Add(ctx, gameDetails.Description, gameDetails.PodID, gameDetails.FormatID, gameDetails.Results...); err != nil {
-		lib.WriteError(log, w, http.StatusInternalServerError, err, "Failed to add Game record", errMsg)
+	if err = g.games.Create(ctx, req.Description, req.PodID, req.FormatID, req.Results); err != nil {
+		lib.WriteError(log, w, http.StatusInternalServerError, err, "Failed to create Game record", errMsg)
 		return
 	}
 

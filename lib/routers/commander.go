@@ -8,18 +8,19 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/m-sharp/edh-tracker/lib"
-	"github.com/m-sharp/edh-tracker/lib/models"
+	"github.com/m-sharp/edh-tracker/lib/business"
+	"github.com/m-sharp/edh-tracker/lib/business/commander"
 )
 
 type CommanderRouter struct {
-	log           *zap.Logger
-	commanderRepo models.CommanderRepositoryInterface
+	log        *zap.Logger
+	commanders commander.Functions
 }
 
-func NewCommanderRouter(log *zap.Logger, repos *models.Repositories) *CommanderRouter {
+func NewCommanderRouter(log *zap.Logger, biz *business.Business) *CommanderRouter {
 	return &CommanderRouter{
-		log:           log.Named("CommanderRouter"),
-		commanderRepo: repos.Commanders,
+		log:        log.Named("CommanderRouter"),
+		commanders: biz.Commanders,
 	}
 }
 
@@ -48,17 +49,17 @@ func (c *CommanderRouter) GetCommanderById(w http.ResponseWriter, r *http.Reques
 	}
 
 	errMsg := "Failed to get Commander record"
-	commander, err := c.commanderRepo.GetById(ctx, commanderID)
+	cmd, err := c.commanders.GetByID(ctx, commanderID)
 	if err != nil {
 		lib.WriteError(c.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
 		return
 	}
-	if commander == nil {
+	if cmd == nil {
 		lib.WriteError(c.log, w, http.StatusNotFound, nil, "Commander not found", "Commander not found")
 		return
 	}
 
-	marshalled, err := json.Marshal(commander)
+	marshalled, err := json.Marshal(cmd)
 	if err != nil {
 		lib.WriteError(c.log, w, http.StatusInternalServerError, err, "Failed to marshal records as JSON", errMsg)
 		return
@@ -77,21 +78,23 @@ func (c *CommanderRouter) CommanderCreate(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	var commander models.Commander
-	if err := json.Unmarshal(body, &commander); err != nil {
+	var req struct {
+		Name string `json:"name"`
+	}
+	if err = json.Unmarshal(body, &req); err != nil {
 		lib.WriteError(c.log, w, http.StatusBadRequest, err, "Failed to unmarshal Commander body", errMsg)
 		return
 	}
 
-	if commander.Name == "" {
+	if req.Name == "" {
 		lib.WriteError(c.log, w, http.StatusBadRequest, nil, "Missing commander name", "Commander name is required")
 		return
 	}
 
-	log := c.log.With(zap.String("Name", commander.Name))
+	log := c.log.With(zap.String("Name", req.Name))
 	log.Info("Saving new Commander record")
 
-	if _, err := c.commanderRepo.Add(ctx, commander.Name); err != nil {
+	if _, err = c.commanders.Create(ctx, req.Name); err != nil {
 		lib.WriteError(log, w, http.StatusInternalServerError, err, "Failed to add Commander record", errMsg)
 		return
 	}

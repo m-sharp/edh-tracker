@@ -8,8 +8,10 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/m-sharp/edh-tracker/lib"
+	"github.com/m-sharp/edh-tracker/lib/business"
 	"github.com/m-sharp/edh-tracker/lib/migrations"
 	"github.com/m-sharp/edh-tracker/lib/models"
+	"github.com/m-sharp/edh-tracker/lib/repositories"
 	"github.com/m-sharp/edh-tracker/lib/seeder"
 )
 
@@ -42,7 +44,10 @@ func main() {
 		}
 	}
 
-	apiRouter := NewApiRouter(cfg, logger, repos)
+	repoLayer := repositories.New(logger, client)
+	biz := business.NewBusiness(logger, repoLayer)
+
+	apiRouter := NewApiRouter(cfg, logger, biz)
 	server := lib.NewWebServer(cfg, logger, func(router *mux.Router) {
 		// ToDo: Will need some auth for the app's connection eventually
 		apiRouter.SetupRoutes(router)
