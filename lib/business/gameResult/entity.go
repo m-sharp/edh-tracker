@@ -1,4 +1,4 @@
-package gameresult
+package gameResult
 
 import "fmt"
 

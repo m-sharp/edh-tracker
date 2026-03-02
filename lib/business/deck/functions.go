@@ -72,14 +72,16 @@ func GetAll(
 			return nil, fmt.Errorf("failed to get decks: %w", err)
 		}
 
-		formatCache := map[int]string{}
 		playerCache := map[int]string{}
 
 		result := make([]EntityWithStats, 0, len(decks))
 		for _, d := range decks {
-			formatName, err := cachedFormatName(ctx, d.FormatID, formatCache, getFormat)
+			f, err := getFormat(ctx, d.FormatID)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("failed to look up format %d: %w", d.FormatID, err)
+			}
+			if f == nil {
+				return nil, fmt.Errorf("format %d not found", d.FormatID)
 			}
 
 			playerName, err := cachedPlayerName(ctx, d.PlayerID, playerCache, getPlayerName)
@@ -92,7 +94,7 @@ func GetAll(
 				return nil, err
 			}
 
-			entity := ToEntity(d, playerName, formatName, commanders)
+			entity := ToEntity(d, playerName, f.Name, commanders)
 
 			agg, err := gameResultRepo.GetStatsForDeck(ctx, d.ID)
 			if err != nil {
@@ -119,20 +121,19 @@ func GetAllForPlayer(
 			return nil, fmt.Errorf("failed to get decks for player %d: %w", playerID, err)
 		}
 
-		formatCache := map[int]string{}
-		playerCache := map[int]string{}
+		playerName, err := getPlayerName(ctx, playerID)
+		if err != nil {
+			return nil, err
+		}
 
 		result := make([]EntityWithStats, 0, len(decks))
 		for _, d := range decks {
-			formatName, err := cachedFormatName(ctx, d.FormatID, formatCache, getFormat)
+			f, err := getFormat(ctx, d.FormatID)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("failed to look up format %d: %w", d.FormatID, err)
 			}
-
-			// TODO: Player name should always be the same here, we're looking up by a single PlayerID. No need to cache player name
-			playerName, err := cachedPlayerName(ctx, d.PlayerID, playerCache, getPlayerName)
-			if err != nil {
-				return nil, err
+			if f == nil {
+				return nil, fmt.Errorf("format %d not found", d.FormatID)
 			}
 
 			commanders, err := getCommanderEntry(ctx, d.ID)
@@ -140,7 +141,7 @@ func GetAllForPlayer(
 				return nil, err
 			}
 
-			entity := ToEntity(d, playerName, formatName, commanders)
+			entity := ToEntity(d, playerName, f.Name, commanders)
 
 			agg, err := gameResultRepo.GetStatsForDeck(ctx, d.ID)
 			if err != nil {
@@ -170,13 +171,15 @@ func GetByID(
 			return nil, nil
 		}
 
-		formatName, err := cachedFormatName(ctx, d.FormatID, map[int]string{}, getFormat)
+		f, err := getFormat(ctx, d.FormatID)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to look up format %d: %w", d.FormatID, err)
+		}
+		if f == nil {
+			return nil, fmt.Errorf("format %d not found", d.FormatID)
 		}
 
-		// TODO: No point to cache here
-		playerName, err := cachedPlayerName(ctx, d.PlayerID, map[int]string{}, getPlayerName)
+		playerName, err := getPlayerName(ctx, d.PlayerID)
 		if err != nil {
 			return nil, err
 		}
@@ -186,7 +189,7 @@ func GetByID(
 			return nil, err
 		}
 
-		entity := ToEntity(*d, playerName, formatName, commanders)
+		entity := ToEntity(*d, playerName, f.Name, commanders)
 
 		agg, err := gameResultRepo.GetStatsForDeck(ctx, deckID)
 		if err != nil {
@@ -235,22 +238,6 @@ func Retire(deckRepo repos.DeckRepository) RetireFunc {
 	return func(ctx context.Context, deckID int) error {
 		return deckRepo.Retire(ctx, deckID)
 	}
-}
-
-// TODO: Format is probably trim enough that it could be a flyweight - maintain a known lookup list of FormatID->Name in memory and return from there first
-func cachedFormatName(ctx context.Context, formatID int, cache map[int]string, getFormat format.GetByIDFunc) (string, error) {
-	if name, ok := cache[formatID]; ok {
-		return name, nil
-	}
-	f, err := getFormat(ctx, formatID)
-	if err != nil {
-		return "", fmt.Errorf("failed to look up format %d: %w", formatID, err)
-	}
-	if f == nil {
-		return "", fmt.Errorf("format %d not found", formatID)
-	}
-	cache[formatID] = f.Name
-	return f.Name, nil
 }
 
 func cachedPlayerName(ctx context.Context, playerID int, cache map[int]string, getPlayerName player.GetPlayerNameFunc) (string, error) {

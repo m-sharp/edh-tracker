@@ -6,9 +6,8 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/m-sharp/edh-tracker/lib/business/deck"
 	"github.com/m-sharp/edh-tracker/lib/business/format"
-	"github.com/m-sharp/edh-tracker/lib/business/gameresult"
+	"github.com/m-sharp/edh-tracker/lib/business/gameResult"
 	repos "github.com/m-sharp/edh-tracker/lib/repositories"
 	gamerepo "github.com/m-sharp/edh-tracker/lib/repositories/game"
 	gameResultrepo "github.com/m-sharp/edh-tracker/lib/repositories/gameResult"
@@ -17,9 +16,7 @@ import (
 func GetAllByPod(
 	log *zap.Logger,
 	gameRepo repos.GameRepository,
-	gameResultRepo repos.GameResultRepository,
-	getDeckName deck.GetDeckNameFunc,
-	getCommanderEntry deck.GetCommanderEntryFunc,
+	getGameResults gameResult.GetByGameIDFunc,
 ) GetAllByPodFunc {
 	return func(ctx context.Context, podID int) ([]Entity, error) {
 		games, err := gameRepo.GetAllByPod(ctx, podID)
@@ -29,13 +26,13 @@ func GetAllByPod(
 
 		result := make([]Entity, 0, len(games))
 		for _, g := range games {
-			entity, err := buildGameEntity(ctx, g, gameResultRepo, getDeckName, getCommanderEntry)
+			results, err := getGameResults(ctx, g.ID)
 			if err != nil {
-				log.Warn("Failed to build game entity, dropping from results",
+				log.Warn("Failed to get results for game, dropping from results",
 					zap.Int("game_id", g.ID), zap.Error(err))
 				continue
 			}
-			result = append(result, entity)
+			result = append(result, buildGameEntity(g, results))
 		}
 
 		return result, nil
@@ -45,9 +42,7 @@ func GetAllByPod(
 func GetAllByDeck(
 	log *zap.Logger,
 	gameRepo repos.GameRepository,
-	gameResultRepo repos.GameResultRepository,
-	getDeckName deck.GetDeckNameFunc,
-	getCommanderEntry deck.GetCommanderEntryFunc,
+	getGameResults gameResult.GetByGameIDFunc,
 ) GetAllByDeckFunc {
 	return func(ctx context.Context, deckID int) ([]Entity, error) {
 		games, err := gameRepo.GetAllByDeck(ctx, deckID)
@@ -57,13 +52,13 @@ func GetAllByDeck(
 
 		result := make([]Entity, 0, len(games))
 		for _, g := range games {
-			entity, err := buildGameEntity(ctx, g, gameResultRepo, getDeckName, getCommanderEntry)
+			results, err := getGameResults(ctx, g.ID)
 			if err != nil {
-				log.Warn("Failed to build game entity, dropping from results",
+				log.Warn("Failed to get results for game, dropping from results",
 					zap.Int("game_id", g.ID), zap.Error(err))
 				continue
 			}
-			result = append(result, entity)
+			result = append(result, buildGameEntity(g, results))
 		}
 
 		return result, nil
@@ -73,9 +68,7 @@ func GetAllByDeck(
 func GetByID(
 	log *zap.Logger,
 	gameRepo repos.GameRepository,
-	gameResultRepo repos.GameResultRepository,
-	getDeckName deck.GetDeckNameFunc,
-	getCommanderEntry deck.GetCommanderEntryFunc,
+	getGameResults gameResult.GetByGameIDFunc,
 ) GetByIDFunc {
 	return func(ctx context.Context, gameID int) (*Entity, error) {
 		g, err := gameRepo.GetById(ctx, gameID)
@@ -86,11 +79,11 @@ func GetByID(
 			return nil, nil
 		}
 
-		entity, err := buildGameEntity(ctx, *g, gameResultRepo, getDeckName, getCommanderEntry)
+		results, err := getGameResults(ctx, g.ID)
 		if err != nil {
 			return nil, err
 		}
-
+		entity := buildGameEntity(*g, results)
 		return &entity, nil
 	}
 }
@@ -102,7 +95,7 @@ func Create(
 	deckRepo repos.DeckRepository,
 	getFormat format.GetByIDFunc,
 ) CreateFunc {
-	return func(ctx context.Context, description string, podID, formatID int, inputs []gameresult.InputEntity) error {
+	return func(ctx context.Context, description string, podID, formatID int, inputs []gameResult.InputEntity) error {
 		for _, input := range inputs {
 			if err := input.Validate(); err != nil {
 				return fmt.Errorf("invalid game result: %w", err)
@@ -155,52 +148,7 @@ func Create(
 	}
 }
 
-func buildGameEntity(
-	ctx context.Context,
-	g gamerepo.Model,
-	gameResultRepo repos.GameResultRepository,
-	getDeckName deck.GetDeckNameFunc,
-	getCommanderEntry deck.GetCommanderEntryFunc,
-) (Entity, error) {
-	// TODO: Getting GameResults by GameID should be a Business Function under lib/business/gameresult.
-	// TODO: This method should take GameResult Entities to associate with the Game Entity being returned
-	resultModels, err := gameResultRepo.GetByGameId(ctx, g.ID)
-	if err != nil {
-		return Entity{}, fmt.Errorf("failed to get results for game %d: %w", g.ID, err)
-	}
-
-	deckNameCache := map[int]string{}
-
-	results := make([]gameresult.Entity, 0, len(resultModels))
-	for _, r := range resultModels {
-		deckName, err := cachedDeckName(ctx, r.DeckID, deckNameCache, getDeckName)
-		if err != nil {
-			return Entity{}, err
-		}
-
-		entity := gameresult.Entity{
-			ID:       r.ID,
-			GameID:   r.GameID,
-			DeckID:   r.DeckID,
-			DeckName: deckName,
-			Place:    r.Place,
-			Kills:    r.KillCount,
-			Points:   gameresult.GetPointsForPlace(r.KillCount, r.Place),
-		}
-
-		commanders, err := getCommanderEntry(ctx, r.DeckID)
-		if err != nil {
-			return Entity{}, fmt.Errorf("failed to get commander for deck %d: %w", r.DeckID, err)
-		}
-		if commanders != nil {
-			name := commanders.CommanderName
-			entity.CommanderName = &name
-			entity.PartnerCommanderName = commanders.PartnerCommanderName
-		}
-
-		results = append(results, entity)
-	}
-
+func buildGameEntity(g gamerepo.Model, results []gameResult.Entity) Entity {
 	return Entity{
 		ID:          g.ID,
 		Description: g.Description,
@@ -209,18 +157,5 @@ func buildGameEntity(
 		Results:     results,
 		CreatedAt:   g.CreatedAt,
 		UpdatedAt:   g.UpdatedAt,
-	}, nil
-}
-
-// TODO: Not much savings to be found here, remove for now
-func cachedDeckName(ctx context.Context, deckID int, cache map[int]string, getDeckName deck.GetDeckNameFunc) (string, error) {
-	if name, ok := cache[deckID]; ok {
-		return name, nil
 	}
-	name, err := getDeckName(ctx, deckID)
-	if err != nil {
-		return "", err
-	}
-	cache[deckID] = name
-	return name, nil
 }

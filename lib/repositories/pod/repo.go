@@ -9,9 +9,9 @@ import (
 )
 
 const (
-	getAllPods = `SELECT id, name, created_at, updated_at, deleted_at FROM pod WHERE deleted_at IS NULL;`
-	getPodByID = `SELECT id, name, created_at, updated_at, deleted_at FROM pod WHERE id = ? AND deleted_at IS NULL;`
-	getPodByName = `SELECT id, name, created_at, updated_at, deleted_at FROM pod WHERE name = ? AND deleted_at IS NULL LIMIT 1;`
+	getAllPods        = `SELECT id, name, created_at, updated_at, deleted_at FROM pod WHERE deleted_at IS NULL;`
+	getPodByID        = `SELECT id, name, created_at, updated_at, deleted_at FROM pod WHERE id = ? AND deleted_at IS NULL;`
+	getPodByName      = `SELECT id, name, created_at, updated_at, deleted_at FROM pod WHERE name = ? AND deleted_at IS NULL LIMIT 1;`
 	getPodsByPlayerID = `SELECT pod.id, pod.name, pod.created_at, pod.updated_at, pod.deleted_at
 						   FROM (pod INNER JOIN player_pod ON pod.id = player_pod.pod_id)
 						  WHERE player_pod.player_id = ?

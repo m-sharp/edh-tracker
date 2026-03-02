@@ -7,6 +7,7 @@ import (
 	"github.com/m-sharp/edh-tracker/lib/business/deck"
 	"github.com/m-sharp/edh-tracker/lib/business/format"
 	"github.com/m-sharp/edh-tracker/lib/business/game"
+	"github.com/m-sharp/edh-tracker/lib/business/gameResult"
 	"github.com/m-sharp/edh-tracker/lib/business/player"
 	"github.com/m-sharp/edh-tracker/lib/business/pod"
 	"github.com/m-sharp/edh-tracker/lib/business/user"
@@ -14,13 +15,14 @@ import (
 )
 
 type Business struct {
-	Players    player.Functions
-	Decks      deck.Functions
-	Games      game.Functions
-	Formats    format.Functions
-	Commanders commander.Functions
-	Pods       pod.Functions
-	Users      user.Functions
+	Players     player.Functions
+	Decks       deck.Functions
+	Games       game.Functions
+	GameResults gameResult.Functions
+	Formats     format.Functions
+	Commanders  commander.Functions
+	Pods        pod.Functions
+	Users       user.Functions
 }
 
 func NewBusiness(log *zap.Logger, r *repositories.Repositories) *Business {
@@ -32,6 +34,9 @@ func NewBusiness(log *zap.Logger, r *repositories.Repositories) *Business {
 	// Build deck cross-domain functions.
 	getCommanderEntry := deck.GetCommanderEntry(r.DeckCommanders, getCommanderName)
 	getDeckName := deck.GetDeckName(r.Decks)
+
+	// Build game result function.
+	getGameResults := gameResult.GetByGameID(r.GameResults, getDeckName, getCommanderEntry)
 
 	return &Business{
 		Players: player.Functions{
@@ -50,10 +55,13 @@ func NewBusiness(log *zap.Logger, r *repositories.Repositories) *Business {
 			GetCommanderEntry: getCommanderEntry,
 		},
 		Games: game.Functions{
-			GetAllByPod:  game.GetAllByPod(log, r.Games, r.GameResults, getDeckName, getCommanderEntry),
-			GetAllByDeck: game.GetAllByDeck(log, r.Games, r.GameResults, getDeckName, getCommanderEntry),
-			GetByID:      game.GetByID(log, r.Games, r.GameResults, getDeckName, getCommanderEntry),
+			GetAllByPod:  game.GetAllByPod(log, r.Games, getGameResults),
+			GetAllByDeck: game.GetAllByDeck(log, r.Games, getGameResults),
+			GetByID:      game.GetByID(log, r.Games, getGameResults),
 			Create:       game.Create(log, r.Games, r.GameResults, r.Decks, getFormat),
+		},
+		GameResults: gameResult.Functions{
+			GetByGameID: getGameResults,
 		},
 		Formats: format.Functions{
 			GetAll:  format.GetAll(r.Formats),

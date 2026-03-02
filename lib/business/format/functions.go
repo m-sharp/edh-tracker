@@ -3,41 +3,68 @@ package format
 import (
 	"context"
 	"fmt"
+	"sync"
 
 	repos "github.com/m-sharp/edh-tracker/lib/repositories"
 )
 
-// TODO: There will never by more than a handful of functions.
-// TODO: Create a flyweight pattern here where a var cachedFormats map[int]Entity map will be held in memory and consulted first by GetByID.
-// TODO: If cachedFormats is empty or missing the target ID for GetByID, populate it via GetAll.
-// TODO: GetAll should return from cachedFormats and only populate it on a daily basis.
+var cache struct {
+	sync.RWMutex
+	m map[int]Entity
+}
 
 func GetAll(formatRepo repos.FormatRepository) GetAllFunc {
 	return func(ctx context.Context) ([]Entity, error) {
-		models, err := formatRepo.GetAll(ctx)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get formats: %w", err)
+		if err := ensureCache(ctx, formatRepo); err != nil {
+			return nil, err
 		}
-
-		entities := make([]Entity, 0, len(models))
-		for _, m := range models {
-			entities = append(entities, ToEntity(m))
+		cache.RLock()
+		defer cache.RUnlock()
+		entities := make([]Entity, 0, len(cache.m))
+		for _, e := range cache.m {
+			entities = append(entities, e)
 		}
-
 		return entities, nil
 	}
 }
 
 func GetByID(formatRepo repos.FormatRepository) GetByIDFunc {
 	return func(ctx context.Context, id int) (*Entity, error) {
-		m, err := formatRepo.GetById(ctx, id)
-		if err != nil {
+		if err := ensureCache(ctx, formatRepo); err != nil {
 			return nil, fmt.Errorf("failed to get format %d: %w", id, err)
 		}
-		if m == nil {
-			return nil, nil
+		cache.RLock()
+		defer cache.RUnlock()
+		if e, ok := cache.m[id]; ok {
+			return &e, nil
 		}
-		e := ToEntity(*m)
-		return &e, nil
+		return nil, nil
 	}
+}
+
+func ensureCache(ctx context.Context, formatRepo repos.FormatRepository) error {
+	cache.RLock()
+	populated := cache.m != nil
+	cache.RUnlock()
+	if populated {
+		return nil
+	}
+
+	cache.Lock()
+	defer cache.Unlock()
+	if cache.m != nil {
+		return nil
+	}
+
+	models, err := formatRepo.GetAll(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to get formats: %w", err)
+	}
+
+	cache.m = make(map[int]Entity, len(models))
+	for _, m := range models {
+		e := ToEntity(m)
+		cache.m[e.ID] = e
+	}
+	return nil
 }

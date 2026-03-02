@@ -65,7 +65,9 @@ func TestDeckRouter_Add_CommanderFormat_WithCommanderID(t *testing.T) {
 		AddFn: func(ctx context.Context, playerID int, name string, formatID int) (int, error) { return 10, nil },
 	}
 	dcRepo := &mockDeckCommanderRepo{
-		AddFn: func(ctx context.Context, deckID, commanderID int, partnerCommanderID *int) (int, error) { return 1, nil },
+		AddFn: func(ctx context.Context, deckID, commanderID int, partnerCommanderID *int) (int, error) {
+			return 1, nil
+		},
 	}
 	formatRepo := &mockFormatRepo{
 		GetByIdFn: func(ctx context.Context, id int) (*models.Format, error) {
