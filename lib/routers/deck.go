@@ -66,7 +66,7 @@ func (d *DeckRouter) GetAll(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
-		// TODO: Should probably not exist.
+		// TODO: Should probably not exist. Also, it's slowwwww
 		decks, err = d.decks.GetAll(ctx)
 		if err != nil {
 			lib.WriteError(d.log, w, http.StatusInternalServerError, err, errMsg, errMsg)

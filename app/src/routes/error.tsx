@@ -6,6 +6,7 @@ interface RouterError {
     message: string;
 }
 
+// TODO: This looks bad, content should be flexed and centered on the page
 export default function ErrorPage(): ReactElement {
     const error = useRouteError() as RouterError;
     console.error(error);

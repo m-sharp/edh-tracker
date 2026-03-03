@@ -8,6 +8,7 @@ interface RecordProps {
     record: RecordDict;
 }
 
+// TODO: Record will need to be dynamic for any number of players eventually
 // Record takes a Record dictionary like {1: 10, 2: 12, 3: 7, 4: 5}
 export function Record({ record }: RecordProps): ReactElement {
     let first = getter(record, 1);
@@ -50,8 +51,9 @@ export const StatColumns: Array<GridColDef> = [
     {
         field: "record",
         headerName: "Record",
+        valueGetter: (params) => params.row.stats?.record,
         renderCell: (params) => (
-            <Record record={params.row.record} />
+            <Record record={params.value} />
         ),
         sortComparator: RecordComparator,
         flex: 1,
@@ -61,18 +63,21 @@ export const StatColumns: Array<GridColDef> = [
         field: "kills",
         headerName: "Total Kills",
         type: "number",
+        valueGetter: (params) => params.row.stats?.kills,
         minWidth: 125,
     },
     {
         field: "points",
         headerName: "Total Points",
         type: "number",
+        valueGetter: (params) => params.row.stats?.points,
         minWidth: 150,
     },
     {
         field: "games",
         headerName: "Games Played",
         type: "number",
+        valueGetter: (params) => params.row.stats?.games,
         minWidth: 150,
     },
 ];
