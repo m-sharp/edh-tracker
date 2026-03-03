@@ -15,12 +15,12 @@ export default function View(): ReactElement {
         <Box id="player" sx={{display: "flex", flexDirection: "column", alignItems: "center"}}>
             <Box sx={{display: "flex", flexDirection: "column", alignItems: "center"}}>
                 <h1>{player.name}</h1>
-                <Record record={player.record} />
+                <Record record={player.stats.record} />
             </Box>
             <Box sx={{width: "100%", display: "flex", flexDirection: "row", justifyContent: "space-evenly", py: 3}}>
-                <span><strong>Games Played:</strong> {player.games}</span>
-                <span><strong>Total Kills:</strong> {player.kills}</span>
-                <span><strong>Total Points:</strong> {player.points}</span>
+                <span><strong>Games Played:</strong> {player.stats.games}</span>
+                <span><strong>Total Kills:</strong> {player.stats.kills}</span>
+                <span><strong>Total Points:</strong> {player.stats.points}</span>
             </Box>
             <DeckDisplay player={player} />
             <Box sx={{width: "100%", display: "flex", justifyContent: "flex-end", pt: 1}}>

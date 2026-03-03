@@ -2,6 +2,13 @@ export interface RecordDict {
     [key: number]: number;
 }
 
+export interface Stats {
+    record: RecordDict;
+    games: number;
+    kills: number;
+    points: number;
+}
+
 export interface Format {
     id: number;
     name: string;
@@ -30,21 +37,16 @@ export interface Deck {
     retired: boolean;
     created_at: string;
     updated_at: string;
-    record: RecordDict;
-    games: number;
-    kills: number;
-    points: number;
+    stats: Stats;
 }
 
 export interface Player {
     id: number;
     name: string;
+    pod_ids: number[];
     created_at: string;
     updated_at: string;
-    record: RecordDict;
-    games: number;
-    kills: number;
-    points: number;
+    stats: Stats;
 }
 
 export interface Game {

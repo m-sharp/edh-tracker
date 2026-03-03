@@ -17,16 +17,16 @@ export default function View(): ReactElement {
         <Box id="deck" sx={{display: "flex", flexDirection: "column", alignItems: "center"}}>
             <Box sx={{display: "flex", flexDirection: "column", alignItems: "center"}}>
                 <h1>{deck.name}{deck.commanders && ` — ${deck.commanders.commander_name}`}</h1>
-                <Record record={deck.record} />
+                <Record record={deck.stats.record} />
                 <span className={"info-column-item"}>Owner - <Link to={`/player/${deck.player_id}`}>{deck.player_name}</Link></span>
                 {deck.retired &&
                     <Box sx={{display: "flex"}}><DeleteIcon /><span> Retired</span></Box>
                 }
             </Box>
             <Box sx={{width: "100%", display: "flex", flexDirection: "row", justifyContent: "space-evenly", py: 3}}>
-                <span><strong>Games Played:</strong> {deck.games}</span>
-                <span><strong>Total Kills:</strong> {deck.kills}</span>
-                <span><strong>Total Points:</strong> {deck.points}</span>
+                <span><strong>Games Played:</strong> {deck.stats.games}</span>
+                <span><strong>Total Kills:</strong> {deck.stats.kills}</span>
+                <span><strong>Total Points:</strong> {deck.stats.points}</span>
             </Box>
             <MatchUpsForDeck deck={deck} />
             <Box sx={{width: "100%", display: "flex", justifyContent: "flex-end", pt: 1}}>
