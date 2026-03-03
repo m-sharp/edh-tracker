@@ -48,7 +48,9 @@ const navLinks: Array<NavLink> = [
     }
 ]
 
-// ToDo: Add mobile menu icon and link menu
+// TODO: Add mobile menu icon and link menu
+// TODO: Mobile view for all tables
+// TODO: There is a bug where refreshing the browser on a route page results in a 404 - should refetch the current route
 function DrawerAppBar(): ReactElement {
     return (
         <AppBar position="fixed">

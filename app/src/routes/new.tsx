@@ -37,6 +37,8 @@ interface ResultsMap {
     [key: number]: NewGameResult;
 }
 
+// TODO: This page is very ugly and needs a lot of help
+// TODO: Review and develop plan with Claude from TODOs
 export default function View(): ReactElement {
     const newGameInfo = useLoaderData() as NewGameData;
     const submit = useSubmit();
@@ -73,8 +75,6 @@ export default function View(): ReactElement {
 
     const [desc, setDesc] = useState<string>("");
 
-    // TODO: Better styling
-    // TODO: Honor player_id on backend
     return (
         <Box id="newGameForm" sx={{display: "flex", flexDirection: "column", alignItems: "center", width: "100%"}}>
             <h1>Add New Game</h1>

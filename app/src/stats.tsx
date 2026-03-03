@@ -8,6 +8,7 @@ interface RecordProps {
     record: RecordDict;
 }
 
+// TODO: Record will need to be dynamic for any number of players eventually
 // Record takes a Record dictionary like {1: 10, 2: 12, 3: 7, 4: 5}
 export function Record({ record }: RecordProps): ReactElement {
     let first = getter(record, 1);
