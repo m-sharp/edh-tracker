@@ -20,12 +20,12 @@ func TestFromAggregate_NonNil(t *testing.T) {
 	agg := &gameresultrepo.Aggregate{
 		Games:  3,
 		Kills:  4,
-		Points: 12,
 		Record: map[int]int{1: 2},
 	}
 	s := FromAggregate(agg)
 	assert.Equal(t, 3, s.Games)
 	assert.Equal(t, 4, s.Kills)
-	assert.Equal(t, 12, s.Points)
+	// 4 kills + 2 first-place wins * 3 = 10
+	assert.Equal(t, 10, s.Points)
 	assert.Equal(t, map[int]int{1: 2}, s.Record)
 }

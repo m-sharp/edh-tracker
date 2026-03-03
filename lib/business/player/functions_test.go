@@ -117,7 +117,7 @@ func TestGetByID_Success(t *testing.T) {
 	}
 	gameResultRepo := &mockGameResultRepo{
 		GetStatsForPlayerFn: func(ctx context.Context, playerID int) (*gameresultrepo.Aggregate, error) {
-			return &gameresultrepo.Aggregate{Games: 3, Kills: 2, Points: 8, Record: map[int]int{1: 1}}, nil
+			return &gameresultrepo.Aggregate{Games: 3, Kills: 2, Record: map[int]int{1: 1}}, nil
 		},
 	}
 	podRepo := &mockPodRepo{

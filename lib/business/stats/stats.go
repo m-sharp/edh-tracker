@@ -1,6 +1,8 @@
 package stats
 
-import "github.com/m-sharp/edh-tracker/lib/repositories/gameResult"
+import (
+	"github.com/m-sharp/edh-tracker/lib/repositories/gameResult"
+)
 
 // Stats is the entity representation of aggregated game statistics.
 type Stats struct {
@@ -18,6 +20,6 @@ func FromAggregate(a *gameResult.Aggregate) Stats {
 		Record: a.Record,
 		Games:  a.Games,
 		Kills:  a.Kills,
-		Points: a.Points,
+		Points: GetPointsForRecord(a.Kills, a.Record),
 	}
 }

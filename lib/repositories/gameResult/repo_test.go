@@ -84,8 +84,6 @@ func TestGetStatsForPlayer_WithGames(t *testing.T) {
 	assert.Equal(t, 3, got.Games)
 	assert.Equal(t, 3, got.Kills)
 	assert.Equal(t, map[int]int{1: 2, 2: 1}, got.Record)
-	// Points: kills(3) + 1st_place_bonus(3)*2 wins + 2nd_place_bonus(2)*1 win = 3 + 6 + 2 = 11
-	assert.Equal(t, 11, got.Points)
 	assert.NoError(t, mock.ExpectationsWereMet())
 }
 
@@ -100,7 +98,6 @@ func TestGetStatsForDeck_Empty(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, got)
 	assert.Equal(t, 0, got.Games)
-	assert.Equal(t, 0, got.Points)
 	assert.Len(t, got.Record, 0)
 	assert.NoError(t, mock.ExpectationsWereMet())
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/m-sharp/edh-tracker/lib/business/deck"
+	"github.com/m-sharp/edh-tracker/lib/business/stats"
 	repos "github.com/m-sharp/edh-tracker/lib/repositories"
 )
 
@@ -42,7 +43,7 @@ func GetByGameID(
 				DeckName: deckName,
 				Place:    r.Place,
 				Kills:    r.KillCount,
-				Points:   GetPointsForPlace(r.KillCount, r.Place),
+				Points:   stats.GetPointsForPlace(r.KillCount, r.Place),
 			}
 
 			commanders, err := getCommanderEntry(ctx, r.DeckID)
