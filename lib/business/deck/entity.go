@@ -57,7 +57,7 @@ func ToEntity(m repo.Model, playerName, formatName string, commanders *Commander
 		PlayerName: playerName,
 		Name:       m.Name,
 		FormatID:   m.FormatID,
-		FormatName: formatName,
+		FormatName: formatName, // TODO: Should be title cased - capitalize first letter of each word
 		Retired:    m.Retired,
 		Commanders: commanders,
 		CreatedAt:  m.CreatedAt,

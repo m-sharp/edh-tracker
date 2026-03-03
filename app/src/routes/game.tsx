@@ -6,6 +6,14 @@ import { DataGrid, GridColDef, GridToolbar } from "@mui/x-data-grid";
 import { Game } from "../types";
 
 export default function View(): ReactElement {
+    // TODO: A better route would probably be /pod/<PodID>/game/<GameID>
+    // TODO: Should display: Game description, decks that played DataGrid, CreatedAt
+    // TODO: Logged in user that is a "PodManager" should be able to do the following:
+    //      - edit the Game description
+    //      - edit individual Game Result via a modal. Edit kills, place, points, deck etc
+    //      - Add and remove Game Results from the game
+    //      - delete the Game
+
     const game = useLoaderData() as Game;
 
     const columns: Array<GridColDef> = [
@@ -46,6 +54,7 @@ export default function View(): ReactElement {
 
     return (
         <Box id="game" sx={{display: "flex", flexDirection: "column", alignItems: "center"}}>
+            {/* TODO: Would probably be better to say "{PodName} Game #{game.id}" */}
             <h1>Game #{game.id}</h1>
             <em>{new Date(game.created_at).toLocaleString()}</em>
             <p>Description: {game.description}</p>

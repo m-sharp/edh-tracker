@@ -11,6 +11,16 @@ import { Player } from "../types";
 export default function View(): ReactElement {
     const player = useLoaderData() as Player;
 
+    // TODO: Rephrase name as "Display Name"
+    // TODO: Should have various tabs for:
+    //      - Overall stats
+    //      - Decks
+    //      - Games
+    // TODO: Logged in user viewing their own Player page should have settings tab that lets them:
+    //      - edit their own Display Name
+    //      - see the pods they belong to
+    //      - create a new pod
+    //      - leave a pod they belong to (with warning confirmation)
     return (
         <Box id="player" sx={{display: "flex", flexDirection: "column", alignItems: "center"}}>
             <Box sx={{display: "flex", flexDirection: "column", alignItems: "center"}}>

@@ -11,11 +11,23 @@ import { Record } from "../stats";
 import { Deck } from "../types";
 
 export default function View(): ReactElement {
+    // TODO: A better route would probably be /player/<PlayerID>/deck/<DeckID>
+    // TODO: Should have tabs to show:
+    //      - Landing overview tab - Deck name, commanders, format, record, points, kills, games, CreatedAt
+    //      - Games tab - MatchUpsForDeck view - game loading should be paginated for performance
+    // TODO: Logged in user viewing one of their own Decks should have a settings tab that lets them:
+    //      - edit the Deck name
+    //      - edit the Deck's format
+    //      - edit the Deck's commanders
+    //      - delete the Deck
+    //      - retire the Deck
+
     const deck = useLoaderData() as Deck;
 
     return (
         <Box id="deck" sx={{display: "flex", flexDirection: "column", alignItems: "center"}}>
             <Box sx={{display: "flex", flexDirection: "column", alignItems: "center"}}>
+                {/* TODO: deck.name should be an h1, commanders should be rendered as h2s below the name */}
                 <h1>{deck.name}{deck.commanders && ` — ${deck.commanders.commander_name}`}</h1>
                 <Record record={deck.stats.record} />
                 <span className={"info-column-item"}>Owner - <Link to={`/player/${deck.player_id}`}>{deck.player_name}</Link></span>
