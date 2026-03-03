@@ -11,18 +11,20 @@ func TestToAggregate_Empty(t *testing.T) {
 	agg := gs.toAggregate()
 	assert.Equal(t, 0, agg.Games)
 	assert.Equal(t, 0, agg.Kills)
+	assert.Equal(t, 0, agg.Points)
 	assert.NotNil(t, agg.Record)
 	assert.Len(t, agg.Record, 0)
 }
 
 func TestToAggregate_WithData(t *testing.T) {
 	gs := gameStats{
-		{GameID: 1, Place: 1, KillCount: 2},
-		{GameID: 2, Place: 2, KillCount: 0},
-		{GameID: 3, Place: 1, KillCount: 1},
+		{GameID: 1, Place: 1, KillCount: 2, PlayerCount: 4}, // 2 + max(0,4-1)=3 = 5
+		{GameID: 2, Place: 2, KillCount: 0, PlayerCount: 4}, // 0 + max(0,4-2)=2 = 2
+		{GameID: 3, Place: 1, KillCount: 1, PlayerCount: 4}, // 1 + max(0,4-1)=3 = 4
 	}
 	agg := gs.toAggregate()
 	assert.Equal(t, 3, agg.Games)
 	assert.Equal(t, 3, agg.Kills)
+	assert.Equal(t, 11, agg.Points) // 5 + 2 + 4
 	assert.Equal(t, map[int]int{1: 2, 2: 1}, agg.Record)
 }

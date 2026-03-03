@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/m-sharp/edh-tracker/lib/business/deck"
-	"github.com/m-sharp/edh-tracker/lib/business/stats"
 	repos "github.com/m-sharp/edh-tracker/lib/repositories"
+	"github.com/m-sharp/edh-tracker/lib/utils"
 )
 
 func GetByGameID(
@@ -20,6 +20,7 @@ func GetByGameID(
 			return nil, fmt.Errorf("failed to get results for game %d: %w", gameID, err)
 		}
 
+		numPlayers := len(resultModels)
 		deckNameCache := map[int]string{}
 
 		results := make([]Entity, 0, len(resultModels))
@@ -43,7 +44,7 @@ func GetByGameID(
 				DeckName: deckName,
 				Place:    r.Place,
 				Kills:    r.KillCount,
-				Points:   stats.GetPointsForPlace(r.KillCount, r.Place),
+				Points:   utils.GetPointsForPlace(r.KillCount, r.Place, numPlayers),
 			}
 
 			commanders, err := getCommanderEntry(ctx, r.DeckID)

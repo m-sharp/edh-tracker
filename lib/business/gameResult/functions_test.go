@@ -76,8 +76,8 @@ func TestGetByGameID_NoCommander(t *testing.T) {
 	require.Len(t, got, 1)
 	assert.Equal(t, "My Deck", got[0].DeckName)
 	assert.Nil(t, got[0].CommanderName)
-	// Points: 2 kills + 3 (1st place) = 5
-	assert.Equal(t, 5, got[0].Points)
+	// Points: 2 kills + max(0, 1-1)=0 bonus = 2 (1-player game)
+	assert.Equal(t, 2, got[0].Points)
 }
 
 func TestGetByGameID_WithCommander(t *testing.T) {
@@ -182,7 +182,7 @@ func TestGetByGameID_PointsCalculation(t *testing.T) {
 	got, err := fn(context.Background(), 1)
 	require.NoError(t, err)
 	require.Len(t, got, 3)
-	assert.Equal(t, 5, got[0].Points) // 2 kills + 3 (1st place)
-	assert.Equal(t, 2, got[1].Points) // 0 kills + 2 (2nd place)
-	assert.Equal(t, 1, got[2].Points) // 1 kill + 0 (4th place)
+	assert.Equal(t, 4, got[0].Points) // 2 kills + max(0,3-1)=2 (3-player game, 1st place)
+	assert.Equal(t, 1, got[1].Points) // 0 kills + max(0,3-2)=1 (3-player game, 2nd place)
+	assert.Equal(t, 1, got[2].Points) // 1 kill + max(0,3-4)=0 (3-player game, 4th place)
 }

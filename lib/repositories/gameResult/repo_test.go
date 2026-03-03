@@ -72,10 +72,10 @@ func TestGetStatsForPlayer_WithGames(t *testing.T) {
 	client, mock := newMockDB(t)
 	repo := NewRepository(client)
 
-	rows := sqlmock.NewRows([]string{"game_id", "place", "kill_count"}).
-		AddRow(1, 1, 2).
-		AddRow(2, 2, 0).
-		AddRow(3, 1, 1)
+	rows := sqlmock.NewRows([]string{"game_id", "place", "kill_count", "player_count"}).
+		AddRow(1, 1, 2, 4).
+		AddRow(2, 2, 0, 4).
+		AddRow(3, 1, 1, 4)
 	mock.ExpectQuery(regexp.QuoteMeta(getStatsForPlayer)).WithArgs(7).WillReturnRows(rows)
 
 	got, err := repo.GetStatsForPlayer(context.Background(), 7)
@@ -83,6 +83,7 @@ func TestGetStatsForPlayer_WithGames(t *testing.T) {
 	require.NotNil(t, got)
 	assert.Equal(t, 3, got.Games)
 	assert.Equal(t, 3, got.Kills)
+	assert.Equal(t, 11, got.Points) // 5 + 2 + 4
 	assert.Equal(t, map[int]int{1: 2, 2: 1}, got.Record)
 	assert.NoError(t, mock.ExpectationsWereMet())
 }
@@ -91,7 +92,7 @@ func TestGetStatsForDeck_Empty(t *testing.T) {
 	client, mock := newMockDB(t)
 	repo := NewRepository(client)
 
-	rows := sqlmock.NewRows([]string{"game_id", "place", "kill_count"})
+	rows := sqlmock.NewRows([]string{"game_id", "place", "kill_count", "player_count"})
 	mock.ExpectQuery(regexp.QuoteMeta(getStatsForDeck)).WithArgs(10).WillReturnRows(rows)
 
 	got, err := repo.GetStatsForDeck(context.Background(), 10)

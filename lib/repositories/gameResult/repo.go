@@ -12,13 +12,19 @@ const (
 	getGameResultsByGameID = `SELECT id, game_id, deck_id, place, kill_count, created_at, updated_at, deleted_at
 								FROM game_result WHERE game_id = ? AND deleted_at IS NULL;`
 
-	getStatsForPlayer = `SELECT DISTINCT game_result.game_id, game_result.place, game_result.kill_count
+	getStatsForPlayer = `SELECT game_result.game_id, game_result.place, game_result.kill_count,
+						        (SELECT COUNT(*) FROM game_result gr2
+						          WHERE gr2.game_id = game_result.game_id
+						            AND gr2.deleted_at IS NULL) AS player_count
 						   FROM game_result INNER JOIN deck ON game_result.deck_id = deck.id
 						  WHERE deck.player_id = ?
 						    AND deck.deleted_at IS NULL
 						    AND game_result.deleted_at IS NULL;`
 
-	getStatsForDeck = `SELECT DISTINCT game_result.game_id, game_result.place, game_result.kill_count
+	getStatsForDeck = `SELECT game_result.game_id, game_result.place, game_result.kill_count,
+						      (SELECT COUNT(*) FROM game_result gr2
+						        WHERE gr2.game_id = game_result.game_id
+						          AND gr2.deleted_at IS NULL) AS player_count
 						 FROM game_result INNER JOIN deck ON game_result.deck_id = deck.id
 						WHERE deck.id = ? AND game_result.deleted_at IS NULL;`
 

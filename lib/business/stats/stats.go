@@ -20,6 +20,6 @@ func FromAggregate(a *gameResult.Aggregate) Stats {
 		Record: a.Record,
 		Games:  a.Games,
 		Kills:  a.Kills,
-		Points: GetPointsForRecord(a.Kills, a.Record),
+		Points: a.Points,
 	}
 }
