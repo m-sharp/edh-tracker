@@ -7,7 +7,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/m-sharp/edh-tracker/lib"
-	"github.com/m-sharp/edh-tracker/lib/models"
+	"github.com/m-sharp/edh-tracker/lib/business"
 	"github.com/m-sharp/edh-tracker/lib/routers"
 )
 
@@ -17,17 +17,17 @@ type ApiRouter struct {
 	routers []lib.ApiRouter
 }
 
-func NewApiRouter(cfg *lib.Config, log *zap.Logger, repos *models.Repositories) *ApiRouter {
+func NewApiRouter(cfg *lib.Config, log *zap.Logger, biz *business.Business) *ApiRouter {
 	inst := &ApiRouter{
 		cfg: cfg,
 		log: log.Named("ApiRoute"),
 		routers: []lib.ApiRouter{
-			routers.NewPlayerRouter(log, repos),
-			routers.NewDeckRouter(log, repos),
-			routers.NewGameRouter(log, repos),
-			routers.NewPodRouter(log, repos),
-			routers.NewFormatRouter(log, repos),
-			routers.NewCommanderRouter(log, repos),
+			routers.NewPlayerRouter(log, biz),
+			routers.NewDeckRouter(log, biz),
+			routers.NewGameRouter(log, biz),
+			routers.NewPodRouter(log, biz),
+			routers.NewFormatRouter(log, biz),
+			routers.NewCommanderRouter(log, biz),
 		},
 	}
 

@@ -13,76 +13,71 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 
-	"github.com/m-sharp/edh-tracker/lib/models"
+	"github.com/m-sharp/edh-tracker/lib/business/game"
+	"github.com/m-sharp/edh-tracker/lib/business/gameResult"
 )
 
-func newTestGameRouter(game *mockGameRepo, format *mockFormatRepo, deck *mockDeckRepo) *GameRouter {
+func newTestGameRouter(games game.Functions) *GameRouter {
 	return &GameRouter{
-		log:        zap.NewNop(),
-		gameRepo:   game,
-		formatRepo: format,
-		deckRepo:   deck,
+		log:   zap.NewNop(),
+		games: games,
 	}
 }
 
-// gameCreateBody builds a minimal valid GameDetails JSON body.
+// gameCreateBody builds a minimal valid createGameRequest JSON body.
 func gameCreateBody(t *testing.T, formatID, deckID int) *bytes.Reader {
 	t.Helper()
-	details := models.GameDetails{
-		Game: models.Game{
-			Description: "Test Game",
-			PodID:       1,
-			FormatID:    formatID,
-		},
-		Results: []models.GameResult{
-			{DeckId: deckID, Place: 1, Kills: 0},
+	req := createGameRequest{
+		Description: "Test Game",
+		PodID:       1,
+		FormatID:    formatID,
+		Results: []gameResult.InputEntity{
+			{DeckID: deckID, Place: 1, Kills: 0},
 		},
 	}
-	b, err := json.Marshal(details)
+	b, err := json.Marshal(req)
 	require.NoError(t, err)
 	return bytes.NewReader(b)
 }
 
 func TestGameRouter_GetGames_ByPod(t *testing.T) {
-	games := []models.GameDetails{{Game: models.Game{Description: "Game 1"}}}
-	gameRepo := &mockGameRepo{
-		GetAllByPodFn: func(ctx context.Context, podId int) ([]models.GameDetails, error) {
+	games := []game.Entity{{Description: "Game 1"}}
+	router := newTestGameRouter(game.Functions{
+		GetAllByPod: func(ctx context.Context, podId int) ([]game.Entity, error) {
 			return games, nil
 		},
-	}
-	router := newTestGameRouter(gameRepo, &mockFormatRepo{}, &mockDeckRepo{})
+	})
 
 	req := httptest.NewRequest(http.MethodGet, "/api/games?pod_id=1", nil)
 	rr := httptest.NewRecorder()
 	router.GetAll(rr, req)
 
 	assert.Equal(t, http.StatusOK, rr.Code)
-	var got []models.GameDetails
+	var got []game.Entity
 	require.NoError(t, json.Unmarshal(rr.Body.Bytes(), &got))
 	assert.Len(t, got, 1)
 }
 
 func TestGameRouter_GetGames_ByDeck(t *testing.T) {
-	games := []models.GameDetails{{Game: models.Game{Description: "Game 1"}}}
-	gameRepo := &mockGameRepo{
-		GetAllByDeckFn: func(ctx context.Context, deckId int) ([]models.GameDetails, error) {
+	games := []game.Entity{{Description: "Game 1"}}
+	router := newTestGameRouter(game.Functions{
+		GetAllByDeck: func(ctx context.Context, deckId int) ([]game.Entity, error) {
 			return games, nil
 		},
-	}
-	router := newTestGameRouter(gameRepo, &mockFormatRepo{}, &mockDeckRepo{})
+	})
 
 	req := httptest.NewRequest(http.MethodGet, "/api/games?deck_id=1", nil)
 	rr := httptest.NewRecorder()
 	router.GetAll(rr, req)
 
 	assert.Equal(t, http.StatusOK, rr.Code)
-	var got []models.GameDetails
+	var got []game.Entity
 	require.NoError(t, json.Unmarshal(rr.Body.Bytes(), &got))
 	assert.Len(t, got, 1)
 }
 
 func TestGameRouter_GetGames_MissingQueryParam(t *testing.T) {
-	router := newTestGameRouter(&mockGameRepo{}, &mockFormatRepo{}, &mockDeckRepo{})
+	router := newTestGameRouter(game.Functions{})
 
 	req := httptest.NewRequest(http.MethodGet, "/api/games", nil)
 	rr := httptest.NewRecorder()
@@ -92,26 +87,23 @@ func TestGameRouter_GetGames_MissingQueryParam(t *testing.T) {
 }
 
 func TestGameRouter_GetGame_Success(t *testing.T) {
-	game := &models.GameDetails{Game: models.Game{Description: "My Game"}}
-	gameRepo := &mockGameRepo{
-		GetGameByIdFn: func(ctx context.Context, gameId int) (*models.GameDetails, error) {
-			return game, nil
-		},
-	}
-	router := newTestGameRouter(gameRepo, &mockFormatRepo{}, &mockDeckRepo{})
+	g := &game.Entity{Description: "My Game"}
+	router := newTestGameRouter(game.Functions{
+		GetByID: func(ctx context.Context, gameId int) (*game.Entity, error) { return g, nil },
+	})
 
 	req := httptest.NewRequest(http.MethodGet, "/api/game?game_id=1", nil)
 	rr := httptest.NewRecorder()
 	router.GetGameById(rr, req)
 
 	assert.Equal(t, http.StatusOK, rr.Code)
-	var got models.GameDetails
+	var got game.Entity
 	require.NoError(t, json.Unmarshal(rr.Body.Bytes(), &got))
 	assert.Equal(t, "My Game", got.Description)
 }
 
 func TestGameRouter_GetGame_MissingParam(t *testing.T) {
-	router := newTestGameRouter(&mockGameRepo{}, &mockFormatRepo{}, &mockDeckRepo{})
+	router := newTestGameRouter(game.Functions{})
 
 	req := httptest.NewRequest(http.MethodGet, "/api/game", nil)
 	rr := httptest.NewRecorder()
@@ -121,12 +113,11 @@ func TestGameRouter_GetGame_MissingParam(t *testing.T) {
 }
 
 func TestGameRouter_GetGame_Error(t *testing.T) {
-	gameRepo := &mockGameRepo{
-		GetGameByIdFn: func(ctx context.Context, gameId int) (*models.GameDetails, error) {
+	router := newTestGameRouter(game.Functions{
+		GetByID: func(ctx context.Context, gameId int) (*game.Entity, error) {
 			return nil, errors.New("db error")
 		},
-	}
-	router := newTestGameRouter(gameRepo, &mockFormatRepo{}, &mockDeckRepo{})
+	})
 
 	req := httptest.NewRequest(http.MethodGet, "/api/game?game_id=1", nil)
 	rr := httptest.NewRecorder()
@@ -135,91 +126,62 @@ func TestGameRouter_GetGame_Error(t *testing.T) {
 	assert.Equal(t, http.StatusInternalServerError, rr.Code)
 }
 
-func TestGameRouter_Add_FormatMatch(t *testing.T) {
-	const formatID = 1
-	const deckID = 10
-	formatRepo := &mockFormatRepo{
-		GetByIdFn: func(ctx context.Context, id int) (*models.Format, error) {
-			return &models.Format{Name: "commander"}, nil
-		},
-	}
-	deckRepo := &mockDeckRepo{
-		GetByIdFn: func(ctx context.Context, id int) (*models.DeckWithStats, error) {
-			return &models.DeckWithStats{Deck: models.Deck{FormatID: formatID}}, nil
-		},
-	}
-	gameRepo := &mockGameRepo{
-		AddFn: func(ctx context.Context, description string, podID, fID int, results ...models.GameResult) error {
+func TestGameRouter_Add_Success(t *testing.T) {
+	router := newTestGameRouter(game.Functions{
+		Create: func(ctx context.Context, description string, podID, formatID int, results []gameResult.InputEntity) error {
 			return nil
 		},
-	}
-	router := newTestGameRouter(gameRepo, formatRepo, deckRepo)
+	})
 
-	req := httptest.NewRequest(http.MethodPost, "/api/game", gameCreateBody(t, formatID, deckID))
+	req := httptest.NewRequest(http.MethodPost, "/api/game", gameCreateBody(t, 1, 10))
 	rr := httptest.NewRecorder()
 	router.GameCreate(rr, req)
 
 	assert.Equal(t, http.StatusCreated, rr.Code)
 }
 
-func TestGameRouter_Add_FormatMismatch(t *testing.T) {
-	const gameFormatID = 1
-	const deckFormatID = 2
-	const deckID = 10
-
-	formatRepo := &mockFormatRepo{
-		GetByIdFn: func(ctx context.Context, id int) (*models.Format, error) {
-			return &models.Format{Name: "commander"}, nil
+func TestGameRouter_Add_CreateError(t *testing.T) {
+	router := newTestGameRouter(game.Functions{
+		Create: func(ctx context.Context, description string, podID, formatID int, results []gameResult.InputEntity) error {
+			return errors.New("format not found")
 		},
-	}
-	deckRepo := &mockDeckRepo{
-		GetByIdFn: func(ctx context.Context, id int) (*models.DeckWithStats, error) {
-			return &models.DeckWithStats{Deck: models.Deck{FormatID: deckFormatID}}, nil
-		},
-	}
-	router := newTestGameRouter(&mockGameRepo{}, formatRepo, deckRepo)
+	})
 
-	req := httptest.NewRequest(http.MethodPost, "/api/game", gameCreateBody(t, gameFormatID, deckID))
+	req := httptest.NewRequest(http.MethodPost, "/api/game", gameCreateBody(t, 99, 10))
+	rr := httptest.NewRecorder()
+	router.GameCreate(rr, req)
+
+	assert.Equal(t, http.StatusInternalServerError, rr.Code)
+}
+
+func TestGameRouter_Add_EmptyResults(t *testing.T) {
+	router := newTestGameRouter(game.Functions{})
+
+	body, _ := json.Marshal(createGameRequest{
+		Description: "Test",
+		PodID:       1,
+		FormatID:    1,
+		Results:     []gameResult.InputEntity{},
+	})
+	req := httptest.NewRequest(http.MethodPost, "/api/game", bytes.NewReader(body))
 	rr := httptest.NewRecorder()
 	router.GameCreate(rr, req)
 
 	assert.Equal(t, http.StatusBadRequest, rr.Code)
 }
 
-func TestGameRouter_Add_OtherFormat_SkipsFormatCheck(t *testing.T) {
-	const gameFormatID = 2
-	const deckFormatID = 1 // differs from game, but "other" format skips the check
-	const deckID = 10
+func TestGameRouter_Add_InvalidResult(t *testing.T) {
+	router := newTestGameRouter(game.Functions{})
 
-	formatRepo := &mockFormatRepo{
-		GetByIdFn: func(ctx context.Context, id int) (*models.Format, error) {
-			return &models.Format{Name: "other"}, nil
+	body, _ := json.Marshal(createGameRequest{
+		Description: "Test",
+		PodID:       1,
+		FormatID:    1,
+		Results: []gameResult.InputEntity{
+			{DeckID: 0, Place: 1, Kills: 0}, // DeckID=0 is invalid
 		},
-	}
-	gameRepo := &mockGameRepo{
-		AddFn: func(ctx context.Context, description string, podID, fID int, results ...models.GameResult) error {
-			return nil
-		},
-	}
-	// deckRepo should NOT be called for "other" format — leave it with nil fns so a call would panic
-	router := newTestGameRouter(gameRepo, formatRepo, &mockDeckRepo{})
-
-	req := httptest.NewRequest(http.MethodPost, "/api/game", gameCreateBody(t, gameFormatID, deckID))
-	rr := httptest.NewRecorder()
-	router.GameCreate(rr, req)
-
-	assert.Equal(t, http.StatusCreated, rr.Code)
-}
-
-func TestGameRouter_Add_InvalidFormat(t *testing.T) {
-	formatRepo := &mockFormatRepo{
-		GetByIdFn: func(ctx context.Context, id int) (*models.Format, error) {
-			return nil, nil // format not found
-		},
-	}
-	router := newTestGameRouter(&mockGameRepo{}, formatRepo, &mockDeckRepo{})
-
-	req := httptest.NewRequest(http.MethodPost, "/api/game", gameCreateBody(t, 99, 1))
+	})
+	req := httptest.NewRequest(http.MethodPost, "/api/game", bytes.NewReader(body))
 	rr := httptest.NewRecorder()
 	router.GameCreate(rr, req)
 
