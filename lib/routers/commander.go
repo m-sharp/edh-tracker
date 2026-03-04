@@ -7,9 +7,9 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/m-sharp/edh-tracker/lib"
 	"github.com/m-sharp/edh-tracker/lib/business"
 	"github.com/m-sharp/edh-tracker/lib/business/commander"
+	"github.com/m-sharp/edh-tracker/lib/trackerHttp"
 )
 
 type CommanderRouter struct {
@@ -24,8 +24,8 @@ func NewCommanderRouter(log *zap.Logger, biz *business.Business) *CommanderRoute
 	}
 }
 
-func (c *CommanderRouter) GetRoutes() []*lib.Route {
-	return []*lib.Route{
+func (c *CommanderRouter) GetRoutes() []*trackerHttp.Route {
+	return []*trackerHttp.Route{
 		{
 			Path:    "/api/commander",
 			Method:  http.MethodGet,
@@ -42,30 +42,30 @@ func (c *CommanderRouter) GetRoutes() []*lib.Route {
 func (c *CommanderRouter) GetCommanderById(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	commanderID, err := lib.GetQueryId(r, "commander_id")
+	commanderID, err := trackerHttp.GetQueryId(r, "commander_id")
 	if err != nil {
-		lib.WriteError(c.log, w, http.StatusBadRequest, err, "Bad commander_id query string specified", err.Error())
+		trackerHttp.WriteError(c.log, w, http.StatusBadRequest, err, "Bad commander_id query string specified", err.Error())
 		return
 	}
 
 	errMsg := "Failed to get Commander record"
 	cmd, err := c.commanders.GetByID(ctx, commanderID)
 	if err != nil {
-		lib.WriteError(c.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
+		trackerHttp.WriteError(c.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
 		return
 	}
 	if cmd == nil {
-		lib.WriteError(c.log, w, http.StatusNotFound, nil, "Commander not found", "Commander not found")
+		trackerHttp.WriteError(c.log, w, http.StatusNotFound, nil, "Commander not found", "Commander not found")
 		return
 	}
 
 	marshalled, err := json.Marshal(cmd)
 	if err != nil {
-		lib.WriteError(c.log, w, http.StatusInternalServerError, err, "Failed to marshal records as JSON", errMsg)
+		trackerHttp.WriteError(c.log, w, http.StatusInternalServerError, err, "Failed to marshal records as JSON", errMsg)
 		return
 	}
 
-	lib.WriteJson(c.log, w, marshalled)
+	trackerHttp.WriteJson(c.log, w, marshalled)
 }
 
 func (c *CommanderRouter) CommanderCreate(w http.ResponseWriter, r *http.Request) {
@@ -74,7 +74,7 @@ func (c *CommanderRouter) CommanderCreate(w http.ResponseWriter, r *http.Request
 
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		lib.WriteError(c.log, w, http.StatusInternalServerError, err, "Failed to read Commander POST body", errMsg)
+		trackerHttp.WriteError(c.log, w, http.StatusInternalServerError, err, "Failed to read Commander POST body", errMsg)
 		return
 	}
 
@@ -82,12 +82,12 @@ func (c *CommanderRouter) CommanderCreate(w http.ResponseWriter, r *http.Request
 		Name string `json:"name"`
 	}
 	if err = json.Unmarshal(body, &req); err != nil {
-		lib.WriteError(c.log, w, http.StatusBadRequest, err, "Failed to unmarshal Commander body", errMsg)
+		trackerHttp.WriteError(c.log, w, http.StatusBadRequest, err, "Failed to unmarshal Commander body", errMsg)
 		return
 	}
 
 	if req.Name == "" {
-		lib.WriteError(c.log, w, http.StatusBadRequest, nil, "Missing commander name", "Commander name is required")
+		trackerHttp.WriteError(c.log, w, http.StatusBadRequest, nil, "Missing commander name", "Commander name is required")
 		return
 	}
 
@@ -95,7 +95,7 @@ func (c *CommanderRouter) CommanderCreate(w http.ResponseWriter, r *http.Request
 	log.Info("Saving new Commander record")
 
 	if _, err = c.commanders.Create(ctx, req.Name); err != nil {
-		lib.WriteError(log, w, http.StatusInternalServerError, err, "Failed to add Commander record", errMsg)
+		trackerHttp.WriteError(log, w, http.StatusInternalServerError, err, "Failed to add Commander record", errMsg)
 		return
 	}
 

@@ -9,5 +9,5 @@ meaning they likely have (or had) a Partner commander that was not recorded.
 | Jaheira, Friend of the Forest | ???              | Peter          |
 | Rose Tyler                    | The Tenth Doctor | Michaela, Mike |
 | Sakashima of a Thousand Faces | ???              | Dillon         |
-| Tegan Jovanka                 | ???              | Michaela       |
+| Tegan Jovanka                 | The Tenth Doctor | Michaela       |
 | Wyll, Blade of Frontiers      | ???              | Peter          |

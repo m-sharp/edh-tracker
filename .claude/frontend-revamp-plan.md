@@ -55,17 +55,17 @@ Mark items `[x]` as they are completed during implementation.
 ### Phase 1 — Database Migrations
 - [x] Migration 17: `player_pod_role` table
 - [x] Migration 18: `pod_invite` table
-- [x] Migration 19: Soft-delete columns (`game` + `deck`)
-- [x] Register all three in `lib/migrations/migrate.go`
+- [x] Migration 19: Soft-delete columns (`game` + `deck`) — **SKIPPED**: columns already existed from Migration 6; no file created
+- [x] Migrations 17 and 18 registered in `lib/migrations/migrate.go` (19 not needed)
 
 ### Phase 2A — OAuth Backend
-- [ ] Fix CORS bugs in `lib/http.go` (wildcard+credentials invalid, preflight writes body, `Add` vs `Set`)
-- [ ] Add dependencies (`golang.org/x/oauth2`, `github.com/golang-jwt/jwt/v5`)
-- [ ] Add config keys in `lib/config.go`
-- [ ] `lib/middleware/auth.go` (`RequireAuth`, `OptionalAuth`, sliding re-issue)
-- [ ] User business: `GetByOAuth`, `CreateWithOAuth`
-- [ ] `lib/routers/auth.go` (login, callback, logout, me)
-- [ ] Wire `AuthRouter` + apply middleware in `api.go`
+- [x] Fix CORS bugs in `lib/trackerHttp/http.go` (wildcard+credentials invalid, preflight writes body, `Add` vs `Set`)
+- [x] Add dependencies (`golang.org/x/oauth2`, `github.com/golang-jwt/jwt/v5`)
+- [x] Add config keys in `lib/config.go`
+- [x] `lib/middleware/auth.go` (`RequireAuth`, `OptionalAuth`, sliding re-issue)
+- [x] User business: `GetByOAuth`, `CreateWithOAuth`
+- [x] `lib/routers/auth.go` (login, callback, logout, me)
+- [x] Wire `AuthRouter` + apply middleware in `api.go`
 
 ### Phase 2B — Pod Roles + Invite
 - [ ] `lib/repositories/playerPodRole/` (model + repo)
@@ -323,7 +323,7 @@ Add both to `business.Business.User` struct and wire in `NewBusiness`.
 | `POST /api/deck` | RequireAuth | No additional check — caller creates a deck under their own player_id (JWT player_id used, not request body) |
 | `POST /api/player` | **Remove** | See Phase 2C |
 
-### CORS fixes in `lib/http.go`
+### CORS fixes in `lib/trackerHttp/http.go`
 
 Three bugs in the existing CORS middleware must be fixed before OAuth + cookies work correctly:
 

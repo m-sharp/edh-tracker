@@ -6,6 +6,7 @@ import (
 )
 
 const (
+	// DB Configs
 	dbHostEnvVar = "DBHOST"
 	DBHost       = "Host"
 
@@ -21,8 +22,25 @@ const (
 	devEnvVar   = "DEV"
 	Development = "Development"
 
+	// If SEED is true, run the data seeder
 	seedEnvVar = "SEED"
 	Seed       = "Seed"
+
+	// Auth Configs
+	googleClientIDEnvVar = "GOOGLE_CLIENT_ID"
+	GoogleClientID       = "GoogleClientID"
+
+	googleClientSecretEnvVar = "GOOGLE_CLIENT_SECRET"
+	GoogleClientSecret       = "GoogleClientSecret"
+
+	oauthRedirectURLEnvVar = "OAUTH_REDIRECT_URL"
+	OAuthRedirectURL       = "OAuthRedirectURL"
+
+	jwtSecretEnvVar = "JWT_SECRET"
+	JWTSecret       = "JWTSecret"
+
+	frontendURLEnvVar = "FRONTEND_URL"
+	FrontendURL       = "FrontendURL"
 
 	lookupErr = "ENVVAR for %q not found"
 )
@@ -57,10 +75,15 @@ func (c *Config) Set(key, value string) {
 
 var (
 	lookupMap = map[string]string{
-		dbHostEnvVar: DBHost,
-		dbUserEnvVar: DBUsername,
-		dbPassEnvVar: DBPass,
-		dbPortEnvVar: DBPort,
+		dbHostEnvVar:             DBHost,
+		dbUserEnvVar:             DBUsername,
+		dbPassEnvVar:             DBPass,
+		dbPortEnvVar:             DBPort,
+		googleClientIDEnvVar:     GoogleClientID,
+		googleClientSecretEnvVar: GoogleClientSecret,
+		oauthRedirectURLEnvVar:   OAuthRedirectURL,
+		jwtSecretEnvVar:          JWTSecret,
+		frontendURLEnvVar:        FrontendURL,
 	}
 )
 

@@ -79,9 +79,11 @@ func NewBusiness(log *zap.Logger, r *repositories.Repositories) *Business {
 			AddPlayer:     pod.AddPlayer(r.Pods),
 		},
 		Users: user.Functions{
-			GetByID:       user.GetByID(r.Users),
-			GetByPlayerID: user.GetByPlayerID(r.Users),
-			Create:        user.Create(r.Users),
+			GetByID:         user.GetByID(r.Users),
+			GetByPlayerID:   user.GetByPlayerID(r.Users),
+			Create:          user.Create(r.Users),
+			GetByOAuth:      user.GetByOAuth(r.Users),
+			CreateWithOAuth: user.CreateWithOAuth(r.Users),
 		},
 	}
 }

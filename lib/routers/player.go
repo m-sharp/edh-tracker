@@ -7,9 +7,9 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/m-sharp/edh-tracker/lib"
 	"github.com/m-sharp/edh-tracker/lib/business"
 	"github.com/m-sharp/edh-tracker/lib/business/player"
+	"github.com/m-sharp/edh-tracker/lib/trackerHttp"
 )
 
 type PlayerRouter struct {
@@ -24,8 +24,8 @@ func NewPlayerRouter(log *zap.Logger, biz *business.Business) *PlayerRouter {
 	}
 }
 
-func (p *PlayerRouter) GetRoutes() []*lib.Route {
-	return []*lib.Route{
+func (p *PlayerRouter) GetRoutes() []*trackerHttp.Route {
+	return []*trackerHttp.Route{
 		{
 			Path:    "/api/players",
 			Method:  http.MethodGet,
@@ -50,43 +50,43 @@ func (p *PlayerRouter) GetAll(w http.ResponseWriter, r *http.Request) {
 
 	players, err := p.players.GetAll(ctx)
 	if err != nil {
-		lib.WriteError(p.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
+		trackerHttp.WriteError(p.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
 		return
 	}
 
 	marshalled, err := json.Marshal(players)
 	if err != nil {
-		lib.WriteError(p.log, w, http.StatusInternalServerError, err, "Failed to marshall records as JSON", errMsg)
+		trackerHttp.WriteError(p.log, w, http.StatusInternalServerError, err, "Failed to marshall records as JSON", errMsg)
 		return
 	}
 
-	lib.WriteJson(p.log, w, marshalled)
+	trackerHttp.WriteJson(p.log, w, marshalled)
 }
 
 func (p *PlayerRouter) GetPlayerById(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	// TODO: Use route param instead?
-	playerID, err := lib.GetQueryId(r, "player_id")
+	playerID, err := trackerHttp.GetQueryId(r, "player_id")
 	if err != nil {
-		lib.WriteError(p.log, w, http.StatusBadRequest, err, "Bad player_id query string specified", err.Error())
+		trackerHttp.WriteError(p.log, w, http.StatusBadRequest, err, "Bad player_id query string specified", err.Error())
 		return
 	}
 
 	errMsg := "Failed to get Player record"
 	playerEntity, err := p.players.GetByID(ctx, playerID)
 	if err != nil {
-		lib.WriteError(p.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
+		trackerHttp.WriteError(p.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
 		return
 	}
 
 	marshalled, err := json.Marshal(playerEntity)
 	if err != nil {
-		lib.WriteError(p.log, w, http.StatusInternalServerError, err, "Failed to marshall records as JSON", errMsg)
+		trackerHttp.WriteError(p.log, w, http.StatusInternalServerError, err, "Failed to marshall records as JSON", errMsg)
 		return
 	}
 
-	lib.WriteJson(p.log, w, marshalled)
+	trackerHttp.WriteJson(p.log, w, marshalled)
 }
 
 func (p *PlayerRouter) PlayerCreate(w http.ResponseWriter, r *http.Request) {
@@ -95,7 +95,7 @@ func (p *PlayerRouter) PlayerCreate(w http.ResponseWriter, r *http.Request) {
 
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		lib.WriteError(p.log, w, http.StatusInternalServerError, err, "Failed to read player POST body", errMsg)
+		trackerHttp.WriteError(p.log, w, http.StatusInternalServerError, err, "Failed to read player POST body", errMsg)
 		return
 	}
 
@@ -103,19 +103,19 @@ func (p *PlayerRouter) PlayerCreate(w http.ResponseWriter, r *http.Request) {
 		Name string `json:"name"`
 	}
 	if err = json.Unmarshal(body, &req); err != nil {
-		lib.WriteError(p.log, w, http.StatusBadRequest, err, "Failed to unmarshal Player body", errMsg)
+		trackerHttp.WriteError(p.log, w, http.StatusBadRequest, err, "Failed to unmarshal Player body", errMsg)
 		return
 	}
 	log := p.log.With(zap.String("NewPlayer", req.Name))
 
 	if req.Name == "" {
-		lib.WriteError(log, w, http.StatusBadRequest, nil, "Missing player name", "name is required")
+		trackerHttp.WriteError(log, w, http.StatusBadRequest, nil, "Missing player name", "name is required")
 		return
 	}
 
 	log.Info("Saving new Player record")
 	if _, err = p.players.Create(ctx, req.Name); err != nil {
-		lib.WriteError(log, w, http.StatusInternalServerError, err, "Failed to add Player record", errMsg)
+		trackerHttp.WriteError(log, w, http.StatusInternalServerError, err, "Failed to add Player record", errMsg)
 		return
 	}
 

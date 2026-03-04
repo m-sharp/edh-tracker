@@ -6,9 +6,9 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/m-sharp/edh-tracker/lib"
 	"github.com/m-sharp/edh-tracker/lib/business"
 	"github.com/m-sharp/edh-tracker/lib/business/format"
+	"github.com/m-sharp/edh-tracker/lib/trackerHttp"
 )
 
 type FormatRouter struct {
@@ -23,8 +23,8 @@ func NewFormatRouter(log *zap.Logger, biz *business.Business) *FormatRouter {
 	}
 }
 
-func (f *FormatRouter) GetRoutes() []*lib.Route {
-	return []*lib.Route{
+func (f *FormatRouter) GetRoutes() []*trackerHttp.Route {
+	return []*trackerHttp.Route{
 		{
 			Path:    "/api/formats",
 			Method:  http.MethodGet,
@@ -39,15 +39,15 @@ func (f *FormatRouter) GetAll(w http.ResponseWriter, r *http.Request) {
 
 	formats, err := f.formats.GetAll(ctx)
 	if err != nil {
-		lib.WriteError(f.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
+		trackerHttp.WriteError(f.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
 		return
 	}
 
 	marshalled, err := json.Marshal(formats)
 	if err != nil {
-		lib.WriteError(f.log, w, http.StatusInternalServerError, err, "Failed to marshal records as JSON", errMsg)
+		trackerHttp.WriteError(f.log, w, http.StatusInternalServerError, err, "Failed to marshal records as JSON", errMsg)
 		return
 	}
 
-	lib.WriteJson(f.log, w, marshalled)
+	trackerHttp.WriteJson(f.log, w, marshalled)
 }

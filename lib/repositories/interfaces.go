@@ -65,8 +65,13 @@ type PodRepository interface {
 type UserRepository interface {
 	GetByID(ctx context.Context, id int) (*user.Model, error)
 	GetByPlayerID(ctx context.Context, playerID int) (*user.Model, error)
+	GetByOAuth(ctx context.Context, provider, subject string) (*user.Model, error)
 	GetRoleByName(ctx context.Context, name string) (*user.RoleModel, error)
 	Add(ctx context.Context, playerID, roleID int) (int, error)
+	AddWithOAuth(ctx context.Context, playerID, roleID int, provider, subject, email, displayName, avatarURL string) (int, error)
+	// CreatePlayerAndUser atomically inserts a player row and a linked user row in one transaction.
+	// Returns the created user Model.
+	CreatePlayerAndUser(ctx context.Context, playerName string, roleID int, provider, subject, email, displayName, avatarURL string) (*user.Model, error)
 	BulkAdd(ctx context.Context, playerIDs []int, roleID int) error
 	SoftDelete(ctx context.Context, id int) error
 }

@@ -7,9 +7,9 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/m-sharp/edh-tracker/lib"
 	"github.com/m-sharp/edh-tracker/lib/business"
 	"github.com/m-sharp/edh-tracker/lib/business/pod"
+	"github.com/m-sharp/edh-tracker/lib/trackerHttp"
 )
 
 type PodRouter struct {
@@ -24,8 +24,8 @@ func NewPodRouter(log *zap.Logger, biz *business.Business) *PodRouter {
 	}
 }
 
-func (p *PodRouter) GetRoutes() []*lib.Route {
-	return []*lib.Route{
+func (p *PodRouter) GetRoutes() []*trackerHttp.Route {
+	return []*trackerHttp.Route{
 		{
 			Path:    "/api/pod",
 			Method:  http.MethodGet,
@@ -48,11 +48,11 @@ func (p *PodRouter) GetPod(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	errMsg := "Failed to get Pod records"
 
-	podId, podErr := lib.GetQueryId(r, "pod_id")
-	playerId, playerErr := lib.GetQueryId(r, "player_id")
+	podId, podErr := trackerHttp.GetQueryId(r, "pod_id")
+	playerId, playerErr := trackerHttp.GetQueryId(r, "player_id")
 
 	if podErr != nil && playerErr != nil {
-		lib.WriteError(p.log, w, http.StatusBadRequest, podErr, "Missing pod_id or player_id query param", "pod_id or player_id query param is required")
+		trackerHttp.WriteError(p.log, w, http.StatusBadRequest, podErr, "Missing pod_id or player_id query param", "pod_id or player_id query param is required")
 		return
 	}
 
@@ -65,7 +65,7 @@ func (p *PodRouter) GetPod(w http.ResponseWriter, r *http.Request) {
 		var podEntity *pod.Entity
 		podEntity, err = p.pods.GetByID(ctx, podId)
 		if err != nil {
-			lib.WriteError(p.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
+			trackerHttp.WriteError(p.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
 			return
 		}
 		marshalled, err = json.Marshal(podEntity)
@@ -73,18 +73,18 @@ func (p *PodRouter) GetPod(w http.ResponseWriter, r *http.Request) {
 		var pods []pod.Entity
 		pods, err = p.pods.GetByPlayerID(ctx, playerId)
 		if err != nil {
-			lib.WriteError(p.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
+			trackerHttp.WriteError(p.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
 			return
 		}
 		marshalled, err = json.Marshal(pods)
 	}
 
 	if err != nil {
-		lib.WriteError(p.log, w, http.StatusInternalServerError, err, "Failed to marshall records as JSON", errMsg)
+		trackerHttp.WriteError(p.log, w, http.StatusInternalServerError, err, "Failed to marshall records as JSON", errMsg)
 		return
 	}
 
-	lib.WriteJson(p.log, w, marshalled)
+	trackerHttp.WriteJson(p.log, w, marshalled)
 }
 
 func (p *PodRouter) PodCreate(w http.ResponseWriter, r *http.Request) {
@@ -93,25 +93,25 @@ func (p *PodRouter) PodCreate(w http.ResponseWriter, r *http.Request) {
 
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		lib.WriteError(p.log, w, http.StatusInternalServerError, err, "Failed to read Pod POST body", errMsg)
+		trackerHttp.WriteError(p.log, w, http.StatusInternalServerError, err, "Failed to read Pod POST body", errMsg)
 		return
 	}
 
 	var e pod.Entity
 	if err = json.Unmarshal(body, &e); err != nil {
-		lib.WriteError(p.log, w, http.StatusBadRequest, err, "Failed to unmarshal Pod body", errMsg)
+		trackerHttp.WriteError(p.log, w, http.StatusBadRequest, err, "Failed to unmarshal Pod body", errMsg)
 		return
 	}
 	log := p.log.With(zap.String("PodName", e.Name))
 
 	if err = e.Validate(); err != nil {
-		lib.WriteError(log, w, http.StatusBadRequest, err, "Pod failed validation", err.Error())
+		trackerHttp.WriteError(log, w, http.StatusBadRequest, err, "Pod failed validation", err.Error())
 		return
 	}
 
 	log.Info("Saving new Pod record")
 	if _, err = p.pods.Create(ctx, e.Name); err != nil {
-		lib.WriteError(log, w, http.StatusInternalServerError, err, "Failed to add Pod record", errMsg)
+		trackerHttp.WriteError(log, w, http.StatusInternalServerError, err, "Failed to add Pod record", errMsg)
 		return
 	}
 
@@ -124,25 +124,25 @@ func (p *PodRouter) AddPlayer(w http.ResponseWriter, r *http.Request) {
 
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		lib.WriteError(p.log, w, http.StatusInternalServerError, err, "Failed to read PlayerPod POST body", errMsg)
+		trackerHttp.WriteError(p.log, w, http.StatusInternalServerError, err, "Failed to read PlayerPod POST body", errMsg)
 		return
 	}
 
 	var input pod.PlayerPodInputEntity
 	if err = json.Unmarshal(body, &input); err != nil {
-		lib.WriteError(p.log, w, http.StatusBadRequest, err, "Failed to unmarshal PlayerPod body", errMsg)
+		trackerHttp.WriteError(p.log, w, http.StatusBadRequest, err, "Failed to unmarshal PlayerPod body", errMsg)
 		return
 	}
 	log := p.log.With(zap.Int("PodID", input.PodID), zap.Int("PlayerID", input.PlayerID))
 
 	if err = input.Validate(); err != nil {
-		lib.WriteError(log, w, http.StatusBadRequest, err, "PlayerPod failed validation", err.Error())
+		trackerHttp.WriteError(log, w, http.StatusBadRequest, err, "PlayerPod failed validation", err.Error())
 		return
 	}
 
 	log.Info("Adding Player to Pod")
 	if err = p.pods.AddPlayer(ctx, input.PodID, input.PlayerID); err != nil {
-		lib.WriteError(log, w, http.StatusInternalServerError, err, "Failed to add Player to Pod", errMsg)
+		trackerHttp.WriteError(log, w, http.StatusInternalServerError, err, "Failed to add Player to Pod", errMsg)
 		return
 	}
 
