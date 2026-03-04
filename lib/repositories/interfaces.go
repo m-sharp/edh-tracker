@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"context"
+	"time"
 
 	"github.com/m-sharp/edh-tracker/lib/repositories/commander"
 	"github.com/m-sharp/edh-tracker/lib/repositories/deck"
@@ -10,7 +11,9 @@ import (
 	"github.com/m-sharp/edh-tracker/lib/repositories/game"
 	"github.com/m-sharp/edh-tracker/lib/repositories/gameResult"
 	"github.com/m-sharp/edh-tracker/lib/repositories/player"
+	"github.com/m-sharp/edh-tracker/lib/repositories/playerPodRole"
 	"github.com/m-sharp/edh-tracker/lib/repositories/pod"
+	"github.com/m-sharp/edh-tracker/lib/repositories/podInvite"
 	"github.com/m-sharp/edh-tracker/lib/repositories/user"
 )
 
@@ -57,9 +60,26 @@ type PodRepository interface {
 	GetByPlayerID(ctx context.Context, playerID int) ([]pod.Model, error)
 	GetByName(ctx context.Context, name string) (*pod.Model, error)
 	GetIDsByPlayerID(ctx context.Context, playerID int) ([]int, error)
+	GetPlayerIDs(ctx context.Context, podID int) ([]int, error)
 	Add(ctx context.Context, name string) (int, error)
 	BulkAddPlayers(ctx context.Context, podID int, playerIDs []int) error
 	AddPlayerToPod(ctx context.Context, podID, playerID int) error
+	SoftDelete(ctx context.Context, podID int) error
+	Update(ctx context.Context, podID int, name string) error
+	RemovePlayer(ctx context.Context, podID, playerID int) error
+}
+
+type PlayerPodRoleRepository interface {
+	GetRole(ctx context.Context, podID, playerID int) (*playerPodRole.Model, error)
+	SetRole(ctx context.Context, podID, playerID int, role string) error
+	GetMembersWithRoles(ctx context.Context, podID int) ([]playerPodRole.Model, error)
+	BulkAdd(ctx context.Context, podID int, playerIDs []int, role string) error
+}
+
+type PodInviteRepository interface {
+	GetByCode(ctx context.Context, code string) (*podInvite.Model, error)
+	Add(ctx context.Context, podID, createdByPlayerID int, code string, expiresAt *time.Time) error
+	IncrementUsedCount(ctx context.Context, code string) error
 }
 
 type UserRepository interface {

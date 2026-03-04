@@ -178,6 +178,17 @@ func (s *Seeder) seedPlayersAndUsers(ctx context.Context, playerNames []string, 
 		return nil, fmt.Errorf("failed to bulk add players to pod: %w", err)
 	}
 
+	if err = s.repos.PlayerPodRoles.BulkAdd(ctx, podID, playerIDSlice, "member"); err != nil {
+		return nil, fmt.Errorf("failed to bulk add player pod roles: %w", err)
+	}
+
+	mikeID, ok := playerIDs["Mike"]
+	if ok {
+		if err = s.repos.PlayerPodRoles.SetRole(ctx, podID, mikeID, "manager"); err != nil {
+			return nil, fmt.Errorf("failed to set Mike as pod manager: %w", err)
+		}
+	}
+
 	return playerIDs, nil
 }
 

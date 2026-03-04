@@ -17,6 +17,16 @@
 
 ---
 
+## Testing Policy
+
+Any new production code added to this project **MUST** have corresponding unit tests following the established patterns:
+
+- **Business functions**: Mock structs with per-method `Fn` fields implementing the repository interfaces; panic on unexpected calls. See `lib/business/player/functions_test.go` and `lib/business/pod/functions_test.go`.
+- **Repositories**: `go-sqlmock` with a `newMockDB(t)` helper; match queries using `regexp.QuoteMeta(ConstantName)`. See `lib/repositories/player/repo_test.go`.
+- **Routers**: `httptest.NewRecorder`; inject mock closures directly into the `Functions` struct. See `lib/routers/player_test.go` and `lib/routers/pod_test.go`.
+
+---
+
 ## Dependency Graph
 
 ```
@@ -68,13 +78,13 @@ Mark items `[x]` as they are completed during implementation.
 - [x] Wire `AuthRouter` + apply middleware in `api.go`
 
 ### Phase 2B — Pod Roles + Invite
-- [ ] `lib/repositories/playerPodRole/` (model + repo)
-- [ ] `lib/repositories/podInvite/` (model + repo)
-- [ ] Update `lib/repositories/repositories.go`
-- [ ] Update pod repository (`SoftDelete`, `Update`, `RemovePlayer`, `GetPlayerIDs`)
-- [ ] Pod business: role/invite/leave/manage functions
-- [ ] New pod API endpoints (PATCH, DELETE, invite, join, leave, kick, promote)
-- [ ] Update seeder with `player_pod_role` seed data
+- [x] `lib/repositories/playerPodRole/` (model + repo)
+- [x] `lib/repositories/podInvite/` (model + repo)
+- [x] Update `lib/repositories/repositories.go`
+- [x] Update pod repository (`SoftDelete`, `Update`, `RemovePlayer`, `GetPlayerIDs`)
+- [x] Pod business: role/invite/leave/manage functions
+- [x] New pod API endpoints (PATCH, DELETE, invite, join, leave, kick, promote)
+- [x] Update seeder with `player_pod_role` seed data
 
 ### Phase 2C — Edit/Delete/New Endpoints
 - [ ] Remove `POST /api/player` route + handler (player creation is OAuth-only)

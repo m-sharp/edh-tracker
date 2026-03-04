@@ -108,6 +108,18 @@ func (m *mockPodRepo) BulkAddPlayers(ctx context.Context, podID int, playerIDs [
 func (m *mockPodRepo) AddPlayerToPod(ctx context.Context, podID, playerID int) error {
 	panic("unexpected call to AddPlayerToPod")
 }
+func (m *mockPodRepo) GetPlayerIDs(ctx context.Context, podID int) ([]int, error) {
+	panic("unexpected call to GetPlayerIDs")
+}
+func (m *mockPodRepo) SoftDelete(ctx context.Context, podID int) error {
+	panic("unexpected call to SoftDelete")
+}
+func (m *mockPodRepo) Update(ctx context.Context, podID int, name string) error {
+	panic("unexpected call to Update")
+}
+func (m *mockPodRepo) RemovePlayer(ctx context.Context, podID, playerID int) error {
+	panic("unexpected call to RemovePlayer")
+}
 
 func TestGetByID_Success(t *testing.T) {
 	playerRepo := &mockPlayerRepo{

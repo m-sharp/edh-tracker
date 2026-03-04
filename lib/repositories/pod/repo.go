@@ -17,9 +17,13 @@ const (
 						  WHERE player_pod.player_id = ?
 						    AND pod.deleted_at IS NULL
 						    AND player_pod.deleted_at IS NULL;`
-	getPodIDsByPlayerID = `SELECT pod_id FROM player_pod WHERE player_id = ? AND deleted_at IS NULL;`
-	insertPod           = `INSERT INTO pod (name) VALUES (?);`
-	insertPlayerPod     = `INSERT INTO player_pod (pod_id, player_id) VALUES (?, ?);`
+	getPodIDsByPlayerID  = `SELECT pod_id FROM player_pod WHERE player_id = ? AND deleted_at IS NULL;`
+	getPlayerIDsByPodID  = `SELECT player_id FROM player_pod WHERE pod_id = ? AND deleted_at IS NULL;`
+	insertPod            = `INSERT INTO pod (name) VALUES (?);`
+	insertPlayerPod      = `INSERT INTO player_pod (pod_id, player_id) VALUES (?, ?);`
+	softDeletePod        = `UPDATE pod SET deleted_at = NOW() WHERE id = ?;`
+	updatePodName        = `UPDATE pod SET name = ? WHERE id = ? AND deleted_at IS NULL;`
+	softDeletePlayerPod  = `UPDATE player_pod SET deleted_at = NOW() WHERE pod_id = ? AND player_id = ? AND deleted_at IS NULL;`
 )
 
 type Repository struct {
@@ -138,4 +142,36 @@ func (r *Repository) AddPlayerToPod(ctx context.Context, podID, playerID int) er
 	}
 
 	return nil
+}
+
+func (r *Repository) SoftDelete(ctx context.Context, podID int) error {
+	if _, err := r.client.Db.ExecContext(ctx, softDeletePod, podID); err != nil {
+		return fmt.Errorf("failed to soft delete pod %d: %w", podID, err)
+	}
+	return nil
+}
+
+func (r *Repository) Update(ctx context.Context, podID int, name string) error {
+	if _, err := r.client.Db.ExecContext(ctx, updatePodName, name, podID); err != nil {
+		return fmt.Errorf("failed to update pod %d name: %w", podID, err)
+	}
+	return nil
+}
+
+func (r *Repository) RemovePlayer(ctx context.Context, podID, playerID int) error {
+	if _, err := r.client.Db.ExecContext(ctx, softDeletePlayerPod, podID, playerID); err != nil {
+		return fmt.Errorf("failed to remove player %d from pod %d: %w", playerID, podID, err)
+	}
+	return nil
+}
+
+func (r *Repository) GetPlayerIDs(ctx context.Context, podID int) ([]int, error) {
+	var ids []int
+	if err := r.client.Db.SelectContext(ctx, &ids, getPlayerIDsByPodID, podID); err != nil {
+		return nil, fmt.Errorf("failed to get player IDs for pod %d: %w", podID, err)
+	}
+	if ids == nil {
+		return []int{}, nil
+	}
+	return ids, nil
 }

@@ -6,6 +6,8 @@ import (
 	"strconv"
 
 	"go.uber.org/zap"
+
+	"github.com/m-sharp/edh-tracker/lib/utils"
 )
 
 type MiddlewareFunc func(nextHandler http.HandlerFunc) http.HandlerFunc
@@ -65,6 +67,17 @@ func WriteJson(log *zap.Logger, w http.ResponseWriter, marshalled []byte) {
 		log.Error("Failed to return records", zap.Error(err))
 		http.Error(w, "failed to return records", http.StatusInternalServerError)
 	}
+}
+
+// CallerPlayerID extracts the authenticated player ID from the request context.
+// Returns 0, false and writes a 401 response if not present or zero.
+func CallerPlayerID(w http.ResponseWriter, r *http.Request) (int, bool) {
+	_, playerID, ok := utils.UserFromContext(r.Context())
+	if !ok || playerID == 0 {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return 0, false
+	}
+	return playerID, true
 }
 
 func GetQueryId(r *http.Request, key string) (int, error) {
