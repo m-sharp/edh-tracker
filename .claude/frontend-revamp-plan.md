@@ -45,18 +45,18 @@ Phase 1 (Migrations)
 Mark items `[x]` as they are completed during implementation.
 
 ### Phase 0 — Google Cloud Console Setup
-- [ ] Create Google Cloud project (or select existing)
-- [ ] Configure OAuth consent screen (app name, support email, scopes: openid/email/profile, test users)
-- [ ] Create OAuth 2.0 Client ID credentials (Web application type)
-- [ ] Add local redirect URI: `http://localhost:8080/api/auth/google/callback`
-- [ ] Add production redirect URI when domain is known
-- [ ] Record `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` for env vars
+- [x] Create Google Cloud project (or select existing)
+- [x] Configure OAuth consent screen (app name, support email, scopes: openid/email/profile, test users)
+- [x] Create OAuth 2.0 Client ID credentials (Web application type)
+- [x] Add local redirect URI: `http://localhost:8080/api/auth/google/callback`
+- [x] Add production redirect URI when domain is known
+- [x] Record `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` for env vars
 
 ### Phase 1 — Database Migrations
-- [ ] Migration 17: `player_pod_role` table
-- [ ] Migration 18: `pod_invite` table
-- [ ] Migration 19: Soft-delete columns (`game` + `deck`)
-- [ ] Register all three in `lib/migrations/migrate.go`
+- [x] Migration 17: `player_pod_role` table
+- [x] Migration 18: `pod_invite` table
+- [x] Migration 19: Soft-delete columns (`game` + `deck`)
+- [x] Register all three in `lib/migrations/migrate.go`
 
 ### Phase 2A — OAuth Backend
 - [ ] Fix CORS bugs in `lib/http.go` (wildcard+credentials invalid, preflight writes body, `Add` vs `Set`)
@@ -190,9 +190,11 @@ CREATE TABLE player_pod_role (
     role        ENUM('manager', 'member') NOT NULL DEFAULT 'member',
     created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at  DATETIME NULL,
     UNIQUE KEY uq_ppr (pod_id, player_id),
     INDEX idx_ppr_pod_id    (pod_id),
     INDEX idx_ppr_player_id (player_id),
+    INDEX idx_ppr_deleted_at (deleted_at),
     FOREIGN KEY (pod_id)    REFERENCES pod(id),
     FOREIGN KEY (player_id) REFERENCES player(id)
 );
@@ -210,8 +212,10 @@ CREATE TABLE pod_invite (
     used_count           INT NOT NULL DEFAULT 0,
     created_at           TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at           TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at           DATETIME NULL,
     INDEX idx_pi_pod_id      (pod_id),
     INDEX idx_pi_invite_code (invite_code),
+    INDEX idx_pi_deleted_at  (deleted_at),
     FOREIGN KEY (pod_id)               REFERENCES pod(id),
     FOREIGN KEY (created_by_player_id) REFERENCES player(id)
 );
