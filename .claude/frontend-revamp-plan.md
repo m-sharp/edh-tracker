@@ -20,8 +20,10 @@
 ## Dependency Graph
 
 ```
+Phase 0 (Google Cloud Console Setup — manual, one-time human task)
+  ↓
 Phase 1 (Migrations)
-  ├── Phase 2A (OAuth backend)
+  ├── Phase 2A (OAuth backend)       ← requires Phase 0 credentials
   │     └── Phase 3 (Frontend foundation: auth context + routing)
   │           ├── Phase 4A (Pod landing page)
   │           ├── Phase 4B (Player page revamp)
@@ -34,6 +36,143 @@ Phase 1 (Migrations)
 
 **Phase 2A–2D run in parallel after Phase 1.**
 **Phase 4A–4D run in parallel after Phase 3.**
+**Phase 0 can be done any time before starting Phase 2A.**
+
+---
+
+## Progress Tracking
+
+Mark items `[x]` as they are completed during implementation.
+
+### Phase 0 — Google Cloud Console Setup
+- [ ] Create Google Cloud project (or select existing)
+- [ ] Configure OAuth consent screen (app name, support email, scopes: openid/email/profile, test users)
+- [ ] Create OAuth 2.0 Client ID credentials (Web application type)
+- [ ] Add local redirect URI: `http://localhost:8080/api/auth/google/callback`
+- [ ] Add production redirect URI when domain is known
+- [ ] Record `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` for env vars
+
+### Phase 1 — Database Migrations
+- [ ] Migration 17: `player_pod_role` table
+- [ ] Migration 18: `pod_invite` table
+- [ ] Migration 19: Soft-delete columns (`game` + `deck`)
+- [ ] Register all three in `lib/migrations/migrate.go`
+
+### Phase 2A — OAuth Backend
+- [ ] Fix CORS bugs in `lib/http.go` (wildcard+credentials invalid, preflight writes body, `Add` vs `Set`)
+- [ ] Add dependencies (`golang.org/x/oauth2`, `github.com/golang-jwt/jwt/v5`)
+- [ ] Add config keys in `lib/config.go`
+- [ ] `lib/middleware/auth.go` (`RequireAuth`, `OptionalAuth`, sliding re-issue)
+- [ ] User business: `GetByOAuth`, `CreateWithOAuth`
+- [ ] `lib/routers/auth.go` (login, callback, logout, me)
+- [ ] Wire `AuthRouter` + apply middleware in `api.go`
+
+### Phase 2B — Pod Roles + Invite
+- [ ] `lib/repositories/playerPodRole/` (model + repo)
+- [ ] `lib/repositories/podInvite/` (model + repo)
+- [ ] Update `lib/repositories/repositories.go`
+- [ ] Update pod repository (`SoftDelete`, `Update`, `RemovePlayer`, `GetPlayerIDs`)
+- [ ] Pod business: role/invite/leave/manage functions
+- [ ] New pod API endpoints (PATCH, DELETE, invite, join, leave, kick, promote)
+- [ ] Update seeder with `player_pod_role` seed data
+
+### Phase 2C — Edit/Delete/New Endpoints
+- [ ] Remove `POST /api/player` route + handler (player creation is OAuth-only)
+- [ ] Player: `PATCH /api/player` + business + repo `Update`
+- [ ] Deck: `PATCH /api/deck` (full update) + `DELETE /api/deck` + business + repo
+- [ ] Game: `PATCH /api/game` + `DELETE /api/game` + result CRUD endpoints + business + repo
+- [ ] New GET filters: `GET /api/players?pod_id`, `GET /api/decks?pod_id`, `GET /api/games?player_id`
+
+### Phase 2D — Server-Side Pagination
+- [ ] `PaginatedResponse[T]` type in `lib/business/pagination.go`
+- [ ] Game repo: `GetAllByPodPaginated`, `GetAllByDeckPaginated`
+- [ ] Deck repo: `GetAllByPodPaginated`, `GetAllByPlayerPaginated`
+- [ ] Router changes for `GET /api/games` and `GET /api/decks`
+
+### Phase 3 — Frontend Foundation
+- [ ] `app/src/auth.tsx` (`AuthContext` + `AuthProvider` + `useAuth`)
+- [ ] `app/src/routes/login.tsx`
+- [ ] `app/src/routes/RequireAuth.tsx`
+- [ ] `app/src/http.ts` — add `credentials: "include"` everywhere + all new functions
+- [ ] `app/src/types.ts` — add `Pod`, `PlayerWithRole`, `PaginatedResponse`, etc.
+- [ ] Route restructure in `app/src/index.tsx`
+- [ ] Navigation revamp in `app/src/routes/root.tsx` (pod selector + auth UI)
+
+### Phase 4A — Pod Landing Page
+- [ ] `app/src/routes/pod.tsx` (tabs: Decks, Players, Games, Settings)
+- [ ] `app/src/routes/new.tsx` (pod context: drop global pod selector, use `useParams`)
+- [ ] `app/src/routes/join.tsx` (invite code landing page)
+- [ ] Redirect stale top-level routes (`/decks`, `/players`, `/games`)
+
+### Phase 4B — Player Page Revamp
+- [ ] `app/src/routes/player.tsx` — tabs (Overview, Decks, Games, Settings)
+- [ ] `PlayerSettingsTab` (edit name, pod list with leave button, create pod)
+
+### Phase 4C — Deck Page Revamp
+- [ ] `app/src/routes/deck.tsx` — new route + tabs (Overview, Games, Settings)
+- [ ] Update deck links in `app/src/stats.tsx` (`CommanderColumn`)
+- [ ] Update deck links in `app/src/routes/game.tsx` (results grid)
+
+### Phase 4D — Game Page Revamp
+- [ ] `app/src/routes/game.tsx` — new route + inline editing + result CRUD
+- [ ] Update game links in `app/src/matches.tsx` (include `pod_id`)
+
+---
+
+## Phase 0 — Google Cloud Console Setup
+
+**One-time manual setup. Must be completed before starting Phase 2A. No code changes — follow these steps in a browser.**
+
+### Step 1: Create a Google Cloud Project
+
+1. Go to [console.cloud.google.com](https://console.cloud.google.com)
+2. Click the project selector at the top → **New Project**
+3. Name it (e.g., "EDH Tracker") → **Create**
+4. Select the new project as active
+
+### Step 2: Configure the OAuth Consent Screen
+
+1. In the left sidebar: **APIs & Services → OAuth consent screen**
+2. User type: **External** (allows any Google account; lets the group sign in freely)
+3. Fill in:
+   - App name: `EDH Tracker`
+   - User support email: your email
+   - Developer contact email: your email
+4. Scopes: click **Add or remove scopes** → add:
+   - `openid`
+   - `https://www.googleapis.com/auth/userinfo.email`
+   - `https://www.googleapis.com/auth/userinfo.profile`
+5. Test users: add each player's Google account email address. While the app is in "Testing" mode, only these accounts can sign in (up to 100 accounts — sufficient for a pod tracker).
+6. Save and continue through all steps.
+
+> **Note:** You do not need to publish the app or go through Google's verification process. Staying in Testing mode is fine for a private group app. If you ever want to open it to new players with arbitrary Google accounts, you'd publish and verify — but for an invite-only pod tracker, Testing mode with manually-added users is the right posture.
+
+> **Docs:** [OAuth consent screen setup](https://developers.google.com/workspace/guides/configure-oauth-consent)
+
+### Step 3: Create OAuth 2.0 Credentials
+
+1. **APIs & Services → Credentials → Create Credentials → OAuth 2.0 Client ID**
+2. Application type: **Web application**
+3. Name: `EDH Tracker Web`
+4. Authorized redirect URIs — add both:
+   - `http://localhost:8080/api/auth/google/callback` (local development)
+   - Your production URI when the domain is known (e.g., `https://yourdomain.com/api/auth/google/callback`)
+5. Click **Create**
+6. Copy the **Client ID** and **Client Secret** — these become your `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` env vars
+
+> **Note:** Google allows `http://localhost` redirect URIs without any verification — only production HTTPS URIs are subject to the consent screen publication requirements.
+
+> **Docs:** [Setting up OAuth 2.0 for web server apps](https://developers.google.com/identity/protocols/oauth2/web-server)
+
+### Env vars this phase unlocks
+
+| Env Var | Source |
+|---------|--------|
+| `GOOGLE_CLIENT_ID` | Credentials page |
+| `GOOGLE_CLIENT_SECRET` | Credentials page |
+| `OAUTH_REDIRECT_URL` | Set to `http://localhost:8080/api/auth/google/callback` locally |
+| `JWT_SECRET` | Generate locally: `openssl rand -hex 32` |
+| `FRONTEND_URL` | `http://localhost:8081` locally |
 
 ---
 
@@ -125,8 +264,8 @@ Add to `go.mod` / vendor.
 
 ### New middleware: `lib/middleware/auth.go`
 
-- `RequireAuth(jwtSecret string) mux.MiddlewareFunc` — validates JWT from `edh_session` HttpOnly cookie; injects `userID` and `playerID` into request context; returns 401 if missing/invalid
-- `OptionalAuth(jwtSecret string) mux.MiddlewareFunc` — same but never rejects; injects nil if no valid token
+- `RequireAuth(jwtSecret string, secure bool) mux.MiddlewareFunc` — validates JWT from `edh_session` HttpOnly cookie; injects `userID` and `playerID` into request context; returns 401 if missing/invalid. **Sliding window**: on every valid request, re-issues a fresh `edh_session` cookie with a new `exp: now+24h` to keep sessions alive for active users. The `secure` param (derived from `cfg.Get(lib.Dev) == ""`) sets the `Secure` flag on the re-issued cookie.
+- `OptionalAuth(jwtSecret string, secure bool) mux.MiddlewareFunc` — same but never rejects; injects nil if no valid token; does not re-issue cookie.
 - Helper: `UserFromContext(ctx) (userID, playerID int, ok bool)`
 
 ### User business layer additions (`lib/business/user/`)
@@ -148,26 +287,65 @@ Add both to `business.Business.User` struct and wire in `NewBusiness`.
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
-| `GET` | `/api/auth/google` | None | Set CSRF state cookie; redirect to Google OAuth consent screen |
-| `GET` | `/api/auth/google/callback` | None | Validate state; exchange code; get Google profile; find-or-create User+Player; issue JWT; redirect to `FRONTEND_URL` |
+| `GET` | `/api/auth/google` | None | Accept optional `?redirect=` param; set CSRF state cookie (encodes state + redirect path); redirect to Google OAuth consent screen |
+| `GET` | `/api/auth/google/callback` | None | Validate state; exchange code; get Google profile; find-or-create User+Player; issue JWT; redirect to `FRONTEND_URL` + decoded redirect path (or `/` if none) |
 | `POST` | `/api/auth/logout` | None | Clear `edh_session` cookie; return 204 |
 | `GET` | `/api/auth/me` | Required | Return current `user.Entity` as JSON |
 
 **Callback logic:**
-1. Validate `state` param matches cookie (CSRF)
+1. Validate `state` param matches cookie (CSRF); decode redirect path from state
 2. Exchange code → Google access token
 3. Fetch Google userinfo (email, sub, name, picture)
 4. `user.GetByOAuth(ctx, "google", sub)`
 5. If nil → `user.CreateWithOAuth(ctx, googleName, "google", sub, email, googleName, pictureURL)`
 6. Build JWT: `{ user_id, player_id, exp: now+24h }`, sign with `JWT_SECRET`
-7. Set `edh_session` cookie: HttpOnly, SameSite=Lax, Path=/
-8. Redirect to `FRONTEND_URL`
+7. Set `edh_session` cookie: HttpOnly, SameSite=Lax, Path=/, **Secure=true when `DEV` env var is not set** (i.e., `cfg.Get(lib.Dev) == ""`). This ensures the cookie is only sent over HTTPS in production while remaining accessible in local HTTP dev.
+8. Redirect to `FRONTEND_URL` + redirect path (e.g. `/join?code=xxx`), or `FRONTEND_URL/` if none
+
+> **Note on `/join` flow**: Frontend's `/join` route redirects unauthenticated users to `/api/auth/google?redirect=/join?code=xxx`. The state cookie encodes this path. After Google auth, the callback redirects the browser to `FRONTEND_URL/join?code=xxx` where the now-authenticated user is sent to join the pod.
 
 ### Wire into `api.go`
 
 - Register `AuthRouter` in `SetupRoutes`
-- Apply `RequireAuth` middleware to any new protected sub-routers
-- Apply `OptionalAuth` to routers that need conditional behavior
+- Apply `RequireAuth` middleware to **all** state-changing sub-routers — both new ones (pod roles, invite) and existing ones (game, deck, player). This is the point where the existing `POST /api/game`, `POST /api/deck` routes become auth-protected.
+- Apply `OptionalAuth` to routers that need conditional behavior (read-only endpoints that benefit from knowing who the caller is but don't require login)
+- `secure` param passed to both middleware constructors: `cfg.Get(lib.Dev) == ""`
+
+**Auth requirements for existing endpoints once middleware is applied:**
+
+| Endpoint | Auth | Authorization check |
+|----------|------|---------------------|
+| `POST /api/game` | RequireAuth | Caller must be a member (any role) of the `pod_id` in the request body — call `pod.GetRole(podID, callerPlayerID)`; return 403 if empty |
+| `POST /api/deck` | RequireAuth | No additional check — caller creates a deck under their own player_id (JWT player_id used, not request body) |
+| `POST /api/player` | **Remove** | See Phase 2C |
+
+### CORS fixes in `lib/http.go`
+
+Three bugs in the existing CORS middleware must be fixed before OAuth + cookies work correctly:
+
+1. **Wildcard + Credentials is invalid**: `Access-Control-Allow-Origin: *` combined with `Access-Control-Allow-Credentials: true` is rejected by all browsers per the CORS spec. Replace `"*"` with the explicit `FRONTEND_URL` value from config.
+2. **Preflight handler writes a body on 204**: `http.Error(w, "No Content", http.StatusNoContent)` sets `Content-Type: text/plain` and writes a response body. Replace with `w.WriteHeader(http.StatusNoContent)`.
+3. **`Add` vs `Set` on CORS headers**: `Header.Add` appends, causing duplicate header values on repeated requests. Replace with `Header.Set` for all four CORS headers.
+
+Updated `CORSMiddleware` should accept the allowed origin from config so it can be set explicitly:
+
+```go
+func CORSMiddleware(origin string) MiddlewareFunc {
+    return func(nextHandler http.HandlerFunc) http.HandlerFunc {
+        return func(w http.ResponseWriter, r *http.Request) {
+            w.Header().Set("Access-Control-Allow-Origin", origin)
+            w.Header().Set("Access-Control-Allow-Credentials", "true")
+            w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
+            w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+            nextHandler(w, r)
+        }
+    }
+}
+```
+
+Pass `cfg.Get(lib.FrontendURL)` as `origin` when registering middleware in `api.go`.
+
+> **Note:** The long-term approach to CORS (dev proxy, production reverse proxy) is a separate concern tracked in `.claude/production-ready-cors.md`.
 
 ---
 
@@ -209,7 +387,7 @@ type Model struct {
 
 **`repo.go`** — `Repository` struct with:
 - `GetByCode(ctx, code string) (*Model, error)` — nil if not found
-- `Add(ctx, podID, createdByPlayerID int, code string) error`
+- `Add(ctx, podID, createdByPlayerID int, code string, expiresAt *time.Time) error`
 - `IncrementUsedCount(ctx, code string) error`
 
 ### Update `lib/repositories/repositories.go`
@@ -230,8 +408,9 @@ New functions in `lib/business/pod/functions.go`:
 
 - `GetRole(roleRepo ...) GetRoleFunc` — returns "manager", "member", or "" (not in pod)
 - `PromoteToManager(roleRepo ...) PromoteToManagerFunc` — verifies caller is manager; sets target to manager
-- `GenerateInvite(inviteRepo ...) GenerateInviteFunc` — creates UUID code; stores in pod_invite; returns code string
-- `JoinByInvite(inviteRepo, podRepo, roleRepo ...) JoinByInviteFunc` — validates code; adds to player_pod + player_pod_role as member; increments used_count
+- `GenerateInvite(inviteRepo ...) GenerateInviteFunc` — creates UUID code; stores in pod_invite with `expires_at = NOW() + 7 days`; returns code string
+- `JoinByInvite(inviteRepo, podRepo, roleRepo ...) JoinByInviteFunc` — validates code exists and is not expired (`expires_at IS NULL OR expires_at > NOW()`); adds to player_pod + player_pod_role as member; increments used_count
+- `Leave(podRepo, roleRepo ...) LeaveFunc` — removes caller from player_pod and player_pod_role; returns 403 if caller is the only manager (must promote someone else first)
 - `SoftDelete(podRepo ...) SoftDeleteFunc`
 - `Update(podRepo ...) UpdateFunc` — update pod name
 - `GetMembersWithRoles(roleRepo, playerRepo ...) GetMembersWithRolesFunc` — returns []PlayerWithRole
@@ -246,10 +425,11 @@ New functions in `lib/business/pod/functions.go`:
 |--------|------|------|------------|---------------|-------------|
 | `PATCH` | `/api/pod` | Required | Yes | `{name}` + `?pod_id=X` | Update pod name |
 | `DELETE` | `/api/pod` | Required | Yes | `?pod_id=X` | Soft delete pod |
-| `POST` | `/api/pod/invite` | Required | Yes | `{pod_id}` | Generate invite code; response: `{invite_code}` |
+| `POST` | `/api/pod/invite` | Required | Yes | `{pod_id}` | Generate invite code (7-day expiry); response: `{invite_code}` |
 | `POST` | `/api/pod/join` | Required | No | `{invite_code}` | Join pod; response: pod entity |
+| `POST` | `/api/pod/leave` | Required | No | `{pod_id}` | Self-remove caller from pod; response: 204 |
 | `PATCH` | `/api/pod/player` | Required | Yes | `{pod_id, player_id}` | Promote player_id to manager |
-| `DELETE` | `/api/pod/player` | Required | Yes | `{pod_id, player_id}` | Remove player from pod |
+| `DELETE` | `/api/pod/player` | Required | Yes | `{pod_id, player_id}` | Kick player_id from pod (manager only) |
 
 PodManager check: extract `playerID` from JWT context → `pod.GetRole(podID, playerID)` → 403 if not manager.
 
@@ -280,6 +460,10 @@ After `BulkAddPlayers` + `repos.Pods.BulkAddPlayers(...)`, seed `player_pod_role
 - `GET /api/games?player_id=X`: get deckIDs for player, then games where any deck_id is in those deckIDs
 
 Player entity response for pod-scoped query should include `role` field; define `PlayerWithRoleEntity` in player business layer.
+
+### Remove standalone player creation endpoint
+
+Delete the `POST /api/player` route from `lib/routers/player.go` and `api.go`. Player creation now flows exclusively through the OAuth callback (`CreateWithOAuth`). The associated business function (`player.Create` or equivalent called directly) and repository method can be kept if used by `CreateWithOAuth`; only the HTTP handler and route registration are removed.
 
 ### Player edit endpoint
 
@@ -444,12 +628,14 @@ Add new functions:
 - `GetDecksForPod(podId: number, limit?: number, offset?: number): Promise<PaginatedResponse<Deck>>`
 - `GetGamesForPod(podId: number, limit?: number, offset?: number): Promise<PaginatedResponse<Game>>`
 - `GetGamesForPlayer(playerId: number): Promise<Array<Game>>` — `GET /api/games?player_id=X`
+- `PostPod(name: string): Promise<Pod>` — `POST /api/pod`
 - `PostPodInvite(podId: number): Promise<{invite_code: string}>` — `POST /api/pod/invite`
 - `PostPodJoin(inviteCode: string): Promise<Pod>` — `POST /api/pod/join`
+- `PostPodLeave(podId: number): Promise<void>` — `POST /api/pod/leave`
 - `PatchPod(podId: number, name: string): Promise<void>`
 - `DeletePod(podId: number): Promise<void>`
 - `PatchPodPlayerRole(podId: number, playerId: number): Promise<void>` — promote to manager
-- `DeletePodPlayer(podId: number, playerId: number): Promise<void>`
+- `DeletePodPlayer(podId: number, playerId: number): Promise<void>` — manager kick
 - `PatchPlayer(playerId: number, name: string): Promise<void>`
 - `PatchDeck(deckId: number, fields: DeckUpdateFields): Promise<void>`
 - `DeleteDeck(deckId: number): Promise<void>`
@@ -530,7 +716,7 @@ Replace placeholder login text with:
 - **Logged out**: "Sign in with Google" link
 - **Logged in**:
   - User avatar + display name (link to `/player/:playerId`)
-  - Pod selector `<Select>` — fetches `GetPodsForPlayer(user.player_id)` on mount; navigates to `/pod/:podId` on change; shows current pod if URL is `/pod/:podId/*`
+  - Pod selector `<Select>` — fetches `GetPodsForPlayer(user.player_id)` on mount; navigates to `/pod/:podId` on change. Selected value: use `podId` from URL params if on a `/pod/*` route, otherwise read `lastPodId` from `localStorage`. On navigation, write `lastPodId` to `localStorage`. Shows a placeholder if `localStorage` is empty and not on a pod route.
   - Logout button → `Logout()` → navigate to `/login`
 
 Remove nav links to `/decks`, `/players`, `/games`.
@@ -581,7 +767,7 @@ Remove nav links to `/decks`, `/players`, `/games`.
 
 **`<PodSettingsTab>`:**
 - Edit pod name: text field + save → `PatchPod(podId, newName)` → reload
-- Invite link: "Generate Invite Link" button → `PostPodInvite(podId)` → show `${FRONTEND_URL}/join?code=xxx` with copy button
+- Invite link: "Generate Invite Link" button → `PostPodInvite(podId)` → show `${window.location.origin}/join?code=xxx` with copy button (frontend constructs the full URL — no need for `FRONTEND_URL` on the client)
 - Delete pod: button with `<Dialog>` confirmation → `DeletePod(podId)` → navigate to `/`
 
 ### Route: `/pod/:podId/new-game`
@@ -598,9 +784,9 @@ Remove nav links to `/decks`, `/players`, `/games`.
 **File:** `app/src/routes/join.tsx`
 
 - Reads `?code=xxx` from URL params
-- If not authenticated: redirect to `/login?redirect=/join?code=xxx`
+- If not authenticated: redirect to `/api/auth/google?redirect=/join?code=xxx` (bypasses login page entirely; Google auth will redirect back here after login)
 - If authenticated: call `PostPodJoin(code)` → navigate to `/pod/${pod.id}`
-- If error (invalid code): show error message
+- If error (expired or invalid code): show error message with link back to `/`
 
 ### Redirect old routes
 
@@ -651,8 +837,8 @@ In `app/src/index.tsx`: `/decks`, `/players`, `/games` → `<Navigate to="/" rep
 
 **`<PlayerSettingsTab>` (own profile only):**
 - **Edit display name**: text field + save → `PatchPlayer(player.id, newName)` → reload player data
-- **Your pods**: `AsyncComponentHelper(GetPodsForPlayer(player.id))` → list each pod with link + "Leave Pod" button with `<Dialog>` confirmation → `DeletePodPlayer(podId, player.id)` → reload
-- **Create new pod**: text field + "Create" button → `PostPod({name})` → navigate to `/pod/${newPod.id}`
+- **Your pods**: `AsyncComponentHelper(GetPodsForPlayer(player.id))` → list each pod with link + "Leave Pod" button with `<Dialog>` confirmation → `PostPodLeave(podId)` → reload (note: if caller is the only pod manager, backend returns 403; show error "Promote another member to manager before leaving")
+- **Create new pod**: text field + "Create" button → `PostPod(name)` → navigate to `/pod/${newPod.id}`
 
 ---
 
@@ -770,6 +956,20 @@ If PodManager: add "Edit" icon column + "Remove" icon column
 | Phase 4B (Player page) | Phase 3 | 4A, 4C, 4D |
 | Phase 4C (Deck page) | Phase 3 | 4A, 4B, 4D |
 | Phase 4D (Game page) | Phase 3 | 4A, 4B, 4C |
+
+---
+
+## Verified Codebase State
+
+The following was confirmed by inspecting the current codebase before planning — no additional work needed for these:
+
+| Concern | Status |
+|---------|--------|
+| `pod` table `deleted_at` column | Already exists (Migration 8). Migration 19 correctly targets only `game` and `deck`. |
+| `game.Entity` `pod_id` field | Already present — `matches.tsx` game link update is straightforward. |
+| `deck.Entity` `player_id` field | Already present — no extra backend work needed for deck ownership checks. |
+| `pod` repository `GetByPlayerID` | Already exists — `GET /api/pod?player_id=X` endpoint just needs wiring. |
+| `PATCH /api/deck` handler | Exists as `RetireDeck` (sets `retired=true` only). Phase 2C extends it to a full update. |
 
 ---
 
