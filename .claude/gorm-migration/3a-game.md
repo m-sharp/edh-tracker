@@ -1,7 +1,7 @@
 # Phase 3a — Game Repository
 
 ## Status
-Pending
+Approved
 
 ## Skill
 Load `.claude/skills/gorm.md` at the start of each implementation session for this phase.
@@ -124,6 +124,35 @@ func (r *Repository) BulkAdd(ctx context.Context, games []Model) ([]int, error) 
 
 This is strictly more correct than the old sequential-offset approach.
 
+## Special Pattern — Add
+
+```go
+func (r *Repository) Add(ctx context.Context, description string, podID, formatID int) (int, error) {
+    m := Model{Description: description, PodID: podID, FormatID: formatID}
+    if err := r.db.WithContext(ctx).Create(&m).Error; err != nil {
+        return 0, fmt.Errorf("failed to insert Game record: %w", err)
+    }
+    return m.ID, nil
+}
+```
+
+## Special Pattern — Update
+
+```go
+func (r *Repository) Update(ctx context.Context, gameID int, description string) error {
+    result := r.db.WithContext(ctx).Model(&Model{}).Where("id = ?", gameID).Update("description", description)
+    if result.Error != nil {
+        return fmt.Errorf("failed to update Game record: %w", result.Error)
+    }
+    if result.RowsAffected != 1 {
+        return fmt.Errorf("unexpected number of rows affected by Game update: got %d, expected 1", result.RowsAffected)
+    }
+    return nil
+}
+```
+
+`db.Model(&Model{})` applies the soft-delete scope automatically (`AND deleted_at IS NULL`), matching the original SQL's explicit `WHERE id = ? AND deleted_at IS NULL`.
+
 ## TODO — Cascading Soft Delete
 
 The existing code has a TODO comment:
@@ -132,6 +161,20 @@ The existing code has a TODO comment:
 ```
 
 This is out of scope for the GORM migration phase. Do NOT implement it here — note it as a follow-up.
+
+## Behavior Changes from sqlx Migration
+
+**`SoftDelete` — GORM adds soft-delete scope; RowsAffected check dropped**
+
+The original SQL (`UPDATE game SET deleted_at = NOW() WHERE id = ?`) has no `deleted_at IS NULL` guard — re-deleting an already-deleted game would re-stamp `deleted_at` and return `numAffected = 1`. The original implementation then checks `numAffected != 1` and errors on 0.
+
+GORM's `db.Delete(&Model{}, id)` adds the soft-delete scope automatically, so re-deleting an already-deleted game is a no-op (`RowsAffected = 0`, no error). The RowsAffected check is dropped, consistent with the approach used for deck and pod in earlier phases.
+
+Unlike the deck repository, there is no business-layer existence guard for game (`SoftDelete` in `lib/business/game/functions.go` calls the repo directly). A delete of a non-existent or already-deleted game silently succeeds.
+
+**`Update` — behavior equivalent, no change**
+
+The original SQL has an explicit `WHERE id = ? AND deleted_at IS NULL`. GORM's `db.Model(&Model{}).Where("id = ?", gameID)` adds the same scope automatically. The RowsAffected check is preserved — updating a non-existent or already-deleted game still returns an error.
 
 ## Test Migration
 
