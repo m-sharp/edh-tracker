@@ -13,7 +13,7 @@ func GetByGameID(
 	gameResultRepo repos.GameResultRepository,
 	getDeckName deck.GetDeckNameFunc,
 	getCommanderEntry deck.GetCommanderEntryFunc,
-	getPlayerIDForDeck GetPlayerIDForDeckFunc,
+	getPlayerIDForDeck deck.GetPlayerIDForDeckFunc,
 ) GetByGameIDFunc {
 	return func(ctx context.Context, gameID int) ([]Entity, error) {
 		resultModels, err := gameResultRepo.GetByGameId(ctx, gameID)
@@ -39,17 +39,9 @@ func GetByGameID(
 				deckName = name
 			}
 
-			// TODO: Put this in its own helper function
-			var playerID int
-			if pid, ok := playerIDCache[r.DeckID]; ok {
-				playerID = pid
-			} else {
-				pid, err := getPlayerIDForDeck(ctx, r.DeckID)
-				if err != nil {
-					return nil, fmt.Errorf("failed to get player for deck %d: %w", r.DeckID, err)
-				}
-				playerIDCache[r.DeckID] = pid
-				playerID = pid
+			playerID, err := cachedPlayerIDForDeck(ctx, r.DeckID, playerIDCache, getPlayerIDForDeck)
+			if err != nil {
+				return nil, err
 			}
 
 			entity := Entity{
@@ -78,6 +70,18 @@ func GetByGameID(
 
 		return results, nil
 	}
+}
+
+func cachedPlayerIDForDeck(ctx context.Context, deckID int, cache map[int]int, getPlayerIDForDeck deck.GetPlayerIDForDeckFunc) (int, error) {
+	if pid, ok := cache[deckID]; ok {
+		return pid, nil
+	}
+	pid, err := getPlayerIDForDeck(ctx, deckID)
+	if err != nil {
+		return 0, fmt.Errorf("failed to get player for deck %d: %w", deckID, err)
+	}
+	cache[deckID] = pid
+	return pid, nil
 }
 
 func GetGameIDForResult(gameResultRepo repos.GameResultRepository) GetGameIDForResultFunc {

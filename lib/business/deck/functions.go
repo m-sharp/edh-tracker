@@ -47,6 +47,19 @@ func GetCommanderEntry(
 	}
 }
 
+func GetPlayerIDForDeck(deckRepo repos.DeckRepository) GetPlayerIDForDeckFunc {
+	return func(ctx context.Context, deckID int) (int, error) {
+		d, err := deckRepo.GetById(ctx, deckID)
+		if err != nil {
+			return 0, fmt.Errorf("failed to look up deck %d: %w", deckID, err)
+		}
+		if d == nil {
+			return 0, fmt.Errorf("deck %d not found", deckID)
+		}
+		return d.PlayerID, nil
+	}
+}
+
 func GetDeckName(deckRepo repos.DeckRepository) GetDeckNameFunc {
 	return func(ctx context.Context, deckID int) (string, error) {
 		d, err := deckRepo.GetById(ctx, deckID)
@@ -293,20 +306,27 @@ func GetAllByPod(
 	}
 }
 
+func assertCallerOwnsDeck(ctx context.Context, deckRepo repos.DeckRepository, deckID, callerPlayerID int) error {
+	d, err := deckRepo.GetById(ctx, deckID)
+	if err != nil {
+		return fmt.Errorf("failed to fetch deck %d: %w", deckID, err)
+	}
+	if d == nil {
+		return fmt.Errorf("deck %d not found", deckID)
+	}
+	if d.PlayerID != callerPlayerID {
+		return fmt.Errorf("forbidden: deck %d does not belong to caller", deckID)
+	}
+	return nil
+}
+
 func Update(
 	deckRepo repos.DeckRepository,
 	deckCmdrRepo repos.DeckCommanderRepository,
 ) UpdateFunc {
 	return func(ctx context.Context, deckID int, callerPlayerID int, fields UpdateFields) error {
-		d, err := deckRepo.GetById(ctx, deckID)
-		if err != nil {
-			return fmt.Errorf("failed to fetch deck %d: %w", deckID, err)
-		}
-		if d == nil {
-			return fmt.Errorf("deck %d not found", deckID)
-		}
-		if d.PlayerID != callerPlayerID {
-			return fmt.Errorf("forbidden: deck %d does not belong to caller", deckID)
+		if err := assertCallerOwnsDeck(ctx, deckRepo, deckID, callerPlayerID); err != nil {
+			return err
 		}
 
 		repoFields := deckRepository.UpdateFields{
@@ -314,15 +334,15 @@ func Update(
 			FormatID: fields.FormatID,
 			Retired:  fields.Retired,
 		}
-		if err = deckRepo.Update(ctx, deckID, repoFields); err != nil {
+		if err := deckRepo.Update(ctx, deckID, repoFields); err != nil {
 			return fmt.Errorf("failed to update deck %d: %w", deckID, err)
 		}
 
 		if fields.CommanderID != nil {
-			if err = deckCmdrRepo.DeleteByDeckID(ctx, deckID); err != nil {
+			if err := deckCmdrRepo.DeleteByDeckID(ctx, deckID); err != nil {
 				return fmt.Errorf("failed to clear commander for deck %d: %w", deckID, err)
 			}
-			if _, err = deckCmdrRepo.Add(ctx, deckID, *fields.CommanderID, fields.PartnerCommanderID); err != nil {
+			if _, err := deckCmdrRepo.Add(ctx, deckID, *fields.CommanderID, fields.PartnerCommanderID); err != nil {
 				return fmt.Errorf("failed to set commander for deck %d: %w", deckID, err)
 			}
 		}
@@ -333,23 +353,18 @@ func Update(
 
 func SoftDelete(deckRepo repos.DeckRepository) SoftDeleteFunc {
 	return func(ctx context.Context, deckID int, callerPlayerID int) error {
-		d, err := deckRepo.GetById(ctx, deckID)
-		if err != nil {
-			return fmt.Errorf("failed to fetch deck %d: %w", deckID, err)
-		}
-		if d == nil {
-			return fmt.Errorf("deck %d not found", deckID)
-		}
-		if d.PlayerID != callerPlayerID {
-			return fmt.Errorf("forbidden: deck %d does not belong to caller", deckID)
+		if err := assertCallerOwnsDeck(ctx, deckRepo, deckID, callerPlayerID); err != nil {
+			return err
 		}
 		return deckRepo.SoftDelete(ctx, deckID)
 	}
 }
 
-// TODO: Should be gated by a "Calling player owns this deck?" check. We'll need an abstract helper for that to replace all instances, e.g. in SoftDelete as well.
 func Retire(deckRepo repos.DeckRepository) RetireFunc {
-	return func(ctx context.Context, deckID int) error {
+	return func(ctx context.Context, deckID int, callerPlayerID int) error {
+		if err := assertCallerOwnsDeck(ctx, deckRepo, deckID, callerPlayerID); err != nil {
+			return err
+		}
 		return deckRepo.Retire(ctx, deckID)
 	}
 }

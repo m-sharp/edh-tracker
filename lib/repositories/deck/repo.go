@@ -19,6 +19,8 @@ const (
 					 FROM deck WHERE id = ? AND deleted_at IS NULL;`
 	getDecksForPlayerIDs = `SELECT id, player_id, name, format_id, retired, created_at, updated_at, deleted_at
 							  FROM deck WHERE player_id IN (?) AND deleted_at IS NULL;`
+	getBulkAddedDecks = `SELECT id, player_id, name, format_id, retired, created_at, updated_at, deleted_at
+                           FROM deck WHERE player_id IN (%s) AND name IN (%s) AND deleted_at IS NULL`
 	insertDeck     = `INSERT INTO deck (player_id, name, format_id) VALUES (?, ?, ?);`
 	retireDeck     = `UPDATE deck SET retired = TRUE WHERE id = ?;`
 	softDeleteDeck = `UPDATE deck SET deleted_at = NOW() WHERE id = ?;`
@@ -109,11 +111,7 @@ func (r *Repository) BulkAdd(ctx context.Context, decks []Model) ([]Model, error
 	}
 	inPlayerIDs := strings.TrimSuffix(strings.Repeat("?,", len(decks)), ",")
 	inNames := strings.TrimSuffix(strings.Repeat("?,", len(decks)), ",")
-	selectQuery := fmt.Sprintf(
-		// TODO: This query should be in constants at the top of the file
-		"SELECT id, player_id, name, format_id, retired, created_at, updated_at, deleted_at FROM deck WHERE player_id IN (%s) AND name IN (%s) AND deleted_at IS NULL",
-		inPlayerIDs, inNames,
-	)
+	selectQuery := fmt.Sprintf(getBulkAddedDecks, inPlayerIDs, inNames)
 	selectArgs := append(playerIDArgs, nameArgs...)
 
 	var result []Model

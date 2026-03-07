@@ -4,7 +4,6 @@ import "context"
 
 type GetByGameIDFunc func(ctx context.Context, gameID int) ([]Entity, error)
 type GetGameIDForResultFunc func(ctx context.Context, resultID int) (int, error)
-type GetPlayerIDForDeckFunc func(ctx context.Context, deckID int) (int, error)
 
 type Functions struct {
 	GetByGameID        GetByGameIDFunc

@@ -19,8 +19,9 @@ type GetByIDFunc func(ctx context.Context, deckID int) (*EntityWithStats, error)
 type CreateFunc func(ctx context.Context, playerID int, name string, formatID int, commanderID *int, partnerCommanderID *int) (int, error)
 type UpdateFunc func(ctx context.Context, deckID int, callerPlayerID int, fields UpdateFields) error
 type SoftDeleteFunc func(ctx context.Context, deckID int, callerPlayerID int) error
-type RetireFunc func(ctx context.Context, deckID int) error
+type RetireFunc func(ctx context.Context, deckID int, callerPlayerID int) error
 type GetDeckNameFunc func(ctx context.Context, deckID int) (string, error)
+type GetPlayerIDForDeckFunc func(ctx context.Context, deckID int) (int, error)
 type GetCommanderEntryFunc func(ctx context.Context, deckID int) (*CommanderInfo, error)
 
 type Functions struct {
@@ -31,7 +32,8 @@ type Functions struct {
 	Create            CreateFunc
 	Update            UpdateFunc
 	SoftDelete        SoftDeleteFunc
-	Retire            RetireFunc
-	GetDeckName       GetDeckNameFunc
-	GetCommanderEntry GetCommanderEntryFunc
+	Retire               RetireFunc
+	GetDeckName          GetDeckNameFunc
+	GetCommanderEntry    GetCommanderEntryFunc
+	GetPlayerIDForDeck   GetPlayerIDForDeckFunc
 }

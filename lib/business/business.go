@@ -1,9 +1,6 @@
 package business
 
 import (
-	"context"
-	"fmt"
-
 	"go.uber.org/zap"
 
 	"github.com/m-sharp/edh-tracker/lib/business/commander"
@@ -37,19 +34,9 @@ func NewBusiness(log *zap.Logger, r *repositories.Repositories) *Business {
 	// Build deck cross-domain functions.
 	getCommanderEntry := deck.GetCommanderEntry(r.DeckCommanders, getCommanderName)
 	getDeckName := deck.GetDeckName(r.Decks)
+	getPlayerIDForDeck := deck.GetPlayerIDForDeck(r.Decks)
 
-	// TODO: Doesn't make sense for getPlayerIDForDeck to be declared/live here
 	// Build game result function.
-	getPlayerIDForDeck := func(ctx context.Context, deckID int) (int, error) {
-		d, err := r.Decks.GetById(ctx, deckID)
-		if err != nil {
-			return 0, fmt.Errorf("failed to look up deck %d: %w", deckID, err)
-		}
-		if d == nil {
-			return 0, fmt.Errorf("deck %d not found", deckID)
-		}
-		return d.PlayerID, nil
-	}
 	getGameResults := gameResult.GetByGameID(r.GameResults, getDeckName, getCommanderEntry, getPlayerIDForDeck)
 
 	return &Business{
@@ -69,9 +56,10 @@ func NewBusiness(log *zap.Logger, r *repositories.Repositories) *Business {
 			Create:            deck.Create(r.Decks, r.DeckCommanders, getFormat),
 			Update:            deck.Update(r.Decks, r.DeckCommanders),
 			SoftDelete:        deck.SoftDelete(r.Decks),
-			Retire:            deck.Retire(r.Decks),
-			GetDeckName:       getDeckName,
-			GetCommanderEntry: getCommanderEntry,
+			Retire:             deck.Retire(r.Decks),
+			GetDeckName:        getDeckName,
+			GetCommanderEntry:  getCommanderEntry,
+			GetPlayerIDForDeck: getPlayerIDForDeck,
 		},
 		Games: game.Functions{
 			GetAllByPod:    game.GetAllByPod(log, r.Games, getGameResults),
