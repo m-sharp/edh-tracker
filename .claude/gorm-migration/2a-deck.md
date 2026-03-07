@@ -1,7 +1,7 @@
 # Phase 2a — Deck Repository
 
 ## Status
-Pending
+Approved
 
 ## Skill
 Load `.claude/skills/gorm.md` at the start of each implementation session for this phase.
@@ -65,6 +65,18 @@ func NewRepository(client *lib.DBClient) *Repository {
 }
 ```
 
+## Special Pattern — Add
+
+```go
+func (r *Repository) Add(ctx context.Context, playerID int, name string, formatID int) (int, error) {
+    m := Model{PlayerID: playerID, Name: name, FormatID: formatID}
+    if err := r.db.WithContext(ctx).Create(&m).Error; err != nil {
+        return 0, fmt.Errorf("failed to insert Deck record: %w", err)
+    }
+    return m.ID, nil
+}
+```
+
 ## Special Pattern — BulkAdd (select-back after insert)
 
 The current implementation selects back inserted decks using player_id IN + name IN. With GORM/CreateInBatches, the IDs are populated on the structs directly — no select-back needed:
@@ -122,6 +134,29 @@ func (r *Repository) Retire(ctx context.Context, deckID int) error {
 }
 ```
 
+## Behavior Changes from sqlx Migration
+
+**`SoftDelete` — no RowsAffected check**
+
+The original implementation checks `numAffected != 1` and errors on 0. The GORM version
+(`db.Delete(&Model{}, id)`) omits this check and silently succeeds when the ID doesn't exist.
+This is safe: the business layer always calls `assertCallerOwnsDeck` first (`functions.go:354`),
+which returns an error if the deck doesn't exist, so `SoftDelete` is never reached for a
+missing ID.
+
+**`Retire` — GORM adds `deleted_at IS NULL` scope**
+
+The original SQL (`UPDATE deck SET retired = TRUE WHERE id = ?`) has no `deleted_at IS NULL`
+filter — it would set `retired = TRUE` on a soft-deleted deck. The GORM version adds
+`deleted_at IS NULL` automatically because the model embeds `gorm.DeletedAt`. This is a
+strictly safer behavior — a soft-deleted deck can no longer be retired.
+
+**`BulkAdd` — sequential MySQL auto-increment assumption**
+
+`CreateInBatches` uses `LAST_INSERT_ID()` of the first inserted row and assigns subsequent IDs
+by sequential increment. This works correctly in the seeder (no concurrent inserts during seed),
+but callers should not rely on this pattern in concurrent write contexts.
+
 ## Test Migration
 
 Remove all sqlmock tests in `repo_test.go`. Replace with integration tests.
@@ -135,7 +170,9 @@ Tests to write:
 - `TestBulkAdd` — IDs populated, all returned
 - `TestUpdate_PartialFields` — only specified fields change
 - `TestUpdate_NoFields` — no-op, no error
+- `TestUpdate_NotFound` — RowsAffected == 0, error returned
 - `TestRetire` — deck.Retired set to true
+- `TestRetire_NotFound` — RowsAffected == 0, error returned
 - `TestSoftDelete` — deck not returned after delete
 
 Add `testhelpers_test.go` with `newTestDB(t)` (tx rollback pattern — see Phase 0). No explicit cleanup needed: `t.Cleanup` rolls back the transaction automatically.
