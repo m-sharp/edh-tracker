@@ -23,7 +23,7 @@ import "github.com/m-sharp/edh-tracker/lib/repositories/base"
 
 type Model struct {
     base.GormModelBase
-    Name string `gorm:"column:name"`
+    Name string
 }
 
 func (Model) TableName() string { return "pod" }
@@ -31,8 +31,8 @@ func (Model) TableName() string { return "pod" }
 // PlayerPodModel represents the player_pod junction table.
 type PlayerPodModel struct {
     base.GormModelBase
-    PodID    int `gorm:"column:pod_id"`
-    PlayerID int `gorm:"column:player_id"`
+    PodID    int
+    PlayerID int
 }
 
 func (PlayerPodModel) TableName() string { return "player_pod" }

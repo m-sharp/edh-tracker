@@ -27,9 +27,9 @@ const (
 
 type Model struct {
     base.GormModelBase
-    PodID    int    `gorm:"column:pod_id"`
-    PlayerID int    `gorm:"column:player_id"`
-    Role     string `gorm:"column:role"`
+    PodID    int
+    PlayerID int
+    Role     string
 }
 
 func (Model) TableName() string { return "player_pod_role" }

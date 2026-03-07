@@ -22,10 +22,10 @@ import "github.com/m-sharp/edh-tracker/lib/repositories/base"
 
 type Model struct {
     base.GormModelBase
-    PlayerID int    `gorm:"column:player_id"`
-    Name     string `gorm:"column:name"`
-    FormatID int    `gorm:"column:format_id"`
-    Retired  bool   `gorm:"column:retired"`
+    PlayerID int
+    Name     string
+    FormatID int
+    Retired  bool
 }
 
 func (Model) TableName() string { return "deck" }

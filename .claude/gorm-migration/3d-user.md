@@ -29,20 +29,20 @@ const (
 
 type Model struct {
     base.GormModelBase
-    PlayerID      int     `gorm:"column:player_id"`
-    RoleID        int     `gorm:"column:role_id"`
-    OAuthProvider *string `gorm:"column:oauth_provider"`
-    OAuthSubject  *string `gorm:"column:oauth_subject"`
-    Email         *string `gorm:"column:email"`
-    DisplayName   *string `gorm:"column:display_name"`
-    AvatarURL     *string `gorm:"column:avatar_url"`
+    PlayerID      int
+    RoleID        int
+    OAuthProvider *string `gorm:"column:oauth_provider"` // KEEP: inferred as o_auth_provider, DB has oauth_provider
+    OAuthSubject  *string `gorm:"column:oauth_subject"`  // KEEP: same reason
+    Email         *string
+    DisplayName   *string
+    AvatarURL     *string
 }
 
 func (Model) TableName() string { return "user" }
 
 type RoleModel struct {
     base.GormModelBase
-    Name string `gorm:"column:name"`
+    Name string
 }
 
 func (RoleModel) TableName() string { return "user_role" }
@@ -172,8 +172,8 @@ Alternatively, define a local `playerModel` struct scoped to this method:
 
 ```go
 type txPlayerModel struct {
-    ID   int    `gorm:"primaryKey;column:id"`
-    Name string `gorm:"column:name"`
+    ID   int `gorm:"primaryKey"`
+    Name string
 }
 func (txPlayerModel) TableName() string { return "player" }
 ```

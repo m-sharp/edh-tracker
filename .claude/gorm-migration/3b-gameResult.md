@@ -23,10 +23,10 @@ import "github.com/m-sharp/edh-tracker/lib/repositories/base"
 
 type Model struct {
     base.GormModelBase
-    GameID    int `gorm:"column:game_id"`
-    DeckID    int `gorm:"column:deck_id"`
-    Place     int `gorm:"column:place"`
-    KillCount int `gorm:"column:kill_count"`
+    GameID    int
+    DeckID    int
+    Place     int
+    KillCount int
 }
 
 func (Model) TableName() string { return "game_result" }
@@ -79,15 +79,15 @@ const getStatsForDeck = `SELECT game_result.game_id, game_result.place, game_res
 WHERE deck.id = ? AND game_result.deleted_at IS NULL;`
 ```
 
-Scan into `gameStat` structs using `gorm:"column:..."` tags:
+Scan into `gameStat` structs using GORM's naming convention (all fields infer correctly):
 
 ```go
 // stats.go — update gameStat to use gorm tags instead of db tags
 type gameStat struct {
-    GameID      int `gorm:"column:game_id"`
-    Place       int `gorm:"column:place"`
-    KillCount   int `gorm:"column:kill_count"`
-    PlayerCount int `gorm:"column:player_count"`
+    GameID      int
+    Place       int
+    KillCount   int
+    PlayerCount int
 }
 
 func (r *Repository) GetStatsForPlayer(ctx context.Context, playerID int) (*Aggregate, error) {
@@ -126,14 +126,14 @@ Using a map avoids GORM skipping zero integer values (e.g. `place = 0` is valid)
 
 ## stats.go Changes
 
-Update `gameStat` struct tags from `db:` to `gorm:` — the `toAggregate()` logic is unchanged:
+Update `gameStat` struct tags from `db:` to GORM — all fields infer the correct column names, so no tags needed:
 
 ```go
 type gameStat struct {
-    GameID      int `gorm:"column:game_id"`
-    Place       int `gorm:"column:place"`
-    KillCount   int `gorm:"column:kill_count"`
-    PlayerCount int `gorm:"column:player_count"`
+    GameID      int
+    Place       int
+    KillCount   int
+    PlayerCount int
 }
 ```
 

@@ -26,11 +26,11 @@ import (
 
 type Model struct {
     base.GormModelBase
-    PodID             int        `gorm:"column:pod_id"`
-    InviteCode        string     `gorm:"column:invite_code"`
-    CreatedByPlayerID int        `gorm:"column:created_by_player_id"`
-    ExpiresAt         *time.Time `gorm:"column:expires_at"`
-    UsedCount         int        `gorm:"column:used_count"`
+    PodID             int
+    InviteCode        string
+    CreatedByPlayerID int
+    ExpiresAt         *time.Time
+    UsedCount         int
 }
 
 func (Model) TableName() string { return "pod_invite" }

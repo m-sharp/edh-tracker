@@ -23,9 +23,9 @@ import "github.com/m-sharp/edh-tracker/lib/repositories/base"
 
 type Model struct {
     base.GormModelBase
-    DeckID             int  `gorm:"column:deck_id"`
-    CommanderID        int  `gorm:"column:commander_id"`
-    PartnerCommanderID *int `gorm:"column:partner_commander_id"`
+    DeckID             int
+    CommanderID        int
+    PartnerCommanderID *int
 }
 
 func (Model) TableName() string { return "deck_commander" }

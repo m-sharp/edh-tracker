@@ -1,4 +1,4 @@
-# Phase 4 — Final Cleanup
+# Phase 5 — Final Cleanup
 
 ## Status
 Pending
@@ -34,7 +34,7 @@ All 18 migration files (e.g. `1.go` through `18.go`) and `migrate.go` use `clien
 via `QueryRowContext`, `ExecContext`, `QueryContext`, and `BeginTxx`. The `Db *sqlx.DB` field
 cannot be removed until migrations no longer reference it.
 
-Options (choose one before starting Phase 4):
+Options (choose one before starting Phase 5):
 1. **Run migrations via GORM raw SQL** — replace `client.Db.ExecContext(ctx, sql)` with
    `r.db.WithContext(ctx).Exec(sql)` (or `r.db.Exec(sql)` for non-contextual calls).
    Transactions: use `r.db.Transaction(func(tx *gorm.DB) error { ... })`.
@@ -85,10 +85,10 @@ import (
 
 // GormModelBase is the base struct for all GORM repository models.
 type GormModelBase struct {
-    ID        int            `gorm:"primaryKey;column:id"`
-    CreatedAt time.Time      `gorm:"column:created_at"`
-    UpdatedAt time.Time      `gorm:"column:updated_at"`
-    DeletedAt gorm.DeletedAt `gorm:"column:deleted_at;index"`
+    ID        int            `gorm:"primaryKey"`
+    CreatedAt time.Time
+    UpdatedAt time.Time
+    DeletedAt gorm.DeletedAt `gorm:"index"`
 }
 ```
 
