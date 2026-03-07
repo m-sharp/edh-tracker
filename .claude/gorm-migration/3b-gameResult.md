@@ -38,10 +38,10 @@ func (Model) TableName() string { return "game_result" }
 |---|---|---|
 | `GetByGameId` | `db.Where("game_id = ?", gameID).Find(&results)` | Soft-delete automatic |
 | `GetByID` | `db.First(&m, resultID)` | `ErrRecordNotFound` → nil,nil |
-| `Add` | `db.Create(&m)` | `m.ID` set by GORM |
-| `BulkAdd` | `db.CreateInBatches(&results, 100)` | No return needed |
+| `Add` | `db.Create(&m)` | Takes full `Model`; `m.ID` set by GORM — see below |
+| `BulkAdd` | `db.CreateInBatches(&results, 100)` | Returns `error` only — see below |
 | `Update` | `db.Model(&Model{}).Where("id = ?", resultID).Updates(map)` | Check RowsAffected |
-| `SoftDelete` | `db.Delete(&Model{}, id)` | Sets deleted_at |
+| `SoftDelete` | `db.Delete(&Model{}, id)` | Sets deleted_at; RowsAffected check dropped — see below |
 | `GetStatsForPlayer` | Raw SQL kept | Correlated subquery; see below |
 | `GetStatsForDeck` | Raw SQL kept | Correlated subquery; see below |
 
@@ -57,11 +57,41 @@ func NewRepository(client *lib.DBClient) *Repository {
 }
 ```
 
-## Special Pattern — Stats Queries (Raw SQL)
+## Special Pattern — Add (takes full Model)
 
-The stats queries use a correlated subquery for `player_count`. Keep these as raw SQL since GORM can't express correlated subqueries cleanly:
+Unlike other repos where `Add` takes individual fields, `gameResult.Add` takes a full `Model` struct (interface requirement — no business layer changes). GORM populates `m.ID` after create:
 
 ```go
+func (r *Repository) Add(ctx context.Context, m Model) (int, error) {
+    if err := r.db.WithContext(ctx).Create(&m).Error; err != nil {
+        return 0, fmt.Errorf("failed to insert GameResult record: %w", err)
+    }
+    return m.ID, nil
+}
+```
+
+## Special Pattern — BulkAdd (returns error only)
+
+Unlike game's `BulkAdd` which returns `[]int` IDs, gameResult's interface returns only `error`. No callers need the inserted IDs:
+
+```go
+func (r *Repository) BulkAdd(ctx context.Context, results []Model) error {
+    if len(results) == 0 {
+        return nil
+    }
+    if err := r.db.WithContext(ctx).CreateInBatches(&results, 100).Error; err != nil {
+        return fmt.Errorf("failed to bulk insert GameResult records: %w", err)
+    }
+    return nil
+}
+```
+
+## Special Pattern — Stats Queries (Raw SQL)
+
+The stats queries use a correlated subquery for `player_count`. Keep these as raw SQL since GORM can't express correlated subqueries cleanly. The constants remain in `repo.go` alongside the methods that use them:
+
+```go
+// repo.go — constants stay here alongside GetStatsForPlayer / GetStatsForDeck
 const getStatsForPlayer = `SELECT game_result.game_id, game_result.place, game_result.kill_count,
         (SELECT COUNT(*) FROM game_result gr2
           WHERE gr2.game_id = game_result.game_id
@@ -82,18 +112,19 @@ WHERE deck.id = ? AND game_result.deleted_at IS NULL;`
 Scan into `gameStat` structs using GORM's naming convention (all fields infer correctly):
 
 ```go
-// stats.go — update gameStat to use gorm tags instead of db tags
-type gameStat struct {
-    GameID      int
-    Place       int
-    KillCount   int
-    PlayerCount int
-}
-
 func (r *Repository) GetStatsForPlayer(ctx context.Context, playerID int) (*Aggregate, error) {
     var stats gameStats
     if err := r.db.WithContext(ctx).Raw(getStatsForPlayer, playerID).Scan(&stats).Error; err != nil {
         return nil, fmt.Errorf("failed to get stats for player %d: %w", playerID, err)
+    }
+    agg := stats.toAggregate()
+    return &agg, nil
+}
+
+func (r *Repository) GetStatsForDeck(ctx context.Context, deckID int) (*Aggregate, error) {
+    var stats gameStats
+    if err := r.db.WithContext(ctx).Raw(getStatsForDeck, deckID).Scan(&stats).Error; err != nil {
+        return nil, fmt.Errorf("failed to get stats for deck %d: %w", deckID, err)
     }
     agg := stats.toAggregate()
     return &agg, nil
@@ -126,7 +157,7 @@ Using a map avoids GORM skipping zero integer values (e.g. `place = 0` is valid)
 
 ## stats.go Changes
 
-Update `gameStat` struct tags from `db:` to GORM — all fields infer the correct column names, so no tags needed:
+Update `gameStat` struct tags from `db:` to GORM — all fields infer the correct column names via GORM's snake_case naming convention (`GameID` → `game_id`, `KillCount` → `kill_count`, `PlayerCount` → `player_count`), so no tags are needed:
 
 ```go
 type gameStat struct {
@@ -139,16 +170,26 @@ type gameStat struct {
 
 The `Aggregate` type and `gameStats.toAggregate()` function are unchanged.
 
+## Behavior Changes from sqlx Migration
+
+**`SoftDelete` — RowsAffected check dropped**
+
+The original `SoftDelete` runs `UPDATE game_result SET deleted_at = NOW() WHERE id = ?` with no soft-delete guard, then checks `RowsAffected != 1` and errors. GORM's `db.Delete(&Model{}, id)` adds the soft-delete scope automatically (`AND deleted_at IS NULL`), making re-deletion a no-op with `RowsAffected = 0` and no error. The RowsAffected check is dropped, consistent with the approach used in earlier phases.
+
+There is no business-layer existence guard for `SoftDelete` (the business layer calls the repo directly). A delete of a non-existent or already-deleted game result silently succeeds.
+
 ## Test Migration
 
-Remove existing sqlmock tests. Replace with integration tests.
+Remove existing sqlmock tests from `repo_test.go`. Replace with integration tests.
 
-Tests to write:
+**Keep `stats_test.go` unchanged** — it tests `toAggregate()` as a pure unit test with no DB access. It does not use sqlmock and requires no migration.
+
+Tests to write in `repo_test.go`:
 - `TestGetByGameId`
 - `TestGetByID_Found` / `TestGetByID_NotFound`
 - `TestAdd`
 - `TestBulkAdd`
-- `TestUpdate`
+- `TestUpdate` / `TestUpdate_NotFound`
 - `TestSoftDelete`
 - `TestGetStatsForPlayer` — requires game + deck + player rows; verify kills, points, record
 - `TestGetStatsForDeck` — similar
