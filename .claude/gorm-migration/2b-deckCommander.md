@@ -110,7 +110,7 @@ No existing tests. Write new integration tests:
 - `TestBulkAdd`
 - `TestDeleteByDeckID` — soft-deletes all entries; GetByDeckId returns nil after
 
-Add `testhelpers_test.go` with `newTestDB(t)`. Cleanup: truncate `deck_commander` (and upstream tables needed for FK constraints).
+Add `testhelpers_test.go` with `newTestDB(t)` (tx rollback pattern — see Phase 0). No explicit cleanup needed: `t.Cleanup` rolls back the transaction automatically.
 
 ## Verification
 

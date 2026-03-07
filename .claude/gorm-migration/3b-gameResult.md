@@ -153,7 +153,7 @@ Tests to write:
 - `TestGetStatsForPlayer` — requires game + deck + player rows; verify kills, points, record
 - `TestGetStatsForDeck` — similar
 
-Add `testhelpers_test.go` with `newTestDB(t)`. Cleanup: truncate `game_result` (and upstream tables as needed).
+Add `testhelpers_test.go` with `newTestDB(t)` (tx rollback pattern — see Phase 0). No explicit cleanup needed: `t.Cleanup` rolls back the transaction automatically.
 
 ## Verification
 

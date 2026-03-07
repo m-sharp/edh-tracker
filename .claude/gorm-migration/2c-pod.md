@@ -158,7 +158,7 @@ No existing tests. Write new integration tests:
 - `TestUpdate`
 - `TestRemovePlayer` — player_pod row soft-deleted; not returned by GetPlayerIDs
 
-Add `testhelpers_test.go` with `newTestDB(t)`. Cleanup: truncate `player_pod` and `pod` tables.
+Add `testhelpers_test.go` with `newTestDB(t)` (tx rollback pattern — see Phase 0). No explicit cleanup needed: `t.Cleanup` rolls back the transaction automatically.
 
 ## Verification
 

@@ -147,7 +147,7 @@ Tests to write:
 - `TestUpdate` / `TestUpdate_NotFound`
 - `TestSoftDelete`
 
-Add `testhelpers_test.go` with `newTestDB(t)`. Cleanup: truncate `game` (and `game_result`, `deck`, `player` if needed for FK deps in join tests).
+Add `testhelpers_test.go` with `newTestDB(t)` (tx rollback pattern — see Phase 0). No explicit cleanup needed: `t.Cleanup` rolls back the transaction automatically.
 
 ## Verification
 

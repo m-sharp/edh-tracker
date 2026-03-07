@@ -1,7 +1,7 @@
 # Phase 1b — Format Repository
 
 ## Status
-Pending
+Approved
 
 ## Skill
 Load `.claude/skills/gorm.md` at the start of each implementation session for this phase.
@@ -98,7 +98,7 @@ No existing tests. Write new integration tests:
 
 Note: Format table is seed-only. Tests can use known seeded values (e.g. "Commander") rather than inserting. Alternatively, the test DB should have formats seeded via migrations.
 
-Add `testhelpers_test.go` with `newTestDB(t)` helper.
+Add `testhelpers_test.go` with `newTestDB(t)` (tx rollback pattern — see Phase 0). No explicit cleanup needed: format is read-only (seeded via migrations), so tx rollback is a no-op but harmless.
 
 ## Verification
 

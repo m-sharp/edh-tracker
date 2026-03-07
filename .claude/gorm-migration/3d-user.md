@@ -213,7 +213,9 @@ No existing tests. Write new integration tests:
 - `TestBulkAdd`
 - `TestSoftDelete`
 
-Add `testhelpers_test.go` with `newTestDB(t)`. Cleanup: truncate `user` and `player` tables (`user_role` is seeded and should not be truncated).
+Add `testhelpers_test.go` with `newTestDB(t)` (tx rollback pattern — see Phase 0). No explicit cleanup needed: `t.Cleanup` rolls back the transaction automatically.
+
+**Exception — `TestCreatePlayerAndUser`:** This test calls `r.db.Transaction(...)` internally. MySQL does not support true nested transactions — an inner `BEGIN` implicitly commits the outer transaction, defeating the tx rollback cleanup. For this test only, use `DELETE FROM user WHERE id = ?` and `DELETE FROM player WHERE id = ?` (using IDs from the returned model) in a dedicated `t.Cleanup` closure instead of relying on the outer rollback.
 
 ## Verification
 

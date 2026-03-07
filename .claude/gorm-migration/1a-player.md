@@ -1,7 +1,7 @@
 # Phase 1a — Player Repository
 
 ## Status
-Pending
+Approved
 
 ## Skill
 Load `.claude/skills/gorm.md` at the start of each implementation session for this phase.
@@ -72,6 +72,23 @@ func (r *Repository) BulkAdd(ctx context.Context, names []string) ([]Model, erro
 }
 ```
 
+## Special Pattern — Update
+
+```go
+func (r *Repository) Update(ctx context.Context, playerID int, name string) error {
+    result := r.db.WithContext(ctx).Model(&Model{}).Where("id = ?", playerID).Update("name", name)
+    if result.Error != nil {
+        return fmt.Errorf("failed to update Player record: %w", result.Error)
+    }
+    if result.RowsAffected == 0 {
+        return fmt.Errorf("unexpected number of rows affected by Player update: got 0, expected 1")
+    }
+    return nil
+}
+```
+
+Preserves the existing `TestUpdate_NotFound` behavior (error on 0 rows affected).
+
 ## Special Pattern — GetByNames (IN clause)
 
 ```go
@@ -101,7 +118,7 @@ Tests to write:
 - `TestUpdate_Found` / `TestUpdate_NotFound`
 - `TestSoftDelete` — player not returned by GetAll after delete
 
-Add `testhelpers_test.go` with `newTestDB(t)` helper (see Phase 0 template). Cleanup: truncate `player` table in `t.Cleanup`.
+Add `testhelpers_test.go` with `newTestDB(t)` (tx rollback pattern — see Phase 0). No explicit cleanup needed: `t.Cleanup` rolls back the transaction automatically.
 
 ## Verification
 

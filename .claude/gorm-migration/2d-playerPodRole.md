@@ -119,7 +119,7 @@ Tests to write:
 - `TestGetMembersWithRoles` — returns all non-deleted roles for pod
 - `TestBulkAdd`
 
-Add `testhelpers_test.go` with `newTestDB(t)`. Cleanup: truncate `player_pod_role` (and `pod`/`player` if needed for FK).
+Add `testhelpers_test.go` with `newTestDB(t)` (tx rollback pattern — see Phase 0). No explicit cleanup needed: `t.Cleanup` rolls back the transaction automatically.
 
 ## Verification
 

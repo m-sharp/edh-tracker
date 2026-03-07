@@ -1,7 +1,7 @@
 # Phase 1c — Commander Repository
 
 ## Status
-Pending
+Approved
 
 ## Skill
 Load `.claude/skills/gorm.md` at the start of each implementation session for this phase.
@@ -94,7 +94,7 @@ No existing tests. Write new integration tests:
 - `TestAdd` — returns correct ID
 - `TestBulkAdd` — inserts and returns models
 
-Add `testhelpers_test.go` with `newTestDB(t)` helper. Cleanup: truncate `commander` table in `t.Cleanup`.
+Add `testhelpers_test.go` with `newTestDB(t)` (tx rollback pattern — see Phase 0). No explicit cleanup needed: `t.Cleanup` rolls back the transaction automatically.
 
 ## Verification
 

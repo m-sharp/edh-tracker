@@ -138,7 +138,7 @@ Tests to write:
 - `TestRetire` — deck.Retired set to true
 - `TestSoftDelete` — deck not returned after delete
 
-Add `testhelpers_test.go` with `newTestDB(t)`. Cleanup: truncate `deck` table (and `player`/`format` if inserting those as prereqs).
+Add `testhelpers_test.go` with `newTestDB(t)` (tx rollback pattern — see Phase 0). No explicit cleanup needed: `t.Cleanup` rolls back the transaction automatically.
 
 ## Verification
 

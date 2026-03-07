@@ -112,7 +112,7 @@ Tests to write:
 - `TestAdd_WithExpiry` / `TestAdd_NoExpiry`
 - `TestIncrementUsedCount` — verify used_count goes from 0 to 1 to 2
 
-Add `testhelpers_test.go` with `newTestDB(t)`. Cleanup: truncate `pod_invite` (and `pod`/`player` if needed for FK).
+Add `testhelpers_test.go` with `newTestDB(t)` (tx rollback pattern — see Phase 0). No explicit cleanup needed: `t.Cleanup` rolls back the transaction automatically.
 
 ## Verification
 

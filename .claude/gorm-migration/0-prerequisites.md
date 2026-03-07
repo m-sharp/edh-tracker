@@ -131,11 +131,16 @@ func newTestDB(t *testing.T) *gorm.DB {
     )
     db, err := gorm.Open(gormmysql.Open(dsn), &gorm.Config{})
     require.NoError(t, err)
-    return db
+    tx := db.Begin()
+    require.NoError(t, tx.Error)
+    t.Cleanup(func() { tx.Rollback() })
+    return tx
 }
 ```
 
 Tests that require a real DB call `t.Skip` when `TEST_DBHOST` is unset, so they are safe to run in CI without a DB.
+
+The returned `*gorm.DB` is a transaction. `t.Cleanup` rolls it back, so no explicit table cleanup is needed — inserted rows are never committed. This avoids truncation (which fails with FK constraints) and prevents pollution of local test data.
 
 Required env vars:
 - `TEST_DBHOST`
