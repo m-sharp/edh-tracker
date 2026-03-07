@@ -8,6 +8,7 @@ import (
 	"github.com/m-sharp/edh-tracker/lib/business/format"
 	"github.com/m-sharp/edh-tracker/lib/business/player"
 	repos "github.com/m-sharp/edh-tracker/lib/repositories"
+	deckRepository "github.com/m-sharp/edh-tracker/lib/repositories/deck"
 )
 
 func GetCommanderEntry(
@@ -234,6 +235,119 @@ func Create(
 	}
 }
 
+func GetAllByPod(
+	deckRepo repos.DeckRepository,
+	podRepo repos.PodRepository,
+	gameResultRepo repos.GameResultRepository,
+	getPlayerName player.GetPlayerNameFunc,
+	getFormat format.GetByIDFunc,
+	getCommanderEntry GetCommanderEntryFunc,
+) GetAllByPodFunc {
+	return func(ctx context.Context, podID int) ([]EntityWithStats, error) {
+		playerIDs, err := podRepo.GetPlayerIDs(ctx, podID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get player IDs for pod %d: %w", podID, err)
+		}
+		if len(playerIDs) == 0 {
+			return []EntityWithStats{}, nil
+		}
+
+		decks, err := deckRepo.GetAllByPlayerIDs(ctx, playerIDs)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get decks for pod %d: %w", podID, err)
+		}
+
+		playerCache := map[int]string{}
+
+		result := make([]EntityWithStats, 0, len(decks))
+		for _, d := range decks {
+			f, err := getFormat(ctx, d.FormatID)
+			if err != nil {
+				return nil, fmt.Errorf("failed to look up format %d: %w", d.FormatID, err)
+			}
+			if f == nil {
+				return nil, fmt.Errorf("format %d not found", d.FormatID)
+			}
+
+			playerName, err := cachedPlayerName(ctx, d.PlayerID, playerCache, getPlayerName)
+			if err != nil {
+				return nil, err
+			}
+
+			commanders, err := getCommanderEntry(ctx, d.ID)
+			if err != nil {
+				return nil, err
+			}
+
+			entity := ToEntity(d, playerName, f.Name, commanders)
+
+			agg, err := gameResultRepo.GetStatsForDeck(ctx, d.ID)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get stats for deck %d: %w", d.ID, err)
+			}
+
+			result = append(result, ToEntityWithStats(entity, agg))
+		}
+
+		return result, nil
+	}
+}
+
+func Update(
+	deckRepo repos.DeckRepository,
+	deckCmdrRepo repos.DeckCommanderRepository,
+) UpdateFunc {
+	return func(ctx context.Context, deckID int, callerPlayerID int, fields UpdateFields) error {
+		d, err := deckRepo.GetById(ctx, deckID)
+		if err != nil {
+			return fmt.Errorf("failed to fetch deck %d: %w", deckID, err)
+		}
+		if d == nil {
+			return fmt.Errorf("deck %d not found", deckID)
+		}
+		if d.PlayerID != callerPlayerID {
+			return fmt.Errorf("forbidden: deck %d does not belong to caller", deckID)
+		}
+
+		repoFields := deckRepository.UpdateFields{
+			Name:     fields.Name,
+			FormatID: fields.FormatID,
+			Retired:  fields.Retired,
+		}
+		if err = deckRepo.Update(ctx, deckID, repoFields); err != nil {
+			return fmt.Errorf("failed to update deck %d: %w", deckID, err)
+		}
+
+		if fields.CommanderID != nil {
+			if err = deckCmdrRepo.DeleteByDeckID(ctx, deckID); err != nil {
+				return fmt.Errorf("failed to clear commander for deck %d: %w", deckID, err)
+			}
+			if _, err = deckCmdrRepo.Add(ctx, deckID, *fields.CommanderID, fields.PartnerCommanderID); err != nil {
+				return fmt.Errorf("failed to set commander for deck %d: %w", deckID, err)
+			}
+		}
+
+		return nil
+	}
+}
+
+func SoftDelete(deckRepo repos.DeckRepository) SoftDeleteFunc {
+	return func(ctx context.Context, deckID int, callerPlayerID int) error {
+		d, err := deckRepo.GetById(ctx, deckID)
+		if err != nil {
+			return fmt.Errorf("failed to fetch deck %d: %w", deckID, err)
+		}
+		if d == nil {
+			return fmt.Errorf("deck %d not found", deckID)
+		}
+		if d.PlayerID != callerPlayerID {
+			return fmt.Errorf("forbidden: deck %d does not belong to caller", deckID)
+		}
+		return deckRepo.SoftDelete(ctx, deckID)
+	}
+}
+
+// TODO: Should be gated by a "Calling player owns this deck?" check. We'll need an abstract helper for that to replace all instances, e.g. in SoftDelete as well.
 func Retire(deckRepo repos.DeckRepository) RetireFunc {
 	return func(ctx context.Context, deckID int) error {
 		return deckRepo.Retire(ctx, deckID)

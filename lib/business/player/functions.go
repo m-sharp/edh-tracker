@@ -64,6 +64,59 @@ func Create(playerRepo repos.PlayerRepository) CreateFunc {
 	}
 }
 
+func GetAllByPod(
+	playerRepo repos.PlayerRepository,
+	gameResultRepo repos.GameResultRepository,
+	podRepo repos.PodRepository,
+	roleRepo repos.PlayerPodRoleRepository,
+) GetAllByPodFunc {
+	return func(ctx context.Context, podID int) ([]PlayerWithRoleEntity, error) {
+		members, err := roleRepo.GetMembersWithRoles(ctx, podID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get members for pod %d: %w", podID, err)
+		}
+
+		roleByPlayerID := make(map[int]string, len(members))
+		for _, m := range members {
+			roleByPlayerID[m.PlayerID] = m.Role
+		}
+
+		result := make([]PlayerWithRoleEntity, 0, len(members))
+		for _, m := range members {
+			p, err := playerRepo.GetById(ctx, m.PlayerID)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get player %d: %w", m.PlayerID, err)
+			}
+			if p == nil {
+				continue
+			}
+
+			agg, err := gameResultRepo.GetStatsForPlayer(ctx, m.PlayerID)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get stats for player %d: %w", m.PlayerID, err)
+			}
+
+			podIDs, err := podRepo.GetIDsByPlayerID(ctx, m.PlayerID)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get pod IDs for player %d: %w", m.PlayerID, err)
+			}
+
+			result = append(result, PlayerWithRoleEntity{
+				Entity: ToEntity(*p, agg, podIDs),
+				Role:   roleByPlayerID[m.PlayerID],
+			})
+		}
+
+		return result, nil
+	}
+}
+
+func Update(playerRepo repos.PlayerRepository) UpdateFunc {
+	return func(ctx context.Context, playerID int, name string) error {
+		return playerRepo.Update(ctx, playerID, name)
+	}
+}
+
 func GetPlayerName(playerRepo repos.PlayerRepository) GetPlayerNameFunc {
 	return func(ctx context.Context, playerID int) (string, error) {
 		p, err := playerRepo.GetById(ctx, playerID)

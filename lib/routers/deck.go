@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"strings"
 
 	"go.uber.org/zap"
 
@@ -44,7 +45,12 @@ func (d *DeckRouter) GetRoutes() []*trackerHttp.Route {
 		{
 			Path:    "/api/deck",
 			Method:  http.MethodPatch,
-			Handler: d.RetireDeck,
+			Handler: d.UpdateDeck,
+		},
+		{
+			Path:    "/api/deck",
+			Method:  http.MethodDelete,
+			Handler: d.DeleteDeck,
 		},
 	}
 }
@@ -54,24 +60,24 @@ func (d *DeckRouter) GetAll(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	errMsg := "Failed to get Deck records"
 	playerID, _ := trackerHttp.GetQueryId(r, "player_id")
+	podID, _ := trackerHttp.GetQueryId(r, "pod_id")
 
 	var (
 		decks []deck.EntityWithStats
 		err   error
 	)
-	if playerID != 0 {
+	switch {
+	case podID != 0:
+		decks, err = d.decks.GetAllByPod(ctx, podID)
+	case playerID != 0:
 		decks, err = d.decks.GetAllForPlayer(ctx, playerID)
-		if err != nil {
-			trackerHttp.WriteError(d.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
-			return
-		}
-	} else {
+	default:
 		// TODO: Should probably not exist. Also, it's slowwwww
 		decks, err = d.decks.GetAll(ctx)
-		if err != nil {
-			trackerHttp.WriteError(d.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
-			return
-		}
+	}
+	if err != nil {
+		trackerHttp.WriteError(d.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
+		return
 	}
 
 	marshalled, err := json.Marshal(decks)
@@ -148,8 +154,22 @@ func (d *DeckRouter) DeckCreate(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
-func (d *DeckRouter) RetireDeck(w http.ResponseWriter, r *http.Request) {
+type updateDeckRequest struct {
+	Name               *string `json:"name"`
+	FormatID           *int    `json:"format_id"`
+	CommanderID        *int    `json:"commander_id"`
+	PartnerCommanderID *int    `json:"partner_commander_id"`
+	Retired            *bool   `json:"retired"`
+}
+
+func (d *DeckRouter) UpdateDeck(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	errMsg := "Failed to update Deck"
+
+	callerPlayerID, ok := trackerHttp.CallerPlayerID(w, r)
+	if !ok {
+		return
+	}
 
 	deckID, err := trackerHttp.GetQueryId(r, "deck_id")
 	if err != nil {
@@ -157,9 +177,59 @@ func (d *DeckRouter) RetireDeck(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	errMsg := "Failed to retire deck"
-	if err = d.decks.Retire(ctx, deckID); err != nil {
-		trackerHttp.WriteError(d.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		trackerHttp.WriteError(d.log, w, http.StatusInternalServerError, err, "Failed to read deck PATCH body", errMsg)
+		return
+	}
+
+	var req updateDeckRequest
+	if err = json.Unmarshal(body, &req); err != nil {
+		trackerHttp.WriteError(d.log, w, http.StatusBadRequest, err, "Failed to unmarshal Deck update body", errMsg)
+		return
+	}
+
+	fields := deck.UpdateFields{
+		Name:               req.Name,
+		FormatID:           req.FormatID,
+		CommanderID:        req.CommanderID,
+		PartnerCommanderID: req.PartnerCommanderID,
+		Retired:            req.Retired,
+	}
+
+	if err = d.decks.Update(ctx, deckID, callerPlayerID, fields); err != nil {
+		if strings.HasPrefix(err.Error(), "forbidden:") {
+			http.Error(w, err.Error(), http.StatusForbidden)
+			return
+		}
+		trackerHttp.WriteError(d.log, w, http.StatusInternalServerError, err, "Failed to update Deck record", errMsg)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func (d *DeckRouter) DeleteDeck(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	errMsg := "Failed to delete Deck"
+
+	callerPlayerID, ok := trackerHttp.CallerPlayerID(w, r)
+	if !ok {
+		return
+	}
+
+	deckID, err := trackerHttp.GetQueryId(r, "deck_id")
+	if err != nil {
+		trackerHttp.WriteError(d.log, w, http.StatusBadRequest, err, "Bad deck_id query string specified", err.Error())
+		return
+	}
+
+	if err = d.decks.SoftDelete(ctx, deckID, callerPlayerID); err != nil {
+		if strings.HasPrefix(err.Error(), "forbidden:") {
+			http.Error(w, err.Error(), http.StatusForbidden)
+			return
+		}
+		trackerHttp.WriteError(d.log, w, http.StatusInternalServerError, err, "Failed to delete Deck record", errMsg)
 		return
 	}
 

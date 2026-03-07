@@ -24,15 +24,18 @@ type PlayerRepository interface {
 	GetByNames(ctx context.Context, names []string) ([]player.Model, error)
 	Add(ctx context.Context, name string) (int, error)
 	BulkAdd(ctx context.Context, names []string) ([]player.Model, error)
+	Update(ctx context.Context, playerID int, name string) error
 	SoftDelete(ctx context.Context, id int) error
 }
 
 type DeckRepository interface {
 	GetAll(ctx context.Context) ([]deck.Model, error)
 	GetAllForPlayer(ctx context.Context, playerID int) ([]deck.Model, error)
+	GetAllByPlayerIDs(ctx context.Context, playerIDs []int) ([]deck.Model, error)
 	GetById(ctx context.Context, deckID int) (*deck.Model, error)
 	Add(ctx context.Context, playerID int, name string, formatID int) (int, error)
 	BulkAdd(ctx context.Context, decks []deck.Model) ([]deck.Model, error)
+	Update(ctx context.Context, deckID int, fields deck.UpdateFields) error
 	Retire(ctx context.Context, deckID int) error
 	SoftDelete(ctx context.Context, id int) error
 }
@@ -40,17 +43,22 @@ type DeckRepository interface {
 type GameRepository interface {
 	GetAllByPod(ctx context.Context, podID int) ([]game.Model, error)
 	GetAllByDeck(ctx context.Context, deckID int) ([]game.Model, error)
+	GetAllByPlayerID(ctx context.Context, playerID int) ([]game.Model, error)
 	GetById(ctx context.Context, gameID int) (*game.Model, error)
 	Add(ctx context.Context, description string, podID, formatID int) (int, error)
 	BulkAdd(ctx context.Context, games []game.Model) ([]int, error)
+	Update(ctx context.Context, gameID int, description string) error
 	SoftDelete(ctx context.Context, id int) error
 }
 
 type GameResultRepository interface {
 	GetByGameId(ctx context.Context, gameID int) ([]gameResult.Model, error)
+	GetByID(ctx context.Context, resultID int) (*gameResult.Model, error)
 	GetStatsForPlayer(ctx context.Context, playerID int) (*gameResult.Aggregate, error)
 	GetStatsForDeck(ctx context.Context, deckID int) (*gameResult.Aggregate, error)
+	Add(ctx context.Context, m gameResult.Model) (int, error)
 	BulkAdd(ctx context.Context, results []gameResult.Model) error
+	Update(ctx context.Context, resultID, place, killCount, deckID int) error
 	SoftDelete(ctx context.Context, id int) error
 }
 
@@ -114,4 +122,5 @@ type DeckCommanderRepository interface {
 	GetByDeckId(ctx context.Context, deckID int) (*deckCommander.Model, error)
 	Add(ctx context.Context, deckID, commanderID int, partnerCommanderID *int) (int, error)
 	BulkAdd(ctx context.Context, entries []deckCommander.Model) error
+	DeleteByDeckID(ctx context.Context, deckID int) error
 }

@@ -38,8 +38,8 @@ func (p *PlayerRouter) GetRoutes() []*trackerHttp.Route {
 		},
 		{
 			Path:    "/api/player",
-			Method:  http.MethodPost,
-			Handler: p.PlayerCreate,
+			Method:  http.MethodPatch,
+			Handler: p.UpdatePlayer,
 		},
 	}
 }
@@ -48,15 +48,31 @@ func (p *PlayerRouter) GetAll(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	errMsg := "Failed to get Player records"
 
-	players, err := p.players.GetAll(ctx)
-	if err != nil {
-		trackerHttp.WriteError(p.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
-		return
+	podID, _ := trackerHttp.GetQueryId(r, "pod_id")
+
+	var (
+		marshalled []byte
+		marshalErr error
+	)
+
+	if podID != 0 {
+		players, err := p.players.GetAllByPod(ctx, podID)
+		if err != nil {
+			trackerHttp.WriteError(p.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
+			return
+		}
+		marshalled, marshalErr = json.Marshal(players)
+	} else {
+		players, err := p.players.GetAll(ctx)
+		if err != nil {
+			trackerHttp.WriteError(p.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
+			return
+		}
+		marshalled, marshalErr = json.Marshal(players)
 	}
 
-	marshalled, err := json.Marshal(players)
-	if err != nil {
-		trackerHttp.WriteError(p.log, w, http.StatusInternalServerError, err, "Failed to marshall records as JSON", errMsg)
+	if marshalErr != nil {
+		trackerHttp.WriteError(p.log, w, http.StatusInternalServerError, marshalErr, "Failed to marshall records as JSON", errMsg)
 		return
 	}
 
@@ -89,13 +105,29 @@ func (p *PlayerRouter) GetPlayerById(w http.ResponseWriter, r *http.Request) {
 	trackerHttp.WriteJson(p.log, w, marshalled)
 }
 
-func (p *PlayerRouter) PlayerCreate(w http.ResponseWriter, r *http.Request) {
+func (p *PlayerRouter) UpdatePlayer(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	errMsg := "Failed to create new Player"
+	errMsg := "Failed to update Player"
+
+	callerPlayerID, ok := trackerHttp.CallerPlayerID(w, r)
+	if !ok {
+		return
+	}
+
+	playerID, err := trackerHttp.GetQueryId(r, "player_id")
+	if err != nil {
+		trackerHttp.WriteError(p.log, w, http.StatusBadRequest, err, "Bad player_id query string specified", err.Error())
+		return
+	}
+
+	if callerPlayerID != playerID {
+		http.Error(w, "Forbidden: you may only update your own player record", http.StatusForbidden)
+		return
+	}
 
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		trackerHttp.WriteError(p.log, w, http.StatusInternalServerError, err, "Failed to read player POST body", errMsg)
+		trackerHttp.WriteError(p.log, w, http.StatusInternalServerError, err, "Failed to read player PATCH body", errMsg)
 		return
 	}
 
@@ -103,21 +135,19 @@ func (p *PlayerRouter) PlayerCreate(w http.ResponseWriter, r *http.Request) {
 		Name string `json:"name"`
 	}
 	if err = json.Unmarshal(body, &req); err != nil {
-		trackerHttp.WriteError(p.log, w, http.StatusBadRequest, err, "Failed to unmarshal Player body", errMsg)
+		trackerHttp.WriteError(p.log, w, http.StatusBadRequest, err, "Failed to unmarshal Player update body", errMsg)
 		return
 	}
-	log := p.log.With(zap.String("NewPlayer", req.Name))
 
 	if req.Name == "" {
-		trackerHttp.WriteError(log, w, http.StatusBadRequest, nil, "Missing player name", "name is required")
+		trackerHttp.WriteError(p.log, w, http.StatusBadRequest, nil, "Missing player name", "name is required")
 		return
 	}
 
-	log.Info("Saving new Player record")
-	if _, err = p.players.Create(ctx, req.Name); err != nil {
-		trackerHttp.WriteError(log, w, http.StatusInternalServerError, err, "Failed to add Player record", errMsg)
+	if err = p.players.Update(ctx, playerID, req.Name); err != nil {
+		trackerHttp.WriteError(p.log, w, http.StatusInternalServerError, err, "Failed to update Player record", errMsg)
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
+	w.WriteHeader(http.StatusOK)
 }

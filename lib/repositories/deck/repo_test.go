@@ -65,3 +65,51 @@ func TestSoftDelete_Success(t *testing.T) {
 	require.NoError(t, err)
 	assert.NoError(t, mock.ExpectationsWereMet())
 }
+
+func TestUpdate_NameOnly(t *testing.T) {
+	client, mock := newMockDB(t)
+	repo := NewRepository(client)
+
+	name := "New Name"
+	mock.ExpectExec(`UPDATE deck SET name = \? WHERE id = \? AND deleted_at IS NULL`).
+		WithArgs("New Name", 7).
+		WillReturnResult(sqlmock.NewResult(0, 1))
+
+	err := repo.Update(context.Background(), 7, UpdateFields{Name: &name})
+	require.NoError(t, err)
+	assert.NoError(t, mock.ExpectationsWereMet())
+}
+
+func TestUpdate_MultipleFields(t *testing.T) {
+	client, mock := newMockDB(t)
+	repo := NewRepository(client)
+
+	name := "Renamed"
+	formatID := 2
+	retired := true
+	mock.ExpectExec(`UPDATE deck SET`).
+		WithArgs("Renamed", 2, true, 7).
+		WillReturnResult(sqlmock.NewResult(0, 1))
+
+	err := repo.Update(context.Background(), 7, UpdateFields{Name: &name, FormatID: &formatID, Retired: &retired})
+	require.NoError(t, err)
+	assert.NoError(t, mock.ExpectationsWereMet())
+}
+
+func TestUpdate_NoFields_NoOp(t *testing.T) {
+	client, _ := newMockDB(t)
+	repo := NewRepository(client)
+
+	// No mock expectations — no query should be issued
+	err := repo.Update(context.Background(), 7, UpdateFields{})
+	require.NoError(t, err)
+}
+
+func TestGetAllByPlayerIDs_Empty(t *testing.T) {
+	client, _ := newMockDB(t)
+	repo := NewRepository(client)
+
+	got, err := repo.GetAllByPlayerIDs(context.Background(), []int{})
+	require.NoError(t, err)
+	assert.Len(t, got, 0)
+}

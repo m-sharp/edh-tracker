@@ -17,13 +17,13 @@ const (
 						  WHERE player_pod.player_id = ?
 						    AND pod.deleted_at IS NULL
 						    AND player_pod.deleted_at IS NULL;`
-	getPodIDsByPlayerID  = `SELECT pod_id FROM player_pod WHERE player_id = ? AND deleted_at IS NULL;`
-	getPlayerIDsByPodID  = `SELECT player_id FROM player_pod WHERE pod_id = ? AND deleted_at IS NULL;`
-	insertPod            = `INSERT INTO pod (name) VALUES (?);`
-	insertPlayerPod      = `INSERT INTO player_pod (pod_id, player_id) VALUES (?, ?);`
-	softDeletePod        = `UPDATE pod SET deleted_at = NOW() WHERE id = ?;`
-	updatePodName        = `UPDATE pod SET name = ? WHERE id = ? AND deleted_at IS NULL;`
-	softDeletePlayerPod  = `UPDATE player_pod SET deleted_at = NOW() WHERE pod_id = ? AND player_id = ? AND deleted_at IS NULL;`
+	getPodIDsByPlayerID = `SELECT pod_id FROM player_pod WHERE player_id = ? AND deleted_at IS NULL;`
+	getPlayerIDsByPodID = `SELECT player_id FROM player_pod WHERE pod_id = ? AND deleted_at IS NULL;`
+	insertPod           = `INSERT INTO pod (name) VALUES (?);`
+	insertPlayerPod     = `INSERT INTO player_pod (pod_id, player_id) VALUES (?, ?);`
+	softDeletePod       = `UPDATE pod SET deleted_at = NOW() WHERE id = ?;`
+	updatePodName       = `UPDATE pod SET name = ? WHERE id = ? AND deleted_at IS NULL;`
+	softDeletePlayerPod = `UPDATE player_pod SET deleted_at = NOW() WHERE pod_id = ? AND player_id = ? AND deleted_at IS NULL;`
 )
 
 type Repository struct {

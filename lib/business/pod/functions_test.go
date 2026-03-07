@@ -9,21 +9,21 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	podrepo "github.com/m-sharp/edh-tracker/lib/repositories/pod"
 	"github.com/m-sharp/edh-tracker/lib/repositories/playerPodRole"
+	podrepo "github.com/m-sharp/edh-tracker/lib/repositories/pod"
 	"github.com/m-sharp/edh-tracker/lib/repositories/podInvite"
 )
 
 // --- mock structs ---
 
 type mockPodRepo struct {
-	GetByIDFn         func(ctx context.Context, podID int) (*podrepo.Model, error)
-	GetByPlayerIDFn   func(ctx context.Context, playerID int) ([]podrepo.Model, error)
-	AddFn             func(ctx context.Context, name string) (int, error)
-	AddPlayerToPodFn  func(ctx context.Context, podID, playerID int) error
-	RemovePlayerFn    func(ctx context.Context, podID, playerID int) error
-	SoftDeleteFn      func(ctx context.Context, podID int) error
-	UpdateFn          func(ctx context.Context, podID int, name string) error
+	GetByIDFn          func(ctx context.Context, podID int) (*podrepo.Model, error)
+	GetByPlayerIDFn    func(ctx context.Context, playerID int) ([]podrepo.Model, error)
+	AddFn              func(ctx context.Context, name string) (int, error)
+	AddPlayerToPodFn   func(ctx context.Context, podID, playerID int) error
+	RemovePlayerFn     func(ctx context.Context, podID, playerID int) error
+	SoftDeleteFn       func(ctx context.Context, podID int) error
+	UpdateFn           func(ctx context.Context, podID int, name string) error
 	GetIDsByPlayerIDFn func(ctx context.Context, playerID int) ([]int, error)
 }
 

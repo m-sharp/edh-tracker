@@ -96,30 +96,65 @@ func TestPlayerRouter_GetById_Error(t *testing.T) {
 	assert.Equal(t, http.StatusInternalServerError, rr.Code)
 }
 
-func TestPlayerRouter_Add_Success(t *testing.T) {
+func TestPlayerRouter_Update_Success(t *testing.T) {
 	router := newTestPlayerRouter(player.Functions{
-		Create: func(ctx context.Context, name string) (int, error) { return 1, nil },
+		Update: func(ctx context.Context, playerID int, name string) error { return nil },
 	})
 
 	body, _ := json.Marshal(struct {
 		Name string `json:"name"`
 	}{Name: "Charlie"})
-	req := httptest.NewRequest(http.MethodPost, "/api/player", bytes.NewReader(body))
+	req := withAuth(httptest.NewRequest(http.MethodPatch, "/api/player?player_id=42", bytes.NewReader(body)), 42)
 	rr := httptest.NewRecorder()
-	router.PlayerCreate(rr, req)
+	router.UpdatePlayer(rr, req)
 
-	assert.Equal(t, http.StatusCreated, rr.Code)
+	assert.Equal(t, http.StatusOK, rr.Code)
 }
 
-func TestPlayerRouter_Add_MissingName(t *testing.T) {
+func TestPlayerRouter_Update_MissingName(t *testing.T) {
 	router := newTestPlayerRouter(player.Functions{})
 
 	body, _ := json.Marshal(struct {
 		Name string `json:"name"`
 	}{Name: ""})
-	req := httptest.NewRequest(http.MethodPost, "/api/player", bytes.NewReader(body))
+	req := withAuth(httptest.NewRequest(http.MethodPatch, "/api/player?player_id=42", bytes.NewReader(body)), 42)
 	rr := httptest.NewRecorder()
-	router.PlayerCreate(rr, req)
+	router.UpdatePlayer(rr, req)
 
 	assert.Equal(t, http.StatusBadRequest, rr.Code)
+}
+
+func TestPlayerRouter_Update_Forbidden(t *testing.T) {
+	router := newTestPlayerRouter(player.Functions{})
+
+	body, _ := json.Marshal(struct {
+		Name string `json:"name"`
+	}{Name: "NewName"})
+	// callerID=99 != player_id=42 → forbidden
+	req := withAuth(httptest.NewRequest(http.MethodPatch, "/api/player?player_id=42", bytes.NewReader(body)), 99)
+	rr := httptest.NewRecorder()
+	router.UpdatePlayer(rr, req)
+
+	assert.Equal(t, http.StatusForbidden, rr.Code)
+}
+
+func TestPlayerRouter_GetAll_ByPod_Success(t *testing.T) {
+	players := []player.PlayerWithRoleEntity{
+		{Entity: player.Entity{Name: "Alice"}, Role: "manager"},
+	}
+	router := newTestPlayerRouter(player.Functions{
+		GetAllByPod: func(ctx context.Context, podID int) ([]player.PlayerWithRoleEntity, error) {
+			return players, nil
+		},
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/api/players?pod_id=1", nil)
+	rr := httptest.NewRecorder()
+	router.GetAll(rr, req)
+
+	assert.Equal(t, http.StatusOK, rr.Code)
+	var got []player.PlayerWithRoleEntity
+	require.NoError(t, json.Unmarshal(rr.Body.Bytes(), &got))
+	assert.Len(t, got, 1)
+	assert.Equal(t, "manager", got[0].Role)
 }

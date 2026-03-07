@@ -9,9 +9,9 @@ type GetByOAuthFunc func(ctx context.Context, provider, subject string) (*Entity
 type CreateWithOAuthFunc func(ctx context.Context, playerName, provider, subject, email, displayName, avatarURL string) (*Entity, error)
 
 type Functions struct {
-	GetByID        GetByIDFunc
-	GetByPlayerID  GetByPlayerIDFunc
-	Create         CreateFunc
-	GetByOAuth     GetByOAuthFunc
+	GetByID         GetByIDFunc
+	GetByPlayerID   GetByPlayerIDFunc
+	Create          CreateFunc
+	GetByOAuth      GetByOAuthFunc
 	CreateWithOAuth CreateWithOAuthFunc
 }

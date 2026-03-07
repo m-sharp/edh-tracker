@@ -17,17 +17,17 @@ type GetMembersWithRolesFunc func(ctx context.Context, podID int) ([]PlayerWithR
 type RemovePlayerFunc func(ctx context.Context, podID, callerPlayerID, targetPlayerID int) error
 
 type Functions struct {
-	GetByID              GetByIDFunc
-	GetByPlayerID        GetByPlayerIDFunc
-	Create               CreateFunc
-	AddPlayer            AddPlayerFunc
-	GetRole              GetRoleFunc
-	PromoteToManager     PromoteToManagerFunc
-	GenerateInvite       GenerateInviteFunc
-	JoinByInvite         JoinByInviteFunc
-	Leave                LeaveFunc
-	SoftDelete           SoftDeleteFunc
-	Update               UpdateFunc
-	GetMembersWithRoles  GetMembersWithRolesFunc
-	RemovePlayer         RemovePlayerFunc
+	GetByID             GetByIDFunc
+	GetByPlayerID       GetByPlayerIDFunc
+	Create              CreateFunc
+	AddPlayer           AddPlayerFunc
+	GetRole             GetRoleFunc
+	PromoteToManager    PromoteToManagerFunc
+	GenerateInvite      GenerateInviteFunc
+	JoinByInvite        JoinByInviteFunc
+	Leave               LeaveFunc
+	SoftDelete          SoftDeleteFunc
+	Update              UpdateFunc
+	GetMembersWithRoles GetMembersWithRolesFunc
+	RemovePlayer        RemovePlayerFunc
 }

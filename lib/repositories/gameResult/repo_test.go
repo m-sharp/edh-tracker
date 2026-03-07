@@ -88,6 +88,77 @@ func TestGetStatsForPlayer_WithGames(t *testing.T) {
 	assert.NoError(t, mock.ExpectationsWereMet())
 }
 
+func TestGetByID_Success(t *testing.T) {
+	client, mock := newMockDB(t)
+	repo := NewRepository(client)
+
+	now := time.Now()
+	rows := sqlmock.NewRows([]string{"id", "game_id", "deck_id", "place", "kill_count", "created_at", "updated_at", "deleted_at"}).
+		AddRow(7, 1, 10, 2, 1, now, now, nil)
+	mock.ExpectQuery(regexp.QuoteMeta(getGameResultByID)).WithArgs(7).WillReturnRows(rows)
+
+	got, err := repo.GetByID(context.Background(), 7)
+	require.NoError(t, err)
+	require.NotNil(t, got)
+	assert.Equal(t, 7, got.ID)
+	assert.Equal(t, 1, got.GameID)
+	assert.Equal(t, 10, got.DeckID)
+	assert.NoError(t, mock.ExpectationsWereMet())
+}
+
+func TestGetByID_NotFound(t *testing.T) {
+	client, mock := newMockDB(t)
+	repo := NewRepository(client)
+
+	rows := sqlmock.NewRows([]string{"id", "game_id", "deck_id", "place", "kill_count", "created_at", "updated_at", "deleted_at"})
+	mock.ExpectQuery(regexp.QuoteMeta(getGameResultByID)).WithArgs(99).WillReturnRows(rows)
+
+	got, err := repo.GetByID(context.Background(), 99)
+	require.NoError(t, err)
+	assert.Nil(t, got)
+	assert.NoError(t, mock.ExpectationsWereMet())
+}
+
+func TestAdd_Success(t *testing.T) {
+	client, mock := newMockDB(t)
+	repo := NewRepository(client)
+
+	mock.ExpectExec(regexp.QuoteMeta(insertGameResult)).
+		WithArgs(1, 10, 2, 1).
+		WillReturnResult(sqlmock.NewResult(7, 1))
+
+	id, err := repo.Add(context.Background(), Model{GameID: 1, DeckID: 10, Place: 2, KillCount: 1})
+	require.NoError(t, err)
+	assert.Equal(t, 7, id)
+	assert.NoError(t, mock.ExpectationsWereMet())
+}
+
+func TestUpdate_Success(t *testing.T) {
+	client, mock := newMockDB(t)
+	repo := NewRepository(client)
+
+	mock.ExpectExec(regexp.QuoteMeta(updateGameResult)).
+		WithArgs(3, 2, 11, 7).
+		WillReturnResult(sqlmock.NewResult(0, 1))
+
+	err := repo.Update(context.Background(), 7, 3, 2, 11)
+	require.NoError(t, err)
+	assert.NoError(t, mock.ExpectationsWereMet())
+}
+
+func TestUpdate_NotFound(t *testing.T) {
+	client, mock := newMockDB(t)
+	repo := NewRepository(client)
+
+	mock.ExpectExec(regexp.QuoteMeta(updateGameResult)).
+		WithArgs(1, 0, 10, 99).
+		WillReturnResult(sqlmock.NewResult(0, 0))
+
+	err := repo.Update(context.Background(), 99, 1, 0, 10)
+	assert.ErrorContains(t, err, "unexpected number of rows")
+	assert.NoError(t, mock.ExpectationsWereMet())
+}
+
 func TestGetStatsForDeck_Empty(t *testing.T) {
 	client, mock := newMockDB(t)
 	repo := NewRepository(client)

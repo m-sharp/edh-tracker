@@ -87,11 +87,11 @@ Mark items `[x]` as they are completed during implementation.
 - [x] Update seeder with `player_pod_role` seed data
 
 ### Phase 2C — Edit/Delete/New Endpoints
-- [ ] Remove `POST /api/player` route + handler (player creation is OAuth-only)
-- [ ] Player: `PATCH /api/player` + business + repo `Update`
-- [ ] Deck: `PATCH /api/deck` (full update) + `DELETE /api/deck` + business + repo
-- [ ] Game: `PATCH /api/game` + `DELETE /api/game` + result CRUD endpoints + business + repo
-- [ ] New GET filters: `GET /api/players?pod_id`, `GET /api/decks?pod_id`, `GET /api/games?player_id`
+- [x] Remove `POST /api/player` route + handler (player creation is OAuth-only)
+- [x] Player: `PATCH /api/player` + business + repo `Update`
+- [x] Deck: `PATCH /api/deck` (full update) + `DELETE /api/deck` + business + repo
+- [x] Game: `PATCH /api/game` + `DELETE /api/game` + result CRUD endpoints + business + repo
+- [x] New GET filters: `GET /api/players?pod_id`, `GET /api/decks?pod_id`, `GET /api/games?player_id`
 
 ### Phase 2D — Server-Side Pagination
 - [ ] `PaginatedResponse[T]` type in `lib/business/pagination.go`

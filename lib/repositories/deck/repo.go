@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/jmoiron/sqlx"
+
 	"github.com/m-sharp/edh-tracker/lib"
 )
 
@@ -15,6 +17,8 @@ const (
 						   FROM deck WHERE player_id = ? AND deleted_at IS NULL;`
 	getDeckByID = `SELECT id, player_id, name, format_id, retired, created_at, updated_at, deleted_at
 					 FROM deck WHERE id = ? AND deleted_at IS NULL;`
+	getDecksForPlayerIDs = `SELECT id, player_id, name, format_id, retired, created_at, updated_at, deleted_at
+							  FROM deck WHERE player_id IN (?) AND deleted_at IS NULL;`
 	insertDeck     = `INSERT INTO deck (player_id, name, format_id) VALUES (?, ?, ?);`
 	retireDeck     = `UPDATE deck SET retired = TRUE WHERE id = ?;`
 	softDeleteDeck = `UPDATE deck SET deleted_at = NOW() WHERE id = ?;`
@@ -106,6 +110,7 @@ func (r *Repository) BulkAdd(ctx context.Context, decks []Model) ([]Model, error
 	inPlayerIDs := strings.TrimSuffix(strings.Repeat("?,", len(decks)), ",")
 	inNames := strings.TrimSuffix(strings.Repeat("?,", len(decks)), ",")
 	selectQuery := fmt.Sprintf(
+		// TODO: This query should be in constants at the top of the file
 		"SELECT id, player_id, name, format_id, retired, created_at, updated_at, deleted_at FROM deck WHERE player_id IN (%s) AND name IN (%s) AND deleted_at IS NULL",
 		inPlayerIDs, inNames,
 	)
@@ -117,6 +122,67 @@ func (r *Repository) BulkAdd(ctx context.Context, decks []Model) ([]Model, error
 	}
 
 	return result, nil
+}
+
+func (r *Repository) GetAllByPlayerIDs(ctx context.Context, playerIDs []int) ([]Model, error) {
+	if len(playerIDs) == 0 {
+		return []Model{}, nil
+	}
+
+	query, args, err := sqlx.In(getDecksForPlayerIDs, playerIDs)
+	if err != nil {
+		return nil, fmt.Errorf("failed to build GetAllByPlayerIDs query: %w", err)
+	}
+	query = r.client.Db.Rebind(query)
+
+	var decks []Model
+	if err = r.client.Db.SelectContext(ctx, &decks, query, args...); err != nil {
+		return nil, fmt.Errorf("failed to get Deck records for player IDs: %w", err)
+	}
+	if decks == nil {
+		return []Model{}, nil
+	}
+	return decks, nil
+}
+
+func (r *Repository) Update(ctx context.Context, deckID int, fields UpdateFields) error {
+	setClauses := []string{}
+	args := []interface{}{}
+
+	if fields.Name != nil {
+		setClauses = append(setClauses, "name = ?")
+		args = append(args, *fields.Name)
+	}
+	if fields.FormatID != nil {
+		setClauses = append(setClauses, "format_id = ?")
+		args = append(args, *fields.FormatID)
+	}
+	if fields.Retired != nil {
+		setClauses = append(setClauses, "retired = ?")
+		args = append(args, *fields.Retired)
+	}
+
+	if len(setClauses) == 0 {
+		return nil
+	}
+
+	args = append(args, deckID)
+	query := "UPDATE deck SET " + strings.Join(setClauses, ", ") + " WHERE id = ? AND deleted_at IS NULL;"
+
+	result, err := r.client.Db.ExecContext(ctx, query, args...)
+	if err != nil {
+		return fmt.Errorf("failed to update Deck record: %w", err)
+	}
+
+	numAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get number of rows affected by update: %w", err)
+	}
+	if numAffected != 1 {
+		return fmt.Errorf("unexpected number of rows affected by Deck update: got %d, expected 1", numAffected)
+	}
+
+	return nil
 }
 
 func (r *Repository) Retire(ctx context.Context, deckID int) error {
