@@ -1,7 +1,7 @@
 # Phase 2d — PlayerPodRole Repository
 
 ## Status
-Pending
+Approved
 
 ## Skill
 Load `.claude/skills/gorm.md` at the start of each implementation session for this phase.
@@ -72,7 +72,6 @@ import "gorm.io/gorm/clause"
 func (r *Repository) SetRole(ctx context.Context, podID, playerID int, role string) error {
     m := Model{PodID: podID, PlayerID: playerID, Role: role}
     err := r.db.WithContext(ctx).Clauses(clause.OnConflict{
-        Columns:   []clause.Column{{Name: "pod_id"}, {Name: "player_id"}},
         DoUpdates: clause.Assignments(map[string]any{
             "role":       role,
             "deleted_at": nil,
@@ -85,7 +84,7 @@ func (r *Repository) SetRole(ctx context.Context, podID, playerID int, role stri
 }
 ```
 
-This relies on the UNIQUE constraint on `(pod_id, player_id)` in the table schema. Verify this constraint exists in the migration.
+MySQL's `ON DUPLICATE KEY UPDATE` fires on any duplicate key violation — no conflict columns need to be specified. The `Columns` field is PostgreSQL semantics and is not used here. This relies on the UNIQUE constraint on `(pod_id, player_id)` in the table schema (confirmed in Migration 17).
 
 ## Special Pattern — BulkAdd
 
