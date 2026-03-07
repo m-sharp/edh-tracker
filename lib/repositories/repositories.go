@@ -11,7 +11,9 @@ import (
 	"github.com/m-sharp/edh-tracker/lib/repositories/game"
 	"github.com/m-sharp/edh-tracker/lib/repositories/gameResult"
 	"github.com/m-sharp/edh-tracker/lib/repositories/player"
+	"github.com/m-sharp/edh-tracker/lib/repositories/playerPodRole"
 	"github.com/m-sharp/edh-tracker/lib/repositories/pod"
+	"github.com/m-sharp/edh-tracker/lib/repositories/podInvite"
 	"github.com/m-sharp/edh-tracker/lib/repositories/user"
 )
 
@@ -26,6 +28,8 @@ var (
 	_ FormatRepository        = (*format.Repository)(nil)
 	_ CommanderRepository     = (*commander.Repository)(nil)
 	_ DeckCommanderRepository = (*deckCommander.Repository)(nil)
+	_ PlayerPodRoleRepository = (*playerPodRole.Repository)(nil)
+	_ PodInviteRepository     = (*podInvite.Repository)(nil)
 )
 
 type Repositories struct {
@@ -38,6 +42,8 @@ type Repositories struct {
 	Formats        *format.Repository
 	Commanders     *commander.Repository
 	DeckCommanders *deckCommander.Repository
+	PlayerPodRoles *playerPodRole.Repository
+	PodInvites     *podInvite.Repository
 }
 
 func New(_ *zap.Logger, client *lib.DBClient) *Repositories {
@@ -51,5 +57,7 @@ func New(_ *zap.Logger, client *lib.DBClient) *Repositories {
 		Formats:        format.NewRepository(client),
 		Commanders:     commander.NewRepository(client),
 		DeckCommanders: deckCommander.NewRepository(client),
+		PlayerPodRoles: playerPodRole.NewRepository(client),
+		PodInvites:     podInvite.NewRepository(client),
 	}
 }

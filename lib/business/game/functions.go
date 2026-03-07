@@ -9,8 +9,8 @@ import (
 	"github.com/m-sharp/edh-tracker/lib/business/format"
 	"github.com/m-sharp/edh-tracker/lib/business/gameResult"
 	repos "github.com/m-sharp/edh-tracker/lib/repositories"
-	gamerepo "github.com/m-sharp/edh-tracker/lib/repositories/game"
-	gameResultrepo "github.com/m-sharp/edh-tracker/lib/repositories/gameResult"
+	gameRepository "github.com/m-sharp/edh-tracker/lib/repositories/game"
+	gameResultRepository "github.com/m-sharp/edh-tracker/lib/repositories/gameResult"
 )
 
 func GetAllByPod(
@@ -130,9 +130,9 @@ func Create(
 			return fmt.Errorf("failed to create game: %w", err)
 		}
 
-		results := make([]gameResultrepo.Model, 0, len(inputs))
+		results := make([]gameResultRepository.Model, 0, len(inputs))
 		for _, input := range inputs {
-			results = append(results, gameResultrepo.Model{
+			results = append(results, gameResultRepository.Model{
 				GameID:    gameID,
 				DeckID:    input.DeckID,
 				Place:     input.Place,
@@ -148,7 +148,70 @@ func Create(
 	}
 }
 
-func buildGameEntity(g gamerepo.Model, results []gameResult.Entity) Entity {
+func GetAllByPlayer(
+	log *zap.Logger,
+	gameRepo repos.GameRepository,
+	getGameResults gameResult.GetByGameIDFunc,
+) GetAllByPlayerFunc {
+	return func(ctx context.Context, playerID int) ([]Entity, error) {
+		games, err := gameRepo.GetAllByPlayerID(ctx, playerID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get games for player %d: %w", playerID, err)
+		}
+
+		result := make([]Entity, 0, len(games))
+		for _, g := range games {
+			results, err := getGameResults(ctx, g.ID)
+			if err != nil {
+				log.Warn("Failed to get results for game, dropping from results",
+					zap.Int("game_id", g.ID), zap.Error(err))
+				continue
+			}
+			result = append(result, buildGameEntity(g, results))
+		}
+
+		return result, nil
+	}
+}
+
+func Update(gameRepo repos.GameRepository) UpdateFunc {
+	return func(ctx context.Context, gameID int, description string) error {
+		return gameRepo.Update(ctx, gameID, description)
+	}
+}
+
+func SoftDelete(gameRepo repos.GameRepository) SoftDeleteFunc {
+	return func(ctx context.Context, gameID int) error {
+		return gameRepo.SoftDelete(ctx, gameID)
+	}
+}
+
+func AddResult(
+	gameResultRepo repos.GameResultRepository,
+) AddResultFunc {
+	return func(ctx context.Context, gameID, deckID, playerID, place, killCount int) (int, error) {
+		return gameResultRepo.Add(ctx, gameResultRepository.Model{
+			GameID:    gameID,
+			DeckID:    deckID,
+			Place:     place,
+			KillCount: killCount,
+		})
+	}
+}
+
+func UpdateResult(gameResultRepo repos.GameResultRepository) UpdateResultFunc {
+	return func(ctx context.Context, resultID, place, killCount, deckID int) error {
+		return gameResultRepo.Update(ctx, resultID, place, killCount, deckID)
+	}
+}
+
+func DeleteResult(gameResultRepo repos.GameResultRepository) DeleteResultFunc {
+	return func(ctx context.Context, resultID int) error {
+		return gameResultRepo.SoftDelete(ctx, resultID)
+	}
+}
+
+func buildGameEntity(g gameRepository.Model, results []gameResult.Entity) Entity {
 	return Entity{
 		ID:          g.ID,
 		Description: g.Description,

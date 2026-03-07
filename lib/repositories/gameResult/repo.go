@@ -11,6 +11,10 @@ import (
 const (
 	getGameResultsByGameID = `SELECT id, game_id, deck_id, place, kill_count, created_at, updated_at, deleted_at
 								FROM game_result WHERE game_id = ? AND deleted_at IS NULL;`
+	getGameResultByID = `SELECT id, game_id, deck_id, place, kill_count, created_at, updated_at, deleted_at
+						   FROM game_result WHERE id = ? AND deleted_at IS NULL;`
+	insertGameResult = `INSERT INTO game_result (game_id, deck_id, place, kill_count) VALUES (?, ?, ?, ?);`
+	updateGameResult = `UPDATE game_result SET place = ?, kill_count = ?, deck_id = ? WHERE id = ? AND deleted_at IS NULL;`
 
 	getStatsForPlayer = `SELECT game_result.game_id, game_result.place, game_result.kill_count,
 						        (SELECT COUNT(*) FROM game_result gr2
@@ -37,6 +41,56 @@ type Repository struct {
 
 func NewRepository(client *lib.DBClient) *Repository {
 	return &Repository{client: client}
+}
+
+func (r *Repository) GetByID(ctx context.Context, resultID int) (*Model, error) {
+	var results []Model
+	if err := r.client.Db.SelectContext(ctx, &results, getGameResultByID, resultID); err != nil {
+		return nil, fmt.Errorf("failed to get GameResult record for id %d: %w", resultID, err)
+	}
+	if len(results) == 0 {
+		return nil, nil
+	}
+	return &results[0], nil
+}
+
+func (r *Repository) Add(ctx context.Context, m Model) (int, error) {
+	result, err := r.client.Db.ExecContext(ctx, insertGameResult, m.GameID, m.DeckID, m.Place, m.KillCount)
+	if err != nil {
+		return 0, fmt.Errorf("failed to insert GameResult record: %w", err)
+	}
+
+	numAffected, err := result.RowsAffected()
+	if err != nil {
+		return 0, fmt.Errorf("failed to get number of rows affected by insert: %w", err)
+	}
+	if numAffected != 1 {
+		return 0, fmt.Errorf("unexpected number of rows affected by GameResult insert: got %d, expected 1", numAffected)
+	}
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, fmt.Errorf("failed to get last insert ID for new GameResult: %w", err)
+	}
+
+	return int(id), nil
+}
+
+func (r *Repository) Update(ctx context.Context, resultID, place, killCount, deckID int) error {
+	result, err := r.client.Db.ExecContext(ctx, updateGameResult, place, killCount, deckID, resultID)
+	if err != nil {
+		return fmt.Errorf("failed to update GameResult record: %w", err)
+	}
+
+	numAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get number of rows affected by update: %w", err)
+	}
+	if numAffected != 1 {
+		return fmt.Errorf("unexpected number of rows affected by GameResult update: got %d, expected 1", numAffected)
+	}
+
+	return nil
 }
 
 func (r *Repository) GetByGameId(ctx context.Context, gameID int) ([]Model, error) {

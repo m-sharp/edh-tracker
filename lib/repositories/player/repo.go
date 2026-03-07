@@ -17,6 +17,7 @@ const (
 	getPlayersByNames = `SELECT id, name, created_at, updated_at, deleted_at FROM player WHERE name IN (?) AND deleted_at IS NULL`
 	insertPlayer      = `INSERT INTO player (name) VALUES (?);`
 	softDeletePlayer  = `UPDATE player SET deleted_at = NOW() WHERE id = ?;`
+	updatePlayer      = `UPDATE player SET name = ? WHERE id = ? AND deleted_at IS NULL;`
 )
 
 type Repository struct {
@@ -115,6 +116,23 @@ func (r *Repository) BulkAdd(ctx context.Context, names []string) ([]Model, erro
 	}
 
 	return r.GetByNames(ctx, names)
+}
+
+func (r *Repository) Update(ctx context.Context, playerID int, name string) error {
+	result, err := r.client.Db.ExecContext(ctx, updatePlayer, name, playerID)
+	if err != nil {
+		return fmt.Errorf("failed to update Player record: %w", err)
+	}
+
+	numAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get number of rows affected by update: %w", err)
+	}
+	if numAffected != 1 {
+		return fmt.Errorf("unexpected number of rows affected by Player update: got %d, expected 1", numAffected)
+	}
+
+	return nil
 }
 
 func (r *Repository) SoftDelete(ctx context.Context, id int) error {

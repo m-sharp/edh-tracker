@@ -25,6 +25,11 @@ func (e Entity) Validate() error {
 	return nil
 }
 
+type PlayerWithRoleEntity struct {
+	Entity
+	Role string `json:"role"`
+}
+
 func ToEntity(m repo.Model, agg *gameResult.Aggregate, podIDs []int) Entity {
 	if podIDs == nil {
 		podIDs = []int{}

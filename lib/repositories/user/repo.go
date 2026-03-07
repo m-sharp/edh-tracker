@@ -11,9 +11,12 @@ import (
 const (
 	getUserByID       = `SELECT id, player_id, role_id, oauth_provider, oauth_subject, email, display_name, avatar_url, created_at, updated_at, deleted_at FROM user WHERE id = ? AND deleted_at IS NULL;`
 	getUserByPlayerID = `SELECT id, player_id, role_id, oauth_provider, oauth_subject, email, display_name, avatar_url, created_at, updated_at, deleted_at FROM user WHERE player_id = ? AND deleted_at IS NULL;`
+	getUserByOAuth    = `SELECT id, player_id, role_id, oauth_provider, oauth_subject, email, display_name, avatar_url, created_at, updated_at, deleted_at FROM user WHERE oauth_provider = ? AND oauth_subject = ? AND deleted_at IS NULL LIMIT 1;`
 	getRoleByName     = `SELECT id, name, created_at, updated_at, deleted_at FROM user_role WHERE name = ?;`
 	insertUser        = `INSERT INTO user (player_id, role_id) VALUES (?, ?);`
+	insertUserOAuth   = `INSERT INTO user (player_id, role_id, oauth_provider, oauth_subject, email, display_name, avatar_url) VALUES (?, ?, ?, ?, ?, ?, ?);`
 	softDeleteUser    = `UPDATE user SET deleted_at = NOW() WHERE id = ?;`
+	insertPlayerTx    = `INSERT INTO player (name) VALUES (?);`
 )
 
 type Repository struct {
@@ -42,6 +45,82 @@ func (r *Repository) GetByPlayerID(ctx context.Context, playerID int) (*Model, e
 	}
 	if len(users) == 0 {
 		return nil, nil
+	}
+	return &users[0], nil
+}
+
+func (r *Repository) GetByOAuth(ctx context.Context, provider, subject string) (*Model, error) {
+	var users []Model
+	if err := r.client.Db.SelectContext(ctx, &users, getUserByOAuth, provider, subject); err != nil {
+		return nil, fmt.Errorf("failed to get User record for oauth %s/%s: %w", provider, subject, err)
+	}
+	if len(users) == 0 {
+		return nil, nil
+	}
+	return &users[0], nil
+}
+
+func (r *Repository) AddWithOAuth(
+	ctx context.Context,
+	playerID, roleID int,
+	provider, subject, email, displayName, avatarURL string,
+) (int, error) {
+	result, err := r.client.Db.ExecContext(ctx, insertUserOAuth, playerID, roleID, provider, subject, email, displayName, avatarURL)
+	if err != nil {
+		return 0, fmt.Errorf("failed to insert User record with OAuth: %w", err)
+	}
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, fmt.Errorf("failed to get last insert ID for new User with OAuth: %w", err)
+	}
+	return int(id), nil
+}
+
+func (r *Repository) CreatePlayerAndUser(
+	ctx context.Context,
+	playerName string,
+	roleID int,
+	provider, subject, email, displayName, avatarURL string,
+) (*Model, error) {
+	tx, err := r.client.Db.BeginTxx(ctx, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to begin transaction for CreatePlayerAndUser: %w", err)
+	}
+	defer func() {
+		if err != nil {
+			_ = tx.Rollback()
+		}
+	}()
+
+	playerResult, err := tx.ExecContext(ctx, insertPlayerTx, playerName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to insert player in CreatePlayerAndUser: %w", err)
+	}
+	playerID, err := playerResult.LastInsertId()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get player insert ID in CreatePlayerAndUser: %w", err)
+	}
+
+	userResult, err := tx.ExecContext(ctx, insertUserOAuth, playerID, roleID, provider, subject, email, displayName, avatarURL)
+	if err != nil {
+		return nil, fmt.Errorf("failed to insert user in CreatePlayerAndUser: %w", err)
+	}
+	userID, err := userResult.LastInsertId()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get user insert ID in CreatePlayerAndUser: %w", err)
+	}
+
+	var users []Model
+	if err = tx.SelectContext(ctx, &users, getUserByID, userID); err != nil {
+		return nil, fmt.Errorf("failed to fetch created user in CreatePlayerAndUser: %w", err)
+	}
+	if len(users) == 0 {
+		err = fmt.Errorf("created user %d not found after insert", userID)
+		return nil, err
+	}
+
+	if err = tx.Commit(); err != nil {
+		return nil, fmt.Errorf("failed to commit CreatePlayerAndUser transaction: %w", err)
 	}
 	return &users[0], nil
 }

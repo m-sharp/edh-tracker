@@ -27,6 +27,7 @@ type Entity struct {
 	ID                   int     `json:"id"`
 	GameID               int     `json:"game_id"`
 	DeckID               int     `json:"deck_id"`
+	PlayerID             int     `json:"player_id"`
 	DeckName             string  `json:"deck_name"`
 	CommanderName        *string `json:"commander_name,omitempty"`
 	PartnerCommanderName *string `json:"partner_commander_name,omitempty"`

@@ -14,11 +14,27 @@ import (
 	"github.com/m-sharp/edh-tracker/lib/seeder"
 )
 
+// TODO: Need to add these to docker runs
+var requireCfgs = []string{
+	// DB Configs
+	lib.DBHost,
+	lib.DBUsername,
+	lib.DBPass,
+	lib.DBPort,
+
+	// Auth Configs
+	lib.GoogleClientID,
+	lib.GoogleClientSecret,
+	lib.OAuthRedirectURL,
+	lib.JWTSecret,
+	lib.FrontendURL,
+}
+
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	cfg, err := lib.NewConfig(lib.DBHost, lib.DBUsername, lib.DBPass, lib.DBPort)
+	cfg, err := lib.NewConfig(requireCfgs...)
 	if err != nil {
 		log.Fatalf("Error creating Config: %s", err.Error())
 	}
@@ -46,7 +62,6 @@ func main() {
 
 	apiRouter := NewApiRouter(cfg, logger, biz)
 	server := lib.NewWebServer(cfg, logger, func(router *mux.Router) {
-		// ToDo: Will need some auth for the app's connection eventually
 		apiRouter.SetupRoutes(router)
 	})
 

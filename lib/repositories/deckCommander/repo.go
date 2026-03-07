@@ -11,7 +11,8 @@ import (
 const (
 	getDeckCommanderByDeckId = `SELECT id, deck_id, commander_id, partner_commander_id, created_at, updated_at, deleted_at
 								  FROM deck_commander WHERE deck_id = ? AND deleted_at IS NULL LIMIT 1;`
-	insertDeckCommander = `INSERT INTO deck_commander (deck_id, commander_id, partner_commander_id) VALUES (?, ?, ?);`
+	insertDeckCommander         = `INSERT INTO deck_commander (deck_id, commander_id, partner_commander_id) VALUES (?, ?, ?);`
+	deleteDeckCommanderByDeckID = `UPDATE deck_commander SET deleted_at = NOW() WHERE deck_id = ? AND deleted_at IS NULL;`
 )
 
 type Repository struct {
@@ -53,6 +54,13 @@ func (r *Repository) Add(ctx context.Context, deckID, commanderID int, partnerCo
 	}
 
 	return int(id), nil
+}
+
+func (r *Repository) DeleteByDeckID(ctx context.Context, deckID int) error {
+	if _, err := r.client.Db.ExecContext(ctx, deleteDeckCommanderByDeckID, deckID); err != nil {
+		return fmt.Errorf("failed to soft-delete DeckCommander records for deck %d: %w", deckID, err)
+	}
+	return nil
 }
 
 func (r *Repository) BulkAdd(ctx context.Context, entries []Model) error {

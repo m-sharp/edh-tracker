@@ -187,3 +187,204 @@ func TestGameRouter_Add_InvalidResult(t *testing.T) {
 
 	assert.Equal(t, http.StatusBadRequest, rr.Code)
 }
+
+func newFullGameRouter(games game.Functions, gameResults gameResult.Functions, getPodRole func(ctx context.Context, podID, playerID int) (string, error)) *GameRouter {
+	return &GameRouter{
+		log:         zap.NewNop(),
+		games:       games,
+		gameResults: gameResults,
+		getPodRole:  getPodRole,
+	}
+}
+
+// podManagerRole returns a getPodRole func that always grants manager.
+func podManagerRole() func(ctx context.Context, podID, playerID int) (string, error) {
+	return func(ctx context.Context, podID, playerID int) (string, error) {
+		return "manager", nil
+	}
+}
+
+// gameEntity returns a minimal game.Entity for a given podID.
+func gameEntityForPod(podID int) *game.Entity {
+	return &game.Entity{ID: 1, PodID: podID}
+}
+
+func TestGameRouter_GetGames_ByPlayer(t *testing.T) {
+	games := []game.Entity{{Description: "Game 1"}}
+	router := newTestGameRouter(game.Functions{
+		GetAllByPlayer: func(ctx context.Context, playerID int) ([]game.Entity, error) {
+			return games, nil
+		},
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/api/games?player_id=1", nil)
+	rr := httptest.NewRecorder()
+	router.GetAll(rr, req)
+
+	assert.Equal(t, http.StatusOK, rr.Code)
+	var got []game.Entity
+	require.NoError(t, json.Unmarshal(rr.Body.Bytes(), &got))
+	assert.Len(t, got, 1)
+}
+
+func TestGameRouter_UpdateGame_Success(t *testing.T) {
+	router := newFullGameRouter(
+		game.Functions{
+			GetByID: func(ctx context.Context, gameID int) (*game.Entity, error) { return gameEntityForPod(1), nil },
+			Update:  func(ctx context.Context, gameID int, description string) error { return nil },
+		},
+		gameResult.Functions{},
+		podManagerRole(),
+	)
+
+	body, _ := json.Marshal(struct {
+		Description string `json:"description"`
+	}{Description: "Updated"})
+	req := withAuth(httptest.NewRequest(http.MethodPatch, "/api/game?game_id=1", bytes.NewReader(body)), 42)
+	rr := httptest.NewRecorder()
+	router.UpdateGame(rr, req)
+
+	assert.Equal(t, http.StatusOK, rr.Code)
+}
+
+func TestGameRouter_UpdateGame_NotManager(t *testing.T) {
+	router := newFullGameRouter(
+		game.Functions{
+			GetByID: func(ctx context.Context, gameID int) (*game.Entity, error) { return gameEntityForPod(1), nil },
+		},
+		gameResult.Functions{},
+		func(ctx context.Context, podID, playerID int) (string, error) { return "member", nil },
+	)
+
+	body, _ := json.Marshal(struct{ Description string }{Description: "x"})
+	req := withAuth(httptest.NewRequest(http.MethodPatch, "/api/game?game_id=1", bytes.NewReader(body)), 42)
+	rr := httptest.NewRecorder()
+	router.UpdateGame(rr, req)
+
+	assert.Equal(t, http.StatusForbidden, rr.Code)
+}
+
+func TestGameRouter_UpdateGame_MissingParam(t *testing.T) {
+	router := newFullGameRouter(game.Functions{}, gameResult.Functions{}, nil)
+
+	req := withAuth(httptest.NewRequest(http.MethodPatch, "/api/game", nil), 42)
+	rr := httptest.NewRecorder()
+	router.UpdateGame(rr, req)
+
+	assert.Equal(t, http.StatusBadRequest, rr.Code)
+}
+
+func TestGameRouter_DeleteGame_Success(t *testing.T) {
+	router := newFullGameRouter(
+		game.Functions{
+			GetByID:    func(ctx context.Context, gameID int) (*game.Entity, error) { return gameEntityForPod(1), nil },
+			SoftDelete: func(ctx context.Context, gameID int) error { return nil },
+		},
+		gameResult.Functions{},
+		podManagerRole(),
+	)
+
+	req := withAuth(httptest.NewRequest(http.MethodDelete, "/api/game?game_id=1", nil), 42)
+	rr := httptest.NewRecorder()
+	router.DeleteGame(rr, req)
+
+	assert.Equal(t, http.StatusOK, rr.Code)
+}
+
+func TestGameRouter_DeleteGame_MissingParam(t *testing.T) {
+	router := newFullGameRouter(game.Functions{}, gameResult.Functions{}, nil)
+
+	req := withAuth(httptest.NewRequest(http.MethodDelete, "/api/game", nil), 42)
+	rr := httptest.NewRecorder()
+	router.DeleteGame(rr, req)
+
+	assert.Equal(t, http.StatusBadRequest, rr.Code)
+}
+
+func TestGameRouter_AddGameResult_Success(t *testing.T) {
+	router := newFullGameRouter(
+		game.Functions{
+			GetByID:   func(ctx context.Context, gameID int) (*game.Entity, error) { return gameEntityForPod(1), nil },
+			AddResult: func(ctx context.Context, gameID, deckID, playerID, place, killCount int) (int, error) { return 1, nil },
+		},
+		gameResult.Functions{},
+		podManagerRole(),
+	)
+
+	body, _ := json.Marshal(addGameResultRequest{GameID: 1, DeckID: 10, PlayerID: 42, Place: 2, KillCount: 1})
+	req := withAuth(httptest.NewRequest(http.MethodPost, "/api/game/result", bytes.NewReader(body)), 42)
+	rr := httptest.NewRecorder()
+	router.AddGameResult(rr, req)
+
+	assert.Equal(t, http.StatusCreated, rr.Code)
+}
+
+func TestGameRouter_AddGameResult_MissingGameID(t *testing.T) {
+	router := newFullGameRouter(game.Functions{}, gameResult.Functions{}, podManagerRole())
+
+	body, _ := json.Marshal(addGameResultRequest{GameID: 0, DeckID: 10, PlayerID: 42, Place: 2})
+	req := withAuth(httptest.NewRequest(http.MethodPost, "/api/game/result", bytes.NewReader(body)), 42)
+	rr := httptest.NewRecorder()
+	router.AddGameResult(rr, req)
+
+	assert.Equal(t, http.StatusBadRequest, rr.Code)
+}
+
+func TestGameRouter_UpdateGameResult_Success(t *testing.T) {
+	router := newFullGameRouter(
+		game.Functions{
+			GetByID:      func(ctx context.Context, gameID int) (*game.Entity, error) { return gameEntityForPod(1), nil },
+			UpdateResult: func(ctx context.Context, resultID, place, killCount, deckID int) error { return nil },
+		},
+		gameResult.Functions{
+			GetGameIDForResult: func(ctx context.Context, resultID int) (int, error) { return 1, nil },
+		},
+		podManagerRole(),
+	)
+
+	body, _ := json.Marshal(updateGameResultRequest{Place: 2, KillCount: 1, DeckID: 10})
+	req := withAuth(httptest.NewRequest(http.MethodPatch, "/api/game/result?result_id=5", bytes.NewReader(body)), 42)
+	rr := httptest.NewRecorder()
+	router.UpdateGameResult(rr, req)
+
+	assert.Equal(t, http.StatusOK, rr.Code)
+}
+
+func TestGameRouter_UpdateGameResult_MissingParam(t *testing.T) {
+	router := newFullGameRouter(game.Functions{}, gameResult.Functions{}, nil)
+
+	req := withAuth(httptest.NewRequest(http.MethodPatch, "/api/game/result", nil), 42)
+	rr := httptest.NewRecorder()
+	router.UpdateGameResult(rr, req)
+
+	assert.Equal(t, http.StatusBadRequest, rr.Code)
+}
+
+func TestGameRouter_DeleteGameResult_Success(t *testing.T) {
+	router := newFullGameRouter(
+		game.Functions{
+			GetByID:      func(ctx context.Context, gameID int) (*game.Entity, error) { return gameEntityForPod(1), nil },
+			DeleteResult: func(ctx context.Context, resultID int) error { return nil },
+		},
+		gameResult.Functions{
+			GetGameIDForResult: func(ctx context.Context, resultID int) (int, error) { return 1, nil },
+		},
+		podManagerRole(),
+	)
+
+	req := withAuth(httptest.NewRequest(http.MethodDelete, "/api/game/result?result_id=5", nil), 42)
+	rr := httptest.NewRecorder()
+	router.DeleteGameResult(rr, req)
+
+	assert.Equal(t, http.StatusOK, rr.Code)
+}
+
+func TestGameRouter_DeleteGameResult_MissingParam(t *testing.T) {
+	router := newFullGameRouter(game.Functions{}, gameResult.Functions{}, nil)
+
+	req := withAuth(httptest.NewRequest(http.MethodDelete, "/api/game/result", nil), 42)
+	rr := httptest.NewRecorder()
+	router.DeleteGameResult(rr, req)
+
+	assert.Equal(t, http.StatusBadRequest, rr.Code)
+}

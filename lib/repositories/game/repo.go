@@ -15,9 +15,18 @@ const (
 						 WHERE game_result.deck_id = ?
 						   AND game.deleted_at IS NULL
 						   AND game_result.deleted_at IS NULL;`
-	getGamesByPodId = `SELECT id, description, pod_id, format_id, created_at, updated_at, deleted_at FROM game WHERE pod_id = ? AND deleted_at IS NULL;`
-	insertGame      = `INSERT INTO game (description, pod_id, format_id) VALUES (?, ?, ?);`
-	softDeleteGame  = `UPDATE game SET deleted_at = NOW() WHERE id = ?;`
+	getGamesByPodId    = `SELECT id, description, pod_id, format_id, created_at, updated_at, deleted_at FROM game WHERE pod_id = ? AND deleted_at IS NULL;`
+	getGamesByPlayerID = `SELECT DISTINCT game.id, game.description, game.pod_id, game.format_id, game.created_at, game.updated_at, game.deleted_at
+						    FROM game
+						    INNER JOIN game_result ON game.id = game_result.game_id
+						    INNER JOIN deck ON game_result.deck_id = deck.id
+						   WHERE deck.player_id = ?
+						     AND game.deleted_at IS NULL
+						     AND game_result.deleted_at IS NULL
+						     AND deck.deleted_at IS NULL;`
+	insertGame     = `INSERT INTO game (description, pod_id, format_id) VALUES (?, ?, ?);`
+	updateGame     = `UPDATE game SET description = ? WHERE id = ? AND deleted_at IS NULL;`
+	softDeleteGame = `UPDATE game SET deleted_at = NOW() WHERE id = ?;`
 )
 
 type Repository struct {
@@ -59,6 +68,34 @@ func (r *Repository) GetById(ctx context.Context, gameID int) (*Model, error) {
 		return nil, nil
 	}
 	return &games[0], nil
+}
+
+func (r *Repository) GetAllByPlayerID(ctx context.Context, playerID int) ([]Model, error) {
+	var games []Model
+	if err := r.client.Db.SelectContext(ctx, &games, getGamesByPlayerID, playerID); err != nil {
+		return nil, fmt.Errorf("failed to get Game records for player %d: %w", playerID, err)
+	}
+	if games == nil {
+		return []Model{}, nil
+	}
+	return games, nil
+}
+
+func (r *Repository) Update(ctx context.Context, gameID int, description string) error {
+	result, err := r.client.Db.ExecContext(ctx, updateGame, description, gameID)
+	if err != nil {
+		return fmt.Errorf("failed to update Game record: %w", err)
+	}
+
+	numAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get number of rows affected by update: %w", err)
+	}
+	if numAffected != 1 {
+		return fmt.Errorf("unexpected number of rows affected by Game update: got %d, expected 1", numAffected)
+	}
+
+	return nil
 }
 
 func (r *Repository) Add(ctx context.Context, description string, podID, formatID int) (int, error) {

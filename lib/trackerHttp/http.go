@@ -1,4 +1,4 @@
-package lib
+package trackerHttp
 
 import (
 	"fmt"
@@ -6,18 +6,22 @@ import (
 	"strconv"
 
 	"go.uber.org/zap"
+
+	"github.com/m-sharp/edh-tracker/lib/utils"
 )
 
 type MiddlewareFunc func(nextHandler http.HandlerFunc) http.HandlerFunc
 
-func CORSMiddleware(nextHandler http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Add("Access-Control-Allow-Origin", "*")
-		w.Header().Add("Access-Control-Allow-Credentials", "true")
-		w.Header().Add("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
-		w.Header().Add("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+func CORSMiddleware(origin string) MiddlewareFunc {
+	return func(nextHandler http.HandlerFunc) http.HandlerFunc {
+		return func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Access-Control-Allow-Origin", origin)
+			w.Header().Set("Access-Control-Allow-Credentials", "true")
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
+			w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, PATCH")
 
-		nextHandler(w, r)
+			nextHandler(w, r)
+		}
 	}
 }
 
@@ -27,7 +31,7 @@ func CORSPreflightHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Error(w, "No Content", http.StatusNoContent)
+	w.WriteHeader(http.StatusNoContent)
 }
 
 // GNUMiddleware adds the X-Clacks-Overhead header to keep names alive (https://wiki.lspace.org/GNU_Terry_Pratchett)
@@ -40,10 +44,12 @@ func GNUMiddleware(nextHandler http.HandlerFunc) http.HandlerFunc {
 }
 
 type Route struct {
-	Path       string
-	Method     string
-	Handler    http.HandlerFunc
-	MiddleWare MiddlewareFunc
+	Path        string
+	Method      string
+	Handler     http.HandlerFunc
+	MiddleWare  MiddlewareFunc
+	RequireAuth bool // explicitly require auth (for GET routes that need it)
+	NoAuth      bool // opt out of automatic auth for state-changing routes
 }
 
 type ApiRouter interface {
@@ -61,6 +67,17 @@ func WriteJson(log *zap.Logger, w http.ResponseWriter, marshalled []byte) {
 		log.Error("Failed to return records", zap.Error(err))
 		http.Error(w, "failed to return records", http.StatusInternalServerError)
 	}
+}
+
+// CallerPlayerID extracts the authenticated player ID from the request context.
+// Returns 0, false and writes a 401 response if not present or zero.
+func CallerPlayerID(w http.ResponseWriter, r *http.Request) (int, bool) {
+	_, playerID, ok := utils.UserFromContext(r.Context())
+	if !ok || playerID == 0 {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return 0, false
+	}
+	return playerID, true
 }
 
 func GetQueryId(r *http.Request, key string) (int, error) {

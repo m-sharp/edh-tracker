@@ -15,6 +15,7 @@ import (
 // mockGameResultRepo implements repos.GameResultRepository
 type mockGameResultRepo struct {
 	GetByGameIdFn func(ctx context.Context, gameID int) ([]gameresultrepo.Model, error)
+	GetByIDFn     func(ctx context.Context, resultID int) (*gameresultrepo.Model, error)
 }
 
 func (m *mockGameResultRepo) GetByGameId(ctx context.Context, gameID int) ([]gameresultrepo.Model, error) {
@@ -28,6 +29,18 @@ func (m *mockGameResultRepo) GetStatsForPlayer(ctx context.Context, playerID int
 }
 func (m *mockGameResultRepo) GetStatsForDeck(ctx context.Context, deckID int) (*gameresultrepo.Aggregate, error) {
 	panic("unexpected call to GetStatsForDeck")
+}
+func (m *mockGameResultRepo) GetByID(ctx context.Context, resultID int) (*gameresultrepo.Model, error) {
+	if m.GetByIDFn != nil {
+		return m.GetByIDFn(ctx, resultID)
+	}
+	panic("unexpected call to GetByID")
+}
+func (m *mockGameResultRepo) Add(ctx context.Context, model gameresultrepo.Model) (int, error) {
+	panic("unexpected call to Add")
+}
+func (m *mockGameResultRepo) Update(ctx context.Context, resultID, place, killCount, deckID int) error {
+	panic("unexpected call to Update")
 }
 func (m *mockGameResultRepo) BulkAdd(ctx context.Context, results []gameresultrepo.Model) error {
 	panic("unexpected call to BulkAdd")
@@ -49,7 +62,8 @@ func TestGetByGameID_NoResults(t *testing.T) {
 		panic("should not be called")
 	}
 
-	fn := GetByGameID(repo, getDeckName, getCommanderEntry)
+	getPlayerIDForDeck := func(ctx context.Context, deckID int) (int, error) { return 1, nil }
+	fn := GetByGameID(repo, getDeckName, getCommanderEntry, getPlayerIDForDeck)
 	got, err := fn(context.Background(), 1)
 	require.NoError(t, err)
 	assert.Len(t, got, 0)
@@ -70,7 +84,8 @@ func TestGetByGameID_NoCommander(t *testing.T) {
 		return nil, nil
 	}
 
-	fn := GetByGameID(repo, getDeckName, getCommanderEntry)
+	getPlayerIDForDeck := func(ctx context.Context, deckID int) (int, error) { return 1, nil }
+	fn := GetByGameID(repo, getDeckName, getCommanderEntry, getPlayerIDForDeck)
 	got, err := fn(context.Background(), 1)
 	require.NoError(t, err)
 	require.Len(t, got, 1)
@@ -95,7 +110,8 @@ func TestGetByGameID_WithCommander(t *testing.T) {
 		return &deck.CommanderInfo{CommanderID: 5, CommanderName: "Krenko"}, nil
 	}
 
-	fn := GetByGameID(repo, getDeckName, getCommanderEntry)
+	getPlayerIDForDeck := func(ctx context.Context, deckID int) (int, error) { return 1, nil }
+	fn := GetByGameID(repo, getDeckName, getCommanderEntry, getPlayerIDForDeck)
 	got, err := fn(context.Background(), 1)
 	require.NoError(t, err)
 	require.Len(t, got, 1)
@@ -126,7 +142,8 @@ func TestGetByGameID_WithPartner(t *testing.T) {
 		}, nil
 	}
 
-	fn := GetByGameID(repo, getDeckName, getCommanderEntry)
+	getPlayerIDForDeck := func(ctx context.Context, deckID int) (int, error) { return 1, nil }
+	fn := GetByGameID(repo, getDeckName, getCommanderEntry, getPlayerIDForDeck)
 	got, err := fn(context.Background(), 1)
 	require.NoError(t, err)
 	require.Len(t, got, 1)
@@ -154,7 +171,8 @@ func TestGetByGameID_DeckNameCached(t *testing.T) {
 		return nil, nil
 	}
 
-	fn := GetByGameID(repo, getDeckName, getCommanderEntry)
+	getPlayerIDForDeck := func(ctx context.Context, deckID int) (int, error) { return 1, nil }
+	fn := GetByGameID(repo, getDeckName, getCommanderEntry, getPlayerIDForDeck)
 	got, err := fn(context.Background(), 1)
 	require.NoError(t, err)
 	assert.Len(t, got, 2)
@@ -178,11 +196,35 @@ func TestGetByGameID_PointsCalculation(t *testing.T) {
 		return nil, nil
 	}
 
-	fn := GetByGameID(repo, getDeckName, getCommanderEntry)
+	getPlayerIDForDeck := func(ctx context.Context, deckID int) (int, error) { return 1, nil }
+	fn := GetByGameID(repo, getDeckName, getCommanderEntry, getPlayerIDForDeck)
 	got, err := fn(context.Background(), 1)
 	require.NoError(t, err)
 	require.Len(t, got, 3)
 	assert.Equal(t, 4, got[0].Points) // 2 kills + max(0,3-1)=2 (3-player game, 1st place)
 	assert.Equal(t, 1, got[1].Points) // 0 kills + max(0,3-2)=1 (3-player game, 2nd place)
 	assert.Equal(t, 1, got[2].Points) // 1 kill + max(0,3-4)=0 (3-player game, 4th place)
+}
+
+func TestGetGameIDForResult_Found(t *testing.T) {
+	repo := &mockGameResultRepo{
+		GetByIDFn: func(ctx context.Context, resultID int) (*gameresultrepo.Model, error) {
+			return &gameresultrepo.Model{ModelBase: base.ModelBase{ID: resultID}, GameID: 7}, nil
+		},
+	}
+	fn := GetGameIDForResult(repo)
+	gameID, err := fn(context.Background(), 5)
+	require.NoError(t, err)
+	assert.Equal(t, 7, gameID)
+}
+
+func TestGetGameIDForResult_NotFound(t *testing.T) {
+	repo := &mockGameResultRepo{
+		GetByIDFn: func(ctx context.Context, resultID int) (*gameresultrepo.Model, error) {
+			return nil, nil
+		},
+	}
+	fn := GetGameIDForResult(repo)
+	_, err := fn(context.Background(), 99)
+	assert.ErrorContains(t, err, "not found")
 }

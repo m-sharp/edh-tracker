@@ -7,6 +7,15 @@ import { StatColumns } from "../stats";
 import { Player } from "../types";
 
 export default function View(): ReactElement {
+    // TODO: Should be getting players for a given pod. Will be supplanted by the new pods view described in TODOs in @app/src/routes/decks.tsx
+
+    // TODO: Need to introduce the context of a logged in user. The logged in user should be able to, for instance:
+    //      - view and managed their pods
+    //      - view and manage their decks
+    //      - view players in their pod
+    //      - add and invite new players to their pod (will need roles for "PodManager" and "PodMember" - manager can add members)
+    //      - view a pod player's decks
+    //      - view a pod player's games & record within the pod
     const players = useLoaderData() as Array<Player>;
 
     const columns: Array<GridColDef> = [

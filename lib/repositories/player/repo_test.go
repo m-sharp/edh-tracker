@@ -62,3 +62,29 @@ func TestSoftDelete_Success(t *testing.T) {
 	require.NoError(t, err)
 	assert.NoError(t, mock.ExpectationsWereMet())
 }
+
+func TestUpdate_Success(t *testing.T) {
+	client, mock := newMockDB(t)
+	repo := NewRepository(client)
+
+	mock.ExpectExec(regexp.QuoteMeta(updatePlayer)).
+		WithArgs("NewName", 42).
+		WillReturnResult(sqlmock.NewResult(0, 1))
+
+	err := repo.Update(context.Background(), 42, "NewName")
+	require.NoError(t, err)
+	assert.NoError(t, mock.ExpectationsWereMet())
+}
+
+func TestUpdate_NotFound(t *testing.T) {
+	client, mock := newMockDB(t)
+	repo := NewRepository(client)
+
+	mock.ExpectExec(regexp.QuoteMeta(updatePlayer)).
+		WithArgs("NewName", 99).
+		WillReturnResult(sqlmock.NewResult(0, 0))
+
+	err := repo.Update(context.Background(), 99, "NewName")
+	assert.ErrorContains(t, err, "unexpected number of rows")
+	assert.NoError(t, mock.ExpectationsWereMet())
+}
