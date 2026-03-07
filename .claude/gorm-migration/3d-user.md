@@ -1,7 +1,7 @@
 # Phase 3d — User Repository
 
 ## Status
-Pending
+Approved
 
 ## Skill
 Load `.claude/skills/gorm.md` at the start of each implementation session for this phase.
@@ -134,18 +134,17 @@ func (r *Repository) CreatePlayerAndUser(
     var created Model
 
     err := r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-        // Insert player (using the player package model is not available here;
-        // use a local struct or raw Exec)
-        playerResult := tx.Exec("INSERT INTO player (name) VALUES (?)", playerName)
-        if playerResult.Error != nil {
-            return fmt.Errorf("failed to insert player in CreatePlayerAndUser: %w", playerResult.Error)
+        type playerRow struct {
+            ID   int    `gorm:"primaryKey"`
+            Name string
+        }
+        p := playerRow{Name: playerName}
+        if err := tx.Table("player").Create(&p).Error; err != nil {
+            return fmt.Errorf("failed to insert player in CreatePlayerAndUser: %w", err)
         }
 
-        var playerID int64
-        tx.Raw("SELECT LAST_INSERT_ID()").Scan(&playerID)
-
         created = Model{
-            PlayerID:      int(playerID),
+            PlayerID:      p.ID,
             RoleID:        roleID,
             OAuthProvider: &provider,
             OAuthSubject:  &subject,
@@ -166,21 +165,9 @@ func (r *Repository) CreatePlayerAndUser(
 }
 ```
 
-Note: The player insert inside the transaction intentionally uses a raw `Exec` rather than importing the player repository — this keeps the user package self-contained and avoids circular imports. The `created` model has its ID populated by `tx.Create`.
+The `playerRow` local type uses `tx.Table("player")` to target the correct table without a `TableName()` method. GORM sets `p.ID` from `LAST_INSERT_ID()` after insert. The `player` table's `created_at`/`updated_at` columns are absent from `playerRow`, so GORM won't try to set them — the DB's `DEFAULT NOW()` / `ON UPDATE CURRENT_TIMESTAMP` handle them.
 
-Alternatively, define a local `playerModel` struct scoped to this method:
-
-```go
-type txPlayerModel struct {
-    ID   int `gorm:"primaryKey"`
-    Name string
-}
-func (txPlayerModel) TableName() string { return "player" }
-```
-
-Then use `tx.Create(&txPlayerModel{Name: playerName})` to get the player ID without raw SQL.
-
-Either approach is valid. The local struct approach avoids the `LAST_INSERT_ID()` raw query.
+The `created` user model has its `ID`, `CreatedAt`, and `UpdatedAt` populated by GORM's `tx.Create` directly (from `LAST_INSERT_ID()` and `time.Now()`). No re-select from DB is needed — unlike the sqlx implementation which does a `SELECT` after insert. All fields consumed by `ToEntity` (`ID`, `PlayerID`, `RoleID`, OAuth fields, `CreatedAt`, `UpdatedAt`) are populated correctly.
 
 ## BulkAdd
 
@@ -199,6 +186,20 @@ func (r *Repository) BulkAdd(ctx context.Context, playerIDs []int, roleID int) e
     return nil
 }
 ```
+
+## Behavior Changes from sqlx Migration
+
+**`GetRoleByName` — soft-delete scope now applied**
+
+The original sqlx query (`SELECT ... FROM user_role WHERE name = ?`) has no `deleted_at IS NULL` filter. GORM applies the soft-delete scope automatically because `RoleModel` embeds `GormModelBase` (which has `gorm.DeletedAt`). In practice this is harmless — the two seeded roles (`admin`, `player`) are never soft-deleted.
+
+**`CreatePlayerAndUser` — no re-select after insert**
+
+The sqlx implementation does a `SELECT ... FROM user WHERE id = ?` after inserting the user row to get a fully DB-populated model. The GORM implementation returns the `created` model directly, with `ID`, `CreatedAt`, and `UpdatedAt` populated by GORM during `Create`. The values are functionally equivalent (GORM sets timestamps from `time.Now()`; the DB uses `DEFAULT NOW()`).
+
+**`SoftDelete` — no `RowsAffected` check**
+
+The sqlx implementation checks `RowsAffected == 1` and returns an error if not. The GORM `db.Delete(&Model{}, id)` does not check `RowsAffected`. This is consistent with all other GORM phase implementations.
 
 ## Test Migration
 
