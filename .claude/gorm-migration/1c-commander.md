@@ -1,5 +1,11 @@
 # Phase 1c — Commander Repository
 
+## Status
+Pending
+
+## Skill
+Load `.claude/skills/gorm.md` at the start of each implementation session for this phase.
+
 ## Scope
 
 - Table: `commander`

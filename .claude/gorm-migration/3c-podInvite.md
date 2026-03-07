@@ -1,5 +1,11 @@
 # Phase 3c — PodInvite Repository
 
+## Status
+Pending
+
+## Skill
+Load `.claude/skills/gorm.md` at the start of each implementation session for this phase.
+
 ## Scope
 
 - Table: `pod_invite`

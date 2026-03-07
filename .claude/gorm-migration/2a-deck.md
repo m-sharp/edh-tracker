@@ -1,5 +1,11 @@
 # Phase 2a — Deck Repository
 
+## Status
+Pending
+
+## Skill
+Load `.claude/skills/gorm.md` at the start of each implementation session for this phase.
+
 ## Scope
 
 - Table: `deck`

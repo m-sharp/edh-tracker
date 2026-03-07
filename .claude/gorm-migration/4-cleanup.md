@@ -1,5 +1,11 @@
 # Phase 4 — Final Cleanup
 
+## Status
+Pending
+
+## Skill
+Load `.claude/skills/gorm.md` at the start of each implementation session for this phase.
+
 ## Goal
 
 Remove all sqlx dependencies after all 11 repository domains have been migrated to GORM. Project should compile cleanly with no sqlx references remaining.
@@ -18,6 +24,27 @@ All phases complete:
 - Phase 3b — gameResult
 - Phase 3c — podInvite
 - Phase 3d — user
+
+> Note: `client.Db` is used by all 18 migration files. Migrations must be updated to use
+> `client.GormDb` (or its underlying `*sql.DB`) before `Db *sqlx.DB` can be removed.
+
+## Step 0 — Migrate `lib/migrations/` Off sqlx
+
+All 18 migration files (e.g. `1.go` through `18.go`) and `migrate.go` use `client.Db` directly
+via `QueryRowContext`, `ExecContext`, `QueryContext`, and `BeginTxx`. The `Db *sqlx.DB` field
+cannot be removed until migrations no longer reference it.
+
+Options (choose one before starting Phase 4):
+1. **Run migrations via GORM raw SQL** — replace `client.Db.ExecContext(ctx, sql)` with
+   `r.db.WithContext(ctx).Exec(sql)` (or `r.db.Exec(sql)` for non-contextual calls).
+   Transactions: use `r.db.Transaction(func(tx *gorm.DB) error { ... })`.
+2. **Run migrations via `sqlDB`** — extract the underlying `*sql.DB` from GORM:
+   `sqlDB, _ := client.GormDb.DB()` and use `sqlDB.ExecContext(ctx, sql)` etc.
+   This avoids touching migration SQL while still removing the sqlx dependency.
+
+Recommended: Option 2 (minimal diff — only the field access changes, no migration logic touched).
+
+After this step, `client.Db` has zero remaining callers and Step 1 can proceed.
 
 ## Step 1 — Remove `Db *sqlx.DB` from DBClient
 

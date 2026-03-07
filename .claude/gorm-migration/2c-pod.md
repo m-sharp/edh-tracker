@@ -1,5 +1,11 @@
 # Phase 2c — Pod Repository
 
+## Status
+Pending
+
+## Skill
+Load `.claude/skills/gorm.md` at the start of each implementation session for this phase.
+
 ## Scope
 
 - Tables: `pod`, `player_pod`

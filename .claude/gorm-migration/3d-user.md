@@ -1,5 +1,11 @@
 # Phase 3d — User Repository
 
+## Status
+Pending
+
+## Skill
+Load `.claude/skills/gorm.md` at the start of each implementation session for this phase.
+
 ## Scope
 
 - Tables: `user`, `user_role`
