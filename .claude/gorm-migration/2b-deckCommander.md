@@ -1,7 +1,7 @@
 # Phase 2b — DeckCommander Repository
 
 ## Status
-Pending
+Approved
 
 ## Skill
 Load `.claude/skills/gorm.md` at the start of each implementation session for this phase.
@@ -12,7 +12,7 @@ Load `.claude/skills/gorm.md` at the start of each implementation session for th
 - Files: `lib/repositories/deckCommander/model.go`, `lib/repositories/deckCommander/repo.go`
 - No existing tests — write new integration tests
 - Depends on: deck (Phase 2a), commander (Phase 1c)
-- No business layer changes
+- No business logic changes; `lib/business/deck/functions_test.go` requires a minor collateral fix (see below)
 
 ## GORM Model
 
@@ -37,7 +37,7 @@ func (Model) TableName() string { return "deck_commander" }
 
 | Old (sqlx) | New (GORM) | Notes |
 |---|---|---|
-| `GetByDeckId` | `db.Where("deck_id = ?", deckID).First(&m)` | `ErrRecordNotFound` → nil,nil |
+| `GetByDeckId` | `db.Where("deck_id = ?", deckID).First(&m)` | `ErrRecordNotFound` → nil,nil; `.First()` adds `ORDER BY id ASC LIMIT 1` (original SQL had no ORDER BY — safe, a deck has at most one active commander entry) |
 | `Add` | `db.Create(&m)` | `m.ID` set by GORM |
 | `BulkAdd` | `db.CreateInBatches(&entries, 100)` | No return value needed |
 | `DeleteByDeckID` | `db.Where("deck_id = ?", deckID).Delete(&Model{})` | Soft-delete all rows for deck |
@@ -100,6 +100,20 @@ func (r *Repository) BulkAdd(ctx context.Context, entries []Model) error {
     return nil
 }
 ```
+
+## Collateral Fix — `lib/business/deck/functions_test.go`
+
+Two test helper closures construct `deckCommanderrepo.Model` using the old embedded field name `ModelBase: base.ModelBase{ID: 1}`. After the model switches to `GormModelBase`, this fails to compile. Drop the base field entirely — the ID is never asserted on in these tests:
+
+```go
+// Before (two locations, lines ~222 and ~245):
+&deckCommanderrepo.Model{ModelBase: base.ModelBase{ID: 1}, DeckID: 7, CommanderID: 5}
+
+// After:
+&deckCommanderrepo.Model{DeckID: 7, CommanderID: 5}
+```
+
+If, after removing the `base.ModelBase` references, the `base` import is no longer used elsewhere in the file, remove it from the import block.
 
 ## Test Migration
 
