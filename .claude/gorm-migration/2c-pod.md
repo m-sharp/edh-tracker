@@ -1,7 +1,7 @@
 # Phase 2c — Pod Repository
 
 ## Status
-Pending
+Approved
 
 ## Skill
 Load `.claude/skills/gorm.md` at the start of each implementation session for this phase.
@@ -50,7 +50,7 @@ func (PlayerPodModel) TableName() string { return "player_pod" }
 | `GetPlayerIDs` | `db.Model(&PlayerPodModel{}).Where(...).Pluck("player_id", &ids)` | Pluck scalar list |
 | `Add` | `db.Create(&m)` | `m.ID` set by GORM |
 | `BulkAddPlayers` | `db.CreateInBatches(&entries, 100)` | Junction table bulk insert |
-| `AddPlayerToPod` | `db.Create(&PlayerPodModel{...})` | Check RowsAffected |
+| `AddPlayerToPod` | `db.Create(&PlayerPodModel{...})` | Error-only; RowsAffected check dropped (see below) |
 | `SoftDelete` | `db.Delete(&Model{}, podID)` | Sets deleted_at |
 | `Update` | `db.Model(&Model{}).Where("id = ?", podID).Update("name", name)` | |
 | `RemovePlayer` | `db.Where("pod_id = ? AND player_id = ?", ...).Delete(&PlayerPodModel{})` | Soft-delete junction row |
@@ -122,7 +122,7 @@ func (r *Repository) GetPlayerIDs(ctx context.Context, podID int) ([]int, error)
 }
 ```
 
-Note: Explicit `AND deleted_at IS NULL` in Pluck queries because `PlayerPodModel` embeds `GormModelBase` which uses `gorm.DeletedAt` — GORM should apply the soft-delete filter, but be explicit in WHERE to be safe with the junction table context.
+Note: `PlayerPodModel` embeds `GormModelBase` (which contains `gorm.DeletedAt`), so GORM applies `AND deleted_at IS NULL` automatically when `Model(&PlayerPodModel{})` is used. The explicit `AND deleted_at IS NULL` in the WHERE clause is redundant but retained for readability.
 
 ## Special Pattern — BulkAddPlayers
 
@@ -141,6 +141,34 @@ func (r *Repository) BulkAddPlayers(ctx context.Context, podID int, playerIDs []
     return nil
 }
 ```
+
+## Special Pattern — AddPlayerToPod
+
+The current implementation checks `numAffected != 1` after `ExecContext`. With GORM's `Create`, the insert either succeeds (exactly 1 row) or returns an error — the RowsAffected check adds nothing:
+
+```go
+func (r *Repository) AddPlayerToPod(ctx context.Context, podID, playerID int) error {
+    m := PlayerPodModel{PodID: podID, PlayerID: playerID}
+    if err := r.db.WithContext(ctx).Create(&m).Error; err != nil {
+        return fmt.Errorf("failed to insert PlayerPod record: %w", err)
+    }
+    return nil
+}
+```
+
+## Behavior Changes from sqlx Migration
+
+**`SoftDelete` (pod) — GORM adds soft-delete scope**
+
+The original SQL (`UPDATE pod SET deleted_at = NOW() WHERE id = ?`) has no `deleted_at IS NULL` guard — it would re-stamp `deleted_at` on an already-deleted pod. GORM's `db.Delete(&Model{}, podID)` adds the soft-delete scope automatically, so it has no effect on already-deleted pods. Strictly safer behavior.
+
+**`AddPlayerToPod` — RowsAffected check removed**
+
+The original implementation checks `numAffected != 1` and returns an error. The GORM version relies solely on `Create`'s error return, which is equivalent — `Create` always inserts exactly 1 row or errors.
+
+**`Update` (pod) — no RowsAffected check in either version**
+
+Neither the original SQL (`UPDATE pod SET name = ? WHERE id = ? AND deleted_at IS NULL`) nor the GORM version checks RowsAffected. If the pod ID doesn't exist or is already deleted, the update is a silent no-op. This is consistent behavior, not a regression.
 
 ## Test Migration
 
