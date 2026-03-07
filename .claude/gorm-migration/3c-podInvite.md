@@ -1,7 +1,7 @@
 # Phase 3c — PodInvite Repository
 
 ## Status
-Pending
+Approved
 
 ## Skill
 Load `.claude/skills/gorm.md` at the start of each implementation session for this phase.
@@ -38,13 +38,15 @@ func (Model) TableName() string { return "pod_invite" }
 
 `ExpiresAt` is nullable (`*time.Time`) — GORM handles this correctly.
 
+All field names infer correct column names via GORM's snake_case convention (`PodID` → `pod_id`, `InviteCode` → `invite_code`, `CreatedByPlayerID` → `created_by_player_id`, `UsedCount` → `used_count`). No explicit `gorm:"column:..."` tags needed.
+
 ## Method Mapping
 
 | Old (sqlx) | New (GORM) | Notes |
 |---|---|---|
-| `GetByCode` | `db.Where("invite_code = ?", code).First(&m)` | `ErrRecordNotFound` → nil,nil |
+| `GetByCode` | `db.Where("invite_code = ?", code).First(&m)` | `ErrRecordNotFound` → nil,nil; soft-delete scope automatic |
 | `Add` | `db.Create(&m)` | No ID needed; return error only |
-| `IncrementUsedCount` | Raw `UPDATE` via `db.Exec` | See below |
+| `IncrementUsedCount` | `gorm.Expr("used_count + 1")` via `Model(&Model{}).Where(...).Update(...)` | See below |
 
 ## Repository Field
 
@@ -77,40 +79,46 @@ func (r *Repository) Add(ctx context.Context, podID, createdByPlayerID int, code
 }
 ```
 
-## Special Pattern — IncrementUsedCount (raw UPDATE)
+## Special Pattern — IncrementUsedCount (gorm.Expr)
 
-`used_count = used_count + 1` can't be expressed safely as a GORM `Update` (it would send the literal value, not an expression). Use `db.Exec` for this:
+`used_count = used_count + 1` must use a SQL expression rather than a Go literal to avoid GORM sending the pre-incremented value. Use `gorm.Expr`:
 
 ```go
 func (r *Repository) IncrementUsedCount(ctx context.Context, code string) error {
-    err := r.db.WithContext(ctx).
-        Exec("UPDATE pod_invite SET used_count = used_count + 1 WHERE invite_code = ?", code).
-        Error
-    if err != nil {
-        return fmt.Errorf("failed to increment used_count for invite %q: %w", code, err)
+    result := r.db.WithContext(ctx).Model(&Model{}).
+        Where("invite_code = ?", code).
+        Update("used_count", gorm.Expr("used_count + 1"))
+    if result.Error != nil {
+        return fmt.Errorf("failed to increment used_count for invite %q: %w", code, result.Error)
     }
     return nil
 }
 ```
 
-Alternatively, use GORM's expression support:
-```go
-r.db.WithContext(ctx).Model(&Model{}).
-    Where("invite_code = ?", code).
-    Update("used_count", gorm.Expr("used_count + 1"))
-```
+`Model(&Model{})` applies the soft-delete scope automatically (`AND deleted_at IS NULL`). In practice this is unreachable — the business layer always calls `GetByCode` first (which won't return deleted invites) before calling `IncrementUsedCount`. No `RowsAffected` check needed.
 
-Either approach is acceptable. The `gorm.Expr` approach is more idiomatic GORM.
+## Behavior Changes from sqlx Migration
+
+**`GetByCode` — behavior equivalent, no change**
+
+The original SQL explicitly has `AND deleted_at IS NULL` and `LIMIT 1`. GORM's `First` on a model embedding `gorm.DeletedAt` applies the soft-delete scope automatically, and `First` always adds `LIMIT 1`. Behavior is identical.
+
+**`IncrementUsedCount` — soft-delete scope now applied**
+
+The original SQL has no `deleted_at IS NULL` guard — it could increment `used_count` on a soft-deleted invite. The `gorm.Expr` implementation uses `Model(&Model{})` which adds the soft-delete scope automatically, making updates to deleted invites a silent no-op. This is an intentional minor change: in practice the business layer always calls `GetByCode` first (which returns nil for deleted invites), so `IncrementUsedCount` is never called with a deleted code.
 
 ## Test Migration
 
 Remove existing sqlmock tests. Replace with integration tests.
 
+**FK prerequisites:** `pod_invite` has foreign keys to `pod(id)` and `player(id)`. Each test that inserts a `pod_invite` row must first insert prerequisite `player` and `pod` rows within the same transaction. The tx rollback cleanup handles all of these automatically.
+
 Tests to write:
-- `TestGetByCode_Found` — with and without expiresAt
+- `TestGetByCode_Found_WithExpiry` — invite with non-nil `ExpiresAt`; verify all fields
+- `TestGetByCode_Found_NoExpiry` — invite with nil `ExpiresAt`; verify `ExpiresAt` is nil
 - `TestGetByCode_NotFound`
-- `TestAdd_WithExpiry` / `TestAdd_NoExpiry`
-- `TestIncrementUsedCount` — verify used_count goes from 0 to 1 to 2
+- `TestAdd_WithExpiry` / `TestAdd_NoExpiry` — insert then `GetByCode` to verify
+- `TestIncrementUsedCount` — insert invite (used_count = 0), call once → verify 1, call again → verify 2; read back via `GetByCode` after each call
 
 Add `testhelpers_test.go` with `newTestDB(t)` (tx rollback pattern — see Phase 0). No explicit cleanup needed: `t.Cleanup` rolls back the transaction automatically.
 
