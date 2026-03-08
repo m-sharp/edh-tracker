@@ -1,7 +1,14 @@
 # Phase 4 — GORM Preloading & Associations
 
 ## Status
-Needs Review
+Superseded
+
+This plan has been broken into targeted sub-phases. See:
+- 4a-gameResults.md
+- 4b-deckCommander.md
+- 4c-deckBelongsTo.md
+- 4d-gameResultDeck.md
+- 4e-podMembers.md
 
 ## Goal
 
