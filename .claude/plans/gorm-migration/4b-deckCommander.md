@@ -1,7 +1,7 @@
 # Phase 4b — Preloading: deck.Model → deckCommander.Model → commander.Model
 
 ## Status
-Needs Review
+Approved
 
 ## Skill
 Load `.claude/skills/gorm.md` at the start of each implementation session for this phase.
@@ -13,8 +13,9 @@ Eliminate the per-deck commander lookups in deck listing functions
 
 Current pattern: per-deck `getCommanderEntry` calls make 1 query to `deck_commander`
 plus 1–2 queries to `commander` (for name + optional partner name) = 2–3 queries per deck.
-After: 2 batched queries regardless of deck count (one for deck_commander rows, one for
-commander rows), loaded via nested GORM `Preload`.
+After: up to 3 batched queries regardless of deck count (deck_commander rows, commander rows,
+and a separate batch for partner commander rows when any deck has a partner), loaded via
+nested GORM `Preload`.
 
 ## Scope
 
@@ -43,8 +44,8 @@ type Model struct {
     CommanderID        int
     PartnerCommanderID *int
     // Associations — populated when preloaded.
-    Commander        commanderRepo.Model  // BelongsTo via CommanderID
-    PartnerCommander *commanderRepo.Model // BelongsTo via PartnerCommanderID (nil if no partner)
+    Commander        commanderRepo.Model  `gorm:"foreignKey:CommanderID"`        // BelongsTo via CommanderID
+    PartnerCommander *commanderRepo.Model `gorm:"foreignKey:PartnerCommanderID"` // BelongsTo via PartnerCommanderID (nil if no partner)
 }
 
 func (Model) TableName() string { return "deck_commander" }
@@ -162,6 +163,8 @@ func commanderInfoFromModel(d deckRepo.Model) *CommanderInfo {
     }
     if d.Commander.PartnerCommanderID != nil {
         entry.PartnerCommanderID = d.Commander.PartnerCommanderID
+        // PartnerCommander is guaranteed non-nil here: GORM always loads a BelongsTo
+        // association when its FK is non-nil and referential integrity holds.
         name := d.Commander.PartnerCommander.Name
         entry.PartnerCommanderName = &name
     }
@@ -177,6 +180,10 @@ repo methods and call `commanderInfoFromModel(d)` instead of `getCommanderEntry(
 The `getCommanderEntry GetCommanderEntryFunc` parameter is **removed** from these four
 constructors. `GetCommanderEntry` (the closure constructor) remains in place for callers
 that still need point lookups by deck ID (e.g., `gameResult.GetByGameID` until Phase 4d).
+
+Note: `GetAllByPod`'s internal deck fetch changes from `deckRepo.GetAllByPlayerIDs` to
+`deckRepo.GetAllByPlayerIDsWithCommanders` — this is the only non-obvious repo call change
+in the business layer (the enrichment loop structure is otherwise unchanged).
 
 Example diff for `GetAll`:
 
@@ -220,10 +227,10 @@ Decks: deck.Functions{
 
 | Function | Before | After |
 |----------|--------|-------|
-| GetAll (N decks) | 2–3 per-deck | 2 batched (deckCommander + commander) |
-| GetAllForPlayer (N decks) | 2–3 per-deck | 2 batched |
-| GetAllByPod (N decks) | 2–3 per-deck | 2 batched |
-| GetByID | 2–3 queries | 2 queries |
+| GetAll (N decks) | 2–3 per-deck | up to 3 batched (deck_commander + commander + partner commander) |
+| GetAllForPlayer (N decks) | 2–3 per-deck | up to 3 batched |
+| GetAllByPod (N decks) | 2–3 per-deck | up to 3 batched |
+| GetByID | 2–3 queries | up to 3 queries |
 
 `getPlayerName` and `getFormat` per-deck calls unchanged — addressed in Phase 4c.
 
