@@ -1,7 +1,7 @@
 # Phase 4a — Preloading: game.Model → []gameResult.Model
 
 ## Status
-Needs Review
+Approved
 
 ## Skill
 Load `.claude/skills/gorm.md` at the start of each implementation session for this phase.
@@ -142,7 +142,7 @@ func EnrichModels(
         for _, r := range models {
             // Same enrichment logic as GetByGameID inner loop:
             // - resolve deck name (cached)
-            // - resolve playerID (cached)
+            // - resolve playerID via cachedPlayerIDForDeck (reuse the existing private helper — do NOT duplicate inline)
             // - resolve commander entry
             // - compute points via utils.GetPointsForPlace
         }
@@ -233,8 +233,13 @@ Per-result enrichment (deck name, commander, player ID) unchanged — addressed 
 
 - Integration tests for each `Get*WithResults` repo method
 - Verify preloaded `Results` is populated and soft-deleted results are excluded
-- Business layer tests: update `GetAllByPod` etc. to inject mock `EnrichModelsFunc`
-  instead of `GetByGameIDFunc`
+- Business layer tests (`lib/business/game/functions_test.go`): update all four tests that
+  currently inject a mock `GetByGameIDFunc` (`TestGetByID_NotFound`,
+  `TestGetAllByPod_ResultErrorDropsGame`, `TestGetAllByPlayer_ResultErrorDropsGame`,
+  `TestGetAllByPlayer_RepoError`) to inject a mock `EnrichModelsFunc` instead — the mock
+  signature changes from `func(ctx, gameID int) ([]Entity, error)` to
+  `func(ctx, []gameResultRepo.Model) ([]Entity, error)`; the mock game repo methods used in
+  those tests must also call `Get*WithResults` variants (update `mockGameRepo` accordingly)
 
 ## Verification
 
