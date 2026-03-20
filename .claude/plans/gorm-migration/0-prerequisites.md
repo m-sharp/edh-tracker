@@ -101,53 +101,19 @@ type GormModelBase struct {
 
 ## Step 4 — Integration Test Infrastructure
 
-For each repo package that is migrated, create a `testhelpers_test.go` file with a `newTestDB(t)` helper. This pattern is the same across all packages:
+`base.NewTestDB(t)` already exists in `lib/repositories/base/testHelpers.go`. Do **not** create a per-package `testhelpers_test.go`.
+
+In each package's `repo_test.go`, define a domain-specific helper that wraps it:
 
 ```go
-package <domain>
-
-import (
-    "fmt"
-    "os"
-    "testing"
-
-    gormmysql "gorm.io/driver/mysql"
-    "gorm.io/gorm"
-    "github.com/stretchr/testify/require"
-)
-
-func newTestDB(t *testing.T) *gorm.DB {
+func newRepo(t *testing.T) *Repository {
     t.Helper()
-    host := os.Getenv("TEST_DBHOST")
-    if host == "" {
-        t.Skip("TEST_DBHOST not set; skipping integration test")
-    }
-    dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true",
-        os.Getenv("TEST_DBUSER"),
-        os.Getenv("TEST_DBPASSWORD"),
-        host,
-        os.Getenv("TEST_DBPORT"),
-        os.Getenv("TEST_DBNAME"),
-    )
-    db, err := gorm.Open(gormmysql.Open(dsn), &gorm.Config{})
-    require.NoError(t, err)
-    tx := db.Begin()
-    require.NoError(t, tx.Error)
-    t.Cleanup(func() { tx.Rollback() })
-    return tx
+    db := base.NewTestDB(t)
+    return &Repository{db: db}
 }
 ```
 
-Tests that require a real DB call `t.Skip` when `TEST_DBHOST` is unset, so they are safe to run in CI without a DB.
-
-The returned `*gorm.DB` is a transaction. `t.Cleanup` rolls it back, so no explicit table cleanup is needed — inserted rows are never committed. This avoids truncation (which fails with FK constraints) and prevents pollution of local test data.
-
-Required env vars:
-- `TEST_DBHOST`
-- `TEST_DBUSER`
-- `TEST_DBPASSWORD`
-- `TEST_DBPORT`
-- `TEST_DBNAME` (recommended: `pod_tracker_test` — a dedicated test DB with the same schema)
+`base.NewTestDB` opens a connection to `host.docker.internal:3306/pod_tracker`, begins a transaction, and registers a `t.Cleanup` rollback — no explicit table cleanup needed.
 
 ## Verification
 

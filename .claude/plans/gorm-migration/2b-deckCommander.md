@@ -124,7 +124,7 @@ No existing tests. Write new integration tests:
 - `TestBulkAdd`
 - `TestDeleteByDeckID` — soft-deletes all entries; GetByDeckId returns nil after
 
-Add `testhelpers_test.go` with `newTestDB(t)` (tx rollback pattern — see Phase 0). No explicit cleanup needed: `t.Cleanup` rolls back the transaction automatically.
+Use `base.NewTestDB(t)` from `lib/repositories/base/testHelpers.go`. Define a `newRepo(t)` helper in `repo_test.go` (see Phase 1a pattern). No `testhelpers_test.go` needed.
 
 ## Verification
 

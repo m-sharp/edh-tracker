@@ -94,10 +94,10 @@ No existing tests. Write new integration tests:
 - `TestAdd` — returns correct ID
 - `TestBulkAdd` — inserts and returns models
 
-Add `testhelpers_test.go` with `newTestDB(t)` (tx rollback pattern — see Phase 0). No explicit cleanup needed: `t.Cleanup` rolls back the transaction automatically.
+Use `base.NewTestDB(t)` from `lib/repositories/base/testHelpers.go`. Define a `newRepo(t)` helper in `repo_test.go` (see Phase 1a pattern). No `testhelpers_test.go` needed.
 
 ## Verification
 
 1. `go vet ./lib/...` passes
-2. `go test ./lib/repositories/commander/...` passes (or skips if TEST_DBHOST unset)
+2. `go test ./lib/repositories/commander/...` passes (or skips)
 3. Smoke test: `POST /api/deck` (which creates commanders) returns 201

@@ -98,10 +98,10 @@ No existing tests. Write new integration tests:
 
 Note: Format table is seed-only. Tests can use known seeded values (e.g. "Commander") rather than inserting. Alternatively, the test DB should have formats seeded via migrations.
 
-Add `testhelpers_test.go` with `newTestDB(t)` (tx rollback pattern — see Phase 0). No explicit cleanup needed: format is read-only (seeded via migrations), so tx rollback is a no-op but harmless.
+Use `base.NewTestDB(t)` from `lib/repositories/base/testHelpers.go`. Define a `newRepo(t)` helper in `repo_test.go` (see Phase 1a pattern). No `testhelpers_test.go` needed.
 
 ## Verification
 
 1. `go vet ./lib/...` passes
-2. `go test ./lib/repositories/format/...` passes (or skips if TEST_DBHOST unset)
+2. `go test ./lib/repositories/format/...` passes (or skips)
 3. Smoke test: `GET /api/formats` returns 200
