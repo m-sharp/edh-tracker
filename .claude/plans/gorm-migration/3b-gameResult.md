@@ -55,6 +55,10 @@ type Repository struct {
 func NewRepository(client *lib.DBClient) *Repository {
     return &Repository{db: client.GormDb}
 }
+
+func NewRepositoryFromDB(db *gorm.DB) *Repository {
+    return &Repository{db: db}
+}
 ```
 
 ## Special Pattern — Add (takes full Model)
@@ -194,7 +198,18 @@ Tests to write in `repo_test.go`:
 - `TestGetStatsForPlayer` — requires game + deck + player rows; verify kills, points, record
 - `TestGetStatsForDeck` — similar
 
-Use `base.NewTestDB(t)` from `lib/repositories/base/testHelpers.go`. Define a `newRepo(t)` helper in `repo_test.go` (see Phase 1a pattern). No `testhelpers_test.go` needed.
+**Test infrastructure:** Test file uses `package gameResult_test`. Set up each test with:
+
+```go
+db := testHelpers.NewTestDB(t)
+repo := testHelpers.NewGameResultRepo(db)
+```
+
+FK prerequisites: use `testHelpers.CreateTestGame(t, db)` and `testHelpers.CreateTestDeck(t, db)` for game and deck IDs.
+
+**As part of this phase**, add to `testHelpers/helpers.go`:
+- `NewGameResultRepo(db *gorm.DB) *gameResult.Repository` — wrapper over `gameResult.NewRepositoryFromDB`
+- `CreateTestGameResult(t, db, gameID, deckID int) int` — inserts a game_result row and returns its ID (used by phase 4a)
 
 ## Verification
 

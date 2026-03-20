@@ -74,6 +74,10 @@ type Repository struct {
 func NewRepository(client *lib.DBClient) *Repository {
     return &Repository{db: client.GormDb}
 }
+
+func NewRepositoryFromDB(db *gorm.DB) *Repository {
+    return &Repository{db: db}
+}
 ```
 
 ## Special Pattern — GetRoleByName (error on not found)
@@ -214,7 +218,17 @@ No existing tests. Write new integration tests:
 - `TestBulkAdd`
 - `TestSoftDelete`
 
-Use `base.NewTestDB(t)` from `lib/repositories/base/testHelpers.go`. Define a `newRepo(t)` helper in `repo_test.go` (see Phase 1a pattern). No `testhelpers_test.go` needed.
+**Test infrastructure:** Test file uses `package user_test`. Set up each test with:
+
+```go
+db := testHelpers.NewTestDB(t)
+repo := testHelpers.NewUserRepo(db)
+```
+
+FK prerequisites: use `testHelpers.CreateTestPlayer(t, db)` for player IDs. The two seeded `user_role` rows (`admin`, `player`) can be looked up by name via `repo.GetRoleByName` or their IDs hardcoded as `1` / `2` if verified stable.
+
+**As part of this phase**, add to `testHelpers/helpers.go`:
+- `NewUserRepo(db *gorm.DB) *user.Repository` — wrapper over `user.NewRepositoryFromDB`
 
 **Exception — `TestCreatePlayerAndUser`:** This test calls `r.db.Transaction(...)` internally. MySQL does not support true nested transactions — an inner `BEGIN` implicitly commits the outer transaction, defeating the tx rollback cleanup. For this test only, use `DELETE FROM user WHERE id = ?` and `DELETE FROM player WHERE id = ?` (using IDs from the returned model) in a dedicated `t.Cleanup` closure instead of relying on the outer rollback.
 

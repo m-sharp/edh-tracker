@@ -65,6 +65,10 @@ type Repository struct {
 func NewRepository(client *lib.DBClient) *Repository {
     return &Repository{db: client.GormDb}
 }
+
+func NewRepositoryFromDB(db *gorm.DB) *Repository {
+    return &Repository{db: db}
+}
 ```
 
 ## Special Pattern — GetByPlayerID (JOIN)
@@ -186,7 +190,16 @@ No existing tests. Write new integration tests:
 - `TestUpdate`
 - `TestRemovePlayer` — player_pod row soft-deleted; not returned by GetPlayerIDs
 
-Use `base.NewTestDB(t)` from `lib/repositories/base/testHelpers.go`. Define a `newRepo(t)` helper in `repo_test.go` (see Phase 1a pattern). No `testhelpers_test.go` needed.
+**Test infrastructure:** Test file uses `package pod_test`. Set up each test with:
+
+```go
+db := testHelpers.NewTestDB(t)
+repo := testHelpers.NewPodRepo(db)
+```
+
+**As part of this phase**, add to `testHelpers/helpers.go`:
+- `NewPodRepo(db *gorm.DB) *pod.Repository` — wrapper over `pod.NewRepositoryFromDB`
+- `CreateTestPod(t, db) int` — inserts a pod row and returns its ID (used by phases 2d, 3a, 3c)
 
 ## Verification
 

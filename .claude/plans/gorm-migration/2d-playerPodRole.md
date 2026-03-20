@@ -54,6 +54,10 @@ type Repository struct {
 func NewRepository(client *lib.DBClient) *Repository {
     return &Repository{db: client.GormDb}
 }
+
+func NewRepositoryFromDB(db *gorm.DB) *Repository {
+    return &Repository{db: db}
+}
 ```
 
 ## Special Pattern — SetRole (Upsert via ON DUPLICATE KEY UPDATE)
@@ -118,7 +122,17 @@ Tests to write:
 - `TestGetMembersWithRoles` — returns all non-deleted roles for pod
 - `TestBulkAdd`
 
-Use `base.NewTestDB(t)` from `lib/repositories/base/testHelpers.go`. Define a `newRepo(t)` helper in `repo_test.go` (see Phase 1a pattern). No `testhelpers_test.go` needed.
+**Test infrastructure:** Test file uses `package playerPodRole_test`. Set up each test with:
+
+```go
+db := testHelpers.NewTestDB(t)
+repo := testHelpers.NewPlayerPodRoleRepo(db)
+```
+
+FK prerequisites: use `testHelpers.CreateTestPod(t, db)` and `testHelpers.CreateTestPlayer(t, db)` for pod and player IDs.
+
+**As part of this phase**, add to `testHelpers/helpers.go`:
+- `NewPlayerPodRoleRepo(db *gorm.DB) *playerPodRole.Repository` — wrapper over `playerPodRole.NewRepositoryFromDB`
 
 ## Verification
 

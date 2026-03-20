@@ -1,7 +1,7 @@
 # Phase 2b — DeckCommander Repository
 
 ## Status
-Approved
+Done
 
 ## Skill
 Use the `/gorm` skill tool at the start of each implementation session for this phase.

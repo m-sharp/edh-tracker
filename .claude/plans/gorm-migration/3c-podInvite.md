@@ -58,6 +58,10 @@ type Repository struct {
 func NewRepository(client *lib.DBClient) *Repository {
     return &Repository{db: client.GormDb}
 }
+
+func NewRepositoryFromDB(db *gorm.DB) *Repository {
+    return &Repository{db: db}
+}
 ```
 
 ## Special Pattern — Add (no returned ID)
@@ -120,7 +124,17 @@ Tests to write:
 - `TestAdd_WithExpiry` / `TestAdd_NoExpiry` — insert then `GetByCode` to verify
 - `TestIncrementUsedCount` — insert invite (used_count = 0), call once → verify 1, call again → verify 2; read back via `GetByCode` after each call
 
-Use `base.NewTestDB(t)` from `lib/repositories/base/testHelpers.go`. Define a `newRepo(t)` helper in `repo_test.go` (see Phase 1a pattern). No `testhelpers_test.go` needed.
+**Test infrastructure:** Test file uses `package podInvite_test`. Set up each test with:
+
+```go
+db := testHelpers.NewTestDB(t)
+repo := testHelpers.NewPodInviteRepo(db)
+```
+
+FK prerequisites: use `testHelpers.CreateTestPod(t, db)` and `testHelpers.CreateTestPlayer(t, db)` for pod and player IDs.
+
+**As part of this phase**, add to `testHelpers/helpers.go`:
+- `NewPodInviteRepo(db *gorm.DB) *podInvite.Repository` — wrapper over `podInvite.NewRepositoryFromDB`
 
 ## Verification
 

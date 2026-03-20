@@ -54,6 +54,10 @@ type Repository struct {
 func NewRepository(client *lib.DBClient) *Repository {
     return &Repository{db: client.GormDb}
 }
+
+func NewRepositoryFromDB(db *gorm.DB) *Repository {
+    return &Repository{db: db}
+}
 ```
 
 ## Special Pattern — GetAllByDeck (JOIN)
@@ -190,7 +194,18 @@ Tests to write:
 - `TestUpdate` / `TestUpdate_NotFound`
 - `TestSoftDelete`
 
-Use `base.NewTestDB(t)` from `lib/repositories/base/testHelpers.go`. Define a `newRepo(t)` helper in `repo_test.go` (see Phase 1a pattern). No `testhelpers_test.go` needed.
+**Test infrastructure:** Test file uses `package game_test`. Set up each test with:
+
+```go
+db := testHelpers.NewTestDB(t)
+repo := testHelpers.NewGameRepo(db)
+```
+
+FK prerequisites: use `testHelpers.CreateTestPod(t, db)` for pod IDs; format ID `1` is seeded and may be hardcoded.
+
+**As part of this phase**, add to `testHelpers/helpers.go`:
+- `NewGameRepo(db *gorm.DB) *game.Repository` — wrapper over `game.NewRepositoryFromDB`
+- `CreateTestGame(t, db) int` — inserts a game row (using `CreateTestPod` + format ID 1) and returns its ID (used by phases 3b, 4a)
 
 ## Verification
 

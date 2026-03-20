@@ -101,19 +101,20 @@ type GormModelBase struct {
 
 ## Step 4 — Integration Test Infrastructure
 
-`base.NewTestDB(t)` already exists in `lib/repositories/base/testHelpers.go`. Do **not** create a per-package `testhelpers_test.go`.
+The shared test helper package lives at `lib/repositories/testHelpers/`:
 
-In each package's `repo_test.go`, define a domain-specific helper that wraps it:
+- `testHelpers.NewTestDB(t)` — opens a connection to `host.docker.internal:3306/pod_tracker`, begins a transaction, and registers a `t.Cleanup` rollback — no explicit table cleanup needed.
+- `testHelpers.New<Domain>Repo(db)` — thin wrappers over each repo's `NewRepositoryFromDB`.
+- `testHelpers.CreateTest*` helpers — insert FK prerequisites and return the generated ID.
+
+Each repo test file uses an **external test package** (`package <domain>_test`) and sets up per-test with two lines — no shared `newRepo` helper:
 
 ```go
-func newRepo(t *testing.T) *Repository {
-    t.Helper()
-    db := base.NewTestDB(t)
-    return &Repository{db: db}
-}
+db := testHelpers.NewTestDB(t)
+repo := testHelpers.NewPlayerRepo(db)
 ```
 
-`base.NewTestDB` opens a connection to `host.docker.internal:3306/pod_tracker`, begins a transaction, and registers a `t.Cleanup` rollback — no explicit table cleanup needed.
+`base/testHelpers.go` has been deleted; `base.NewTestDB` no longer exists. All new and migrated tests import `testHelpers` directly.
 
 ## Verification
 
