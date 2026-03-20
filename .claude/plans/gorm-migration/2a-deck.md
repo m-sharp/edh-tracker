@@ -37,6 +37,10 @@ type UpdateFields struct {
     FormatID *int
     Retired  *bool
 }
+
+func (u UpdateFields) HasChanges() bool {
+    return u.Name != nil || u.FormatID != nil || u.Retired != nil
+}
 ```
 
 ## Method Mapping
@@ -49,7 +53,7 @@ type UpdateFields struct {
 | `GetById` | `db.First(&m, deckID)` | `ErrRecordNotFound` → nil,nil |
 | `Add` | `db.Create(&m)` | `m.ID` set by GORM |
 | `BulkAdd` | `db.CreateInBatches(&models, 100)` + select-back | See below |
-| `Update` | dynamic map-based `db.Updates(map)` | See UpdateFields pattern |
+| `Update` | struct-based `db.Updates(updated)` | See UpdateFields pattern |
 | `Retire` | `db.Model(&Model{}).Where("id = ?", id).Update("retired", true)` | Check RowsAffected |
 | `SoftDelete` | `db.Delete(&Model{}, id)` | Sets deleted_at automatically |
 
@@ -97,18 +101,20 @@ This simplifies the business layer slightly — verify callers only need the ret
 
 ## Special Pattern — Dynamic Update (UpdateFields)
 
-Use a `map[string]any` to avoid GORM skipping zero values:
+Build a minimal Model{} with only the changed (non-nil pointer) fields set. GORM skips zero-value fields in struct updates, which is safe here because only dereferenced non-nil pointers are assigned:
 
 ```go
 func (r *Repository) Update(ctx context.Context, deckID int, fields UpdateFields) error {
-    updates := map[string]any{}
-    if fields.Name != nil     { updates["name"] = *fields.Name }
-    if fields.FormatID != nil { updates["format_id"] = *fields.FormatID }
-    if fields.Retired != nil  { updates["retired"] = *fields.Retired }
-    if len(updates) == 0 {
+    if !fields.HasChanges() {
         return nil
     }
-    result := r.db.WithContext(ctx).Model(&Model{}).Where("id = ?", deckID).Updates(updates)
+
+    updated := Model{}
+    if fields.Name != nil     { updated.Name = *fields.Name }
+    if fields.FormatID != nil { updated.FormatID = *fields.FormatID }
+    if fields.Retired != nil  { updated.Retired = *fields.Retired }
+
+    result := r.db.WithContext(ctx).Model(&Model{}).Where("id = ?", deckID).Updates(updated)
     if result.Error != nil {
         return fmt.Errorf("failed to update Deck record: %w", result.Error)
     }

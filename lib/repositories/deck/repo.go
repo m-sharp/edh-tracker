@@ -85,20 +85,22 @@ func (r *Repository) GetAllByPlayerIDs(ctx context.Context, playerIDs []int) ([]
 }
 
 func (r *Repository) Update(ctx context.Context, deckID int, fields UpdateFields) error {
-	updates := map[string]any{}
-	if fields.Name != nil {
-		updates["name"] = *fields.Name
-	}
-	if fields.FormatID != nil {
-		updates["format_id"] = *fields.FormatID
-	}
-	if fields.Retired != nil {
-		updates["retired"] = *fields.Retired
-	}
-	if len(updates) == 0 {
+	if !fields.HasChanges() {
 		return nil
 	}
-	result := r.db.WithContext(ctx).Model(&Model{}).Where("id = ?", deckID).Updates(updates)
+
+	updated := Model{}
+	if fields.Name != nil {
+		updated.Name = *fields.Name
+	}
+	if fields.FormatID != nil {
+		updated.FormatID = *fields.FormatID
+	}
+	if fields.Retired != nil {
+		updated.Retired = *fields.Retired
+	}
+
+	result := r.db.WithContext(ctx).Model(&Model{}).Where("id = ?", deckID).Updates(updated)
 	if result.Error != nil {
 		return fmt.Errorf("failed to update Deck record: %w", result.Error)
 	}

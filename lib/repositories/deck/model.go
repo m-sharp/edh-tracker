@@ -19,3 +19,7 @@ type UpdateFields struct {
 	FormatID *int
 	Retired  *bool
 }
+
+func (u UpdateFields) HasChanges() bool {
+	return u.Name != nil || u.FormatID != nil || u.Retired != nil
+}

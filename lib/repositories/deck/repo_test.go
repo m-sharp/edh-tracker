@@ -163,6 +163,26 @@ func TestUpdate_PartialFields(t *testing.T) {
 	assert.Equal(t, 1, got.FormatID) // unchanged
 }
 
+func TestUpdate_MultipleFields(t *testing.T) {
+	repo := newRepo(t)
+	ctx := context.Background()
+
+	id, err := repo.Add(ctx, 1, "Original Name", 1)
+	require.NoError(t, err)
+
+	newName := "Updated Name"
+	require.NoError(t, repo.Update(ctx, id, UpdateFields{
+		Name:    &newName,
+		Retired: new(true),
+	}))
+
+	got, err := repo.GetById(ctx, id)
+	require.NoError(t, err)
+	assert.Equal(t, newName, got.Name)
+	assert.Equal(t, 1, got.FormatID) // unchanged
+	assert.True(t, got.Retired)
+}
+
 func TestUpdate_NoFields(t *testing.T) {
 	repo := newRepo(t)
 	ctx := context.Background()
