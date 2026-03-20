@@ -201,7 +201,7 @@ func TestCreate_MatchingFormat_Success(t *testing.T) {
 	}
 	deckRepo := &mockDeckRepo{
 		GetByIdFn: func(ctx context.Context, deckID int) (*deckrepo.Model, error) {
-			return &deckrepo.Model{ModelBase: base.ModelBase{ID: deckID}, FormatID: 1}, nil
+			return &deckrepo.Model{GormModelBase: base.GormModelBase{ID: deckID}, FormatID: 1}, nil
 		},
 	}
 	getFormat := func(ctx context.Context, id int) (*format.Entity, error) {
@@ -223,7 +223,7 @@ func TestCreate_FormatMismatch_Error(t *testing.T) {
 	deckRepo := &mockDeckRepo{
 		GetByIdFn: func(ctx context.Context, deckID int) (*deckrepo.Model, error) {
 			// deck has format 2, game has format 1
-			return &deckrepo.Model{ModelBase: base.ModelBase{ID: deckID}, FormatID: 2}, nil
+			return &deckrepo.Model{GormModelBase: base.GormModelBase{ID: deckID}, FormatID: 2}, nil
 		},
 	}
 	getFormat := func(ctx context.Context, id int) (*format.Entity, error) {

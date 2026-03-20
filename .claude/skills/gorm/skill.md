@@ -1,3 +1,9 @@
+---
+name: gorm
+description: Use this skill to load GORM patterns, conventions, and code examples for the EDH Tracker. Invoke at the start of any GORM repository implementation or migration session to get import paths, model definitions, query patterns, bulk insert, upsert, transactions, soft-delete, and test infrastructure.
+version: 1.0.0
+---
+
 # GORM Patterns — EDH Tracker Reference
 
 ## Import Paths

@@ -274,7 +274,7 @@ func TestGetCommanderEntry_WithPartner(t *testing.T) {
 func TestGetDeckName_Success(t *testing.T) {
 	deckRepo := &mockDeckRepo{
 		GetByIdFn: func(ctx context.Context, deckID int) (*deckrepo.Model, error) {
-			return &deckrepo.Model{ModelBase: base.ModelBase{ID: 20}, Name: "Krenko Goblins"}, nil
+			return &deckrepo.Model{GormModelBase: base.GormModelBase{ID: 20}, Name: "Krenko Goblins"}, nil
 		},
 	}
 	fn := GetDeckName(deckRepo)
@@ -342,7 +342,7 @@ func (m *mockPodRepo) RemovePlayer(ctx context.Context, podID, playerID int) err
 func TestDeckUpdate_Success_NoCommander(t *testing.T) {
 	deckRepo := &mockDeckRepo{
 		GetByIdFn: func(ctx context.Context, deckID int) (*deckrepo.Model, error) {
-			return &deckrepo.Model{ModelBase: base.ModelBase{ID: deckID}, PlayerID: 42}, nil
+			return &deckrepo.Model{GormModelBase: base.GormModelBase{ID: deckID}, PlayerID: 42}, nil
 		},
 		UpdateFn: func(ctx context.Context, deckID int, fields deckrepo.UpdateFields) error {
 			return nil
@@ -361,7 +361,7 @@ func TestDeckUpdate_WithCommander(t *testing.T) {
 	addCalled := false
 	deckRepo := &mockDeckRepo{
 		GetByIdFn: func(ctx context.Context, deckID int) (*deckrepo.Model, error) {
-			return &deckrepo.Model{ModelBase: base.ModelBase{ID: deckID}, PlayerID: 10}, nil
+			return &deckrepo.Model{GormModelBase: base.GormModelBase{ID: deckID}, PlayerID: 10}, nil
 		},
 		UpdateFn: func(ctx context.Context, deckID int, fields deckrepo.UpdateFields) error {
 			return nil
@@ -400,7 +400,7 @@ func TestDeckUpdate_NotFound(t *testing.T) {
 func TestDeckUpdate_Forbidden(t *testing.T) {
 	deckRepo := &mockDeckRepo{
 		GetByIdFn: func(ctx context.Context, deckID int) (*deckrepo.Model, error) {
-			return &deckrepo.Model{ModelBase: base.ModelBase{ID: deckID}, PlayerID: 10}, nil
+			return &deckrepo.Model{GormModelBase: base.GormModelBase{ID: deckID}, PlayerID: 10}, nil
 		},
 	}
 	fn := Update(deckRepo, &mockDeckCommanderRepo{})
@@ -411,7 +411,7 @@ func TestDeckUpdate_Forbidden(t *testing.T) {
 func TestDeckSoftDelete_Success(t *testing.T) {
 	deckRepo := &mockDeckRepo{
 		GetByIdFn: func(ctx context.Context, deckID int) (*deckrepo.Model, error) {
-			return &deckrepo.Model{ModelBase: base.ModelBase{ID: deckID}, PlayerID: 7}, nil
+			return &deckrepo.Model{GormModelBase: base.GormModelBase{ID: deckID}, PlayerID: 7}, nil
 		},
 		SoftDeleteFn: func(ctx context.Context, id int) error {
 			return nil
@@ -436,7 +436,7 @@ func TestDeckSoftDelete_NotFound(t *testing.T) {
 func TestDeckSoftDelete_Forbidden(t *testing.T) {
 	deckRepo := &mockDeckRepo{
 		GetByIdFn: func(ctx context.Context, deckID int) (*deckrepo.Model, error) {
-			return &deckrepo.Model{ModelBase: base.ModelBase{ID: deckID}, PlayerID: 10}, nil
+			return &deckrepo.Model{GormModelBase: base.GormModelBase{ID: deckID}, PlayerID: 10}, nil
 		},
 	}
 	fn := SoftDelete(deckRepo)
@@ -453,7 +453,7 @@ func TestDeckGetAllByPod_Success(t *testing.T) {
 	deckRepo := &mockDeckRepo{
 		GetAllByPlayerIDsFn: func(ctx context.Context, playerIDs []int) ([]deckrepo.Model, error) {
 			return []deckrepo.Model{
-				{ModelBase: base.ModelBase{ID: 10}, PlayerID: 1, FormatID: 1, Name: "Deck A"},
+				{GormModelBase: base.GormModelBase{ID: 10}, PlayerID: 1, FormatID: 1, Name: "Deck A"},
 			}, nil
 		},
 	}

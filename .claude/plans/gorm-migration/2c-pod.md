@@ -4,7 +4,7 @@
 Approved
 
 ## Skill
-Load `.claude/skills/gorm.md` at the start of each implementation session for this phase.
+Use the `/gorm` skill tool at the start of each implementation session for this phase.
 
 ## Scope
 
