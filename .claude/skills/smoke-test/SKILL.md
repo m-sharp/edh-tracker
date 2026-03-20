@@ -35,12 +35,6 @@ curl -s http://localhost:8080/api/formats | jq .
 
 # Players: must return a non-error response
 curl -s http://localhost:8080/api/players | jq length
-
-# Create a player: must return HTTP 201 (no body)
-curl -s -o /dev/null -w "HTTP %{http_code}\n" \
-  -X POST http://localhost:8080/api/player \
-  -H 'Content-Type: application/json' \
-  -d '{"name":"SmokeTest"}'
 ```
 
 ## Step 5 — Stop
@@ -59,7 +53,6 @@ All routes are prefixed `/api/`. The pattern is: **plural path for GET-all, sing
 |---|---|---|
 | GET | `/api/players` | list all players with stats |
 | GET | `/api/player?player_id=X` | single player |
-| POST | `/api/player` | create player — **201, no body** |
 | GET | `/api/decks` | list all active decks |
 | GET | `/api/deck?deck_id=X` | single deck |
 | POST | `/api/deck` | create deck |
