@@ -18,6 +18,10 @@ func NewRepository(client *lib.DBClient) *Repository {
 	return &Repository{db: client.GormDb}
 }
 
+func NewRepositoryFromDB(db *gorm.DB) *Repository {
+	return &Repository{db: db}
+}
+
 func (r *Repository) GetAll(ctx context.Context) ([]Model, error) {
 	var players []Model
 	if err := r.db.WithContext(ctx).Find(&players).Error; err != nil {

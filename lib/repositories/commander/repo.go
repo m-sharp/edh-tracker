@@ -18,6 +18,10 @@ func NewRepository(client *lib.DBClient) *Repository {
 	return &Repository{db: client.GormDb}
 }
 
+func NewRepositoryFromDB(db *gorm.DB) *Repository {
+	return &Repository{db: db}
+}
+
 func (r *Repository) GetById(ctx context.Context, id int) (*Model, error) {
 	var m Model
 	err := r.db.WithContext(ctx).First(&m, id).Error

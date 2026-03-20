@@ -1,4 +1,4 @@
-package format
+package format_test
 
 import (
 	"context"
@@ -6,23 +6,18 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"gorm.io/gorm"
 
-	"github.com/m-sharp/edh-tracker/lib/repositories/base"
+	"github.com/m-sharp/edh-tracker/lib/repositories/format"
+	"github.com/m-sharp/edh-tracker/lib/repositories/testHelpers"
 )
 
-func newRepo(t *testing.T) (*Repository, *gorm.DB) {
-	t.Helper()
-	db := base.NewTestDB(t)
-	return &Repository{db: db}, db
-}
-
 func TestGetAll(t *testing.T) {
-	repo, db := newRepo(t)
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewFormatRepo(db)
 	ctx := context.Background()
 
-	db.Create(&Model{Name: "FormatA"})
-	db.Create(&Model{Name: "FormatB"})
+	db.Create(&format.Model{Name: "FormatA"})
+	db.Create(&format.Model{Name: "FormatB"})
 
 	formats, err := repo.GetAll(ctx)
 	require.NoError(t, err)
@@ -30,10 +25,11 @@ func TestGetAll(t *testing.T) {
 }
 
 func TestGetById_Found(t *testing.T) {
-	repo, db := newRepo(t)
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewFormatRepo(db)
 	ctx := context.Background()
 
-	m := Model{Name: "FormatC"}
+	m := format.Model{Name: "FormatC"}
 	db.Create(&m)
 	require.Greater(t, m.ID, 0)
 
@@ -45,17 +41,19 @@ func TestGetById_Found(t *testing.T) {
 }
 
 func TestGetById_NotFound(t *testing.T) {
-	repo, _ := newRepo(t)
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewFormatRepo(db)
 	got, err := repo.GetById(context.Background(), 999999)
 	require.NoError(t, err)
 	assert.Nil(t, got)
 }
 
 func TestGetByName_Found(t *testing.T) {
-	repo, db := newRepo(t)
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewFormatRepo(db)
 	ctx := context.Background()
 
-	m := Model{Name: "FormatD"}
+	m := format.Model{Name: "FormatD"}
 	db.Create(&m)
 
 	got, err := repo.GetByName(ctx, "FormatD")
@@ -65,7 +63,8 @@ func TestGetByName_Found(t *testing.T) {
 }
 
 func TestGetByName_NotFound(t *testing.T) {
-	repo, _ := newRepo(t)
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewFormatRepo(db)
 	got, err := repo.GetByName(context.Background(), "NoSuchFormat")
 	require.NoError(t, err)
 	assert.Nil(t, got)

@@ -10,40 +10,40 @@ import (
 
 	"github.com/m-sharp/edh-tracker/lib/business/format"
 	"github.com/m-sharp/edh-tracker/lib/repositories/base"
-	deckrepo "github.com/m-sharp/edh-tracker/lib/repositories/deck"
-	deckCommanderrepo "github.com/m-sharp/edh-tracker/lib/repositories/deckCommander"
-	gameresultrepo "github.com/m-sharp/edh-tracker/lib/repositories/gameResult"
-	podrepo "github.com/m-sharp/edh-tracker/lib/repositories/pod"
+	deckRepo "github.com/m-sharp/edh-tracker/lib/repositories/deck"
+	deckCommanderRepo "github.com/m-sharp/edh-tracker/lib/repositories/deckCommander"
+	gameResultRepo "github.com/m-sharp/edh-tracker/lib/repositories/gameResult"
+	podRepo "github.com/m-sharp/edh-tracker/lib/repositories/pod"
 )
 
 // mockDeckRepo implements repos.DeckRepository
 type mockDeckRepo struct {
-	GetByIdFn           func(ctx context.Context, deckID int) (*deckrepo.Model, error)
+	GetByIdFn           func(ctx context.Context, deckID int) (*deckRepo.Model, error)
 	AddFn               func(ctx context.Context, playerID int, name string, formatID int) (int, error)
-	UpdateFn            func(ctx context.Context, deckID int, fields deckrepo.UpdateFields) error
+	UpdateFn            func(ctx context.Context, deckID int, fields deckRepo.UpdateFields) error
 	SoftDeleteFn        func(ctx context.Context, id int) error
-	GetAllByPlayerIDsFn func(ctx context.Context, playerIDs []int) ([]deckrepo.Model, error)
+	GetAllByPlayerIDsFn func(ctx context.Context, playerIDs []int) ([]deckRepo.Model, error)
 }
 
-func (m *mockDeckRepo) GetAll(ctx context.Context) ([]deckrepo.Model, error) {
+func (m *mockDeckRepo) GetAll(ctx context.Context) ([]deckRepo.Model, error) {
 	panic("unexpected call to GetAll")
 }
-func (m *mockDeckRepo) GetAllForPlayer(ctx context.Context, playerID int) ([]deckrepo.Model, error) {
+func (m *mockDeckRepo) GetAllForPlayer(ctx context.Context, playerID int) ([]deckRepo.Model, error) {
 	panic("unexpected call to GetAllForPlayer")
 }
-func (m *mockDeckRepo) GetAllByPlayerIDs(ctx context.Context, playerIDs []int) ([]deckrepo.Model, error) {
+func (m *mockDeckRepo) GetAllByPlayerIDs(ctx context.Context, playerIDs []int) ([]deckRepo.Model, error) {
 	if m.GetAllByPlayerIDsFn != nil {
 		return m.GetAllByPlayerIDsFn(ctx, playerIDs)
 	}
 	panic("unexpected call to GetAllByPlayerIDs")
 }
-func (m *mockDeckRepo) Update(ctx context.Context, deckID int, fields deckrepo.UpdateFields) error {
+func (m *mockDeckRepo) Update(ctx context.Context, deckID int, fields deckRepo.UpdateFields) error {
 	if m.UpdateFn != nil {
 		return m.UpdateFn(ctx, deckID, fields)
 	}
 	panic("unexpected call to Update")
 }
-func (m *mockDeckRepo) GetById(ctx context.Context, deckID int) (*deckrepo.Model, error) {
+func (m *mockDeckRepo) GetById(ctx context.Context, deckID int) (*deckRepo.Model, error) {
 	if m.GetByIdFn != nil {
 		return m.GetByIdFn(ctx, deckID)
 	}
@@ -55,7 +55,7 @@ func (m *mockDeckRepo) Add(ctx context.Context, playerID int, name string, forma
 	}
 	panic("unexpected call to Add")
 }
-func (m *mockDeckRepo) BulkAdd(ctx context.Context, decks []deckrepo.Model) ([]deckrepo.Model, error) {
+func (m *mockDeckRepo) BulkAdd(ctx context.Context, decks []deckRepo.Model) ([]deckRepo.Model, error) {
 	panic("unexpected call to BulkAdd")
 }
 func (m *mockDeckRepo) Retire(ctx context.Context, deckID int) error {
@@ -70,13 +70,13 @@ func (m *mockDeckRepo) SoftDelete(ctx context.Context, id int) error {
 
 // mockDeckCommanderRepo implements repos.DeckCommanderRepository
 type mockDeckCommanderRepo struct {
-	GetByDeckIdFn    func(ctx context.Context, deckID int) (*deckCommanderrepo.Model, error)
+	GetByDeckIdFn    func(ctx context.Context, deckID int) (*deckCommanderRepo.Model, error)
 	AddFn            func(ctx context.Context, deckID, commanderID int, partnerCommanderID *int) (int, error)
 	DeleteByDeckIDFn func(ctx context.Context, deckID int) error
 	addCalled        bool
 }
 
-func (m *mockDeckCommanderRepo) GetByDeckId(ctx context.Context, deckID int) (*deckCommanderrepo.Model, error) {
+func (m *mockDeckCommanderRepo) GetByDeckId(ctx context.Context, deckID int) (*deckCommanderRepo.Model, error) {
 	if m.GetByDeckIdFn != nil {
 		return m.GetByDeckIdFn(ctx, deckID)
 	}
@@ -89,7 +89,7 @@ func (m *mockDeckCommanderRepo) Add(ctx context.Context, deckID, commanderID int
 	}
 	panic("unexpected call to Add")
 }
-func (m *mockDeckCommanderRepo) BulkAdd(ctx context.Context, entries []deckCommanderrepo.Model) error {
+func (m *mockDeckCommanderRepo) BulkAdd(ctx context.Context, entries []deckCommanderRepo.Model) error {
 	panic("unexpected call to BulkAdd")
 }
 func (m *mockDeckCommanderRepo) DeleteByDeckID(ctx context.Context, deckID int) error {
@@ -101,31 +101,31 @@ func (m *mockDeckCommanderRepo) DeleteByDeckID(ctx context.Context, deckID int) 
 
 // mockGameResultRepoForDeck implements repos.GameResultRepository (used in GetAll tests)
 type mockGameResultRepoForDeck struct {
-	GetStatsForDeckFn func(ctx context.Context, deckID int) (*gameresultrepo.Aggregate, error)
+	GetStatsForDeckFn func(ctx context.Context, deckID int) (*gameResultRepo.Aggregate, error)
 }
 
-func (m *mockGameResultRepoForDeck) GetByGameId(ctx context.Context, gameID int) ([]gameresultrepo.Model, error) {
+func (m *mockGameResultRepoForDeck) GetByGameId(ctx context.Context, gameID int) ([]gameResultRepo.Model, error) {
 	panic("unexpected call")
 }
-func (m *mockGameResultRepoForDeck) GetStatsForPlayer(ctx context.Context, playerID int) (*gameresultrepo.Aggregate, error) {
+func (m *mockGameResultRepoForDeck) GetStatsForPlayer(ctx context.Context, playerID int) (*gameResultRepo.Aggregate, error) {
 	panic("unexpected call")
 }
-func (m *mockGameResultRepoForDeck) GetStatsForDeck(ctx context.Context, deckID int) (*gameresultrepo.Aggregate, error) {
+func (m *mockGameResultRepoForDeck) GetStatsForDeck(ctx context.Context, deckID int) (*gameResultRepo.Aggregate, error) {
 	if m.GetStatsForDeckFn != nil {
 		return m.GetStatsForDeckFn(ctx, deckID)
 	}
 	panic("unexpected call to GetStatsForDeck")
 }
-func (m *mockGameResultRepoForDeck) GetByID(ctx context.Context, resultID int) (*gameresultrepo.Model, error) {
+func (m *mockGameResultRepoForDeck) GetByID(ctx context.Context, resultID int) (*gameResultRepo.Model, error) {
 	panic("unexpected call")
 }
-func (m *mockGameResultRepoForDeck) Add(ctx context.Context, model gameresultrepo.Model) (int, error) {
+func (m *mockGameResultRepoForDeck) Add(ctx context.Context, model gameResultRepo.Model) (int, error) {
 	panic("unexpected call")
 }
 func (m *mockGameResultRepoForDeck) Update(ctx context.Context, resultID, place, killCount, deckID int) error {
 	panic("unexpected call")
 }
-func (m *mockGameResultRepoForDeck) BulkAdd(ctx context.Context, results []gameresultrepo.Model) error {
+func (m *mockGameResultRepoForDeck) BulkAdd(ctx context.Context, results []gameResultRepo.Model) error {
 	panic("unexpected call")
 }
 func (m *mockGameResultRepoForDeck) SoftDelete(ctx context.Context, id int) error {
@@ -202,7 +202,7 @@ func TestCreate_FormatNotFound(t *testing.T) {
 
 func TestGetCommanderEntry_NoEntry(t *testing.T) {
 	deckCmdrRepo := &mockDeckCommanderRepo{
-		GetByDeckIdFn: func(ctx context.Context, deckID int) (*deckCommanderrepo.Model, error) {
+		GetByDeckIdFn: func(ctx context.Context, deckID int) (*deckCommanderRepo.Model, error) {
 			return nil, nil
 		},
 	}
@@ -218,8 +218,8 @@ func TestGetCommanderEntry_NoEntry(t *testing.T) {
 
 func TestGetCommanderEntry_WithCommander(t *testing.T) {
 	deckCmdrRepo := &mockDeckCommanderRepo{
-		GetByDeckIdFn: func(ctx context.Context, deckID int) (*deckCommanderrepo.Model, error) {
-			return &deckCommanderrepo.Model{ModelBase: base.ModelBase{ID: 1}, DeckID: 7, CommanderID: 5}, nil
+		GetByDeckIdFn: func(ctx context.Context, deckID int) (*deckCommanderRepo.Model, error) {
+			return &deckCommanderRepo.Model{DeckID: 7, CommanderID: 5}, nil
 		},
 	}
 	getCommanderName := func(ctx context.Context, id int) (string, error) {
@@ -240,9 +240,8 @@ func TestGetCommanderEntry_WithCommander(t *testing.T) {
 func TestGetCommanderEntry_WithPartner(t *testing.T) {
 	partnerID := 6
 	deckCmdrRepo := &mockDeckCommanderRepo{
-		GetByDeckIdFn: func(ctx context.Context, deckID int) (*deckCommanderrepo.Model, error) {
-			return &deckCommanderrepo.Model{
-				ModelBase:          base.ModelBase{ID: 1},
+		GetByDeckIdFn: func(ctx context.Context, deckID int) (*deckCommanderRepo.Model, error) {
+			return &deckCommanderRepo.Model{
 				DeckID:             7,
 				CommanderID:        5,
 				PartnerCommanderID: &partnerID,
@@ -273,8 +272,8 @@ func TestGetCommanderEntry_WithPartner(t *testing.T) {
 
 func TestGetDeckName_Success(t *testing.T) {
 	deckRepo := &mockDeckRepo{
-		GetByIdFn: func(ctx context.Context, deckID int) (*deckrepo.Model, error) {
-			return &deckrepo.Model{GormModelBase: base.GormModelBase{ID: 20}, Name: "Krenko Goblins"}, nil
+		GetByIdFn: func(ctx context.Context, deckID int) (*deckRepo.Model, error) {
+			return &deckRepo.Model{GormModelBase: base.GormModelBase{ID: 20}, Name: "Krenko Goblins"}, nil
 		},
 	}
 	fn := GetDeckName(deckRepo)
@@ -285,7 +284,7 @@ func TestGetDeckName_Success(t *testing.T) {
 
 func TestGetDeckName_NotFound(t *testing.T) {
 	deckRepo := &mockDeckRepo{
-		GetByIdFn: func(ctx context.Context, deckID int) (*deckrepo.Model, error) {
+		GetByIdFn: func(ctx context.Context, deckID int) (*deckRepo.Model, error) {
 			return nil, nil
 		},
 	}
@@ -299,16 +298,16 @@ type mockPodRepo struct {
 	GetPlayerIDsFn func(ctx context.Context, podID int) ([]int, error)
 }
 
-func (m *mockPodRepo) GetAll(ctx context.Context) ([]podrepo.Model, error) {
+func (m *mockPodRepo) GetAll(ctx context.Context) ([]podRepo.Model, error) {
 	panic("unexpected call to GetAll")
 }
-func (m *mockPodRepo) GetByID(ctx context.Context, podID int) (*podrepo.Model, error) {
+func (m *mockPodRepo) GetByID(ctx context.Context, podID int) (*podRepo.Model, error) {
 	panic("unexpected call to GetByID")
 }
-func (m *mockPodRepo) GetByPlayerID(ctx context.Context, playerID int) ([]podrepo.Model, error) {
+func (m *mockPodRepo) GetByPlayerID(ctx context.Context, playerID int) ([]podRepo.Model, error) {
 	panic("unexpected call to GetByPlayerID")
 }
-func (m *mockPodRepo) GetByName(ctx context.Context, name string) (*podrepo.Model, error) {
+func (m *mockPodRepo) GetByName(ctx context.Context, name string) (*podRepo.Model, error) {
 	panic("unexpected call to GetByName")
 }
 func (m *mockPodRepo) GetIDsByPlayerID(ctx context.Context, playerID int) ([]int, error) {
@@ -341,10 +340,10 @@ func (m *mockPodRepo) RemovePlayer(ctx context.Context, podID, playerID int) err
 
 func TestDeckUpdate_Success_NoCommander(t *testing.T) {
 	deckRepo := &mockDeckRepo{
-		GetByIdFn: func(ctx context.Context, deckID int) (*deckrepo.Model, error) {
-			return &deckrepo.Model{GormModelBase: base.GormModelBase{ID: deckID}, PlayerID: 42}, nil
+		GetByIdFn: func(ctx context.Context, deckID int) (*deckRepo.Model, error) {
+			return &deckRepo.Model{GormModelBase: base.GormModelBase{ID: deckID}, PlayerID: 42}, nil
 		},
-		UpdateFn: func(ctx context.Context, deckID int, fields deckrepo.UpdateFields) error {
+		UpdateFn: func(ctx context.Context, deckID int, fields deckRepo.UpdateFields) error {
 			return nil
 		},
 	}
@@ -360,10 +359,10 @@ func TestDeckUpdate_WithCommander(t *testing.T) {
 	deleteCalled := false
 	addCalled := false
 	deckRepo := &mockDeckRepo{
-		GetByIdFn: func(ctx context.Context, deckID int) (*deckrepo.Model, error) {
-			return &deckrepo.Model{GormModelBase: base.GormModelBase{ID: deckID}, PlayerID: 10}, nil
+		GetByIdFn: func(ctx context.Context, deckID int) (*deckRepo.Model, error) {
+			return &deckRepo.Model{GormModelBase: base.GormModelBase{ID: deckID}, PlayerID: 10}, nil
 		},
-		UpdateFn: func(ctx context.Context, deckID int, fields deckrepo.UpdateFields) error {
+		UpdateFn: func(ctx context.Context, deckID int, fields deckRepo.UpdateFields) error {
 			return nil
 		},
 	}
@@ -388,7 +387,7 @@ func TestDeckUpdate_WithCommander(t *testing.T) {
 
 func TestDeckUpdate_NotFound(t *testing.T) {
 	deckRepo := &mockDeckRepo{
-		GetByIdFn: func(ctx context.Context, deckID int) (*deckrepo.Model, error) {
+		GetByIdFn: func(ctx context.Context, deckID int) (*deckRepo.Model, error) {
 			return nil, nil
 		},
 	}
@@ -399,8 +398,8 @@ func TestDeckUpdate_NotFound(t *testing.T) {
 
 func TestDeckUpdate_Forbidden(t *testing.T) {
 	deckRepo := &mockDeckRepo{
-		GetByIdFn: func(ctx context.Context, deckID int) (*deckrepo.Model, error) {
-			return &deckrepo.Model{GormModelBase: base.GormModelBase{ID: deckID}, PlayerID: 10}, nil
+		GetByIdFn: func(ctx context.Context, deckID int) (*deckRepo.Model, error) {
+			return &deckRepo.Model{GormModelBase: base.GormModelBase{ID: deckID}, PlayerID: 10}, nil
 		},
 	}
 	fn := Update(deckRepo, &mockDeckCommanderRepo{})
@@ -410,8 +409,8 @@ func TestDeckUpdate_Forbidden(t *testing.T) {
 
 func TestDeckSoftDelete_Success(t *testing.T) {
 	deckRepo := &mockDeckRepo{
-		GetByIdFn: func(ctx context.Context, deckID int) (*deckrepo.Model, error) {
-			return &deckrepo.Model{GormModelBase: base.GormModelBase{ID: deckID}, PlayerID: 7}, nil
+		GetByIdFn: func(ctx context.Context, deckID int) (*deckRepo.Model, error) {
+			return &deckRepo.Model{GormModelBase: base.GormModelBase{ID: deckID}, PlayerID: 7}, nil
 		},
 		SoftDeleteFn: func(ctx context.Context, id int) error {
 			return nil
@@ -424,7 +423,7 @@ func TestDeckSoftDelete_Success(t *testing.T) {
 
 func TestDeckSoftDelete_NotFound(t *testing.T) {
 	deckRepo := &mockDeckRepo{
-		GetByIdFn: func(ctx context.Context, deckID int) (*deckrepo.Model, error) {
+		GetByIdFn: func(ctx context.Context, deckID int) (*deckRepo.Model, error) {
 			return nil, nil
 		},
 	}
@@ -435,8 +434,8 @@ func TestDeckSoftDelete_NotFound(t *testing.T) {
 
 func TestDeckSoftDelete_Forbidden(t *testing.T) {
 	deckRepo := &mockDeckRepo{
-		GetByIdFn: func(ctx context.Context, deckID int) (*deckrepo.Model, error) {
-			return &deckrepo.Model{GormModelBase: base.GormModelBase{ID: deckID}, PlayerID: 10}, nil
+		GetByIdFn: func(ctx context.Context, deckID int) (*deckRepo.Model, error) {
+			return &deckRepo.Model{GormModelBase: base.GormModelBase{ID: deckID}, PlayerID: 10}, nil
 		},
 	}
 	fn := SoftDelete(deckRepo)
@@ -451,14 +450,14 @@ func TestDeckGetAllByPod_Success(t *testing.T) {
 		},
 	}
 	deckRepo := &mockDeckRepo{
-		GetAllByPlayerIDsFn: func(ctx context.Context, playerIDs []int) ([]deckrepo.Model, error) {
-			return []deckrepo.Model{
+		GetAllByPlayerIDsFn: func(ctx context.Context, playerIDs []int) ([]deckRepo.Model, error) {
+			return []deckRepo.Model{
 				{GormModelBase: base.GormModelBase{ID: 10}, PlayerID: 1, FormatID: 1, Name: "Deck A"},
 			}, nil
 		},
 	}
 	gameResultRepo := &mockGameResultRepoForDeck{
-		GetStatsForDeckFn: func(ctx context.Context, deckID int) (*gameresultrepo.Aggregate, error) {
+		GetStatsForDeckFn: func(ctx context.Context, deckID int) (*gameResultRepo.Aggregate, error) {
 			return nil, nil
 		},
 	}

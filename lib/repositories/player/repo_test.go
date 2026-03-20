@@ -1,4 +1,4 @@
-package player
+package player_test
 
 import (
 	"context"
@@ -7,17 +7,12 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/m-sharp/edh-tracker/lib/repositories/base"
+	"github.com/m-sharp/edh-tracker/lib/repositories/testHelpers"
 )
 
-func newRepo(t *testing.T) *Repository {
-	t.Helper()
-	db := base.NewTestDB(t)
-	return &Repository{db: db}
-}
-
 func TestGetAll(t *testing.T) {
-	repo := newRepo(t)
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewPlayerRepo(db)
 	ctx := context.Background()
 
 	_, err := repo.Add(ctx, "Alice")
@@ -39,7 +34,8 @@ func TestGetAll(t *testing.T) {
 }
 
 func TestGetById_Found(t *testing.T) {
-	repo := newRepo(t)
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewPlayerRepo(db)
 	ctx := context.Background()
 
 	id, err := repo.Add(ctx, "Alice")
@@ -53,14 +49,16 @@ func TestGetById_Found(t *testing.T) {
 }
 
 func TestGetById_NotFound(t *testing.T) {
-	repo := newRepo(t)
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewPlayerRepo(db)
 	got, err := repo.GetById(context.Background(), 999999)
 	require.NoError(t, err)
 	assert.Nil(t, got)
 }
 
 func TestGetByName_Found(t *testing.T) {
-	repo := newRepo(t)
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewPlayerRepo(db)
 	ctx := context.Background()
 
 	id, err := repo.Add(ctx, "Alice")
@@ -73,14 +71,16 @@ func TestGetByName_Found(t *testing.T) {
 }
 
 func TestGetByName_NotFound(t *testing.T) {
-	repo := newRepo(t)
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewPlayerRepo(db)
 	got, err := repo.GetByName(context.Background(), "NoSuchPlayer")
 	require.NoError(t, err)
 	assert.Nil(t, got)
 }
 
 func TestGetByNames(t *testing.T) {
-	repo := newRepo(t)
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewPlayerRepo(db)
 	ctx := context.Background()
 
 	_, err := repo.Add(ctx, "Alice")
@@ -94,7 +94,8 @@ func TestGetByNames(t *testing.T) {
 }
 
 func TestAdd(t *testing.T) {
-	repo := newRepo(t)
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewPlayerRepo(db)
 	ctx := context.Background()
 
 	id, err := repo.Add(ctx, "Alice")
@@ -103,7 +104,8 @@ func TestAdd(t *testing.T) {
 }
 
 func TestBulkAdd(t *testing.T) {
-	repo := newRepo(t)
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewPlayerRepo(db)
 	ctx := context.Background()
 
 	got, err := repo.BulkAdd(ctx, []string{"Alice", "Bob", "Carol"})
@@ -115,7 +117,8 @@ func TestBulkAdd(t *testing.T) {
 }
 
 func TestUpdate_Found(t *testing.T) {
-	repo := newRepo(t)
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewPlayerRepo(db)
 	ctx := context.Background()
 
 	id, err := repo.Add(ctx, "Alice")
@@ -129,13 +132,15 @@ func TestUpdate_Found(t *testing.T) {
 }
 
 func TestUpdate_NotFound(t *testing.T) {
-	repo := newRepo(t)
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewPlayerRepo(db)
 	err := repo.Update(context.Background(), 999999, "Ghost")
 	assert.ErrorContains(t, err, "unexpected number of rows")
 }
 
 func TestSoftDelete(t *testing.T) {
-	repo := newRepo(t)
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewPlayerRepo(db)
 	ctx := context.Background()
 
 	id, err := repo.Add(ctx, "Alice")
@@ -149,7 +154,8 @@ func TestSoftDelete(t *testing.T) {
 }
 
 func TestSoftDelete_NotFound(t *testing.T) {
-	repo := newRepo(t)
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewPlayerRepo(db)
 	err := repo.SoftDelete(context.Background(), 999999)
 	assert.ErrorContains(t, err, "unexpected number of rows")
 }
