@@ -8,6 +8,8 @@ import (
 	"github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 	"go.uber.org/zap"
+	gormmysql "gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
 const (
@@ -20,8 +22,9 @@ const (
 )
 
 type DBClient struct {
-	log *zap.Logger
-	Db  *sqlx.DB
+	log    *zap.Logger
+	Db     *sqlx.DB   // keep until full migration
+	GormDb *gorm.DB
 }
 
 func NewDBClient(cfg *Config, log *zap.Logger) (*DBClient, error) {
@@ -70,7 +73,13 @@ func NewDBClient(cfg *Config, log *zap.Logger) (*DBClient, error) {
 	db.SetMaxOpenConns(maxConnCount)
 	db.SetMaxIdleConns(maxConnCount)
 
-	inst := &DBClient{log: log, Db: sqlx.NewDb(db, "mysql")}
+	// GORM wraps the same *sql.DB — no second pool
+	gormDB, err := gorm.Open(gormmysql.New(gormmysql.Config{Conn: db}), &gorm.Config{})
+	if err != nil {
+		return nil, fmt.Errorf("error opening gorm connection: %w", err)
+	}
+
+	inst := &DBClient{log: log, Db: sqlx.NewDb(db, "mysql"), GormDb: gormDB}
 
 	if err := inst.CheckConnection(); err != nil {
 		return nil, fmt.Errorf("DB connection check failed: %w", err)

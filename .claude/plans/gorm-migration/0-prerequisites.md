@@ -1,7 +1,7 @@
 # Phase 0 — Prerequisites
 
 ## Status
-Approved
+Done
 
 ## Skill
 Load `.claude/skills/gorm.md` at the start of each implementation session for this phase.
