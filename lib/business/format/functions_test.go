@@ -44,8 +44,8 @@ func TestGetAll_Success(t *testing.T) {
 	repo := &mockFormatRepo{
 		GetAllFn: func(ctx context.Context) ([]formatrepo.Model, error) {
 			return []formatrepo.Model{
-				{ModelBase: base.ModelBase{ID: 1}, Name: "commander"},
-				{ModelBase: base.ModelBase{ID: 2}, Name: "other"},
+				{GormModelBase: base.GormModelBase{ID: 1}, Name: "commander"},
+				{GormModelBase: base.GormModelBase{ID: 2}, Name: "other"},
 			}, nil
 		},
 	}
@@ -68,7 +68,7 @@ func TestGetAll_CachePreventsSecondCall(t *testing.T) {
 		GetAllFn: func(ctx context.Context) ([]formatrepo.Model, error) {
 			callCount++
 			return []formatrepo.Model{
-				{ModelBase: base.ModelBase{ID: 1}, Name: "commander"},
+				{GormModelBase: base.GormModelBase{ID: 1}, Name: "commander"},
 			}, nil
 		},
 	}
@@ -97,8 +97,8 @@ func TestGetByID_Found(t *testing.T) {
 	repo := &mockFormatRepo{
 		GetAllFn: func(ctx context.Context) ([]formatrepo.Model, error) {
 			return []formatrepo.Model{
-				{ModelBase: base.ModelBase{ID: 1}, Name: "commander"},
-				{ModelBase: base.ModelBase{ID: 2}, Name: "other"},
+				{GormModelBase: base.GormModelBase{ID: 1}, Name: "commander"},
+				{GormModelBase: base.GormModelBase{ID: 2}, Name: "other"},
 			}, nil
 		},
 	}
@@ -114,7 +114,7 @@ func TestGetByID_NotFound(t *testing.T) {
 	repo := &mockFormatRepo{
 		GetAllFn: func(ctx context.Context) ([]formatrepo.Model, error) {
 			return []formatrepo.Model{
-				{ModelBase: base.ModelBase{ID: 1}, Name: "commander"},
+				{GormModelBase: base.GormModelBase{ID: 1}, Name: "commander"},
 			}, nil
 		},
 	}

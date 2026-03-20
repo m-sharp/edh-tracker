@@ -141,7 +141,7 @@ func (m *mockPodRepo) RemovePlayer(ctx context.Context, podID, playerID int) err
 func TestGetByID_Success(t *testing.T) {
 	playerRepo := &mockPlayerRepo{
 		GetByIdFn: func(ctx context.Context, playerID int) (*playerrepo.Model, error) {
-			return &playerrepo.Model{ModelBase: base.ModelBase{ID: 5}, Name: "Alice"}, nil
+			return &playerrepo.Model{GormModelBase: base.GormModelBase{ID: 5}, Name: "Alice"}, nil
 		},
 	}
 	gameResultRepo := &mockGameResultRepo{
@@ -180,7 +180,7 @@ func TestGetByID_NotFound(t *testing.T) {
 func TestGetByID_StatsError(t *testing.T) {
 	playerRepo := &mockPlayerRepo{
 		GetByIdFn: func(ctx context.Context, playerID int) (*playerrepo.Model, error) {
-			return &playerrepo.Model{ModelBase: base.ModelBase{ID: 5}, Name: "Alice"}, nil
+			return &playerrepo.Model{GormModelBase: base.GormModelBase{ID: 5}, Name: "Alice"}, nil
 		},
 	}
 	gameResultRepo := &mockGameResultRepo{
@@ -197,8 +197,8 @@ func TestGetAll_Success(t *testing.T) {
 	playerRepo := &mockPlayerRepo{
 		GetAllFn: func(ctx context.Context) ([]playerrepo.Model, error) {
 			return []playerrepo.Model{
-				{ModelBase: base.ModelBase{ID: 1}, Name: "Alice"},
-				{ModelBase: base.ModelBase{ID: 2}, Name: "Bob"},
+				{GormModelBase: base.GormModelBase{ID: 1}, Name: "Alice"},
+				{GormModelBase: base.GormModelBase{ID: 2}, Name: "Bob"},
 			}, nil
 		},
 	}
@@ -222,7 +222,7 @@ func TestGetAll_Success(t *testing.T) {
 func TestGetPlayerName_Success(t *testing.T) {
 	playerRepo := &mockPlayerRepo{
 		GetByIdFn: func(ctx context.Context, playerID int) (*playerrepo.Model, error) {
-			return &playerrepo.Model{ModelBase: base.ModelBase{ID: 1}, Name: "Alice"}, nil
+			return &playerrepo.Model{GormModelBase: base.GormModelBase{ID: 1}, Name: "Alice"}, nil
 		},
 	}
 	fn := GetPlayerName(playerRepo)
@@ -299,7 +299,7 @@ func TestGetAllByPod_Success(t *testing.T) {
 	}
 	playerRepo := &mockPlayerRepo{
 		GetByIdFn: func(ctx context.Context, playerID int) (*playerrepo.Model, error) {
-			return &playerrepo.Model{ModelBase: base.ModelBase{ID: playerID}, Name: "Player"}, nil
+			return &playerrepo.Model{GormModelBase: base.GormModelBase{ID: playerID}, Name: "Player"}, nil
 		},
 	}
 	gameResultRepo := &mockGameResultRepo{
