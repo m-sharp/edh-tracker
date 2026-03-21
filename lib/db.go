@@ -10,6 +10,7 @@ import (
 	"go.uber.org/zap"
 	gormmysql "gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 const (
@@ -74,7 +75,9 @@ func NewDBClient(cfg *Config, log *zap.Logger) (*DBClient, error) {
 	db.SetMaxIdleConns(maxConnCount)
 
 	// GORM wraps the same *sql.DB — no second pool
-	gormDB, err := gorm.Open(gormmysql.New(gormmysql.Config{Conn: db}), &gorm.Config{})
+	gormDB, err := gorm.Open(gormmysql.New(gormmysql.Config{Conn: db}), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Warn),
+	})
 	if err != nil {
 		return nil, fmt.Errorf("error opening gorm connection: %w", err)
 	}
