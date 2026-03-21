@@ -11,6 +11,35 @@ import (
 	"github.com/m-sharp/edh-tracker/lib/repositories/testHelpers"
 )
 
+func TestGetByGameIDWithDeckInfo(t *testing.T) {
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewGameResultRepo(db)
+	ctx := context.Background()
+
+	gameID := testHelpers.CreateTestGame(t, db)
+	testDeck := testHelpers.CreateTestDeckWithCommander(t, db)
+
+	_, err := repo.Add(ctx, gameResult.Model{GameID: gameID, DeckID: testDeck.ID, Place: 1, KillCount: 2})
+	require.NoError(t, err)
+
+	got, err := repo.GetByGameIDWithDeckInfo(ctx, gameID)
+	require.NoError(t, err)
+	require.Len(t, got, 1)
+	assert.Equal(t, testDeck.Name, got[0].Deck.Name)
+	assert.Equal(t, testDeck.PlayerID, got[0].Deck.PlayerID)
+	require.NotNil(t, got[0].Deck.Commander)
+	assert.NotEmpty(t, got[0].Deck.Commander.Commander.Name)
+}
+
+func TestGetByGameIDWithDeckInfo_Empty(t *testing.T) {
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewGameResultRepo(db)
+
+	got, err := repo.GetByGameIDWithDeckInfo(context.Background(), 999999)
+	require.NoError(t, err)
+	assert.Len(t, got, 0)
+}
+
 func TestGetByGameId(t *testing.T) {
 	db := testHelpers.NewTestDB(t)
 	repo := testHelpers.NewGameResultRepo(db)

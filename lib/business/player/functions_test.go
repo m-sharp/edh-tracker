@@ -68,6 +68,9 @@ type mockGameResultRepo struct {
 func (m *mockGameResultRepo) GetByGameId(ctx context.Context, gameID int) ([]gameresultrepo.Model, error) {
 	panic("unexpected call to GetByGameId")
 }
+func (m *mockGameResultRepo) GetByGameIDWithDeckInfo(ctx context.Context, gameID int) ([]gameresultrepo.Model, error) {
+	panic("unexpected call to GetByGameIDWithDeckInfo")
+}
 func (m *mockGameResultRepo) GetStatsForPlayer(ctx context.Context, playerID int) (*gameresultrepo.Aggregate, error) {
 	if m.GetStatsForPlayerFn != nil {
 		return m.GetStatsForPlayerFn(ctx, playerID)

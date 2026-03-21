@@ -152,3 +152,16 @@ func CreateTestDeck(t *testing.T, db *gorm.DB) deck.Model {
 
 	return *createdDeck
 }
+
+// CreateTestDeckWithCommander inserts a fresh player + deck + deck_commander row and returns the deck Model.
+func CreateTestDeckWithCommander(t *testing.T, db *gorm.DB) deck.Model {
+	t.Helper()
+	testDeck := CreateTestDeck(t, db)
+	commanderID := CreateTestCommander(t, db)
+
+	dcRepo := NewDeckCommanderRepo(db)
+	_, err := dcRepo.Add(context.Background(), testDeck.ID, commanderID, nil)
+	require.NoError(t, err)
+
+	return testDeck
+}

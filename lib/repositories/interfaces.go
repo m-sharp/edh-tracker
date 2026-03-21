@@ -60,7 +60,9 @@ type GameRepository interface {
 }
 
 type GameResultRepository interface {
+	// TODO: If we're super efficient regardless of scale, why not always fetch the hydrated versions and drop the non-hydrated versions?
 	GetByGameId(ctx context.Context, gameID int) ([]gameResult.Model, error)
+	GetByGameIDWithDeckInfo(ctx context.Context, gameID int) ([]gameResult.Model, error)
 	GetByID(ctx context.Context, resultID int) (*gameResult.Model, error)
 	GetStatsForPlayer(ctx context.Context, playerID int) (*gameResult.Aggregate, error)
 	GetStatsForDeck(ctx context.Context, deckID int) (*gameResult.Aggregate, error)

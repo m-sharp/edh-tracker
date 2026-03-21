@@ -36,8 +36,8 @@ func NewBusiness(log *zap.Logger, r *repositories.Repositories) *Business {
 	getPlayerIDForDeck := deck.GetPlayerIDForDeck(r.Decks)
 
 	// Build game result functions.
-	getGameResults := gameResult.GetByGameID(r.GameResults, getDeckName, getCommanderEntry, getPlayerIDForDeck)
-	enrichGameResults := gameResult.EnrichModels(getDeckName, getCommanderEntry, getPlayerIDForDeck)
+	getGameResults := gameResult.GetByGameID(r.GameResults)
+	enrichGameResults := gameResult.EnrichModels()
 
 	return &Business{
 		Players: player.Functions{

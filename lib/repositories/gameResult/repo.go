@@ -40,6 +40,20 @@ func NewRepositoryFromDB(db *gorm.DB) *Repository {
 	return &Repository{db: db}
 }
 
+func (r *Repository) GetByGameIDWithDeckInfo(ctx context.Context, gameID int) ([]Model, error) {
+	var results []Model
+	err := r.db.WithContext(ctx).
+		Preload("Deck.Commander.Commander").
+		Preload("Deck.Commander.PartnerCommander").
+		Preload("Deck.Player").
+		Where("game_id = ?", gameID).
+		Find(&results).Error
+	if err != nil {
+		return nil, fmt.Errorf("failed to get GameResults with deck info for game %d: %w", gameID, err)
+	}
+	return results, nil
+}
+
 func (r *Repository) GetByGameId(ctx context.Context, gameID int) ([]Model, error) {
 	var results []Model
 	if err := r.db.WithContext(ctx).Where("game_id = ?", gameID).Find(&results).Error; err != nil {
