@@ -36,8 +36,9 @@ func NewBusiness(log *zap.Logger, r *repositories.Repositories) *Business {
 	getDeckName := deck.GetDeckName(r.Decks)
 	getPlayerIDForDeck := deck.GetPlayerIDForDeck(r.Decks)
 
-	// Build game result function.
+	// Build game result functions.
 	getGameResults := gameResult.GetByGameID(r.GameResults, getDeckName, getCommanderEntry, getPlayerIDForDeck)
+	enrichGameResults := gameResult.EnrichModels(getDeckName, getCommanderEntry, getPlayerIDForDeck)
 
 	return &Business{
 		Players: player.Functions{
@@ -62,10 +63,10 @@ func NewBusiness(log *zap.Logger, r *repositories.Repositories) *Business {
 			GetPlayerIDForDeck: getPlayerIDForDeck,
 		},
 		Games: game.Functions{
-			GetAllByPod:    game.GetAllByPod(log, r.Games, getGameResults),
-			GetAllByDeck:   game.GetAllByDeck(log, r.Games, getGameResults),
-			GetAllByPlayer: game.GetAllByPlayer(log, r.Games, getGameResults),
-			GetByID:        game.GetByID(log, r.Games, getGameResults),
+			GetAllByPod:    game.GetAllByPod(log, r.Games, enrichGameResults),
+			GetAllByDeck:   game.GetAllByDeck(log, r.Games, enrichGameResults),
+			GetAllByPlayer: game.GetAllByPlayer(log, r.Games, enrichGameResults),
+			GetByID:        game.GetByID(log, r.Games, enrichGameResults),
 			Create:         game.Create(log, r.Games, r.GameResults, r.Decks, getFormat),
 			Update:         game.Update(r.Games),
 			SoftDelete:     game.SoftDelete(r.Games),
@@ -76,6 +77,7 @@ func NewBusiness(log *zap.Logger, r *repositories.Repositories) *Business {
 		GameResults: gameResult.Functions{
 			GetByGameID:        getGameResults,
 			GetGameIDForResult: gameResult.GetGameIDForResult(r.GameResults),
+			EnrichModels:       enrichGameResults,
 		},
 		Formats: format.Functions{
 			GetAll:  format.GetAll(r.Formats),

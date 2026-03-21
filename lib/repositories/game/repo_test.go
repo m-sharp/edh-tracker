@@ -170,3 +170,99 @@ func TestSoftDelete(t *testing.T) {
 	require.NoError(t, err)
 	assert.Nil(t, got)
 }
+
+func TestGetAllByPodWithResults(t *testing.T) {
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewGameRepo(db)
+	ctx := context.Background()
+
+	podID := testHelpers.CreateTestPod(t, db)
+	gameID, err := repo.Add(ctx, "Game With Results", podID, 1)
+	require.NoError(t, err)
+	deckID := testHelpers.CreateTestDeck(t, db).ID
+	testHelpers.CreateTestGameResult(t, db, gameID, deckID, 1, 2)
+
+	games, err := repo.GetAllByPodWithResults(ctx, podID)
+	require.NoError(t, err)
+	require.Len(t, games, 1)
+	assert.Equal(t, gameID, games[0].ID)
+	require.Len(t, games[0].Results, 1)
+	assert.Equal(t, gameID, games[0].Results[0].GameID)
+	assert.Equal(t, deckID, games[0].Results[0].DeckID)
+	assert.Equal(t, 1, games[0].Results[0].Place)
+	assert.Equal(t, 2, games[0].Results[0].KillCount)
+
+	// Add another deck result
+	deck2ID := testHelpers.CreateTestDeck(t, db).ID
+	testHelpers.CreateTestGameResult(t, db, gameID, deck2ID, 2, 1)
+	games, err = repo.GetAllByPodWithResults(ctx, podID)
+	require.NoError(t, err)
+	require.Len(t, games, 1)
+	require.Len(t, games[0].Results, 2)
+}
+
+func TestGetAllByDeckWithResults(t *testing.T) {
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewGameRepo(db)
+	ctx := context.Background()
+
+	gameID := testHelpers.CreateTestGame(t, db)
+	deckID := testHelpers.CreateTestDeck(t, db).ID
+	testHelpers.CreateTestGameResult(t, db, gameID, deckID, 1, 0)
+
+	games, err := repo.GetAllByDeckWithResults(ctx, deckID)
+	require.NoError(t, err)
+	require.Len(t, games, 1)
+	assert.Equal(t, gameID, games[0].ID)
+	require.Len(t, games[0].Results, 1)
+	assert.Equal(t, gameID, games[0].Results[0].GameID)
+	assert.Equal(t, deckID, games[0].Results[0].DeckID)
+}
+
+func TestGetAllByPlayerWithResults(t *testing.T) {
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewGameRepo(db)
+	ctx := context.Background()
+
+	gameID := testHelpers.CreateTestGame(t, db)
+	testDeck := testHelpers.CreateTestDeck(t, db)
+	testHelpers.CreateTestGameResult(t, db, gameID, testDeck.ID, 1, 0)
+
+	games, err := repo.GetAllByPlayerWithResults(ctx, testDeck.PlayerID)
+	require.NoError(t, err)
+	require.Len(t, games, 1)
+	assert.Equal(t, gameID, games[0].ID)
+	require.Len(t, games[0].Results, 1)
+	assert.Equal(t, gameID, games[0].Results[0].GameID)
+	assert.Equal(t, testDeck.ID, games[0].Results[0].DeckID)
+}
+
+func TestGetByIDWithResults_Found(t *testing.T) {
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewGameRepo(db)
+	ctx := context.Background()
+
+	podID := testHelpers.CreateTestPod(t, db)
+	gameID, err := repo.Add(ctx, "Friday Night", podID, 1)
+	require.NoError(t, err)
+	deckID := testHelpers.CreateTestDeck(t, db).ID
+	testHelpers.CreateTestGameResult(t, db, gameID, deckID, 2, 1)
+
+	got, err := repo.GetByIDWithResults(ctx, gameID)
+	require.NoError(t, err)
+	require.NotNil(t, got)
+	assert.Equal(t, gameID, got.ID)
+	assert.Equal(t, "Friday Night", got.Description)
+	require.Len(t, got.Results, 1)
+	assert.Equal(t, gameID, got.Results[0].GameID)
+	assert.Equal(t, deckID, got.Results[0].DeckID)
+}
+
+func TestGetByIDWithResults_NotFound(t *testing.T) {
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewGameRepo(db)
+
+	got, err := repo.GetByIDWithResults(context.Background(), 999999)
+	require.NoError(t, err)
+	assert.Nil(t, got)
+}

@@ -16,17 +16,17 @@ import (
 func GetAllByPod(
 	log *zap.Logger,
 	gameRepo repos.GameRepository,
-	getGameResults gameResult.GetByGameIDFunc,
+	enrichGameResults gameResult.EnrichModelsFunc,
 ) GetAllByPodFunc {
 	return func(ctx context.Context, podID int) ([]Entity, error) {
-		games, err := gameRepo.GetAllByPod(ctx, podID)
+		games, err := gameRepo.GetAllByPodWithResults(ctx, podID)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get games for pod %d: %w", podID, err)
 		}
 
 		result := make([]Entity, 0, len(games))
 		for _, g := range games {
-			results, err := getGameResults(ctx, g.ID)
+			results, err := enrichGameResults(ctx, g.Results)
 			if err != nil {
 				log.Warn("Failed to get results for game, dropping from results",
 					zap.Int("game_id", g.ID), zap.Error(err))
@@ -42,17 +42,17 @@ func GetAllByPod(
 func GetAllByDeck(
 	log *zap.Logger,
 	gameRepo repos.GameRepository,
-	getGameResults gameResult.GetByGameIDFunc,
+	enrichGameResults gameResult.EnrichModelsFunc,
 ) GetAllByDeckFunc {
 	return func(ctx context.Context, deckID int) ([]Entity, error) {
-		games, err := gameRepo.GetAllByDeck(ctx, deckID)
+		games, err := gameRepo.GetAllByDeckWithResults(ctx, deckID)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get games for deck %d: %w", deckID, err)
 		}
 
 		result := make([]Entity, 0, len(games))
 		for _, g := range games {
-			results, err := getGameResults(ctx, g.ID)
+			results, err := enrichGameResults(ctx, g.Results)
 			if err != nil {
 				log.Warn("Failed to get results for game, dropping from results",
 					zap.Int("game_id", g.ID), zap.Error(err))
@@ -68,10 +68,10 @@ func GetAllByDeck(
 func GetByID(
 	log *zap.Logger,
 	gameRepo repos.GameRepository,
-	getGameResults gameResult.GetByGameIDFunc,
+	enrichGameResults gameResult.EnrichModelsFunc,
 ) GetByIDFunc {
 	return func(ctx context.Context, gameID int) (*Entity, error) {
-		g, err := gameRepo.GetById(ctx, gameID)
+		g, err := gameRepo.GetByIDWithResults(ctx, gameID)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get game %d: %w", gameID, err)
 		}
@@ -79,7 +79,7 @@ func GetByID(
 			return nil, nil
 		}
 
-		results, err := getGameResults(ctx, g.ID)
+		results, err := enrichGameResults(ctx, g.Results)
 		if err != nil {
 			return nil, err
 		}
@@ -151,17 +151,17 @@ func Create(
 func GetAllByPlayer(
 	log *zap.Logger,
 	gameRepo repos.GameRepository,
-	getGameResults gameResult.GetByGameIDFunc,
+	enrichGameResults gameResult.EnrichModelsFunc,
 ) GetAllByPlayerFunc {
 	return func(ctx context.Context, playerID int) ([]Entity, error) {
-		games, err := gameRepo.GetAllByPlayerID(ctx, playerID)
+		games, err := gameRepo.GetAllByPlayerWithResults(ctx, playerID)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get games for player %d: %w", playerID, err)
 		}
 
 		result := make([]Entity, 0, len(games))
 		for _, g := range games {
-			results, err := getGameResults(ctx, g.ID)
+			results, err := enrichGameResults(ctx, g.Results)
 			if err != nil {
 				log.Warn("Failed to get results for game, dropping from results",
 					zap.Int("game_id", g.ID), zap.Error(err))

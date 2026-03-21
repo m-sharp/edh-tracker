@@ -6,6 +6,7 @@ import (
 
 	"github.com/m-sharp/edh-tracker/lib/business/deck"
 	repos "github.com/m-sharp/edh-tracker/lib/repositories"
+	gameResultRepo "github.com/m-sharp/edh-tracker/lib/repositories/gameResult"
 	"github.com/m-sharp/edh-tracker/lib/utils"
 )
 
@@ -82,6 +83,63 @@ func cachedPlayerIDForDeck(ctx context.Context, deckID int, cache map[int]int, g
 	}
 	cache[deckID] = pid
 	return pid, nil
+}
+
+func EnrichModels(
+	getDeckName deck.GetDeckNameFunc,
+	getCommanderEntry deck.GetCommanderEntryFunc,
+	getPlayerIDForDeck deck.GetPlayerIDForDeckFunc,
+) EnrichModelsFunc {
+	return func(ctx context.Context, models []gameResultRepo.Model) ([]Entity, error) {
+		numPlayers := len(models)
+		deckNameCache := map[int]string{}
+		playerIDCache := map[int]int{}
+
+		results := make([]Entity, 0, len(models))
+		for _, r := range models {
+			var deckName string
+			if name, ok := deckNameCache[r.DeckID]; ok {
+				deckName = name
+			} else {
+				name, err := getDeckName(ctx, r.DeckID)
+				if err != nil {
+					return nil, err
+				}
+				deckNameCache[r.DeckID] = name
+				deckName = name
+			}
+
+			playerID, err := cachedPlayerIDForDeck(ctx, r.DeckID, playerIDCache, getPlayerIDForDeck)
+			if err != nil {
+				return nil, err
+			}
+
+			entity := Entity{
+				ID:       r.ID,
+				GameID:   r.GameID,
+				DeckID:   r.DeckID,
+				PlayerID: playerID,
+				DeckName: deckName,
+				Place:    r.Place,
+				Kills:    r.KillCount,
+				Points:   utils.GetPointsForPlace(r.KillCount, r.Place, numPlayers),
+			}
+
+			commanders, err := getCommanderEntry(ctx, r.DeckID)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get commander for deck %d: %w", r.DeckID, err)
+			}
+			if commanders != nil {
+				name := commanders.CommanderName
+				entity.CommanderName = &name
+				entity.PartnerCommanderName = commanders.PartnerCommanderName
+			}
+
+			results = append(results, entity)
+		}
+
+		return results, nil
+	}
 }
 
 func GetGameIDForResult(gameResultRepo repos.GameResultRepository) GetGameIDForResultFunc {

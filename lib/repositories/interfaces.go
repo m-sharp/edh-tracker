@@ -42,9 +42,13 @@ type DeckRepository interface {
 
 type GameRepository interface {
 	GetAllByPod(ctx context.Context, podID int) ([]game.Model, error)
+	GetAllByPodWithResults(ctx context.Context, podID int) ([]game.Model, error)
 	GetAllByDeck(ctx context.Context, deckID int) ([]game.Model, error)
+	GetAllByDeckWithResults(ctx context.Context, deckID int) ([]game.Model, error)
 	GetAllByPlayerID(ctx context.Context, playerID int) ([]game.Model, error)
+	GetAllByPlayerWithResults(ctx context.Context, playerID int) ([]game.Model, error)
 	GetById(ctx context.Context, gameID int) (*game.Model, error)
+	GetByIDWithResults(ctx context.Context, gameID int) (*game.Model, error)
 	Add(ctx context.Context, description string, podID, formatID int) (int, error)
 	BulkAdd(ctx context.Context, games []game.Model) ([]int, error)
 	Update(ctx context.Context, gameID int, description string) error

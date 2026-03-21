@@ -20,12 +20,16 @@ import (
 
 // mockGameRepo implements repos.GameRepository
 type mockGameRepo struct {
-	GetAllByPodFn      func(ctx context.Context, podID int) ([]gamerepo.Model, error)
-	GetByIdFn          func(ctx context.Context, gameID int) (*gamerepo.Model, error)
-	AddFn              func(ctx context.Context, description string, podID, formatID int) (int, error)
-	GetAllByPlayerIDFn func(ctx context.Context, playerID int) ([]gamerepo.Model, error)
-	UpdateFn           func(ctx context.Context, gameID int, description string) error
-	SoftDeleteFn       func(ctx context.Context, id int) error
+	GetAllByPodFn              func(ctx context.Context, podID int) ([]gamerepo.Model, error)
+	GetByIdFn                  func(ctx context.Context, gameID int) (*gamerepo.Model, error)
+	AddFn                      func(ctx context.Context, description string, podID, formatID int) (int, error)
+	GetAllByPlayerIDFn         func(ctx context.Context, playerID int) ([]gamerepo.Model, error)
+	UpdateFn                   func(ctx context.Context, gameID int, description string) error
+	SoftDeleteFn               func(ctx context.Context, id int) error
+	GetAllByPodWithResultsFn    func(ctx context.Context, podID int) ([]gamerepo.Model, error)
+	GetAllByDeckWithResultsFn   func(ctx context.Context, deckID int) ([]gamerepo.Model, error)
+	GetAllByPlayerWithResultsFn func(ctx context.Context, playerID int) ([]gamerepo.Model, error)
+	GetByIDWithResultsFn        func(ctx context.Context, gameID int) (*gamerepo.Model, error)
 }
 
 func (m *mockGameRepo) GetAllByPod(ctx context.Context, podID int) ([]gamerepo.Model, error) {
@@ -69,6 +73,30 @@ func (m *mockGameRepo) SoftDelete(ctx context.Context, id int) error {
 		return m.SoftDeleteFn(ctx, id)
 	}
 	panic("unexpected call to SoftDelete")
+}
+func (m *mockGameRepo) GetAllByPodWithResults(ctx context.Context, podID int) ([]gamerepo.Model, error) {
+	if m.GetAllByPodWithResultsFn != nil {
+		return m.GetAllByPodWithResultsFn(ctx, podID)
+	}
+	panic("unexpected call to GetAllByPodWithResults")
+}
+func (m *mockGameRepo) GetAllByDeckWithResults(ctx context.Context, deckID int) ([]gamerepo.Model, error) {
+	if m.GetAllByDeckWithResultsFn != nil {
+		return m.GetAllByDeckWithResultsFn(ctx, deckID)
+	}
+	panic("unexpected call to GetAllByDeckWithResults")
+}
+func (m *mockGameRepo) GetAllByPlayerWithResults(ctx context.Context, playerID int) ([]gamerepo.Model, error) {
+	if m.GetAllByPlayerWithResultsFn != nil {
+		return m.GetAllByPlayerWithResultsFn(ctx, playerID)
+	}
+	panic("unexpected call to GetAllByPlayerWithResults")
+}
+func (m *mockGameRepo) GetByIDWithResults(ctx context.Context, gameID int) (*gamerepo.Model, error) {
+	if m.GetByIDWithResultsFn != nil {
+		return m.GetByIDWithResultsFn(ctx, gameID)
+	}
+	panic("unexpected call to GetByIDWithResults")
 }
 
 // mockGameResultRepo implements repos.GameResultRepository
@@ -276,15 +304,15 @@ func TestCreate_InvalidInput_Error(t *testing.T) {
 
 func TestGetByID_NotFound(t *testing.T) {
 	gameRepo := &mockGameRepo{
-		GetByIdFn: func(ctx context.Context, gameID int) (*gamerepo.Model, error) {
+		GetByIDWithResultsFn: func(ctx context.Context, gameID int) (*gamerepo.Model, error) {
 			return nil, nil
 		},
 	}
-	getGameResults := func(ctx context.Context, gameID int) ([]gameResult.Entity, error) {
+	enrichGameResults := func(ctx context.Context, models []gameresultrepo.Model) ([]gameResult.Entity, error) {
 		panic("should not be called")
 	}
 
-	fn := GetByID(zap.NewNop(), gameRepo, getGameResults)
+	fn := GetByID(zap.NewNop(), gameRepo, enrichGameResults)
 	got, err := fn(context.Background(), 999)
 	require.NoError(t, err)
 	assert.Nil(t, got)
@@ -292,21 +320,21 @@ func TestGetByID_NotFound(t *testing.T) {
 
 func TestGetAllByPod_ResultErrorDropsGame(t *testing.T) {
 	gameRepo := &mockGameRepo{
-		GetAllByPodFn: func(ctx context.Context, podID int) ([]gamerepo.Model, error) {
+		GetAllByPodWithResultsFn: func(ctx context.Context, podID int) ([]gamerepo.Model, error) {
 			return []gamerepo.Model{
-				{GormModelBase: base.GormModelBase{ID: 1}, PodID: podID, FormatID: 1},
-				{GormModelBase: base.GormModelBase{ID: 2}, PodID: podID, FormatID: 1},
+				{GormModelBase: base.GormModelBase{ID: 1}, PodID: podID, FormatID: 1, Results: []gameresultrepo.Model{{GameID: 1, DeckID: 1}}},
+				{GormModelBase: base.GormModelBase{ID: 2}, PodID: podID, FormatID: 1, Results: []gameresultrepo.Model{{GameID: 2, DeckID: 2}}},
 			}, nil
 		},
 	}
-	getGameResults := func(ctx context.Context, gameID int) ([]gameResult.Entity, error) {
-		if gameID == 1 {
+	enrichGameResults := func(ctx context.Context, models []gameresultrepo.Model) ([]gameResult.Entity, error) {
+		if len(models) > 0 && models[0].GameID == 1 {
 			return nil, errors.New("results error for game 1")
 		}
 		return []gameResult.Entity{{ID: 10, GameID: 2}}, nil
 	}
 
-	fn := GetAllByPod(zap.NewNop(), gameRepo, getGameResults)
+	fn := GetAllByPod(zap.NewNop(), gameRepo, enrichGameResults)
 	got, err := fn(context.Background(), 5)
 	require.NoError(t, err)
 	// game 1 dropped due to error, game 2 included
@@ -316,21 +344,21 @@ func TestGetAllByPod_ResultErrorDropsGame(t *testing.T) {
 
 func TestGetAllByPlayer_ResultErrorDropsGame(t *testing.T) {
 	gameRepo := &mockGameRepo{
-		GetAllByPlayerIDFn: func(ctx context.Context, playerID int) ([]gamerepo.Model, error) {
+		GetAllByPlayerWithResultsFn: func(ctx context.Context, playerID int) ([]gamerepo.Model, error) {
 			return []gamerepo.Model{
-				{GormModelBase: base.GormModelBase{ID: 1}},
-				{GormModelBase: base.GormModelBase{ID: 2}},
+				{GormModelBase: base.GormModelBase{ID: 1}, Results: []gameresultrepo.Model{{GameID: 1, DeckID: 1}}},
+				{GormModelBase: base.GormModelBase{ID: 2}, Results: []gameresultrepo.Model{{GameID: 2, DeckID: 2}}},
 			}, nil
 		},
 	}
-	getGameResults := func(ctx context.Context, gameID int) ([]gameResult.Entity, error) {
-		if gameID == 1 {
+	enrichGameResults := func(ctx context.Context, models []gameresultrepo.Model) ([]gameResult.Entity, error) {
+		if len(models) > 0 && models[0].GameID == 1 {
 			return nil, errors.New("result error")
 		}
 		return []gameResult.Entity{{ID: 10, GameID: 2}}, nil
 	}
 
-	fn := GetAllByPlayer(zap.NewNop(), gameRepo, getGameResults)
+	fn := GetAllByPlayer(zap.NewNop(), gameRepo, enrichGameResults)
 	got, err := fn(context.Background(), 5)
 	require.NoError(t, err)
 	assert.Len(t, got, 1)
@@ -339,7 +367,7 @@ func TestGetAllByPlayer_ResultErrorDropsGame(t *testing.T) {
 
 func TestGetAllByPlayer_RepoError(t *testing.T) {
 	gameRepo := &mockGameRepo{
-		GetAllByPlayerIDFn: func(ctx context.Context, playerID int) ([]gamerepo.Model, error) {
+		GetAllByPlayerWithResultsFn: func(ctx context.Context, playerID int) ([]gamerepo.Model, error) {
 			return nil, errors.New("db error")
 		},
 	}

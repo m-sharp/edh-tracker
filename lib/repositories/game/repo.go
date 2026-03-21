@@ -33,6 +33,21 @@ func (r *Repository) GetAllByPod(ctx context.Context, podID int) ([]Model, error
 	return games, nil
 }
 
+func (r *Repository) GetAllByPodWithResults(ctx context.Context, podID int) ([]Model, error) {
+	var games []Model
+	err := r.db.WithContext(ctx).
+		Preload("Results").
+		Where("pod_id = ?", podID).
+		Find(&games).Error
+	if err != nil {
+		return nil, fmt.Errorf("failed to get Game records with results for pod %d: %w", podID, err)
+	}
+	if games == nil {
+		return []Model{}, nil
+	}
+	return games, nil
+}
+
 func (r *Repository) GetAllByDeck(ctx context.Context, deckID int) ([]Model, error) {
 	var games []Model
 	err := r.db.WithContext(ctx).
@@ -48,16 +63,52 @@ func (r *Repository) GetAllByDeck(ctx context.Context, deckID int) ([]Model, err
 	return games, nil
 }
 
+func (r *Repository) GetAllByDeckWithResults(ctx context.Context, deckID int) ([]Model, error) {
+	var games []Model
+	err := r.db.WithContext(ctx).
+		Preload("Results").
+		Joins("INNER JOIN game_result ON game.id = game_result.game_id").
+		Where("game_result.deck_id = ? AND game_result.deleted_at IS NULL", deckID).
+		Find(&games).Error
+	if err != nil {
+		return nil, fmt.Errorf("failed to get Game records with results for deck %d: %w", deckID, err)
+	}
+	if games == nil {
+		return []Model{}, nil
+	}
+	return games, nil
+}
+
 func (r *Repository) GetAllByPlayerID(ctx context.Context, playerID int) ([]Model, error) {
 	var games []Model
 	err := r.db.WithContext(ctx).
-		Distinct("game.id, game.description, game.pod_id, game.format_id, game.created_at, game.updated_at, game.deleted_at").
+		Select("game.*").
 		Joins("INNER JOIN game_result ON game.id = game_result.game_id").
 		Joins("INNER JOIN deck ON game_result.deck_id = deck.id").
 		Where("deck.player_id = ? AND game_result.deleted_at IS NULL AND deck.deleted_at IS NULL", playerID).
+		Distinct().
 		Find(&games).Error
 	if err != nil {
 		return nil, fmt.Errorf("failed to get Game records for player %d: %w", playerID, err)
+	}
+	if games == nil {
+		return []Model{}, nil
+	}
+	return games, nil
+}
+
+func (r *Repository) GetAllByPlayerWithResults(ctx context.Context, playerID int) ([]Model, error) {
+	var games []Model
+	err := r.db.WithContext(ctx).
+		Preload("Results").
+		Select("game.*").
+		Joins("INNER JOIN game_result ON game.id = game_result.game_id").
+		Joins("INNER JOIN deck ON game_result.deck_id = deck.id").
+		Where("deck.player_id = ? AND game_result.deleted_at IS NULL AND deck.deleted_at IS NULL", playerID).
+		Distinct().
+		Find(&games).Error
+	if err != nil {
+		return nil, fmt.Errorf("failed to get Game records with results for player %d: %w", playerID, err)
 	}
 	if games == nil {
 		return []Model{}, nil
@@ -73,6 +124,18 @@ func (r *Repository) GetById(ctx context.Context, gameID int) (*Model, error) {
 	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to get Game record for id %d: %w", gameID, err)
+	}
+	return &m, nil
+}
+
+func (r *Repository) GetByIDWithResults(ctx context.Context, gameID int) (*Model, error) {
+	var m Model
+	err := r.db.WithContext(ctx).Preload("Results").First(&m, gameID).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to get Game record with results for id %d: %w", gameID, err)
 	}
 	return &m, nil
 }
