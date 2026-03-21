@@ -1,7 +1,7 @@
 # Phase 3b — GameResult Repository
 
 ## Status
-Pending
+Done
 
 ## Skill
 Use the `/gorm` skill tool at the start of each implementation session for this phase.

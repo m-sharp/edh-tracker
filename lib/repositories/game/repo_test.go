@@ -34,13 +34,9 @@ func TestGetAllByDeck(t *testing.T) {
 	ctx := context.Background()
 
 	gameID := testHelpers.CreateTestGame(t, db)
-	deckID := testHelpers.CreateTestDeck(t, db)
+	deckID := testHelpers.CreateTestDeck(t, db).ID
 
-	err := db.Exec(
-		"INSERT INTO game_result (game_id, deck_id, kill_count, place) VALUES (?, ?, 0, 1)",
-		gameID, deckID,
-	).Error
-	require.NoError(t, err)
+	testHelpers.CreateTestGameResult(t, db, gameID, deckID, 1, 0)
 
 	games, err := repo.GetAllByDeck(ctx, deckID)
 	require.NoError(t, err)
@@ -54,18 +50,11 @@ func TestGetAllByPlayerID(t *testing.T) {
 	ctx := context.Background()
 
 	gameID := testHelpers.CreateTestGame(t, db)
-	deckID := testHelpers.CreateTestDeck(t, db)
+	testDeck := testHelpers.CreateTestDeck(t, db)
 
-	err := db.Exec(
-		"INSERT INTO game_result (game_id, deck_id, kill_count, place) VALUES (?, ?, 0, 1)",
-		gameID, deckID,
-	).Error
-	require.NoError(t, err)
+	testHelpers.CreateTestGameResult(t, db, gameID, testDeck.ID, 1, 0)
 
-	// Fetch the player ID from the deck we created
-	var playerID int
-	err = db.Raw("SELECT player_id FROM deck WHERE id = ?", deckID).Scan(&playerID).Error
-	require.NoError(t, err)
+	playerID := testDeck.PlayerID
 
 	games, err := repo.GetAllByPlayerID(ctx, playerID)
 	require.NoError(t, err)

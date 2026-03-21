@@ -11,10 +11,10 @@ type Aggregate struct {
 }
 
 type gameStat struct {
-	GameID      int `db:"game_id"`
-	Place       int `db:"place"`
-	KillCount   int `db:"kill_count"`
-	PlayerCount int `db:"player_count"`
+	GameID      int
+	Place       int
+	KillCount   int
+	PlayerCount int
 }
 
 type gameStats []gameStat

@@ -9,11 +9,13 @@ import (
 	"github.com/stretchr/testify/require"
 	"gorm.io/gorm"
 
+	"github.com/m-sharp/edh-tracker/lib/repositories/base"
 	"github.com/m-sharp/edh-tracker/lib/repositories/commander"
 	"github.com/m-sharp/edh-tracker/lib/repositories/deck"
 	"github.com/m-sharp/edh-tracker/lib/repositories/deckCommander"
 	"github.com/m-sharp/edh-tracker/lib/repositories/format"
 	"github.com/m-sharp/edh-tracker/lib/repositories/game"
+	"github.com/m-sharp/edh-tracker/lib/repositories/gameResult"
 	"github.com/m-sharp/edh-tracker/lib/repositories/player"
 	"github.com/m-sharp/edh-tracker/lib/repositories/playerPodRole"
 	"github.com/m-sharp/edh-tracker/lib/repositories/pod"
@@ -57,6 +59,23 @@ func NewGameRepo(db *gorm.DB) *game.Repository {
 	return game.NewRepositoryFromDB(db)
 }
 
+func NewGameResultRepo(db *gorm.DB) *gameResult.Repository {
+	return gameResult.NewRepositoryFromDB(db)
+}
+
+// CreateTestGameResult inserts a fresh game_result row and returns its ID.
+func CreateTestGameResult(t *testing.T, db *gorm.DB, gameID, deckID, place, killCount int) int {
+	t.Helper()
+	id, err := gameResult.NewRepositoryFromDB(db).Add(context.Background(), gameResult.Model{
+		GameID:    gameID,
+		DeckID:    deckID,
+		Place:     place,
+		KillCount: killCount,
+	})
+	require.NoError(t, err)
+	return id
+}
+
 // CreateTestPod inserts a fresh pod row and returns its ID.
 func CreateTestPod(t *testing.T, db *gorm.DB) int {
 	t.Helper()
@@ -90,11 +109,17 @@ func CreateTestGame(t *testing.T, db *gorm.DB) int {
 	return id
 }
 
-// CreateTestDeck inserts a fresh player + deck row and returns the deck ID.
-func CreateTestDeck(t *testing.T, db *gorm.DB) int {
+// CreateTestDeck inserts a fresh player + deck row and returns the deck Model.
+func CreateTestDeck(t *testing.T, db *gorm.DB) deck.Model {
 	t.Helper()
 	playerID := CreateTestPlayer(t, db)
-	id, err := deck.NewRepositoryFromDB(db).Add(context.Background(), playerID, fmt.Sprintf("Test Deck %d", nextID()), 1)
+	name := fmt.Sprintf("Test Deck %d", nextID())
+	id, err := deck.NewRepositoryFromDB(db).Add(context.Background(), playerID, name, 1)
 	require.NoError(t, err)
-	return id
+	return deck.Model{
+		GormModelBase: base.GormModelBase{ID: id},
+		PlayerID:      playerID,
+		Name:          name,
+		FormatID:      1,
+	}
 }

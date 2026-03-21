@@ -14,7 +14,7 @@ import (
 func TestGetByDeckId_NotFound(t *testing.T) {
 	db := testHelpers.NewTestDB(t)
 	repo := testHelpers.NewDeckCommanderRepo(db)
-	deckID := testHelpers.CreateTestDeck(t, db)
+	deckID := testHelpers.CreateTestDeck(t, db).ID
 	got, err := repo.GetByDeckId(context.Background(), deckID)
 	require.NoError(t, err)
 	assert.Nil(t, got)
@@ -25,7 +25,7 @@ func TestGetByDeckId_Found_WithoutPartner(t *testing.T) {
 	repo := testHelpers.NewDeckCommanderRepo(db)
 	ctx := context.Background()
 
-	deckID := testHelpers.CreateTestDeck(t, db)
+	deckID := testHelpers.CreateTestDeck(t, db).ID
 	commanderID := testHelpers.CreateTestCommander(t, db)
 
 	id, err := repo.Add(ctx, deckID, commanderID, nil)
@@ -45,7 +45,7 @@ func TestGetByDeckId_Found_WithPartner(t *testing.T) {
 	repo := testHelpers.NewDeckCommanderRepo(db)
 	ctx := context.Background()
 
-	deckID := testHelpers.CreateTestDeck(t, db)
+	deckID := testHelpers.CreateTestDeck(t, db).ID
 	commanderID := testHelpers.CreateTestCommander(t, db)
 	partnerID := testHelpers.CreateTestCommander(t, db)
 
@@ -67,7 +67,7 @@ func TestAdd_WithoutPartner(t *testing.T) {
 	repo := testHelpers.NewDeckCommanderRepo(db)
 	ctx := context.Background()
 
-	deckID := testHelpers.CreateTestDeck(t, db)
+	deckID := testHelpers.CreateTestDeck(t, db).ID
 	commanderID := testHelpers.CreateTestCommander(t, db)
 
 	id, err := repo.Add(ctx, deckID, commanderID, nil)
@@ -87,7 +87,7 @@ func TestAdd_WithPartner(t *testing.T) {
 	repo := testHelpers.NewDeckCommanderRepo(db)
 	ctx := context.Background()
 
-	deckID := testHelpers.CreateTestDeck(t, db)
+	deckID := testHelpers.CreateTestDeck(t, db).ID
 	commanderID := testHelpers.CreateTestCommander(t, db)
 	partnerID := testHelpers.CreateTestCommander(t, db)
 
@@ -110,9 +110,9 @@ func TestBulkAdd(t *testing.T) {
 	ctx := context.Background()
 
 	entries := []deckCommander.Model{
-		{DeckID: testHelpers.CreateTestDeck(t, db), CommanderID: testHelpers.CreateTestCommander(t, db)},
-		{DeckID: testHelpers.CreateTestDeck(t, db), CommanderID: testHelpers.CreateTestCommander(t, db)},
-		{DeckID: testHelpers.CreateTestDeck(t, db), CommanderID: testHelpers.CreateTestCommander(t, db)},
+		{DeckID: testHelpers.CreateTestDeck(t, db).ID, CommanderID: testHelpers.CreateTestCommander(t, db)},
+		{DeckID: testHelpers.CreateTestDeck(t, db).ID, CommanderID: testHelpers.CreateTestCommander(t, db)},
+		{DeckID: testHelpers.CreateTestDeck(t, db).ID, CommanderID: testHelpers.CreateTestCommander(t, db)},
 	}
 	require.NoError(t, repo.BulkAdd(ctx, entries))
 
@@ -129,7 +129,7 @@ func TestDeleteByDeckID(t *testing.T) {
 	repo := testHelpers.NewDeckCommanderRepo(db)
 	ctx := context.Background()
 
-	deckID := testHelpers.CreateTestDeck(t, db)
+	deckID := testHelpers.CreateTestDeck(t, db).ID
 	commanderID := testHelpers.CreateTestCommander(t, db)
 
 	_, err := repo.Add(ctx, deckID, commanderID, nil)

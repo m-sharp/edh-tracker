@@ -73,7 +73,7 @@ func TestGetByGameID_NoCommander(t *testing.T) {
 	repo := &mockGameResultRepo{
 		GetByGameIdFn: func(ctx context.Context, gameID int) ([]gameresultrepo.Model, error) {
 			return []gameresultrepo.Model{
-				{ModelBase: base.ModelBase{ID: 1}, GameID: 1, DeckID: 20, Place: 1, KillCount: 2},
+				{GormModelBase: base.GormModelBase{ID: 1}, GameID: 1, DeckID: 20, Place: 1, KillCount: 2},
 			}, nil
 		},
 	}
@@ -99,7 +99,7 @@ func TestGetByGameID_WithCommander(t *testing.T) {
 	repo := &mockGameResultRepo{
 		GetByGameIdFn: func(ctx context.Context, gameID int) ([]gameresultrepo.Model, error) {
 			return []gameresultrepo.Model{
-				{ModelBase: base.ModelBase{ID: 1}, GameID: 1, DeckID: 20, Place: 1, KillCount: 0},
+				{GormModelBase: base.GormModelBase{ID: 1}, GameID: 1, DeckID: 20, Place: 1, KillCount: 0},
 			}, nil
 		},
 	}
@@ -126,7 +126,7 @@ func TestGetByGameID_WithPartner(t *testing.T) {
 	repo := &mockGameResultRepo{
 		GetByGameIdFn: func(ctx context.Context, gameID int) ([]gameresultrepo.Model, error) {
 			return []gameresultrepo.Model{
-				{ModelBase: base.ModelBase{ID: 1}, GameID: 1, DeckID: 20, Place: 2, KillCount: 1},
+				{GormModelBase: base.GormModelBase{ID: 1}, GameID: 1, DeckID: 20, Place: 2, KillCount: 1},
 			}, nil
 		},
 	}
@@ -157,8 +157,8 @@ func TestGetByGameID_DeckNameCached(t *testing.T) {
 	repo := &mockGameResultRepo{
 		GetByGameIdFn: func(ctx context.Context, gameID int) ([]gameresultrepo.Model, error) {
 			return []gameresultrepo.Model{
-				{ModelBase: base.ModelBase{ID: 1}, GameID: 1, DeckID: 20, Place: 1, KillCount: 0},
-				{ModelBase: base.ModelBase{ID: 2}, GameID: 1, DeckID: 20, Place: 2, KillCount: 0},
+				{GormModelBase: base.GormModelBase{ID: 1}, GameID: 1, DeckID: 20, Place: 1, KillCount: 0},
+				{GormModelBase: base.GormModelBase{ID: 2}, GameID: 1, DeckID: 20, Place: 2, KillCount: 0},
 			}, nil
 		},
 	}
@@ -183,9 +183,9 @@ func TestGetByGameID_PointsCalculation(t *testing.T) {
 	repo := &mockGameResultRepo{
 		GetByGameIdFn: func(ctx context.Context, gameID int) ([]gameresultrepo.Model, error) {
 			return []gameresultrepo.Model{
-				{ModelBase: base.ModelBase{ID: 1}, GameID: 1, DeckID: 10, Place: 1, KillCount: 2},
-				{ModelBase: base.ModelBase{ID: 2}, GameID: 1, DeckID: 11, Place: 2, KillCount: 0},
-				{ModelBase: base.ModelBase{ID: 3}, GameID: 1, DeckID: 12, Place: 4, KillCount: 1},
+				{GormModelBase: base.GormModelBase{ID: 1}, GameID: 1, DeckID: 10, Place: 1, KillCount: 2},
+				{GormModelBase: base.GormModelBase{ID: 2}, GameID: 1, DeckID: 11, Place: 2, KillCount: 0},
+				{GormModelBase: base.GormModelBase{ID: 3}, GameID: 1, DeckID: 12, Place: 4, KillCount: 1},
 			}, nil
 		},
 	}
@@ -209,7 +209,7 @@ func TestGetByGameID_PointsCalculation(t *testing.T) {
 func TestGetGameIDForResult_Found(t *testing.T) {
 	repo := &mockGameResultRepo{
 		GetByIDFn: func(ctx context.Context, resultID int) (*gameresultrepo.Model, error) {
-			return &gameresultrepo.Model{ModelBase: base.ModelBase{ID: resultID}, GameID: 7}, nil
+			return &gameresultrepo.Model{GormModelBase: base.GormModelBase{ID: resultID}, GameID: 7}, nil
 		},
 	}
 	fn := GetGameIDForResult(repo)
