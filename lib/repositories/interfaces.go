@@ -75,6 +75,7 @@ type GameResultRepository interface {
 type PodRepository interface {
 	GetAll(ctx context.Context) ([]pod.Model, error)
 	GetByID(ctx context.Context, podID int) (*pod.Model, error)
+	GetByIDWithMembers(ctx context.Context, podID int) (*pod.Model, error)
 	GetByPlayerID(ctx context.Context, playerID int) ([]pod.Model, error)
 	GetByName(ctx context.Context, name string) (*pod.Model, error)
 	GetIDsByPlayerID(ctx context.Context, playerID int) ([]int, error)

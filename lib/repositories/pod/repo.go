@@ -45,6 +45,18 @@ func (r *Repository) GetByID(ctx context.Context, podID int) (*Model, error) {
 	return &m, nil
 }
 
+func (r *Repository) GetByIDWithMembers(ctx context.Context, podID int) (*Model, error) {
+	var m Model
+	err := r.db.WithContext(ctx).Preload("Members").First(&m, podID).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to get Pod with members for id %d: %w", podID, err)
+	}
+	return &m, nil
+}
+
 func (r *Repository) GetByName(ctx context.Context, name string) (*Model, error) {
 	var m Model
 	err := r.db.WithContext(ctx).Where("name = ?", name).First(&m).Error

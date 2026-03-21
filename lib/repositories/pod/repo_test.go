@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/m-sharp/edh-tracker/lib/repositories/playerPodRole"
 	"github.com/m-sharp/edh-tracker/lib/repositories/testHelpers"
 )
 
@@ -203,6 +204,71 @@ func TestUpdate(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, got)
 	assert.Equal(t, "Pod Beta", got.Name)
+}
+
+func TestGetByIDWithMembers(t *testing.T) {
+	t.Run("returns pod with members", func(t *testing.T) {
+		db := testHelpers.NewTestDB(t)
+		repo := testHelpers.NewPodRepo(db)
+		roleRepo := testHelpers.NewPlayerPodRoleRepo(db)
+		ctx := context.Background()
+
+		podID := testHelpers.CreateTestPod(t, db)
+		p1 := testHelpers.CreateTestPlayer(t, db)
+		p2 := testHelpers.CreateTestPlayer(t, db)
+
+		require.NoError(t, roleRepo.BulkAdd(ctx, podID, []int{p1, p2}, playerPodRole.RoleMember))
+
+		got, err := repo.GetByIDWithMembers(ctx, podID)
+		require.NoError(t, err)
+		require.NotNil(t, got)
+		assert.Equal(t, podID, got.ID)
+		require.Len(t, got.Members, 2)
+
+		memberIDs := []int{got.Members[0].PlayerID, got.Members[1].PlayerID}
+		assert.Contains(t, memberIDs, p1)
+		assert.Contains(t, memberIDs, p2)
+		for _, m := range got.Members {
+			assert.Equal(t, playerPodRole.RoleMember, m.Role)
+		}
+	})
+
+	t.Run("excludes soft-deleted member", func(t *testing.T) {
+		db := testHelpers.NewTestDB(t)
+		repo := testHelpers.NewPodRepo(db)
+		roleRepo := testHelpers.NewPlayerPodRoleRepo(db)
+		ctx := context.Background()
+
+		podID := testHelpers.CreateTestPod(t, db)
+		p1 := testHelpers.CreateTestPlayer(t, db)
+		p2 := testHelpers.CreateTestPlayer(t, db)
+		p3 := testHelpers.CreateTestPlayer(t, db)
+
+		require.NoError(t, roleRepo.BulkAdd(ctx, podID, []int{p1, p2, p3}, playerPodRole.RoleMember))
+
+		// Soft-delete p3's role row directly via GORM
+		p3Role, err := roleRepo.GetRole(ctx, podID, p3)
+		require.NoError(t, err)
+		require.NotNil(t, p3Role)
+		require.NoError(t, db.Delete(&playerPodRole.Model{}, p3Role.ID).Error)
+
+		got, err := repo.GetByIDWithMembers(ctx, podID)
+		require.NoError(t, err)
+		require.NotNil(t, got)
+		require.Len(t, got.Members, 2)
+		for _, m := range got.Members {
+			assert.NotEqual(t, p3, m.PlayerID)
+		}
+	})
+
+	t.Run("returns nil for unknown pod", func(t *testing.T) {
+		db := testHelpers.NewTestDB(t)
+		repo := testHelpers.NewPodRepo(db)
+
+		got, err := repo.GetByIDWithMembers(context.Background(), 999999)
+		require.NoError(t, err)
+		assert.Nil(t, got)
+	})
 }
 
 func TestRemovePlayer(t *testing.T) {

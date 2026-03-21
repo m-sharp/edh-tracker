@@ -335,6 +335,9 @@ type mockPodRepo struct {
 func (m *mockPodRepo) GetAll(ctx context.Context) ([]podRepo.Model, error) {
 	panic("unexpected call to GetAll")
 }
+func (m *mockPodRepo) GetByIDWithMembers(ctx context.Context, podID int) (*podRepo.Model, error) {
+	panic("unexpected call to GetByIDWithMembers")
+}
 func (m *mockPodRepo) GetByID(ctx context.Context, podID int) (*podRepo.Model, error) {
 	panic("unexpected call to GetByID")
 }
