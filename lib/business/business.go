@@ -27,7 +27,6 @@ type Business struct {
 
 func NewBusiness(log *zap.Logger, r *repositories.Repositories) *Business {
 	// Build leaf functions first (no cross-domain deps).
-	getPlayerName := player.GetPlayerName(r.Players)
 	getFormat := format.GetByID(r.Formats)
 	getCommanderName := commander.GetCommanderName(r.Commanders)
 
@@ -47,16 +46,16 @@ func NewBusiness(log *zap.Logger, r *repositories.Repositories) *Business {
 			GetByID:       player.GetByID(r.Players, r.GameResults, r.Pods),
 			Create:        player.Create(r.Players),
 			Update:        player.Update(r.Players),
-			GetPlayerName: getPlayerName,
+			GetPlayerName: player.GetPlayerName(r.Players),
 		},
 		Decks: deck.Functions{
-			GetAll:            deck.GetAll(r.Decks, r.GameResults, getPlayerName, getFormat, getCommanderEntry),
-			GetAllForPlayer:   deck.GetAllForPlayer(r.Decks, r.GameResults, getPlayerName, getFormat, getCommanderEntry),
-			GetAllByPod:       deck.GetAllByPod(r.Decks, r.Pods, r.GameResults, getPlayerName, getFormat, getCommanderEntry),
-			GetByID:           deck.GetByID(r.Decks, r.GameResults, getPlayerName, getFormat, getCommanderEntry),
-			Create:            deck.Create(r.Decks, r.DeckCommanders, getFormat),
-			Update:            deck.Update(r.Decks, r.DeckCommanders),
-			SoftDelete:        deck.SoftDelete(r.Decks),
+			GetAll:             deck.GetAll(r.Decks, r.GameResults),
+			GetAllForPlayer:    deck.GetAllForPlayer(r.Decks, r.GameResults),
+			GetAllByPod:        deck.GetAllByPod(r.Decks, r.Pods, r.GameResults),
+			GetByID:            deck.GetByID(r.Decks, r.GameResults),
+			Create:             deck.Create(r.Decks, r.DeckCommanders, getFormat),
+			Update:             deck.Update(r.Decks, r.DeckCommanders),
+			SoftDelete:         deck.SoftDelete(r.Decks),
 			Retire:             deck.Retire(r.Decks),
 			GetDeckName:        getDeckName,
 			GetCommanderEntry:  getCommanderEntry,

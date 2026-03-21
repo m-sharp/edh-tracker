@@ -16,11 +16,12 @@ func TestGetAllByPod(t *testing.T) {
 	db := testHelpers.NewTestDB(t)
 	repo := testHelpers.NewGameRepo(db)
 	ctx := context.Background()
+	formatID := testHelpers.GetCommanderFormatID(t, db)
 
 	podID := testHelpers.CreateTestPod(t, db)
-	_, err := repo.Add(ctx, "Game A", podID, 1)
+	_, err := repo.Add(ctx, "Game A", podID, formatID)
 	require.NoError(t, err)
-	_, err = repo.Add(ctx, "Game B", podID, 1)
+	_, err = repo.Add(ctx, "Game B", podID, formatID)
 	require.NoError(t, err)
 
 	games, err := repo.GetAllByPod(ctx, podID)
@@ -66,9 +67,10 @@ func TestGetById_Found(t *testing.T) {
 	db := testHelpers.NewTestDB(t)
 	repo := testHelpers.NewGameRepo(db)
 	ctx := context.Background()
+	formatID := testHelpers.GetCommanderFormatID(t, db)
 
 	podID := testHelpers.CreateTestPod(t, db)
-	id, err := repo.Add(ctx, "Friday Night", podID, 1)
+	id, err := repo.Add(ctx, "Friday Night", podID, formatID)
 	require.NoError(t, err)
 
 	got, err := repo.GetById(ctx, id)
@@ -92,9 +94,10 @@ func TestAdd(t *testing.T) {
 	db := testHelpers.NewTestDB(t)
 	repo := testHelpers.NewGameRepo(db)
 	ctx := context.Background()
+	formatID := testHelpers.GetCommanderFormatID(t, db)
 
 	podID := testHelpers.CreateTestPod(t, db)
-	id, err := repo.Add(ctx, "Test Game", podID, 1)
+	id, err := repo.Add(ctx, "Test Game", podID, formatID)
 	require.NoError(t, err)
 	assert.Greater(t, id, 0)
 
@@ -103,19 +106,20 @@ func TestAdd(t *testing.T) {
 	require.NotNil(t, got)
 	assert.Equal(t, "Test Game", got.Description)
 	assert.Equal(t, podID, got.PodID)
-	assert.Equal(t, 1, got.FormatID)
+	assert.Equal(t, formatID, got.FormatID)
 }
 
 func TestBulkAdd(t *testing.T) {
 	db := testHelpers.NewTestDB(t)
 	repo := testHelpers.NewGameRepo(db)
 	ctx := context.Background()
+	formatID := testHelpers.GetCommanderFormatID(t, db)
 
 	podID := testHelpers.CreateTestPod(t, db)
 	games := []game.Model{
-		{Description: fmt.Sprintf("Bulk Game %d", 1), PodID: podID, FormatID: 1},
-		{Description: fmt.Sprintf("Bulk Game %d", 2), PodID: podID, FormatID: 1},
-		{Description: fmt.Sprintf("Bulk Game %d", 3), PodID: podID, FormatID: 1},
+		{Description: fmt.Sprintf("Bulk Game %d", 1), PodID: podID, FormatID: formatID},
+		{Description: fmt.Sprintf("Bulk Game %d", 2), PodID: podID, FormatID: formatID},
+		{Description: fmt.Sprintf("Bulk Game %d", 3), PodID: podID, FormatID: formatID},
 	}
 
 	ids, err := repo.BulkAdd(ctx, games)
@@ -134,9 +138,10 @@ func TestUpdate(t *testing.T) {
 	db := testHelpers.NewTestDB(t)
 	repo := testHelpers.NewGameRepo(db)
 	ctx := context.Background()
+	formatID := testHelpers.GetCommanderFormatID(t, db)
 
 	podID := testHelpers.CreateTestPod(t, db)
-	id, err := repo.Add(ctx, "Old Description", podID, 1)
+	id, err := repo.Add(ctx, "Old Description", podID, formatID)
 	require.NoError(t, err)
 
 	require.NoError(t, repo.Update(ctx, id, "New Description"))
@@ -159,9 +164,10 @@ func TestSoftDelete(t *testing.T) {
 	db := testHelpers.NewTestDB(t)
 	repo := testHelpers.NewGameRepo(db)
 	ctx := context.Background()
+	formatID := testHelpers.GetCommanderFormatID(t, db)
 
 	podID := testHelpers.CreateTestPod(t, db)
-	id, err := repo.Add(ctx, "To Delete", podID, 1)
+	id, err := repo.Add(ctx, "To Delete", podID, formatID)
 	require.NoError(t, err)
 
 	require.NoError(t, repo.SoftDelete(ctx, id))
@@ -175,9 +181,10 @@ func TestGetAllByPodWithResults(t *testing.T) {
 	db := testHelpers.NewTestDB(t)
 	repo := testHelpers.NewGameRepo(db)
 	ctx := context.Background()
+	formatID := testHelpers.GetCommanderFormatID(t, db)
 
 	podID := testHelpers.CreateTestPod(t, db)
-	gameID, err := repo.Add(ctx, "Game With Results", podID, 1)
+	gameID, err := repo.Add(ctx, "Game With Results", podID, formatID)
 	require.NoError(t, err)
 	deckID := testHelpers.CreateTestDeck(t, db).ID
 	testHelpers.CreateTestGameResult(t, db, gameID, deckID, 1, 2)
@@ -241,9 +248,10 @@ func TestGetByIDWithResults_Found(t *testing.T) {
 	db := testHelpers.NewTestDB(t)
 	repo := testHelpers.NewGameRepo(db)
 	ctx := context.Background()
+	formatID := testHelpers.GetCommanderFormatID(t, db)
 
 	podID := testHelpers.CreateTestPod(t, db)
-	gameID, err := repo.Add(ctx, "Friday Night", podID, 1)
+	gameID, err := repo.Add(ctx, "Friday Night", podID, formatID)
 	require.NoError(t, err)
 	deckID := testHelpers.CreateTestDeck(t, db).ID
 	testHelpers.CreateTestGameResult(t, db, gameID, deckID, 2, 1)

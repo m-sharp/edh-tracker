@@ -20,12 +20,12 @@ import (
 
 // mockGameRepo implements repos.GameRepository
 type mockGameRepo struct {
-	GetAllByPodFn              func(ctx context.Context, podID int) ([]gamerepo.Model, error)
-	GetByIdFn                  func(ctx context.Context, gameID int) (*gamerepo.Model, error)
-	AddFn                      func(ctx context.Context, description string, podID, formatID int) (int, error)
-	GetAllByPlayerIDFn         func(ctx context.Context, playerID int) ([]gamerepo.Model, error)
-	UpdateFn                   func(ctx context.Context, gameID int, description string) error
-	SoftDeleteFn               func(ctx context.Context, id int) error
+	GetAllByPodFn               func(ctx context.Context, podID int) ([]gamerepo.Model, error)
+	GetByIdFn                   func(ctx context.Context, gameID int) (*gamerepo.Model, error)
+	AddFn                       func(ctx context.Context, description string, podID, formatID int) (int, error)
+	GetAllByPlayerIDFn          func(ctx context.Context, playerID int) ([]gamerepo.Model, error)
+	UpdateFn                    func(ctx context.Context, gameID int, description string) error
+	SoftDeleteFn                func(ctx context.Context, id int) error
 	GetAllByPodWithResultsFn    func(ctx context.Context, podID int) ([]gamerepo.Model, error)
 	GetAllByDeckWithResultsFn   func(ctx context.Context, deckID int) ([]gamerepo.Model, error)
 	GetAllByPlayerWithResultsFn func(ctx context.Context, playerID int) ([]gamerepo.Model, error)
@@ -180,6 +180,18 @@ func (m *mockDeckRepo) Retire(ctx context.Context, deckID int) error {
 }
 func (m *mockDeckRepo) SoftDelete(ctx context.Context, id int) error {
 	panic("unexpected call to SoftDelete")
+}
+func (m *mockDeckRepo) GetAllHydrated(ctx context.Context) ([]deckrepo.Model, error) {
+	panic("unexpected call to GetAllHydrated")
+}
+func (m *mockDeckRepo) GetAllForPlayerHydrated(ctx context.Context, playerID int) ([]deckrepo.Model, error) {
+	panic("unexpected call to GetAllForPlayerHydrated")
+}
+func (m *mockDeckRepo) GetAllByPlayerIDsHydrated(ctx context.Context, playerIDs []int) ([]deckrepo.Model, error) {
+	panic("unexpected call to GetAllByPlayerIDsHydrated")
+}
+func (m *mockDeckRepo) GetByIDHydrated(ctx context.Context, deckID int) (*deckrepo.Model, error) {
+	panic("unexpected call to GetByIDHydrated")
 }
 
 func validInputs() []gameResult.InputEntity {

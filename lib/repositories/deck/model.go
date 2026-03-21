@@ -1,13 +1,24 @@
 package deck
 
-import "github.com/m-sharp/edh-tracker/lib/repositories/base"
+import (
+	"github.com/m-sharp/edh-tracker/lib/repositories/base"
+	deckCommanderRepo "github.com/m-sharp/edh-tracker/lib/repositories/deckCommander"
+	formatRepo "github.com/m-sharp/edh-tracker/lib/repositories/format"
+	playerRepo "github.com/m-sharp/edh-tracker/lib/repositories/player"
+)
 
 type Model struct {
 	base.GormModelBase
+	Name    string
+	Retired bool
+
 	PlayerID int
-	Name     string
+	Player   playerRepo.Model
+
 	FormatID int
-	Retired  bool
+	Format   formatRepo.Model
+
+	Commander *deckCommanderRepo.Model `gorm:"foreignKey:DeckID"`
 }
 
 func (Model) TableName() string { return "deck" }

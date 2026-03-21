@@ -15,12 +15,13 @@ func TestGetAll(t *testing.T) {
 	db := testHelpers.NewTestDB(t)
 	repo := testHelpers.NewDeckRepo(db)
 	ctx := context.Background()
+	formatID := testHelpers.GetCommanderFormatID(t, db)
 
 	playerID := testHelpers.CreateTestPlayer(t, db)
-	id1, err := repo.Add(ctx, playerID, "Active Deck", 1)
+	id1, err := repo.Add(ctx, playerID, "Active Deck", formatID)
 	require.NoError(t, err)
 
-	id2, err := repo.Add(ctx, playerID, "Retired Deck", 1)
+	id2, err := repo.Add(ctx, playerID, "Retired Deck", formatID)
 	require.NoError(t, err)
 	require.NoError(t, repo.Retire(ctx, id2))
 
@@ -39,17 +40,18 @@ func TestGetAllForPlayer(t *testing.T) {
 	db := testHelpers.NewTestDB(t)
 	repo := testHelpers.NewDeckRepo(db)
 	ctx := context.Background()
+	formatID := testHelpers.GetCommanderFormatID(t, db)
 
 	p1 := testHelpers.CreateTestPlayer(t, db)
 	p2 := testHelpers.CreateTestPlayer(t, db)
 
-	id1, err := repo.Add(ctx, p1, "Active", 1)
+	id1, err := repo.Add(ctx, p1, "Active", formatID)
 	require.NoError(t, err)
-	id2, err := repo.Add(ctx, p1, "Retired", 1)
+	id2, err := repo.Add(ctx, p1, "Retired", formatID)
 	require.NoError(t, err)
 	require.NoError(t, repo.Retire(ctx, id2))
 
-	_, err = repo.Add(ctx, p2, "Other Player Deck", 1)
+	_, err = repo.Add(ctx, p2, "Other Player Deck", formatID)
 	require.NoError(t, err)
 
 	got, err := repo.GetAllForPlayer(ctx, p1)
@@ -70,16 +72,17 @@ func TestGetAllByPlayerIDs(t *testing.T) {
 	db := testHelpers.NewTestDB(t)
 	repo := testHelpers.NewDeckRepo(db)
 	ctx := context.Background()
+	formatID := testHelpers.GetCommanderFormatID(t, db)
 
 	p1 := testHelpers.CreateTestPlayer(t, db)
 	p2 := testHelpers.CreateTestPlayer(t, db)
 	p3 := testHelpers.CreateTestPlayer(t, db)
 
-	id1, err := repo.Add(ctx, p1, "P1 Deck", 1)
+	id1, err := repo.Add(ctx, p1, "P1 Deck", formatID)
 	require.NoError(t, err)
-	id2, err := repo.Add(ctx, p2, "P2 Deck", 1)
+	id2, err := repo.Add(ctx, p2, "P2 Deck", formatID)
 	require.NoError(t, err)
-	id3, err := repo.Add(ctx, p3, "P3 Deck", 1)
+	id3, err := repo.Add(ctx, p3, "P3 Deck", formatID)
 	require.NoError(t, err)
 
 	got, err := repo.GetAllByPlayerIDs(ctx, []int{p1, p2})
@@ -106,9 +109,10 @@ func TestGetById_Found(t *testing.T) {
 	db := testHelpers.NewTestDB(t)
 	repo := testHelpers.NewDeckRepo(db)
 	ctx := context.Background()
+	formatID := testHelpers.GetCommanderFormatID(t, db)
 
 	playerID := testHelpers.CreateTestPlayer(t, db)
-	id, err := repo.Add(ctx, playerID, "Krenko Goblins", 1)
+	id, err := repo.Add(ctx, playerID, "Krenko Goblins", formatID)
 	require.NoError(t, err)
 
 	got, err := repo.GetById(ctx, id)
@@ -117,7 +121,7 @@ func TestGetById_Found(t *testing.T) {
 	assert.Equal(t, id, got.ID)
 	assert.Equal(t, playerID, got.PlayerID)
 	assert.Equal(t, "Krenko Goblins", got.Name)
-	assert.Equal(t, 1, got.FormatID)
+	assert.Equal(t, formatID, got.FormatID)
 	assert.False(t, got.Retired)
 }
 
@@ -132,8 +136,9 @@ func TestGetById_NotFound(t *testing.T) {
 func TestAdd(t *testing.T) {
 	db := testHelpers.NewTestDB(t)
 	repo := testHelpers.NewDeckRepo(db)
+	formatID := testHelpers.GetCommanderFormatID(t, db)
 	playerID := testHelpers.CreateTestPlayer(t, db)
-	id, err := repo.Add(context.Background(), playerID, "New Deck", 1)
+	id, err := repo.Add(context.Background(), playerID, "New Deck", formatID)
 	require.NoError(t, err)
 	assert.Greater(t, id, 0)
 }
@@ -142,14 +147,15 @@ func TestBulkAdd(t *testing.T) {
 	db := testHelpers.NewTestDB(t)
 	repo := testHelpers.NewDeckRepo(db)
 	ctx := context.Background()
+	formatID := testHelpers.GetCommanderFormatID(t, db)
 
 	p1 := testHelpers.CreateTestPlayer(t, db)
 	p2 := testHelpers.CreateTestPlayer(t, db)
 
 	decks := []deck.Model{
-		{PlayerID: p1, Name: "Bulk Deck A", FormatID: 1},
-		{PlayerID: p1, Name: "Bulk Deck B", FormatID: 1},
-		{PlayerID: p2, Name: "Bulk Deck C", FormatID: 1},
+		{PlayerID: p1, Name: "Bulk Deck A", FormatID: formatID},
+		{PlayerID: p1, Name: "Bulk Deck B", FormatID: formatID},
+		{PlayerID: p2, Name: "Bulk Deck C", FormatID: formatID},
 	}
 	got, err := repo.BulkAdd(ctx, decks)
 	require.NoError(t, err)
@@ -163,9 +169,10 @@ func TestUpdate_PartialFields(t *testing.T) {
 	db := testHelpers.NewTestDB(t)
 	repo := testHelpers.NewDeckRepo(db)
 	ctx := context.Background()
+	formatID := testHelpers.GetCommanderFormatID(t, db)
 
 	playerID := testHelpers.CreateTestPlayer(t, db)
-	id, err := repo.Add(ctx, playerID, "Original Name", 1)
+	id, err := repo.Add(ctx, playerID, "Original Name", formatID)
 	require.NoError(t, err)
 
 	newName := "Updated Name"
@@ -174,16 +181,17 @@ func TestUpdate_PartialFields(t *testing.T) {
 	got, err := repo.GetById(ctx, id)
 	require.NoError(t, err)
 	assert.Equal(t, "Updated Name", got.Name)
-	assert.Equal(t, 1, got.FormatID) // unchanged
+	assert.Equal(t, formatID, got.FormatID) // unchanged
 }
 
 func TestUpdate_MultipleFields(t *testing.T) {
 	db := testHelpers.NewTestDB(t)
 	repo := testHelpers.NewDeckRepo(db)
 	ctx := context.Background()
+	formatID := testHelpers.GetCommanderFormatID(t, db)
 
 	playerID := testHelpers.CreateTestPlayer(t, db)
-	id, err := repo.Add(ctx, playerID, "Original Name", 1)
+	id, err := repo.Add(ctx, playerID, "Original Name", formatID)
 	require.NoError(t, err)
 
 	newName := "Updated Name"
@@ -195,7 +203,7 @@ func TestUpdate_MultipleFields(t *testing.T) {
 	got, err := repo.GetById(ctx, id)
 	require.NoError(t, err)
 	assert.Equal(t, newName, got.Name)
-	assert.Equal(t, 1, got.FormatID) // unchanged
+	assert.Equal(t, formatID, got.FormatID) // unchanged
 	assert.True(t, got.Retired)
 }
 
@@ -203,9 +211,10 @@ func TestUpdate_NoFields(t *testing.T) {
 	db := testHelpers.NewTestDB(t)
 	repo := testHelpers.NewDeckRepo(db)
 	ctx := context.Background()
+	formatID := testHelpers.GetCommanderFormatID(t, db)
 
 	playerID := testHelpers.CreateTestPlayer(t, db)
-	id, err := repo.Add(ctx, playerID, "No Change Deck", 1)
+	id, err := repo.Add(ctx, playerID, "No Change Deck", formatID)
 	require.NoError(t, err)
 
 	require.NoError(t, repo.Update(ctx, id, deck.UpdateFields{}))
@@ -224,9 +233,10 @@ func TestRetire(t *testing.T) {
 	db := testHelpers.NewTestDB(t)
 	repo := testHelpers.NewDeckRepo(db)
 	ctx := context.Background()
+	formatID := testHelpers.GetCommanderFormatID(t, db)
 
 	playerID := testHelpers.CreateTestPlayer(t, db)
-	id, err := repo.Add(ctx, playerID, "To Retire", 1)
+	id, err := repo.Add(ctx, playerID, "To Retire", formatID)
 	require.NoError(t, err)
 
 	require.NoError(t, repo.Retire(ctx, id))
@@ -249,9 +259,10 @@ func TestSoftDelete(t *testing.T) {
 	db := testHelpers.NewTestDB(t)
 	repo := testHelpers.NewDeckRepo(db)
 	ctx := context.Background()
+	formatID := testHelpers.GetCommanderFormatID(t, db)
 
 	playerID := testHelpers.CreateTestPlayer(t, db)
-	id, err := repo.Add(ctx, playerID, "To Delete", 1)
+	id, err := repo.Add(ctx, playerID, "To Delete", formatID)
 	require.NoError(t, err)
 
 	require.NoError(t, repo.SoftDelete(ctx, id))
@@ -259,4 +270,226 @@ func TestSoftDelete(t *testing.T) {
 	got, err := repo.GetById(ctx, id)
 	require.NoError(t, err)
 	assert.Nil(t, got)
+}
+
+func TestGetAllHydrated_PopulatesAssociations(t *testing.T) {
+	db := testHelpers.NewTestDB(t)
+	deckRepo := testHelpers.NewDeckRepo(db)
+	dcRepo := testHelpers.NewDeckCommanderRepo(db)
+	ctx := context.Background()
+
+	formatID := testHelpers.GetCommanderFormatID(t, db)
+	playerID := testHelpers.CreateTestPlayer(t, db)
+	cmdID := testHelpers.CreateTestCommander(t, db)
+	partnerID := testHelpers.CreateTestCommander(t, db)
+
+	deckID, err := deckRepo.Add(ctx, playerID, "Krenko Goblins", formatID)
+	require.NoError(t, err)
+
+	_, err = dcRepo.Add(ctx, deckID, cmdID, &partnerID)
+	require.NoError(t, err)
+
+	got, err := deckRepo.GetAllHydrated(ctx)
+	require.NoError(t, err)
+
+	var found *deck.Model
+	for i := range got {
+		if got[i].ID == deckID {
+			found = &got[i]
+			break
+		}
+	}
+	require.NotNil(t, found, "deck should be in GetAllHydrated results")
+
+	assert.NotEmpty(t, found.Player.Name, "Player.Name should be populated")
+	assert.NotEmpty(t, found.Format.Name, "Format.Name should be populated")
+	require.NotNil(t, found.Commander, "Commander should be populated")
+	assert.Equal(t, cmdID, found.Commander.CommanderID)
+	assert.NotEmpty(t, found.Commander.Commander.Name, "Commander.Commander.Name should be populated")
+	require.NotNil(t, found.Commander.PartnerCommanderID)
+	assert.Equal(t, partnerID, *found.Commander.PartnerCommanderID)
+	require.NotNil(t, found.Commander.PartnerCommander)
+	assert.NotEmpty(t, found.Commander.PartnerCommander.Name, "PartnerCommander.Name should be populated")
+}
+
+func TestGetAllHydrated_NoCommander(t *testing.T) {
+	db := testHelpers.NewTestDB(t)
+	deckRepo := testHelpers.NewDeckRepo(db)
+	ctx := context.Background()
+	formatID := testHelpers.GetCommanderFormatID(t, db)
+
+	playerID := testHelpers.CreateTestPlayer(t, db)
+	deckID, err := deckRepo.Add(ctx, playerID, "No Commander Deck", formatID)
+	require.NoError(t, err)
+
+	got, err := deckRepo.GetAllHydrated(ctx)
+	require.NoError(t, err)
+
+	var found *deck.Model
+	for i := range got {
+		if got[i].ID == deckID {
+			found = &got[i]
+			break
+		}
+	}
+	require.NotNil(t, found)
+	assert.Nil(t, found.Commander, "Commander should be nil when no deck_commander row exists")
+	assert.NotEmpty(t, found.Player.Name)
+	assert.NotEmpty(t, found.Format.Name)
+}
+
+func TestGetAllHydrated_ExcludesRetired(t *testing.T) {
+	db := testHelpers.NewTestDB(t)
+	deckRepo := testHelpers.NewDeckRepo(db)
+	ctx := context.Background()
+	formatID := testHelpers.GetCommanderFormatID(t, db)
+
+	playerID := testHelpers.CreateTestPlayer(t, db)
+	activeID, err := deckRepo.Add(ctx, playerID, "Active", formatID)
+	require.NoError(t, err)
+	retiredID, err := deckRepo.Add(ctx, playerID, "Retired", formatID)
+	require.NoError(t, err)
+	require.NoError(t, deckRepo.Retire(ctx, retiredID))
+
+	got, err := deckRepo.GetAllHydrated(ctx)
+	require.NoError(t, err)
+
+	var ids []int
+	for _, d := range got {
+		ids = append(ids, d.ID)
+	}
+	assert.Contains(t, ids, activeID)
+	assert.NotContains(t, ids, retiredID)
+}
+
+func TestGetAllForPlayerHydrated_PopulatesAssociations(t *testing.T) {
+	db := testHelpers.NewTestDB(t)
+	deckRepo := testHelpers.NewDeckRepo(db)
+	dcRepo := testHelpers.NewDeckCommanderRepo(db)
+	ctx := context.Background()
+	formatID := testHelpers.GetCommanderFormatID(t, db)
+
+	playerID := testHelpers.CreateTestPlayer(t, db)
+	cmdID := testHelpers.CreateTestCommander(t, db)
+
+	deckID, err := deckRepo.Add(ctx, playerID, "Test Deck", formatID)
+	require.NoError(t, err)
+	_, err = dcRepo.Add(ctx, deckID, cmdID, nil)
+	require.NoError(t, err)
+
+	got, err := deckRepo.GetAllForPlayerHydrated(ctx, playerID)
+	require.NoError(t, err)
+	require.Len(t, got, 1)
+
+	d := got[0]
+	assert.Equal(t, deckID, d.ID)
+	assert.NotEmpty(t, d.Player.Name)
+	assert.NotEmpty(t, d.Format.Name)
+	require.NotNil(t, d.Commander)
+	assert.Equal(t, cmdID, d.Commander.CommanderID)
+	assert.NotEmpty(t, d.Commander.Commander.Name)
+	assert.Nil(t, d.Commander.PartnerCommander)
+}
+
+func TestGetAllByPlayerIDsHydrated_PopulatesAssociations(t *testing.T) {
+	db := testHelpers.NewTestDB(t)
+	deckRepo := testHelpers.NewDeckRepo(db)
+	ctx := context.Background()
+	formatID := testHelpers.GetCommanderFormatID(t, db)
+
+	p1 := testHelpers.CreateTestPlayer(t, db)
+	p2 := testHelpers.CreateTestPlayer(t, db)
+	p3 := testHelpers.CreateTestPlayer(t, db)
+
+	id1, err := deckRepo.Add(ctx, p1, "P1 Deck", formatID)
+	require.NoError(t, err)
+	id2, err := deckRepo.Add(ctx, p2, "P2 Deck", formatID)
+	require.NoError(t, err)
+	id3, err := deckRepo.Add(ctx, p3, "P3 Deck", formatID)
+	require.NoError(t, err)
+
+	got, err := deckRepo.GetAllByPlayerIDsHydrated(ctx, []int{p1, p2})
+	require.NoError(t, err)
+
+	var ids []int
+	for _, d := range got {
+		ids = append(ids, d.ID)
+		assert.NotEmpty(t, d.Player.Name, "Player.Name should be populated")
+		assert.NotEmpty(t, d.Format.Name, "Format.Name should be populated")
+	}
+	assert.Contains(t, ids, id1)
+	assert.Contains(t, ids, id2)
+	assert.NotContains(t, ids, id3)
+}
+
+func TestGetAllByPlayerIDsHydrated_Empty(t *testing.T) {
+	db := testHelpers.NewTestDB(t)
+	deckRepo := testHelpers.NewDeckRepo(db)
+	got, err := deckRepo.GetAllByPlayerIDsHydrated(context.Background(), []int{})
+	require.NoError(t, err)
+	assert.Len(t, got, 0)
+}
+
+func TestGetByIDHydrated_PopulatesAssociations(t *testing.T) {
+	db := testHelpers.NewTestDB(t)
+	deckRepo := testHelpers.NewDeckRepo(db)
+	dcRepo := testHelpers.NewDeckCommanderRepo(db)
+	ctx := context.Background()
+	formatID := testHelpers.GetCommanderFormatID(t, db)
+
+	playerID := testHelpers.CreateTestPlayer(t, db)
+	cmdID := testHelpers.CreateTestCommander(t, db)
+
+	deckID, err := deckRepo.Add(ctx, playerID, "Krenko Goblins", formatID)
+	require.NoError(t, err)
+	_, err = dcRepo.Add(ctx, deckID, cmdID, nil)
+	require.NoError(t, err)
+
+	got, err := deckRepo.GetByIDHydrated(ctx, deckID)
+	require.NoError(t, err)
+	require.NotNil(t, got)
+
+	assert.Equal(t, deckID, got.ID)
+	assert.NotEmpty(t, got.Player.Name)
+	assert.NotEmpty(t, got.Format.Name)
+	require.NotNil(t, got.Commander)
+	assert.Equal(t, cmdID, got.Commander.CommanderID)
+	assert.NotEmpty(t, got.Commander.Commander.Name)
+	assert.Nil(t, got.Commander.PartnerCommander)
+}
+
+func TestGetByIDHydrated_NotFound(t *testing.T) {
+	db := testHelpers.NewTestDB(t)
+	deckRepo := testHelpers.NewDeckRepo(db)
+	got, err := deckRepo.GetByIDHydrated(context.Background(), 999999)
+	require.NoError(t, err)
+	assert.Nil(t, got)
+}
+
+func TestGetByIDHydrated_WithPartner(t *testing.T) {
+	db := testHelpers.NewTestDB(t)
+	deckRepo := testHelpers.NewDeckRepo(db)
+	dcRepo := testHelpers.NewDeckCommanderRepo(db)
+	ctx := context.Background()
+	formatID := testHelpers.GetCommanderFormatID(t, db)
+
+	playerID := testHelpers.CreateTestPlayer(t, db)
+	cmdID := testHelpers.CreateTestCommander(t, db)
+	partnerID := testHelpers.CreateTestCommander(t, db)
+
+	deckID, err := deckRepo.Add(ctx, playerID, "Partner Deck", formatID)
+	require.NoError(t, err)
+	_, err = dcRepo.Add(ctx, deckID, cmdID, &partnerID)
+	require.NoError(t, err)
+
+	got, err := deckRepo.GetByIDHydrated(ctx, deckID)
+	require.NoError(t, err)
+	require.NotNil(t, got)
+
+	require.NotNil(t, got.Commander)
+	assert.NotEmpty(t, got.Commander.Commander.Name)
+	require.NotNil(t, got.Commander.PartnerCommanderID)
+	assert.Equal(t, partnerID, *got.Commander.PartnerCommanderID)
+	require.NotNil(t, got.Commander.PartnerCommander)
+	assert.NotEmpty(t, got.Commander.PartnerCommander.Name)
 }

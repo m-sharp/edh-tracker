@@ -113,13 +113,24 @@ func CreateTestCommander(t *testing.T, db *gorm.DB) int {
 	return id
 }
 
+// GetCommanderFormatID looks up the ID of the "commander" format in the DB.
+func GetCommanderFormatID(t *testing.T, db *gorm.DB) int {
+	t.Helper()
+	repo := NewFormatRepo(db)
+	f, err := repo.GetByName(context.Background(), "commander")
+	require.NoError(t, err)
+	require.NotNil(t, f, "commander format not found in DB")
+	return f.ID
+}
+
 // CreateTestGame inserts a fresh pod + game row and returns the game ID.
 func CreateTestGame(t *testing.T, db *gorm.DB) int {
 	t.Helper()
 	podID := CreateTestPod(t, db)
+	formatID := GetCommanderFormatID(t, db)
 
 	repo := NewGameRepo(db)
-	id, err := repo.Add(context.Background(), fmt.Sprintf("Test Game %d", nextID()), podID, 1)
+	id, err := repo.Add(context.Background(), fmt.Sprintf("Test Game %d", nextID()), podID, formatID)
 	require.NoError(t, err)
 	return id
 }
@@ -129,9 +140,10 @@ func CreateTestDeck(t *testing.T, db *gorm.DB) deck.Model {
 	t.Helper()
 	playerID := CreateTestPlayer(t, db)
 	name := fmt.Sprintf("Test Deck %d", nextID())
+	formatID := GetCommanderFormatID(t, db)
 
 	repo := NewDeckRepo(db)
-	id, err := repo.Add(context.Background(), playerID, name, 1)
+	id, err := repo.Add(context.Background(), playerID, name, formatID)
 	require.NoError(t, err)
 
 	createdDeck, err := repo.GetById(context.Background(), id)

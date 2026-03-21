@@ -30,9 +30,13 @@ type PlayerRepository interface {
 
 type DeckRepository interface {
 	GetAll(ctx context.Context) ([]deck.Model, error)
+	GetAllHydrated(ctx context.Context) ([]deck.Model, error)
 	GetAllForPlayer(ctx context.Context, playerID int) ([]deck.Model, error)
+	GetAllForPlayerHydrated(ctx context.Context, playerID int) ([]deck.Model, error)
 	GetAllByPlayerIDs(ctx context.Context, playerIDs []int) ([]deck.Model, error)
+	GetAllByPlayerIDsHydrated(ctx context.Context, playerIDs []int) ([]deck.Model, error)
 	GetById(ctx context.Context, deckID int) (*deck.Model, error)
+	GetByIDHydrated(ctx context.Context, deckID int) (*deck.Model, error)
 	Add(ctx context.Context, playerID int, name string, formatID int) (int, error)
 	BulkAdd(ctx context.Context, decks []deck.Model) ([]deck.Model, error)
 	Update(ctx context.Context, deckID int, fields deck.UpdateFields) error

@@ -22,10 +22,29 @@ func NewRepositoryFromDB(db *gorm.DB) *Repository {
 	return &Repository{db: db}
 }
 
+func (r *Repository) preloadAll(db *gorm.DB) *gorm.DB {
+	return db.
+		Preload("Commander.Commander").
+		Preload("Commander.PartnerCommander").
+		Preload("Player").
+		Preload("Format")
+}
+
 func (r *Repository) GetAll(ctx context.Context) ([]Model, error) {
 	var decks []Model
 	if err := r.db.WithContext(ctx).Where("retired = ?", false).Find(&decks).Error; err != nil {
 		return nil, fmt.Errorf("failed to get Deck records: %w", err)
+	}
+	if decks == nil {
+		return []Model{}, nil
+	}
+	return decks, nil
+}
+
+func (r *Repository) GetAllHydrated(ctx context.Context) ([]Model, error) {
+	var decks []Model
+	if err := r.preloadAll(r.db.WithContext(ctx)).Where("retired = ?", false).Find(&decks).Error; err != nil {
+		return nil, fmt.Errorf("failed to get Deck records with associations: %w", err)
 	}
 	if decks == nil {
 		return []Model{}, nil
@@ -44,6 +63,17 @@ func (r *Repository) GetAllForPlayer(ctx context.Context, playerID int) ([]Model
 	return decks, nil
 }
 
+func (r *Repository) GetAllForPlayerHydrated(ctx context.Context, playerID int) ([]Model, error) {
+	var decks []Model
+	if err := r.preloadAll(r.db.WithContext(ctx)).Where("player_id = ?", playerID).Find(&decks).Error; err != nil {
+		return nil, fmt.Errorf("failed to get Deck records for player %d with associations: %w", playerID, err)
+	}
+	if decks == nil {
+		return []Model{}, nil
+	}
+	return decks, nil
+}
+
 func (r *Repository) GetById(ctx context.Context, deckID int) (*Model, error) {
 	var m Model
 	err := r.db.WithContext(ctx).First(&m, deckID).Error
@@ -52,6 +82,18 @@ func (r *Repository) GetById(ctx context.Context, deckID int) (*Model, error) {
 			return nil, nil
 		}
 		return nil, fmt.Errorf("failed to get Deck record for id %d: %w", deckID, err)
+	}
+	return &m, nil
+}
+
+func (r *Repository) GetByIDHydrated(ctx context.Context, deckID int) (*Model, error) {
+	var m Model
+	err := r.preloadAll(r.db.WithContext(ctx)).First(&m, deckID).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("failed to get Deck record for id %d with associations: %w", deckID, err)
 	}
 	return &m, nil
 }
@@ -81,6 +123,20 @@ func (r *Repository) GetAllByPlayerIDs(ctx context.Context, playerIDs []int) ([]
 	var decks []Model
 	if err := r.db.WithContext(ctx).Where("player_id IN ?", playerIDs).Find(&decks).Error; err != nil {
 		return nil, fmt.Errorf("failed to get Deck records for player IDs: %w", err)
+	}
+	if decks == nil {
+		return []Model{}, nil
+	}
+	return decks, nil
+}
+
+func (r *Repository) GetAllByPlayerIDsHydrated(ctx context.Context, playerIDs []int) ([]Model, error) {
+	if len(playerIDs) == 0 {
+		return []Model{}, nil
+	}
+	var decks []Model
+	if err := r.preloadAll(r.db.WithContext(ctx)).Where("player_id IN ?", playerIDs).Find(&decks).Error; err != nil {
+		return nil, fmt.Errorf("failed to get Deck records for player IDs with associations: %w", err)
 	}
 	if decks == nil {
 		return []Model{}, nil

@@ -10,32 +10,63 @@ import (
 
 	"github.com/m-sharp/edh-tracker/lib/business/format"
 	"github.com/m-sharp/edh-tracker/lib/repositories/base"
+	commanderRepo "github.com/m-sharp/edh-tracker/lib/repositories/commander"
 	deckRepo "github.com/m-sharp/edh-tracker/lib/repositories/deck"
 	deckCommanderRepo "github.com/m-sharp/edh-tracker/lib/repositories/deckCommander"
+	formatRepo "github.com/m-sharp/edh-tracker/lib/repositories/format"
 	gameResultRepo "github.com/m-sharp/edh-tracker/lib/repositories/gameResult"
+	playerRepo "github.com/m-sharp/edh-tracker/lib/repositories/player"
 	podRepo "github.com/m-sharp/edh-tracker/lib/repositories/pod"
 )
 
 // mockDeckRepo implements repos.DeckRepository
 type mockDeckRepo struct {
-	GetByIdFn           func(ctx context.Context, deckID int) (*deckRepo.Model, error)
-	AddFn               func(ctx context.Context, playerID int, name string, formatID int) (int, error)
-	UpdateFn            func(ctx context.Context, deckID int, fields deckRepo.UpdateFields) error
-	SoftDeleteFn        func(ctx context.Context, id int) error
-	GetAllByPlayerIDsFn func(ctx context.Context, playerIDs []int) ([]deckRepo.Model, error)
+	GetByIdFn                  func(ctx context.Context, deckID int) (*deckRepo.Model, error)
+	AddFn                      func(ctx context.Context, playerID int, name string, formatID int) (int, error)
+	UpdateFn                   func(ctx context.Context, deckID int, fields deckRepo.UpdateFields) error
+	SoftDeleteFn               func(ctx context.Context, id int) error
+	GetAllByPlayerIDsFn        func(ctx context.Context, playerIDs []int) ([]deckRepo.Model, error)
+	GetAllWithAllFn            func(ctx context.Context) ([]deckRepo.Model, error)
+	GetAllForPlayerWithAllFn   func(ctx context.Context, playerID int) ([]deckRepo.Model, error)
+	GetAllByPlayerIDsWithAllFn func(ctx context.Context, playerIDs []int) ([]deckRepo.Model, error)
+	GetByIDWithAllFn           func(ctx context.Context, deckID int) (*deckRepo.Model, error)
 }
 
 func (m *mockDeckRepo) GetAll(ctx context.Context) ([]deckRepo.Model, error) {
 	panic("unexpected call to GetAll")
 }
+func (m *mockDeckRepo) GetAllHydrated(ctx context.Context) ([]deckRepo.Model, error) {
+	if m.GetAllWithAllFn != nil {
+		return m.GetAllWithAllFn(ctx)
+	}
+	panic("unexpected call to GetAllHydrated")
+}
 func (m *mockDeckRepo) GetAllForPlayer(ctx context.Context, playerID int) ([]deckRepo.Model, error) {
 	panic("unexpected call to GetAllForPlayer")
+}
+func (m *mockDeckRepo) GetAllForPlayerHydrated(ctx context.Context, playerID int) ([]deckRepo.Model, error) {
+	if m.GetAllForPlayerWithAllFn != nil {
+		return m.GetAllForPlayerWithAllFn(ctx, playerID)
+	}
+	panic("unexpected call to GetAllForPlayerHydrated")
 }
 func (m *mockDeckRepo) GetAllByPlayerIDs(ctx context.Context, playerIDs []int) ([]deckRepo.Model, error) {
 	if m.GetAllByPlayerIDsFn != nil {
 		return m.GetAllByPlayerIDsFn(ctx, playerIDs)
 	}
 	panic("unexpected call to GetAllByPlayerIDs")
+}
+func (m *mockDeckRepo) GetAllByPlayerIDsHydrated(ctx context.Context, playerIDs []int) ([]deckRepo.Model, error) {
+	if m.GetAllByPlayerIDsWithAllFn != nil {
+		return m.GetAllByPlayerIDsWithAllFn(ctx, playerIDs)
+	}
+	panic("unexpected call to GetAllByPlayerIDsHydrated")
+}
+func (m *mockDeckRepo) GetByIDHydrated(ctx context.Context, deckID int) (*deckRepo.Model, error) {
+	if m.GetByIDWithAllFn != nil {
+		return m.GetByIDWithAllFn(ctx, deckID)
+	}
+	panic("unexpected call to GetByIDHydrated")
 }
 func (m *mockDeckRepo) Update(ctx context.Context, deckID int, fields deckRepo.UpdateFields) error {
 	if m.UpdateFn != nil {
@@ -444,15 +475,29 @@ func TestDeckSoftDelete_Forbidden(t *testing.T) {
 }
 
 func TestDeckGetAllByPod_Success(t *testing.T) {
+	partnerID := 6
 	podRepo := &mockPodRepo{
 		GetPlayerIDsFn: func(ctx context.Context, podID int) ([]int, error) {
 			return []int{1, 2}, nil
 		},
 	}
 	deckRepo := &mockDeckRepo{
-		GetAllByPlayerIDsFn: func(ctx context.Context, playerIDs []int) ([]deckRepo.Model, error) {
+		GetAllByPlayerIDsWithAllFn: func(ctx context.Context, playerIDs []int) ([]deckRepo.Model, error) {
 			return []deckRepo.Model{
-				{GormModelBase: base.GormModelBase{ID: 10}, PlayerID: 1, FormatID: 1, Name: "Deck A"},
+				{
+					GormModelBase: base.GormModelBase{ID: 10},
+					PlayerID:      1,
+					FormatID:      1,
+					Name:          "Deck A",
+					Player:        playerRepo.Model{Name: "Alice"},
+					Format:        formatRepo.Model{Name: "commander"},
+					Commander: &deckCommanderRepo.Model{
+						CommanderID:        5,
+						PartnerCommanderID: &partnerID,
+						Commander:          commanderRepo.Model{Name: "Krenko"},
+						PartnerCommander:   &commanderRepo.Model{Name: "Goblin Chieftain"},
+					},
+				},
 			}, nil
 		},
 	}
@@ -461,19 +506,18 @@ func TestDeckGetAllByPod_Success(t *testing.T) {
 			return nil, nil
 		},
 	}
-	getPlayerName := func(ctx context.Context, id int) (string, error) { return "Alice", nil }
-	getFormat := func(ctx context.Context, id int) (*format.Entity, error) {
-		return &format.Entity{ID: 1, Name: "commander"}, nil
-	}
-	getCommanderEntry := func(ctx context.Context, deckID int) (*CommanderInfo, error) {
-		return nil, nil
-	}
 
-	fn := GetAllByPod(deckRepo, podRepo, gameResultRepo, getPlayerName, getFormat, getCommanderEntry)
+	fn := GetAllByPod(deckRepo, podRepo, gameResultRepo)
 	got, err := fn(context.Background(), 5)
 	require.NoError(t, err)
-	assert.Len(t, got, 1)
+	require.Len(t, got, 1)
 	assert.Equal(t, "Deck A", got[0].Name)
+	assert.Equal(t, "Alice", got[0].PlayerName)
+	assert.Equal(t, "commander", got[0].FormatName)
+	require.NotNil(t, got[0].Commanders)
+	assert.Equal(t, "Krenko", got[0].Commanders.CommanderName)
+	require.NotNil(t, got[0].Commanders.PartnerCommanderName)
+	assert.Equal(t, "Goblin Chieftain", *got[0].Commanders.PartnerCommanderName)
 }
 
 func TestDeckGetAllByPod_EmptyPod(t *testing.T) {
@@ -482,7 +526,7 @@ func TestDeckGetAllByPod_EmptyPod(t *testing.T) {
 			return []int{}, nil
 		},
 	}
-	fn := GetAllByPod(&mockDeckRepo{}, podRepo, &mockGameResultRepoForDeck{}, nil, nil, nil)
+	fn := GetAllByPod(&mockDeckRepo{}, podRepo, &mockGameResultRepoForDeck{})
 	got, err := fn(context.Background(), 5)
 	require.NoError(t, err)
 	assert.Empty(t, got)
@@ -494,7 +538,7 @@ func TestDeckGetAllByPod_Error(t *testing.T) {
 			return nil, errors.New("db error")
 		},
 	}
-	fn := GetAllByPod(&mockDeckRepo{}, podRepo, &mockGameResultRepoForDeck{}, nil, nil, nil)
+	fn := GetAllByPod(&mockDeckRepo{}, podRepo, &mockGameResultRepoForDeck{})
 	_, err := fn(context.Background(), 5)
 	assert.Error(t, err)
 }
