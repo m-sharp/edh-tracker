@@ -9,7 +9,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"gorm.io/gorm"
 
-	"github.com/m-sharp/edh-tracker/lib/repositories/base"
 	"github.com/m-sharp/edh-tracker/lib/repositories/commander"
 	"github.com/m-sharp/edh-tracker/lib/repositories/deck"
 	"github.com/m-sharp/edh-tracker/lib/repositories/deckCommander"
@@ -20,6 +19,7 @@ import (
 	"github.com/m-sharp/edh-tracker/lib/repositories/playerPodRole"
 	"github.com/m-sharp/edh-tracker/lib/repositories/pod"
 	"github.com/m-sharp/edh-tracker/lib/repositories/podInvite"
+	"github.com/m-sharp/edh-tracker/lib/repositories/user"
 )
 
 var fixtureCounter int64
@@ -68,10 +68,15 @@ func NewPodInviteRepo(db *gorm.DB) *podInvite.Repository {
 	return podInvite.NewRepositoryFromDB(db)
 }
 
+func NewUserRepo(db *gorm.DB) *user.Repository {
+	return user.NewRepositoryFromDB(db)
+}
+
 // CreateTestGameResult inserts a fresh game_result row and returns its ID.
 func CreateTestGameResult(t *testing.T, db *gorm.DB, gameID, deckID, place, killCount int) int {
 	t.Helper()
-	id, err := gameResult.NewRepositoryFromDB(db).Add(context.Background(), gameResult.Model{
+	repo := NewGameResultRepo(db)
+	id, err := repo.Add(context.Background(), gameResult.Model{
 		GameID:    gameID,
 		DeckID:    deckID,
 		Place:     place,
@@ -84,7 +89,8 @@ func CreateTestGameResult(t *testing.T, db *gorm.DB, gameID, deckID, place, kill
 // CreateTestPod inserts a fresh pod row and returns its ID.
 func CreateTestPod(t *testing.T, db *gorm.DB) int {
 	t.Helper()
-	id, err := pod.NewRepositoryFromDB(db).Add(context.Background(), fmt.Sprintf("TestPod-%d", nextID()))
+	repo := NewPodRepo(db)
+	id, err := repo.Add(context.Background(), fmt.Sprintf("TestPod-%d", nextID()))
 	require.NoError(t, err)
 	return id
 }
@@ -92,7 +98,8 @@ func CreateTestPod(t *testing.T, db *gorm.DB) int {
 // CreateTestPlayer inserts a fresh player row and returns its ID.
 func CreateTestPlayer(t *testing.T, db *gorm.DB) int {
 	t.Helper()
-	id, err := player.NewRepositoryFromDB(db).Add(context.Background(), fmt.Sprintf("Test Player %d", nextID()))
+	repo := NewPlayerRepo(db)
+	id, err := repo.Add(context.Background(), fmt.Sprintf("Test Player %d", nextID()))
 	require.NoError(t, err)
 	return id
 }
@@ -100,7 +107,8 @@ func CreateTestPlayer(t *testing.T, db *gorm.DB) int {
 // CreateTestCommander inserts a fresh commander row and returns its ID.
 func CreateTestCommander(t *testing.T, db *gorm.DB) int {
 	t.Helper()
-	id, err := commander.NewRepositoryFromDB(db).Add(context.Background(), fmt.Sprintf("Test Commander %d", nextID()))
+	repo := NewCommanderRepo(db)
+	id, err := repo.Add(context.Background(), fmt.Sprintf("Test Commander %d", nextID()))
 	require.NoError(t, err)
 	return id
 }
@@ -109,7 +117,9 @@ func CreateTestCommander(t *testing.T, db *gorm.DB) int {
 func CreateTestGame(t *testing.T, db *gorm.DB) int {
 	t.Helper()
 	podID := CreateTestPod(t, db)
-	id, err := game.NewRepositoryFromDB(db).Add(context.Background(), fmt.Sprintf("Test Game %d", nextID()), podID, 1)
+
+	repo := NewGameRepo(db)
+	id, err := repo.Add(context.Background(), fmt.Sprintf("Test Game %d", nextID()), podID, 1)
 	require.NoError(t, err)
 	return id
 }
@@ -119,12 +129,14 @@ func CreateTestDeck(t *testing.T, db *gorm.DB) deck.Model {
 	t.Helper()
 	playerID := CreateTestPlayer(t, db)
 	name := fmt.Sprintf("Test Deck %d", nextID())
-	id, err := deck.NewRepositoryFromDB(db).Add(context.Background(), playerID, name, 1)
+
+	repo := NewDeckRepo(db)
+	id, err := repo.Add(context.Background(), playerID, name, 1)
 	require.NoError(t, err)
-	return deck.Model{
-		GormModelBase: base.GormModelBase{ID: id},
-		PlayerID:      playerID,
-		Name:          name,
-		FormatID:      1,
-	}
+
+	createdDeck, err := repo.GetById(context.Background(), id)
+	require.NoError(t, err)
+	require.NotNil(t, createdDeck)
+
+	return *createdDeck
 }

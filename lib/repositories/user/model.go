@@ -8,17 +8,21 @@ const (
 )
 
 type Model struct {
-	base.ModelBase
-	PlayerID      int     `db:"player_id"`
-	RoleID        int     `db:"role_id"`
-	OAuthProvider *string `db:"oauth_provider"`
-	OAuthSubject  *string `db:"oauth_subject"`
-	Email         *string `db:"email"`
-	DisplayName   *string `db:"display_name"`
-	AvatarURL     *string `db:"avatar_url"`
+	base.GormModelBase
+	PlayerID      int
+	RoleID        int
+	OAuthProvider *string `gorm:"column:oauth_provider"`
+	OAuthSubject  *string `gorm:"column:oauth_subject"`
+	Email         *string
+	DisplayName   *string
+	AvatarURL     *string
 }
 
+func (Model) TableName() string { return "user" }
+
 type RoleModel struct {
-	base.ModelBase
-	Name string `db:"name"`
+	base.GormModelBase
+	Name string
 }
+
+func (RoleModel) TableName() string { return "user_role" }
