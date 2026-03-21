@@ -3,12 +3,16 @@ package pod
 import "github.com/m-sharp/edh-tracker/lib/repositories/base"
 
 type Model struct {
-	base.ModelBase
-	Name string `db:"name"`
+	base.GormModelBase
+	Name string
 }
 
+func (Model) TableName() string { return "pod" }
+
 type PlayerPodModel struct {
-	base.ModelBase
-	PodID    int `db:"pod_id"`
-	PlayerID int `db:"player_id"`
+	base.GormModelBase
+	PodID    int
+	PlayerID int
 }
+
+func (PlayerPodModel) TableName() string { return "player_pod" }
