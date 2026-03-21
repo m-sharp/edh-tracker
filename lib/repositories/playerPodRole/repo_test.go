@@ -1,120 +1,140 @@
-package playerPodRole
+package playerPodRole_test
 
 import (
 	"context"
-	"regexp"
 	"testing"
-	"time"
 
-	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/m-sharp/edh-tracker/lib"
+	"github.com/m-sharp/edh-tracker/lib/repositories/playerPodRole"
+	"github.com/m-sharp/edh-tracker/lib/repositories/testHelpers"
 )
 
-func newMockDB(t *testing.T) (*lib.DBClient, sqlmock.Sqlmock) {
-	db, mock, err := sqlmock.New()
-	require.NoError(t, err)
-	return &lib.DBClient{Db: sqlx.NewDb(db, "sqlmock")}, mock
-}
-
 func TestGetRole_Found(t *testing.T) {
-	client, mock := newMockDB(t)
-	repo := NewRepository(client)
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewPlayerPodRoleRepo(db)
+	ctx := context.Background()
 
-	now := time.Now()
-	rows := sqlmock.NewRows([]string{"id", "pod_id", "player_id", "role", "created_at", "updated_at", "deleted_at"}).
-		AddRow(1, 10, 20, "manager", now, now, nil)
-	mock.ExpectQuery(regexp.QuoteMeta(getRole)).WithArgs(10, 20).WillReturnRows(rows)
+	podID := testHelpers.CreateTestPod(t, db)
+	playerID := testHelpers.CreateTestPlayer(t, db)
 
-	got, err := repo.GetRole(context.Background(), 10, 20)
+	require.NoError(t, repo.SetRole(ctx, podID, playerID, playerPodRole.RoleManager))
+
+	got, err := repo.GetRole(ctx, podID, playerID)
 	require.NoError(t, err)
 	require.NotNil(t, got)
-	assert.Equal(t, "manager", got.Role)
-	assert.Equal(t, 10, got.PodID)
-	assert.Equal(t, 20, got.PlayerID)
-	assert.NoError(t, mock.ExpectationsWereMet())
+	assert.Equal(t, playerPodRole.RoleManager, got.Role)
+	assert.Equal(t, podID, got.PodID)
+	assert.Equal(t, playerID, got.PlayerID)
 }
 
 func TestGetRole_NotFound(t *testing.T) {
-	client, mock := newMockDB(t)
-	repo := NewRepository(client)
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewPlayerPodRoleRepo(db)
 
-	rows := sqlmock.NewRows([]string{"id", "pod_id", "player_id", "role", "created_at", "updated_at", "deleted_at"})
-	mock.ExpectQuery(regexp.QuoteMeta(getRole)).WithArgs(10, 20).WillReturnRows(rows)
-
-	got, err := repo.GetRole(context.Background(), 10, 20)
+	got, err := repo.GetRole(context.Background(), 999999, 999999)
 	require.NoError(t, err)
 	assert.Nil(t, got)
-	assert.NoError(t, mock.ExpectationsWereMet())
 }
 
-func TestSetRole_Success(t *testing.T) {
-	client, mock := newMockDB(t)
-	repo := NewRepository(client)
+func TestSetRole_Insert(t *testing.T) {
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewPlayerPodRoleRepo(db)
+	ctx := context.Background()
 
-	mock.ExpectExec(regexp.QuoteMeta(setRole)).
-		WithArgs(10, 20, "manager").
-		WillReturnResult(sqlmock.NewResult(1, 1))
+	podID := testHelpers.CreateTestPod(t, db)
+	playerID := testHelpers.CreateTestPlayer(t, db)
 
-	err := repo.SetRole(context.Background(), 10, 20, "manager")
+	require.NoError(t, repo.SetRole(ctx, podID, playerID, playerPodRole.RoleMember))
+
+	got, err := repo.GetRole(ctx, podID, playerID)
 	require.NoError(t, err)
-	assert.NoError(t, mock.ExpectationsWereMet())
+	require.NotNil(t, got)
+	assert.Equal(t, playerPodRole.RoleMember, got.Role)
 }
 
-func TestGetMembersWithRoles_Empty(t *testing.T) {
-	client, mock := newMockDB(t)
-	repo := NewRepository(client)
+func TestSetRole_Update(t *testing.T) {
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewPlayerPodRoleRepo(db)
+	ctx := context.Background()
 
-	rows := sqlmock.NewRows([]string{"id", "pod_id", "player_id", "role", "created_at", "updated_at", "deleted_at"})
-	mock.ExpectQuery(regexp.QuoteMeta(getMembersWithRole)).WithArgs(10).WillReturnRows(rows)
+	podID := testHelpers.CreateTestPod(t, db)
+	playerID := testHelpers.CreateTestPlayer(t, db)
 
-	got, err := repo.GetMembersWithRoles(context.Background(), 10)
+	require.NoError(t, repo.SetRole(ctx, podID, playerID, playerPodRole.RoleMember))
+	require.NoError(t, repo.SetRole(ctx, podID, playerID, playerPodRole.RoleManager))
+
+	got, err := repo.GetRole(ctx, podID, playerID)
 	require.NoError(t, err)
-	assert.Empty(t, got)
-	assert.NoError(t, mock.ExpectationsWereMet())
+	require.NotNil(t, got)
+	assert.Equal(t, playerPodRole.RoleManager, got.Role)
 }
 
-func TestGetMembersWithRoles_Rows(t *testing.T) {
-	client, mock := newMockDB(t)
-	repo := NewRepository(client)
+func TestSetRole_Restore(t *testing.T) {
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewPlayerPodRoleRepo(db)
+	ctx := context.Background()
 
-	now := time.Now()
-	rows := sqlmock.NewRows([]string{"id", "pod_id", "player_id", "role", "created_at", "updated_at", "deleted_at"}).
-		AddRow(1, 10, 1, "manager", now, now, nil).
-		AddRow(2, 10, 2, "member", now, now, nil)
-	mock.ExpectQuery(regexp.QuoteMeta(getMembersWithRole)).WithArgs(10).WillReturnRows(rows)
+	podID := testHelpers.CreateTestPod(t, db)
+	playerID := testHelpers.CreateTestPlayer(t, db)
 
-	got, err := repo.GetMembersWithRoles(context.Background(), 10)
+	require.NoError(t, repo.SetRole(ctx, podID, playerID, playerPodRole.RoleMember))
+
+	// Soft-delete the row manually
+	require.NoError(t, db.Where("pod_id = ? AND player_id = ?", podID, playerID).Delete(&playerPodRole.Model{}).Error)
+
+	// SetRole should restore the soft-deleted row
+	require.NoError(t, repo.SetRole(ctx, podID, playerID, playerPodRole.RoleMember))
+
+	got, err := repo.GetRole(ctx, podID, playerID)
 	require.NoError(t, err)
-	assert.Len(t, got, 2)
-	assert.Equal(t, "manager", got[0].Role)
-	assert.Equal(t, "member", got[1].Role)
-	assert.NoError(t, mock.ExpectationsWereMet())
+	require.NotNil(t, got)
+	assert.Equal(t, playerPodRole.RoleMember, got.Role)
 }
 
-func TestBulkAdd_EmptyPlayerIDs(t *testing.T) {
-	client, mock := newMockDB(t)
-	repo := NewRepository(client)
+func TestGetMembersWithRoles(t *testing.T) {
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewPlayerPodRoleRepo(db)
+	ctx := context.Background()
 
-	// No DB calls expected for empty input
-	err := repo.BulkAdd(context.Background(), 10, []int{}, "member")
+	podID := testHelpers.CreateTestPod(t, db)
+	p1 := testHelpers.CreateTestPlayer(t, db)
+	p2 := testHelpers.CreateTestPlayer(t, db)
+	p3 := testHelpers.CreateTestPlayer(t, db)
+
+	require.NoError(t, repo.SetRole(ctx, podID, p1, playerPodRole.RoleManager))
+	require.NoError(t, repo.SetRole(ctx, podID, p2, playerPodRole.RoleMember))
+	require.NoError(t, repo.SetRole(ctx, podID, p3, playerPodRole.RoleMember))
+
+	// Soft-delete p3 — should not appear in results
+	require.NoError(t, db.Where("pod_id = ? AND player_id = ?", podID, p3).Delete(&playerPodRole.Model{}).Error)
+
+	members, err := repo.GetMembersWithRoles(ctx, podID)
 	require.NoError(t, err)
-	assert.NoError(t, mock.ExpectationsWereMet())
+	assert.Len(t, members, 2)
+
+	playerIDs := []int{members[0].PlayerID, members[1].PlayerID}
+	assert.Contains(t, playerIDs, p1)
+	assert.Contains(t, playerIDs, p2)
 }
 
-func TestBulkAdd_MultiplePlayerIDs(t *testing.T) {
-	client, mock := newMockDB(t)
-	repo := NewRepository(client)
+func TestBulkAdd(t *testing.T) {
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewPlayerPodRoleRepo(db)
+	ctx := context.Background()
 
-	expectedQuery := "INSERT INTO player_pod_role (pod_id, player_id, role) VALUES (?,?,?),(?,?,?)"
-	mock.ExpectExec(regexp.QuoteMeta(expectedQuery)).
-		WithArgs(10, 1, "member", 10, 2, "member").
-		WillReturnResult(sqlmock.NewResult(2, 2))
+	podID := testHelpers.CreateTestPod(t, db)
+	p1 := testHelpers.CreateTestPlayer(t, db)
+	p2 := testHelpers.CreateTestPlayer(t, db)
 
-	err := repo.BulkAdd(context.Background(), 10, []int{1, 2}, "member")
+	require.NoError(t, repo.BulkAdd(ctx, podID, []int{p1, p2}, playerPodRole.RoleMember))
+
+	members, err := repo.GetMembersWithRoles(ctx, podID)
 	require.NoError(t, err)
-	assert.NoError(t, mock.ExpectationsWereMet())
+	assert.Len(t, members, 2)
+
+	playerIDs := []int{members[0].PlayerID, members[1].PlayerID}
+	assert.Contains(t, playerIDs, p1)
+	assert.Contains(t, playerIDs, p2)
 }

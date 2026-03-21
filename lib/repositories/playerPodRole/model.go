@@ -8,8 +8,10 @@ const (
 )
 
 type Model struct {
-	base.ModelBase
-	PodID    int    `db:"pod_id"`
-	PlayerID int    `db:"player_id"`
-	Role     string `db:"role"`
+	base.GormModelBase
+	PodID    int
+	PlayerID int
+	Role     string
 }
+
+func (Model) TableName() string { return "player_pod_role" }

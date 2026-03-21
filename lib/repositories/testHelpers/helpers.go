@@ -14,6 +14,7 @@ import (
 	"github.com/m-sharp/edh-tracker/lib/repositories/deckCommander"
 	"github.com/m-sharp/edh-tracker/lib/repositories/format"
 	"github.com/m-sharp/edh-tracker/lib/repositories/player"
+	"github.com/m-sharp/edh-tracker/lib/repositories/playerPodRole"
 	"github.com/m-sharp/edh-tracker/lib/repositories/pod"
 )
 
@@ -45,6 +46,10 @@ func NewDeckCommanderRepo(db *gorm.DB) *deckCommander.Repository {
 
 func NewPodRepo(db *gorm.DB) *pod.Repository {
 	return pod.NewRepositoryFromDB(db)
+}
+
+func NewPlayerPodRoleRepo(db *gorm.DB) *playerPodRole.Repository {
+	return playerPodRole.NewRepositoryFromDB(db)
 }
 
 // CreateTestPod inserts a fresh pod row and returns its ID.
