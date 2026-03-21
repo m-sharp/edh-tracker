@@ -30,11 +30,13 @@ func NewSeeder(log *zap.Logger, repos *repositories.Repositories) *Seeder {
 	}
 }
 
-// deckEntry holds the unique player+commander+format combinations found across all games.
+// deckEntry holds the unique player+deck+format combinations found across all games.
 type deckEntry struct {
-	playerName    string
-	commanderName string
-	formatID      int
+	playerName           string
+	deckName             string // display name stored in deck.name
+	commanderName        string // primary commander for deck_commander
+	partnerCommanderName string // optional partner commander
+	formatID             int
 }
 
 func (s *Seeder) Run(ctx context.Context) error {
@@ -130,14 +132,19 @@ func (s *Seeder) collectEntities(games []Game, formatIDs map[string]int) (player
 		}
 		for _, result := range gameToSeed.Results {
 			playerNameSet[result.Player] = struct{}{}
-			commanderNameSet[result.Name] = struct{}{}
-			key := result.Player + ":" + result.Name
+			commanderNameSet[result.CommanderName()] = struct{}{}
+			if result.PartnerCommander != "" {
+				commanderNameSet[result.PartnerCommander] = struct{}{}
+			}
+			key := result.Player + ":" + result.DeckName()
 			if _, exists := deckKeySet[key]; !exists {
 				deckKeySet[key] = struct{}{}
 				entries = append(entries, deckEntry{
-					playerName:    result.Player,
-					commanderName: result.Name,
-					formatID:      formatID,
+					playerName:           result.Player,
+					deckName:             result.DeckName(),
+					commanderName:        result.CommanderName(),
+					partnerCommanderName: result.PartnerCommander,
+					formatID:             formatID,
 				})
 			}
 		}
@@ -215,7 +222,7 @@ func (s *Seeder) seedDecks(ctx context.Context, entries []deckEntry, playerIDs, 
 	for i, de := range entries {
 		deckSlice[i] = deck.Model{
 			PlayerID: playerIDs[de.playerName],
-			Name:     de.commanderName,
+			Name:     de.deckName,
 			FormatID: de.formatID,
 		}
 	}
@@ -235,11 +242,16 @@ func (s *Seeder) seedDecks(ctx context.Context, entries []deckEntry, playerIDs, 
 	dcSlice := make([]deckCommander.Model, len(entries))
 	for i, de := range entries {
 		playerID := playerIDs[de.playerName]
-		deckKey := fmt.Sprintf("%d:%s", playerID, de.commanderName)
-		dcSlice[i] = deckCommander.Model{
+		deckKey := fmt.Sprintf("%d:%s", playerID, de.deckName)
+		dc := deckCommander.Model{
 			DeckID:      deckIDs[deckKey],
 			CommanderID: commanderIDs[de.commanderName],
 		}
+		if de.partnerCommanderName != "" {
+			partnerID := commanderIDs[de.partnerCommanderName]
+			dc.PartnerCommanderID = &partnerID
+		}
+		dcSlice[i] = dc
 	}
 
 	if err = s.repos.DeckCommanders.BulkAdd(ctx, dcSlice); err != nil {
@@ -270,7 +282,7 @@ func (s *Seeder) seedGames(ctx context.Context, games []Game, formatIDs, playerI
 	for i, g := range games {
 		for _, result := range g.Results {
 			playerID := playerIDs[result.Player]
-			deckKey := fmt.Sprintf("%d:%s", playerID, result.Name)
+			deckKey := fmt.Sprintf("%d:%s", playerID, result.DeckName())
 			allResults = append(allResults, gameResult.Model{
 				GameID:    gameIDs[i],
 				DeckID:    deckIDs[deckKey],

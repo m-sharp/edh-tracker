@@ -41,7 +41,8 @@ Each game is an object with:
       "player": "PlayerName",
       "place": 1,
       "kills": 2,
-      "name": "Commander Name"
+      "name": "Commander Name",
+      "partnerCommander": "Partner Name"
     }
   ],
   "format": "commander"
@@ -56,7 +57,9 @@ Each game is an object with:
 | `player` | string | Must match existing player name exactly (case-sensitive) |
 | `place` | int | Finishing position; **ties are valid** — multiple players can share the same place |
 | `kills` | int | **Omit entirely when 0** (do not write `"kills": 0`) |
-| `name` | string | Commander name exactly as it appears on the card |
+| `name` | string | Deck display name; defaults to `commander` if omitted. At least one of `name`/`commander` must be present |
+| `commander` | string | Primary commander name; defaults to `name` if omitted. Use when the deck display name differs from the commander |
+| `partnerCommander` | string | Partner commander name; **omit entirely when not applicable** |
 | `format` | string | Always `"commander"` unless told otherwise |
 
 ### Result ordering

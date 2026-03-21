@@ -54,7 +54,8 @@
         "player": "Dillon",
         "place": 3,
         "kills": 1,
-        "name": "Sakashima of a Thousand Faces"
+        "name": "Sakashima of a Thousand Faces",
+        "partnerCommander": "Tana, the Bloodsower"
       }
     ],
     "format": "commander"
@@ -138,7 +139,8 @@
         "player": "Dillon",
         "place": 3,
         "kills": 0,
-        "name": "Sakashima of a Thousand Faces"
+        "name": "Sakashima of a Thousand Faces",
+        "partnerCommander": "Tana, the Bloodsower"
       },
       {
         "player": "Mike",
@@ -282,7 +284,8 @@
         "player": "Dillon",
         "place": 2,
         "kills": 0,
-        "name": "Sakashima of a Thousand Faces"
+        "name": "Sakashima of a Thousand Faces",
+        "partnerCommander": "Tana, the Bloodsower"
       },
       {
         "player": "Peter",
@@ -408,7 +411,8 @@
         "player": "Peter",
         "place": 3,
         "kills": 1,
-        "name": "Ganax, Astral Hunter"
+        "name": "Ganax, Astral Hunter",
+        "partnerCommander": "Haunted One"
       }
     ],
     "format": "commander"
@@ -492,7 +496,8 @@
         "player": "Dillon",
         "place": 2,
         "kills": 2,
-        "name": "Sakashima of a Thousand Faces"
+        "name": "Sakashima of a Thousand Faces",
+        "partnerCommander": "Tana, the Bloodsower"
       },
       {
         "player": "Peter",
@@ -732,7 +737,8 @@
         "player": "Dillon",
         "place": 4,
         "kills": 0,
-        "name": "Sakashima of a Thousand Faces"
+        "name": "Sakashima of a Thousand Faces",
+        "partnerCommander": "Tana, the Bloodsower"
       },
       {
         "player": "Peter",
@@ -1062,7 +1068,8 @@
         "player": "Dillon",
         "place": 1,
         "kills": 3,
-        "name": "Sakashima of a Thousand Faces"
+        "name": "Sakashima of a Thousand Faces",
+        "partnerCommander": "Tana, the Bloodsower"
       },
       {
         "player": "Peter",
@@ -1188,7 +1195,8 @@
         "player": "Peter",
         "place": 4,
         "kills": 0,
-        "name": "Wyll, Blade of Frontiers"
+        "name": "Wyll, Blade of Frontiers",
+        "partnerCommander": "Sword Coast Sailor"
       }
     ],
     "format": "commander"
@@ -1272,7 +1280,8 @@
         "player": "Dillon",
         "place": 4,
         "kills": 0,
-        "name": "Sakashima of a Thousand Faces"
+        "name": "Sakashima of a Thousand Faces",
+        "partnerCommander": "Tana, the Bloodsower"
       },
       {
         "player": "Peter",
@@ -1518,7 +1527,8 @@
         "player": "Peter",
         "place": 1,
         "kills": 3,
-        "name": "Jaheira, Friend of the Forest"
+        "name": "Jaheira, Friend of the Forest",
+        "partnerCommander": "Inspiring Leader"
       }
     ],
     "format": "commander"
@@ -1578,7 +1588,8 @@
         "player": "Peter",
         "place": 2,
         "kills": 0,
-        "name": "Wyll, Blade of Frontiers"
+        "name": "Wyll, Blade of Frontiers",
+        "partnerCommander": "Sword Coast Sailor"
       }
     ],
     "format": "commander"
@@ -1608,7 +1619,8 @@
         "player": "Peter",
         "place": 3,
         "kills": 0,
-        "name": "Wyll, Blade of Frontiers"
+        "name": "Wyll, Blade of Frontiers",
+        "partnerCommander": "Sword Coast Sailor"
       }
     ],
     "format": "commander"
@@ -1638,7 +1650,8 @@
         "player": "Peter",
         "place": 3,
         "kills": 0,
-        "name": "Jaheira, Friend of the Forest"
+        "name": "Jaheira, Friend of the Forest",
+        "partnerCommander": "Inspiring Leader"
       }
     ],
     "format": "commander"
@@ -1668,7 +1681,8 @@
         "player": "Peter",
         "place": 2,
         "kills": 1,
-        "name": "Wyll, Blade of Frontiers"
+        "name": "Wyll, Blade of Frontiers",
+        "partnerCommander": "Sword Coast Sailor"
       }
     ],
     "format": "commander"
@@ -2028,7 +2042,8 @@
         "player": "Peter",
         "place": 4,
         "kills": 0,
-        "name": "Wyll, Blade of Frontiers"
+        "name": "Wyll, Blade of Frontiers",
+        "partnerCommander": "Sword Coast Sailor"
       }
     ],
     "format": "commander"
@@ -2058,7 +2073,8 @@
         "player": "Peter",
         "place": 3,
         "kills": 0,
-        "name": "Wyll, Blade of Frontiers"
+        "name": "Wyll, Blade of Frontiers",
+        "partnerCommander": "Sword Coast Sailor"
       }
     ],
     "format": "commander"
@@ -2148,7 +2164,8 @@
         "player": "Peter",
         "place": 1,
         "kills": 3,
-        "name": "Jaheira, Friend of the Forest"
+        "name": "Jaheira, Friend of the Forest",
+        "partnerCommander": "Inspiring Leader"
       }
     ],
     "format": "commander"
@@ -2478,7 +2495,8 @@
         "player": "Peter",
         "place": 5,
         "kills": 0,
-        "name": "Wyll, Blade of Frontiers"
+        "name": "Wyll, Blade of Frontiers",
+        "partnerCommander": "Sword Coast Sailor"
       }
     ],
     "format": "commander"
@@ -2508,7 +2526,8 @@
         "player": "Michaela",
         "place": 2,
         "kills": 1,
-        "name": "Rose Tyler"
+        "name": "Rose Tyler",
+        "partnerCommander": "The Tenth Doctor"
       }
     ],
     "format": "commander"
@@ -2538,7 +2557,8 @@
         "player": "Michaela",
         "place": 2,
         "kills": 0,
-        "name": "Rose Tyler"
+        "name": "Rose Tyler",
+        "partnerCommander": "The Tenth Doctor"
       }
     ],
     "format": "commander"
@@ -2568,7 +2588,8 @@
         "player": "Michaela",
         "place": 2,
         "kills": 0,
-        "name": "Tegan Jovanka"
+        "name": "Tegan Jovanka",
+        "partnerCommander": "The Tenth Doctor"
       }
     ],
     "format": "commander"
@@ -2748,7 +2769,8 @@
         "player": "Peter",
         "place": 2,
         "kills": 0,
-        "name": "Wyll, Blade of Frontiers"
+        "name": "Wyll, Blade of Frontiers",
+        "partnerCommander": "Sword Coast Sailor"
       }
     ],
     "format": "commander"
@@ -2856,7 +2878,8 @@
         "player": "Mike",
         "place": 1,
         "kills": 3,
-        "name": "Rose Tyler"
+        "name": "Rose Tyler",
+        "partnerCommander": "The Tenth Doctor"
       },
       {
         "player": "Kyriakos",
@@ -2922,7 +2945,8 @@
         "player": "Michaela",
         "place": 3,
         "kills": 1,
-        "name": "Rose Tyler"
+        "name": "Rose Tyler",
+        "partnerCommander": "The Tenth Doctor"
       },
       {
         "player": "Peter",
@@ -2976,7 +3000,8 @@
         "player": "Mike",
         "place": 4,
         "kills": 0,
-        "name": "Rose Tyler"
+        "name": "Rose Tyler",
+        "partnerCommander": "The Tenth Doctor"
       },
       {
         "player": "Michaela",
@@ -3385,7 +3410,8 @@
       {
         "player": "Peter",
         "place": 4,
-        "name": "Wyll, Blade of Frontiers"
+        "name": "Wyll, Blade of Frontiers",
+        "partnerCommander": "Sword Coast Sailor"
       }
     ],
     "format": "commander"
