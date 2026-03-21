@@ -8,154 +8,25 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/m-sharp/edh-tracker/lib/business/testHelpers"
 	"github.com/m-sharp/edh-tracker/lib/repositories/base"
 	gameresultrepo "github.com/m-sharp/edh-tracker/lib/repositories/gameResult"
 	playerrepo "github.com/m-sharp/edh-tracker/lib/repositories/player"
 	playerPodRolerepo "github.com/m-sharp/edh-tracker/lib/repositories/playerPodRole"
-	podrepo "github.com/m-sharp/edh-tracker/lib/repositories/pod"
 )
 
-// mockPlayerRepo implements repos.PlayerRepository
-type mockPlayerRepo struct {
-	GetAllFn    func(ctx context.Context) ([]playerrepo.Model, error)
-	GetByIdFn   func(ctx context.Context, playerID int) (*playerrepo.Model, error)
-	GetByNameFn func(ctx context.Context, name string) (*playerrepo.Model, error)
-	UpdateFn    func(ctx context.Context, playerID int, name string) error
-}
-
-func (m *mockPlayerRepo) GetAll(ctx context.Context) ([]playerrepo.Model, error) {
-	if m.GetAllFn != nil {
-		return m.GetAllFn(ctx)
-	}
-	panic("unexpected call to GetAll")
-}
-func (m *mockPlayerRepo) GetById(ctx context.Context, playerID int) (*playerrepo.Model, error) {
-	if m.GetByIdFn != nil {
-		return m.GetByIdFn(ctx, playerID)
-	}
-	panic("unexpected call to GetById")
-}
-func (m *mockPlayerRepo) GetByName(ctx context.Context, name string) (*playerrepo.Model, error) {
-	if m.GetByNameFn != nil {
-		return m.GetByNameFn(ctx, name)
-	}
-	panic("unexpected call to GetByName")
-}
-func (m *mockPlayerRepo) GetByNames(ctx context.Context, names []string) ([]playerrepo.Model, error) {
-	panic("unexpected call to GetByNames")
-}
-func (m *mockPlayerRepo) Add(ctx context.Context, name string) (int, error) {
-	panic("unexpected call to Add")
-}
-func (m *mockPlayerRepo) BulkAdd(ctx context.Context, names []string) ([]playerrepo.Model, error) {
-	panic("unexpected call to BulkAdd")
-}
-func (m *mockPlayerRepo) Update(ctx context.Context, playerID int, name string) error {
-	if m.UpdateFn != nil {
-		return m.UpdateFn(ctx, playerID, name)
-	}
-	panic("unexpected call to Update")
-}
-func (m *mockPlayerRepo) SoftDelete(ctx context.Context, id int) error {
-	panic("unexpected call to SoftDelete")
-}
-
-// mockGameResultRepo implements repos.GameResultRepository
-type mockGameResultRepo struct {
-	GetStatsForPlayerFn func(ctx context.Context, playerID int) (*gameresultrepo.Aggregate, error)
-}
-
-func (m *mockGameResultRepo) GetByGameId(ctx context.Context, gameID int) ([]gameresultrepo.Model, error) {
-	panic("unexpected call to GetByGameId")
-}
-func (m *mockGameResultRepo) GetByGameIDWithDeckInfo(ctx context.Context, gameID int) ([]gameresultrepo.Model, error) {
-	panic("unexpected call to GetByGameIDWithDeckInfo")
-}
-func (m *mockGameResultRepo) GetStatsForPlayer(ctx context.Context, playerID int) (*gameresultrepo.Aggregate, error) {
-	if m.GetStatsForPlayerFn != nil {
-		return m.GetStatsForPlayerFn(ctx, playerID)
-	}
-	panic("unexpected call to GetStatsForPlayer")
-}
-func (m *mockGameResultRepo) GetStatsForDeck(ctx context.Context, deckID int) (*gameresultrepo.Aggregate, error) {
-	panic("unexpected call to GetStatsForDeck")
-}
-func (m *mockGameResultRepo) GetByID(ctx context.Context, resultID int) (*gameresultrepo.Model, error) {
-	panic("unexpected call to GetByID")
-}
-func (m *mockGameResultRepo) Add(ctx context.Context, model gameresultrepo.Model) (int, error) {
-	panic("unexpected call to Add")
-}
-func (m *mockGameResultRepo) Update(ctx context.Context, resultID, place, killCount, deckID int) error {
-	panic("unexpected call to Update")
-}
-func (m *mockGameResultRepo) BulkAdd(ctx context.Context, results []gameresultrepo.Model) error {
-	panic("unexpected call to BulkAdd")
-}
-func (m *mockGameResultRepo) SoftDelete(ctx context.Context, id int) error {
-	panic("unexpected call to SoftDelete")
-}
-
-// mockPodRepo implements repos.PodRepository
-type mockPodRepo struct {
-	GetIDsByPlayerIDFn func(ctx context.Context, playerID int) ([]int, error)
-}
-
-func (m *mockPodRepo) GetAll(ctx context.Context) ([]podrepo.Model, error) {
-	panic("unexpected call to GetAll")
-}
-func (m *mockPodRepo) GetByIDWithMembers(ctx context.Context, podID int) (*podrepo.Model, error) {
-	panic("unexpected call to GetByIDWithMembers")
-}
-func (m *mockPodRepo) GetByID(ctx context.Context, podID int) (*podrepo.Model, error) {
-	panic("unexpected call to GetByID")
-}
-func (m *mockPodRepo) GetByPlayerID(ctx context.Context, playerID int) ([]podrepo.Model, error) {
-	panic("unexpected call to GetByPlayerID")
-}
-func (m *mockPodRepo) GetByName(ctx context.Context, name string) (*podrepo.Model, error) {
-	panic("unexpected call to GetByName")
-}
-func (m *mockPodRepo) GetIDsByPlayerID(ctx context.Context, playerID int) ([]int, error) {
-	if m.GetIDsByPlayerIDFn != nil {
-		return m.GetIDsByPlayerIDFn(ctx, playerID)
-	}
-	panic("unexpected call to GetIDsByPlayerID")
-}
-func (m *mockPodRepo) Add(ctx context.Context, name string) (int, error) {
-	panic("unexpected call to Add")
-}
-func (m *mockPodRepo) BulkAddPlayers(ctx context.Context, podID int, playerIDs []int) error {
-	panic("unexpected call to BulkAddPlayers")
-}
-func (m *mockPodRepo) AddPlayerToPod(ctx context.Context, podID, playerID int) error {
-	panic("unexpected call to AddPlayerToPod")
-}
-func (m *mockPodRepo) GetPlayerIDs(ctx context.Context, podID int) ([]int, error) {
-	panic("unexpected call to GetPlayerIDs")
-}
-func (m *mockPodRepo) SoftDelete(ctx context.Context, podID int) error {
-	panic("unexpected call to SoftDelete")
-}
-func (m *mockPodRepo) Update(ctx context.Context, podID int, name string) error {
-	panic("unexpected call to Update")
-}
-func (m *mockPodRepo) RemovePlayer(ctx context.Context, podID, playerID int) error {
-	panic("unexpected call to RemovePlayer")
-}
-
 func TestGetByID_Success(t *testing.T) {
-	playerRepo := &mockPlayerRepo{
+	playerRepo := &testHelpers.MockPlayerRepo{
 		GetByIdFn: func(ctx context.Context, playerID int) (*playerrepo.Model, error) {
 			return &playerrepo.Model{GormModelBase: base.GormModelBase{ID: 5}, Name: "Alice"}, nil
 		},
 	}
-	gameResultRepo := &mockGameResultRepo{
+	gameResultRepo := &testHelpers.MockGameResultRepo{
 		GetStatsForPlayerFn: func(ctx context.Context, playerID int) (*gameresultrepo.Aggregate, error) {
 			return &gameresultrepo.Aggregate{Games: 3, Kills: 2, Record: map[int]int{1: 1}}, nil
 		},
 	}
-	podRepo := &mockPodRepo{
+	podRepo := &testHelpers.MockPodRepo{
 		GetIDsByPlayerIDFn: func(ctx context.Context, playerID int) ([]int, error) {
 			return []int{1, 2}, nil
 		},
@@ -172,7 +43,7 @@ func TestGetByID_Success(t *testing.T) {
 }
 
 func TestGetByID_NotFound(t *testing.T) {
-	playerRepo := &mockPlayerRepo{
+	playerRepo := &testHelpers.MockPlayerRepo{
 		GetByIdFn: func(ctx context.Context, playerID int) (*playerrepo.Model, error) {
 			return nil, nil
 		},
@@ -184,12 +55,12 @@ func TestGetByID_NotFound(t *testing.T) {
 }
 
 func TestGetByID_StatsError(t *testing.T) {
-	playerRepo := &mockPlayerRepo{
+	playerRepo := &testHelpers.MockPlayerRepo{
 		GetByIdFn: func(ctx context.Context, playerID int) (*playerrepo.Model, error) {
 			return &playerrepo.Model{GormModelBase: base.GormModelBase{ID: 5}, Name: "Alice"}, nil
 		},
 	}
-	gameResultRepo := &mockGameResultRepo{
+	gameResultRepo := &testHelpers.MockGameResultRepo{
 		GetStatsForPlayerFn: func(ctx context.Context, playerID int) (*gameresultrepo.Aggregate, error) {
 			return nil, errors.New("stats error")
 		},
@@ -200,7 +71,7 @@ func TestGetByID_StatsError(t *testing.T) {
 }
 
 func TestGetAll_Success(t *testing.T) {
-	playerRepo := &mockPlayerRepo{
+	playerRepo := &testHelpers.MockPlayerRepo{
 		GetAllFn: func(ctx context.Context) ([]playerrepo.Model, error) {
 			return []playerrepo.Model{
 				{GormModelBase: base.GormModelBase{ID: 1}, Name: "Alice"},
@@ -208,12 +79,12 @@ func TestGetAll_Success(t *testing.T) {
 			}, nil
 		},
 	}
-	gameResultRepo := &mockGameResultRepo{
+	gameResultRepo := &testHelpers.MockGameResultRepo{
 		GetStatsForPlayerFn: func(ctx context.Context, playerID int) (*gameresultrepo.Aggregate, error) {
 			return &gameresultrepo.Aggregate{Record: map[int]int{}}, nil
 		},
 	}
-	podRepo := &mockPodRepo{
+	podRepo := &testHelpers.MockPodRepo{
 		GetIDsByPlayerIDFn: func(ctx context.Context, playerID int) ([]int, error) {
 			return []int{}, nil
 		},
@@ -226,7 +97,7 @@ func TestGetAll_Success(t *testing.T) {
 }
 
 func TestGetPlayerName_Success(t *testing.T) {
-	playerRepo := &mockPlayerRepo{
+	playerRepo := &testHelpers.MockPlayerRepo{
 		GetByIdFn: func(ctx context.Context, playerID int) (*playerrepo.Model, error) {
 			return &playerrepo.Model{GormModelBase: base.GormModelBase{ID: 1}, Name: "Alice"}, nil
 		},
@@ -238,7 +109,7 @@ func TestGetPlayerName_Success(t *testing.T) {
 }
 
 func TestGetPlayerName_NotFound(t *testing.T) {
-	playerRepo := &mockPlayerRepo{
+	playerRepo := &testHelpers.MockPlayerRepo{
 		GetByIdFn: func(ctx context.Context, playerID int) (*playerrepo.Model, error) {
 			return nil, nil
 		},
@@ -248,30 +119,9 @@ func TestGetPlayerName_NotFound(t *testing.T) {
 	assert.ErrorContains(t, err, "not found")
 }
 
-// mockPlayerPodRoleRepo implements repos.PlayerPodRoleRepository
-type mockPlayerPodRoleRepo struct {
-	GetMembersWithRolesFn func(ctx context.Context, podID int) ([]playerPodRolerepo.Model, error)
-}
-
-func (m *mockPlayerPodRoleRepo) GetRole(ctx context.Context, podID, playerID int) (*playerPodRolerepo.Model, error) {
-	panic("unexpected call to GetRole")
-}
-func (m *mockPlayerPodRoleRepo) SetRole(ctx context.Context, podID, playerID int, role string) error {
-	panic("unexpected call to SetRole")
-}
-func (m *mockPlayerPodRoleRepo) GetMembersWithRoles(ctx context.Context, podID int) ([]playerPodRolerepo.Model, error) {
-	if m.GetMembersWithRolesFn != nil {
-		return m.GetMembersWithRolesFn(ctx, podID)
-	}
-	panic("unexpected call to GetMembersWithRoles")
-}
-func (m *mockPlayerPodRoleRepo) BulkAdd(ctx context.Context, podID int, playerIDs []int, role string) error {
-	panic("unexpected call to BulkAdd")
-}
-
 func TestUpdate_Success(t *testing.T) {
 	updated := false
-	playerRepo := &mockPlayerRepo{
+	playerRepo := &testHelpers.MockPlayerRepo{
 		UpdateFn: func(ctx context.Context, playerID int, name string) error {
 			updated = true
 			return nil
@@ -284,7 +134,7 @@ func TestUpdate_Success(t *testing.T) {
 }
 
 func TestUpdate_Error(t *testing.T) {
-	playerRepo := &mockPlayerRepo{
+	playerRepo := &testHelpers.MockPlayerRepo{
 		UpdateFn: func(ctx context.Context, playerID int, name string) error {
 			return errors.New("db error")
 		},
@@ -295,7 +145,7 @@ func TestUpdate_Error(t *testing.T) {
 }
 
 func TestGetAllByPod_Success(t *testing.T) {
-	roleRepo := &mockPlayerPodRoleRepo{
+	roleRepo := &testHelpers.MockPlayerPodRoleRepo{
 		GetMembersWithRolesFn: func(ctx context.Context, podID int) ([]playerPodRolerepo.Model, error) {
 			return []playerPodRolerepo.Model{
 				{PlayerID: 1, Role: "manager"},
@@ -303,17 +153,17 @@ func TestGetAllByPod_Success(t *testing.T) {
 			}, nil
 		},
 	}
-	playerRepo := &mockPlayerRepo{
+	playerRepo := &testHelpers.MockPlayerRepo{
 		GetByIdFn: func(ctx context.Context, playerID int) (*playerrepo.Model, error) {
 			return &playerrepo.Model{GormModelBase: base.GormModelBase{ID: playerID}, Name: "Player"}, nil
 		},
 	}
-	gameResultRepo := &mockGameResultRepo{
+	gameResultRepo := &testHelpers.MockGameResultRepo{
 		GetStatsForPlayerFn: func(ctx context.Context, playerID int) (*gameresultrepo.Aggregate, error) {
 			return &gameresultrepo.Aggregate{Record: map[int]int{}}, nil
 		},
 	}
-	podRepo := &mockPodRepo{
+	podRepo := &testHelpers.MockPodRepo{
 		GetIDsByPlayerIDFn: func(ctx context.Context, playerID int) ([]int, error) {
 			return []int{10}, nil
 		},
@@ -328,14 +178,14 @@ func TestGetAllByPod_Success(t *testing.T) {
 }
 
 func TestGetAllByPod_PlayerNotFound_Skipped(t *testing.T) {
-	roleRepo := &mockPlayerPodRoleRepo{
+	roleRepo := &testHelpers.MockPlayerPodRoleRepo{
 		GetMembersWithRolesFn: func(ctx context.Context, podID int) ([]playerPodRolerepo.Model, error) {
 			return []playerPodRolerepo.Model{
 				{PlayerID: 99, Role: "member"},
 			}, nil
 		},
 	}
-	playerRepo := &mockPlayerRepo{
+	playerRepo := &testHelpers.MockPlayerRepo{
 		GetByIdFn: func(ctx context.Context, playerID int) (*playerrepo.Model, error) {
 			return nil, nil // not found → skip
 		},
