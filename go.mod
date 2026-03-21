@@ -3,12 +3,10 @@ module github.com/m-sharp/edh-tracker
 go 1.26
 
 require (
-	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/mux v1.8.1
-	github.com/jmoiron/sqlx v1.3.5
 	github.com/stretchr/testify v1.11.1
 	go.uber.org/zap v1.26.0
 	golang.org/x/oauth2 v0.35.0

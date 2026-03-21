@@ -2,8 +2,9 @@ package migrations
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/m-sharp/edh-tracker/lib"
+	"gorm.io/gorm"
 )
 
 const (
@@ -46,19 +47,19 @@ const (
 
 type Migration6 struct{}
 
-func (m *Migration6) Upgrade(ctx context.Context, client *lib.DBClient) error {
+func (m *Migration6) Upgrade(ctx context.Context, db *gorm.DB) error {
 	for _, stmt := range []string{alterPlayer, alterDeck, alterGame, alterGameResult} {
-		if _, err := client.Db.ExecContext(ctx, stmt); err != nil {
-			return lib.NewDBError(stmt, err)
+		if err := db.WithContext(ctx).Exec(stmt).Error; err != nil {
+			return fmt.Errorf("query %q: %w", stmt, err)
 		}
 	}
 	return nil
 }
 
-func (m *Migration6) Downgrade(ctx context.Context, client *lib.DBClient) error {
+func (m *Migration6) Downgrade(ctx context.Context, db *gorm.DB) error {
 	for _, stmt := range []string{revertGameResult, revertGame, revertDeck, revertPlayer} {
-		if _, err := client.Db.ExecContext(ctx, stmt); err != nil {
-			return lib.NewDBError(stmt, err)
+		if err := db.WithContext(ctx).Exec(stmt).Error; err != nil {
+			return fmt.Errorf("query %q: %w", stmt, err)
 		}
 	}
 	return nil

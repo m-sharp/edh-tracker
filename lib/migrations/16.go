@@ -2,8 +2,9 @@ package migrations
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/m-sharp/edh-tracker/lib"
+	"gorm.io/gorm"
 )
 
 const (
@@ -22,7 +23,7 @@ const (
 
 type Migration16 struct{}
 
-func (m *Migration16) Upgrade(ctx context.Context, client *lib.DBClient) error {
+func (m *Migration16) Upgrade(ctx context.Context, db *gorm.DB) error {
 	for _, stmt := range []string{
 		addFormatIndexes,
 		addCommanderIndexes,
@@ -30,14 +31,14 @@ func (m *Migration16) Upgrade(ctx context.Context, client *lib.DBClient) error {
 		addDeckNewIndexes,
 		addGameFormatIndex,
 	} {
-		if _, err := client.Db.ExecContext(ctx, stmt); err != nil {
-			return lib.NewDBError(stmt, err)
+		if err := db.WithContext(ctx).Exec(stmt).Error; err != nil {
+			return fmt.Errorf("query %q: %w", stmt, err)
 		}
 	}
 	return nil
 }
 
-func (m *Migration16) Downgrade(ctx context.Context, client *lib.DBClient) error {
+func (m *Migration16) Downgrade(ctx context.Context, db *gorm.DB) error {
 	for _, stmt := range []string{
 		dropFormatIndexes,
 		dropCommanderIndexes,
@@ -45,8 +46,8 @@ func (m *Migration16) Downgrade(ctx context.Context, client *lib.DBClient) error
 		dropDeckNewIndexes,
 		dropGameFormatIndex,
 	} {
-		if _, err := client.Db.ExecContext(ctx, stmt); err != nil {
-			return lib.NewDBError(stmt, err)
+		if err := db.WithContext(ctx).Exec(stmt).Error; err != nil {
+			return fmt.Errorf("query %q: %w", stmt, err)
 		}
 	}
 	return nil
