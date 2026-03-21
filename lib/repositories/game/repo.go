@@ -22,6 +22,13 @@ func NewRepositoryFromDB(db *gorm.DB) *Repository {
 	return &Repository{db: db}
 }
 
+func (r *Repository) preloadAll(db *gorm.DB) *gorm.DB {
+	return db.
+		Preload("Results.Deck.Commander.Commander").
+		Preload("Results.Deck.Commander.PartnerCommander").
+		Preload("Results.Deck.Player")
+}
+
 func (r *Repository) GetAllByPod(ctx context.Context, podID int) ([]Model, error) {
 	var games []Model
 	if err := r.db.WithContext(ctx).Where("pod_id = ?", podID).Find(&games).Error; err != nil {
@@ -35,11 +42,7 @@ func (r *Repository) GetAllByPod(ctx context.Context, podID int) ([]Model, error
 
 func (r *Repository) GetAllByPodWithResults(ctx context.Context, podID int) ([]Model, error) {
 	var games []Model
-	err := r.db.WithContext(ctx).
-		// TODO: Extract a common helper like we did in the other repo?
-		Preload("Results.Deck.Commander.Commander").
-		Preload("Results.Deck.Commander.PartnerCommander").
-		Preload("Results.Deck.Player").
+	err := r.preloadAll(r.db.WithContext(ctx)).
 		Where("pod_id = ?", podID).
 		Find(&games).Error
 	if err != nil {
@@ -68,10 +71,7 @@ func (r *Repository) GetAllByDeck(ctx context.Context, deckID int) ([]Model, err
 
 func (r *Repository) GetAllByDeckWithResults(ctx context.Context, deckID int) ([]Model, error) {
 	var games []Model
-	err := r.db.WithContext(ctx).
-		Preload("Results.Deck.Commander.Commander").
-		Preload("Results.Deck.Commander.PartnerCommander").
-		Preload("Results.Deck.Player").
+	err := r.preloadAll(r.db.WithContext(ctx)).
 		Joins("INNER JOIN game_result ON game.id = game_result.game_id").
 		Where("game_result.deck_id = ? AND game_result.deleted_at IS NULL", deckID).
 		Find(&games).Error
@@ -104,10 +104,7 @@ func (r *Repository) GetAllByPlayerID(ctx context.Context, playerID int) ([]Mode
 
 func (r *Repository) GetAllByPlayerWithResults(ctx context.Context, playerID int) ([]Model, error) {
 	var games []Model
-	err := r.db.WithContext(ctx).
-		Preload("Results.Deck.Commander.Commander").
-		Preload("Results.Deck.Commander.PartnerCommander").
-		Preload("Results.Deck.Player").
+	err := r.preloadAll(r.db.WithContext(ctx)).
 		Select("game.*").
 		Joins("INNER JOIN game_result ON game.id = game_result.game_id").
 		Joins("INNER JOIN deck ON game_result.deck_id = deck.id").
@@ -137,11 +134,7 @@ func (r *Repository) GetById(ctx context.Context, gameID int) (*Model, error) {
 
 func (r *Repository) GetByIDWithResults(ctx context.Context, gameID int) (*Model, error) {
 	var m Model
-	err := r.db.WithContext(ctx).
-		Preload("Results.Deck.Commander.Commander").
-		Preload("Results.Deck.Commander.PartnerCommander").
-		Preload("Results.Deck.Player").
-		First(&m, gameID).Error
+	err := r.preloadAll(r.db.WithContext(ctx)).First(&m, gameID).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, nil
 	}
