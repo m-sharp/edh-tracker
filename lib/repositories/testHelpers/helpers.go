@@ -19,6 +19,7 @@ import (
 	"github.com/m-sharp/edh-tracker/lib/repositories/player"
 	"github.com/m-sharp/edh-tracker/lib/repositories/playerPodRole"
 	"github.com/m-sharp/edh-tracker/lib/repositories/pod"
+	"github.com/m-sharp/edh-tracker/lib/repositories/podInvite"
 )
 
 var fixtureCounter int64
@@ -61,6 +62,10 @@ func NewGameRepo(db *gorm.DB) *game.Repository {
 
 func NewGameResultRepo(db *gorm.DB) *gameResult.Repository {
 	return gameResult.NewRepositoryFromDB(db)
+}
+
+func NewPodInviteRepo(db *gorm.DB) *podInvite.Repository {
+	return podInvite.NewRepositoryFromDB(db)
 }
 
 // CreateTestGameResult inserts a fresh game_result row and returns its ID.
