@@ -30,11 +30,8 @@ type PlayerRepository interface {
 
 type DeckRepository interface {
 	GetAll(ctx context.Context) ([]deck.Model, error)
-	GetAllHydrated(ctx context.Context) ([]deck.Model, error)
 	GetAllForPlayer(ctx context.Context, playerID int) ([]deck.Model, error)
-	GetAllForPlayerHydrated(ctx context.Context, playerID int) ([]deck.Model, error)
 	GetAllByPlayerIDs(ctx context.Context, playerIDs []int) ([]deck.Model, error)
-	GetAllByPlayerIDsHydrated(ctx context.Context, playerIDs []int) ([]deck.Model, error)
 	GetById(ctx context.Context, deckID int) (*deck.Model, error)
 	GetByIDHydrated(ctx context.Context, deckID int) (*deck.Model, error)
 	Add(ctx context.Context, playerID int, name string, formatID int) (int, error)
@@ -46,13 +43,9 @@ type DeckRepository interface {
 
 type GameRepository interface {
 	GetAllByPod(ctx context.Context, podID int) ([]game.Model, error)
-	GetAllByPodWithResults(ctx context.Context, podID int) ([]game.Model, error)
 	GetAllByDeck(ctx context.Context, deckID int) ([]game.Model, error)
-	GetAllByDeckWithResults(ctx context.Context, deckID int) ([]game.Model, error)
 	GetAllByPlayerID(ctx context.Context, playerID int) ([]game.Model, error)
-	GetAllByPlayerWithResults(ctx context.Context, playerID int) ([]game.Model, error)
-	GetById(ctx context.Context, gameID int) (*game.Model, error)
-	GetByIDWithResults(ctx context.Context, gameID int) (*game.Model, error)
+	GetByID(ctx context.Context, gameID int) (*game.Model, error)
 	Add(ctx context.Context, description string, podID, formatID int) (int, error)
 	BulkAdd(ctx context.Context, games []game.Model) ([]int, error)
 	Update(ctx context.Context, gameID int, description string) error
@@ -60,9 +53,7 @@ type GameRepository interface {
 }
 
 type GameResultRepository interface {
-	// TODO: If we're super efficient regardless of scale, why not always fetch the hydrated versions and drop the non-hydrated versions?
-	GetByGameId(ctx context.Context, gameID int) ([]gameResult.Model, error)
-	GetByGameIDWithDeckInfo(ctx context.Context, gameID int) ([]gameResult.Model, error)
+	GetByGameID(ctx context.Context, gameID int) ([]gameResult.Model, error)
 	GetByID(ctx context.Context, resultID int) (*gameResult.Model, error)
 	GetStatsForPlayer(ctx context.Context, playerID int) (*gameResult.Aggregate, error)
 	GetStatsForDeck(ctx context.Context, deckID int) (*gameResult.Aggregate, error)

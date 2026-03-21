@@ -12,7 +12,7 @@ import (
 func GetByGameID(gameResultRepo repos.GameResultRepository) GetByGameIDFunc {
 	enrich := EnrichModels()
 	return func(ctx context.Context, gameID int) ([]Entity, error) {
-		resultModels, err := gameResultRepo.GetByGameIDWithDeckInfo(ctx, gameID)
+		resultModels, err := gameResultRepo.GetByGameID(ctx, gameID)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get results for game %d: %w", gameID, err)
 		}

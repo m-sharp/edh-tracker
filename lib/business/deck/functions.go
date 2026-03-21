@@ -93,7 +93,7 @@ func GetAll(
 	gameResultRepo repos.GameResultRepository,
 ) GetAllFunc {
 	return func(ctx context.Context) ([]EntityWithStats, error) {
-		decks, err := deckRepo.GetAllHydrated(ctx)
+		decks, err := deckRepo.GetAll(ctx)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get decks: %w", err)
 		}
@@ -119,7 +119,7 @@ func GetAllForPlayer(
 	gameResultRepo repos.GameResultRepository,
 ) GetAllForPlayerFunc {
 	return func(ctx context.Context, playerID int) ([]EntityWithStats, error) {
-		decks, err := deckRepo.GetAllForPlayerHydrated(ctx, playerID)
+		decks, err := deckRepo.GetAllForPlayer(ctx, playerID)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get decks for player %d: %w", playerID, err)
 		}
@@ -212,7 +212,7 @@ func GetAllByPod(
 			return []EntityWithStats{}, nil
 		}
 
-		decks, err := deckRepo.GetAllByPlayerIDsHydrated(ctx, playerIDs)
+		decks, err := deckRepo.GetAllByPlayerIDs(ctx, playerIDs)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get decks for pod %d: %w", podID, err)
 		}

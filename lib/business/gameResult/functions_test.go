@@ -34,7 +34,7 @@ func makeModel(id, gameID, deckID, place, killCount int, deckName string, player
 
 func TestGetByGameID_NoResults(t *testing.T) {
 	repo := &testHelpers.MockGameResultRepo{
-		GetByGameIDWithDeckInfoFn: func(ctx context.Context, gameID int) ([]gameResultRepo.Model, error) {
+		GetByGameIDFn: func(ctx context.Context, gameID int) ([]gameResultRepo.Model, error) {
 			return []gameResultRepo.Model{}, nil
 		},
 	}
@@ -46,7 +46,7 @@ func TestGetByGameID_NoResults(t *testing.T) {
 
 func TestGetByGameID_NoCommander(t *testing.T) {
 	repo := &testHelpers.MockGameResultRepo{
-		GetByGameIDWithDeckInfoFn: func(ctx context.Context, gameID int) ([]gameResultRepo.Model, error) {
+		GetByGameIDFn: func(ctx context.Context, gameID int) ([]gameResultRepo.Model, error) {
 			return []gameResultRepo.Model{
 				makeModel(1, 1, 20, 1, 2, "My Deck", 7, nil),
 			}, nil
@@ -68,7 +68,7 @@ func TestGetByGameID_WithCommander(t *testing.T) {
 		Commander: commanderRepo.Model{Name: "Krenko"},
 	}
 	repo := &testHelpers.MockGameResultRepo{
-		GetByGameIDWithDeckInfoFn: func(ctx context.Context, gameID int) ([]gameResultRepo.Model, error) {
+		GetByGameIDFn: func(ctx context.Context, gameID int) ([]gameResultRepo.Model, error) {
 			return []gameResultRepo.Model{
 				makeModel(1, 1, 20, 1, 0, "Krenko Deck", 5, cmdr),
 			}, nil
@@ -90,7 +90,7 @@ func TestGetByGameID_WithPartner(t *testing.T) {
 		PartnerCommander: partner,
 	}
 	repo := &testHelpers.MockGameResultRepo{
-		GetByGameIDWithDeckInfoFn: func(ctx context.Context, gameID int) ([]gameResultRepo.Model, error) {
+		GetByGameIDFn: func(ctx context.Context, gameID int) ([]gameResultRepo.Model, error) {
 			return []gameResultRepo.Model{
 				makeModel(1, 1, 20, 2, 1, "Partner Deck", 5, cmdr),
 			}, nil
@@ -108,7 +108,7 @@ func TestGetByGameID_WithPartner(t *testing.T) {
 
 func TestGetByGameID_MultipleSameDeck(t *testing.T) {
 	repo := &testHelpers.MockGameResultRepo{
-		GetByGameIDWithDeckInfoFn: func(ctx context.Context, gameID int) ([]gameResultRepo.Model, error) {
+		GetByGameIDFn: func(ctx context.Context, gameID int) ([]gameResultRepo.Model, error) {
 			return []gameResultRepo.Model{
 				makeModel(1, 1, 20, 1, 0, "Shared Deck", 3, nil),
 				makeModel(2, 1, 20, 2, 0, "Shared Deck", 3, nil),
@@ -125,7 +125,7 @@ func TestGetByGameID_MultipleSameDeck(t *testing.T) {
 
 func TestGetByGameID_PointsCalculation(t *testing.T) {
 	repo := &testHelpers.MockGameResultRepo{
-		GetByGameIDWithDeckInfoFn: func(ctx context.Context, gameID int) ([]gameResultRepo.Model, error) {
+		GetByGameIDFn: func(ctx context.Context, gameID int) ([]gameResultRepo.Model, error) {
 			return []gameResultRepo.Model{
 				makeModel(1, 1, 10, 1, 2, "Deck A", 1, nil),
 				makeModel(2, 1, 11, 2, 0, "Deck B", 2, nil),

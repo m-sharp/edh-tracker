@@ -19,7 +19,7 @@ func GetAllByPod(
 	enrichGameResults gameResult.EnrichModelsFunc,
 ) GetAllByPodFunc {
 	return func(ctx context.Context, podID int) ([]Entity, error) {
-		games, err := gameRepo.GetAllByPodWithResults(ctx, podID)
+		games, err := gameRepo.GetAllByPod(ctx, podID)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get games for pod %d: %w", podID, err)
 		}
@@ -45,7 +45,7 @@ func GetAllByDeck(
 	enrichGameResults gameResult.EnrichModelsFunc,
 ) GetAllByDeckFunc {
 	return func(ctx context.Context, deckID int) ([]Entity, error) {
-		games, err := gameRepo.GetAllByDeckWithResults(ctx, deckID)
+		games, err := gameRepo.GetAllByDeck(ctx, deckID)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get games for deck %d: %w", deckID, err)
 		}
@@ -71,7 +71,7 @@ func GetByID(
 	enrichGameResults gameResult.EnrichModelsFunc,
 ) GetByIDFunc {
 	return func(ctx context.Context, gameID int) (*Entity, error) {
-		g, err := gameRepo.GetByIDWithResults(ctx, gameID)
+		g, err := gameRepo.GetByID(ctx, gameID)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get game %d: %w", gameID, err)
 		}
@@ -154,7 +154,7 @@ func GetAllByPlayer(
 	enrichGameResults gameResult.EnrichModelsFunc,
 ) GetAllByPlayerFunc {
 	return func(ctx context.Context, playerID int) ([]Entity, error) {
-		games, err := gameRepo.GetAllByPlayerWithResults(ctx, playerID)
+		games, err := gameRepo.GetAllByPlayerID(ctx, playerID)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get games for player %d: %w", playerID, err)
 		}

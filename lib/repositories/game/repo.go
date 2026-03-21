@@ -31,17 +31,6 @@ func (r *Repository) preloadAll(db *gorm.DB) *gorm.DB {
 
 func (r *Repository) GetAllByPod(ctx context.Context, podID int) ([]Model, error) {
 	var games []Model
-	if err := r.db.WithContext(ctx).Where("pod_id = ?", podID).Find(&games).Error; err != nil {
-		return nil, fmt.Errorf("failed to get Game records for pod %d: %w", podID, err)
-	}
-	if games == nil {
-		return []Model{}, nil
-	}
-	return games, nil
-}
-
-func (r *Repository) GetAllByPodWithResults(ctx context.Context, podID int) ([]Model, error) {
-	var games []Model
 	err := r.preloadAll(r.db.WithContext(ctx)).
 		Where("pod_id = ?", podID).
 		Find(&games).Error
@@ -55,21 +44,6 @@ func (r *Repository) GetAllByPodWithResults(ctx context.Context, podID int) ([]M
 }
 
 func (r *Repository) GetAllByDeck(ctx context.Context, deckID int) ([]Model, error) {
-	var games []Model
-	err := r.db.WithContext(ctx).
-		Joins("INNER JOIN game_result ON game.id = game_result.game_id").
-		Where("game_result.deck_id = ? AND game_result.deleted_at IS NULL", deckID).
-		Find(&games).Error
-	if err != nil {
-		return nil, fmt.Errorf("failed to get Game records for deck %d: %w", deckID, err)
-	}
-	if games == nil {
-		return []Model{}, nil
-	}
-	return games, nil
-}
-
-func (r *Repository) GetAllByDeckWithResults(ctx context.Context, deckID int) ([]Model, error) {
 	var games []Model
 	err := r.preloadAll(r.db.WithContext(ctx)).
 		Joins("INNER JOIN game_result ON game.id = game_result.game_id").
@@ -85,24 +59,6 @@ func (r *Repository) GetAllByDeckWithResults(ctx context.Context, deckID int) ([
 }
 
 func (r *Repository) GetAllByPlayerID(ctx context.Context, playerID int) ([]Model, error) {
-	var games []Model
-	err := r.db.WithContext(ctx).
-		Select("game.*").
-		Joins("INNER JOIN game_result ON game.id = game_result.game_id").
-		Joins("INNER JOIN deck ON game_result.deck_id = deck.id").
-		Where("deck.player_id = ? AND game_result.deleted_at IS NULL AND deck.deleted_at IS NULL", playerID).
-		Distinct().
-		Find(&games).Error
-	if err != nil {
-		return nil, fmt.Errorf("failed to get Game records for player %d: %w", playerID, err)
-	}
-	if games == nil {
-		return []Model{}, nil
-	}
-	return games, nil
-}
-
-func (r *Repository) GetAllByPlayerWithResults(ctx context.Context, playerID int) ([]Model, error) {
 	var games []Model
 	err := r.preloadAll(r.db.WithContext(ctx)).
 		Select("game.*").
@@ -120,19 +76,7 @@ func (r *Repository) GetAllByPlayerWithResults(ctx context.Context, playerID int
 	return games, nil
 }
 
-func (r *Repository) GetById(ctx context.Context, gameID int) (*Model, error) {
-	var m Model
-	err := r.db.WithContext(ctx).First(&m, gameID).Error
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, nil
-	}
-	if err != nil {
-		return nil, fmt.Errorf("failed to get Game record for id %d: %w", gameID, err)
-	}
-	return &m, nil
-}
-
-func (r *Repository) GetByIDWithResults(ctx context.Context, gameID int) (*Model, error) {
+func (r *Repository) GetByID(ctx context.Context, gameID int) (*Model, error) {
 	var m Model
 	err := r.preloadAll(r.db.WithContext(ctx)).First(&m, gameID).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {

@@ -32,17 +32,6 @@ func (r *Repository) preloadAll(db *gorm.DB) *gorm.DB {
 
 func (r *Repository) GetAll(ctx context.Context) ([]Model, error) {
 	var decks []Model
-	if err := r.db.WithContext(ctx).Where("retired = ?", false).Find(&decks).Error; err != nil {
-		return nil, fmt.Errorf("failed to get Deck records: %w", err)
-	}
-	if decks == nil {
-		return []Model{}, nil
-	}
-	return decks, nil
-}
-
-func (r *Repository) GetAllHydrated(ctx context.Context) ([]Model, error) {
-	var decks []Model
 	if err := r.preloadAll(r.db.WithContext(ctx)).Where("retired = ?", false).Find(&decks).Error; err != nil {
 		return nil, fmt.Errorf("failed to get Deck records with associations: %w", err)
 	}
@@ -53,17 +42,6 @@ func (r *Repository) GetAllHydrated(ctx context.Context) ([]Model, error) {
 }
 
 func (r *Repository) GetAllForPlayer(ctx context.Context, playerID int) ([]Model, error) {
-	var decks []Model
-	if err := r.db.WithContext(ctx).Where("player_id = ?", playerID).Find(&decks).Error; err != nil {
-		return nil, fmt.Errorf("failed to get Deck records for player %d: %w", playerID, err)
-	}
-	if decks == nil {
-		return []Model{}, nil
-	}
-	return decks, nil
-}
-
-func (r *Repository) GetAllForPlayerHydrated(ctx context.Context, playerID int) ([]Model, error) {
 	var decks []Model
 	if err := r.preloadAll(r.db.WithContext(ctx)).Where("player_id = ?", playerID).Find(&decks).Error; err != nil {
 		return nil, fmt.Errorf("failed to get Deck records for player %d with associations: %w", playerID, err)
@@ -117,20 +95,6 @@ func (r *Repository) BulkAdd(ctx context.Context, decks []Model) ([]Model, error
 }
 
 func (r *Repository) GetAllByPlayerIDs(ctx context.Context, playerIDs []int) ([]Model, error) {
-	if len(playerIDs) == 0 {
-		return []Model{}, nil
-	}
-	var decks []Model
-	if err := r.db.WithContext(ctx).Where("player_id IN ?", playerIDs).Find(&decks).Error; err != nil {
-		return nil, fmt.Errorf("failed to get Deck records for player IDs: %w", err)
-	}
-	if decks == nil {
-		return []Model{}, nil
-	}
-	return decks, nil
-}
-
-func (r *Repository) GetAllByPlayerIDsHydrated(ctx context.Context, playerIDs []int) ([]Model, error) {
 	if len(playerIDs) == 0 {
 		return []Model{}, nil
 	}

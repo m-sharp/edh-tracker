@@ -11,6 +11,7 @@ import (
 )
 
 const (
+	// TODO: Better way to do deck and player stats? Is this too burdensome here? Should we have views?
 	getStatsForPlayer = `SELECT game_result.game_id, game_result.place, game_result.kill_count,
 						        (SELECT COUNT(*) FROM game_result gr2
 						          WHERE gr2.game_id = game_result.game_id
@@ -40,7 +41,7 @@ func NewRepositoryFromDB(db *gorm.DB) *Repository {
 	return &Repository{db: db}
 }
 
-func (r *Repository) GetByGameIDWithDeckInfo(ctx context.Context, gameID int) ([]Model, error) {
+func (r *Repository) GetByGameID(ctx context.Context, gameID int) ([]Model, error) {
 	var results []Model
 	err := r.db.WithContext(ctx).
 		Preload("Deck.Commander.Commander").
@@ -50,17 +51,6 @@ func (r *Repository) GetByGameIDWithDeckInfo(ctx context.Context, gameID int) ([
 		Find(&results).Error
 	if err != nil {
 		return nil, fmt.Errorf("failed to get GameResults with deck info for game %d: %w", gameID, err)
-	}
-	return results, nil
-}
-
-func (r *Repository) GetByGameId(ctx context.Context, gameID int) ([]Model, error) {
-	var results []Model
-	if err := r.db.WithContext(ctx).Where("game_id = ?", gameID).Find(&results).Error; err != nil {
-		return nil, fmt.Errorf("failed to get GameResult records for game %d: %w", gameID, err)
-	}
-	if results == nil {
-		return []Model{}, nil
 	}
 	return results, nil
 }

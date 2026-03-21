@@ -31,24 +31,21 @@ var (
 
 // MockGameResultRepo implements repos.GameResultRepository.
 type MockGameResultRepo struct {
-	GetByGameIDWithDeckInfoFn func(ctx context.Context, gameID int) ([]gameResultRepo.Model, error)
-	GetByIDFn                 func(ctx context.Context, resultID int) (*gameResultRepo.Model, error)
-	GetStatsForPlayerFn       func(ctx context.Context, playerID int) (*gameResultRepo.Aggregate, error)
-	GetStatsForDeckFn         func(ctx context.Context, deckID int) (*gameResultRepo.Aggregate, error)
-	BulkAddFn                 func(ctx context.Context, results []gameResultRepo.Model) error
-	AddFn                     func(ctx context.Context, model gameResultRepo.Model) (int, error)
-	UpdateFn                  func(ctx context.Context, resultID, place, killCount, deckID int) error
-	SoftDeleteFn              func(ctx context.Context, id int) error
+	GetByGameIDFn       func(ctx context.Context, gameID int) ([]gameResultRepo.Model, error)
+	GetByIDFn           func(ctx context.Context, resultID int) (*gameResultRepo.Model, error)
+	GetStatsForPlayerFn func(ctx context.Context, playerID int) (*gameResultRepo.Aggregate, error)
+	GetStatsForDeckFn   func(ctx context.Context, deckID int) (*gameResultRepo.Aggregate, error)
+	BulkAddFn           func(ctx context.Context, results []gameResultRepo.Model) error
+	AddFn               func(ctx context.Context, model gameResultRepo.Model) (int, error)
+	UpdateFn            func(ctx context.Context, resultID, place, killCount, deckID int) error
+	SoftDeleteFn        func(ctx context.Context, id int) error
 }
 
-func (m *MockGameResultRepo) GetByGameId(ctx context.Context, gameID int) ([]gameResultRepo.Model, error) {
-	panic("unexpected call to GetByGameId")
-}
-func (m *MockGameResultRepo) GetByGameIDWithDeckInfo(ctx context.Context, gameID int) ([]gameResultRepo.Model, error) {
-	if m.GetByGameIDWithDeckInfoFn != nil {
-		return m.GetByGameIDWithDeckInfoFn(ctx, gameID)
+func (m *MockGameResultRepo) GetByGameID(ctx context.Context, gameID int) ([]gameResultRepo.Model, error) {
+	if m.GetByGameIDFn != nil {
+		return m.GetByGameIDFn(ctx, gameID)
 	}
-	panic("unexpected call to GetByGameIDWithDeckInfo")
+	panic("unexpected call to GetByGameID")
 }
 func (m *MockGameResultRepo) GetByID(ctx context.Context, resultID int) (*gameResultRepo.Model, error) {
 	if m.GetByIDFn != nil {
@@ -96,47 +93,34 @@ func (m *MockGameResultRepo) SoftDelete(ctx context.Context, id int) error {
 // MockDeckRepo implements repos.DeckRepository.
 // GetByIdCalled is set to true whenever GetById is invoked (exported tracking flag).
 type MockDeckRepo struct {
-	GetByIdFn                   func(ctx context.Context, deckID int) (*deckRepo.Model, error)
-	AddFn                       func(ctx context.Context, playerID int, name string, formatID int) (int, error)
-	UpdateFn                    func(ctx context.Context, deckID int, fields deckRepo.UpdateFields) error
-	SoftDeleteFn                func(ctx context.Context, id int) error
-	GetAllByPlayerIDsFn         func(ctx context.Context, playerIDs []int) ([]deckRepo.Model, error)
-	GetAllHydratedFn            func(ctx context.Context) ([]deckRepo.Model, error)
-	GetAllForPlayerHydratedFn   func(ctx context.Context, playerID int) ([]deckRepo.Model, error)
-	GetAllByPlayerIDsHydratedFn func(ctx context.Context, playerIDs []int) ([]deckRepo.Model, error)
-	GetByIDHydratedFn           func(ctx context.Context, deckID int) (*deckRepo.Model, error)
-	GetByIdCalled               bool
+	GetByIdFn            func(ctx context.Context, deckID int) (*deckRepo.Model, error)
+	AddFn                func(ctx context.Context, playerID int, name string, formatID int) (int, error)
+	UpdateFn             func(ctx context.Context, deckID int, fields deckRepo.UpdateFields) error
+	SoftDeleteFn         func(ctx context.Context, id int) error
+	GetAllFn             func(ctx context.Context) ([]deckRepo.Model, error)
+	GetAllForPlayerFn    func(ctx context.Context, playerID int) ([]deckRepo.Model, error)
+	GetAllByPlayerIDsFn  func(ctx context.Context, playerIDs []int) ([]deckRepo.Model, error)
+	GetByIDHydratedFn    func(ctx context.Context, deckID int) (*deckRepo.Model, error)
+	GetByIdCalled        bool
 }
 
 func (m *MockDeckRepo) GetAll(ctx context.Context) ([]deckRepo.Model, error) {
+	if m.GetAllFn != nil {
+		return m.GetAllFn(ctx)
+	}
 	panic("unexpected call to GetAll")
 }
-func (m *MockDeckRepo) GetAllHydrated(ctx context.Context) ([]deckRepo.Model, error) {
-	if m.GetAllHydratedFn != nil {
-		return m.GetAllHydratedFn(ctx)
-	}
-	panic("unexpected call to GetAllHydrated")
-}
 func (m *MockDeckRepo) GetAllForPlayer(ctx context.Context, playerID int) ([]deckRepo.Model, error) {
-	panic("unexpected call to GetAllForPlayer")
-}
-func (m *MockDeckRepo) GetAllForPlayerHydrated(ctx context.Context, playerID int) ([]deckRepo.Model, error) {
-	if m.GetAllForPlayerHydratedFn != nil {
-		return m.GetAllForPlayerHydratedFn(ctx, playerID)
+	if m.GetAllForPlayerFn != nil {
+		return m.GetAllForPlayerFn(ctx, playerID)
 	}
-	panic("unexpected call to GetAllForPlayerHydrated")
+	panic("unexpected call to GetAllForPlayer")
 }
 func (m *MockDeckRepo) GetAllByPlayerIDs(ctx context.Context, playerIDs []int) ([]deckRepo.Model, error) {
 	if m.GetAllByPlayerIDsFn != nil {
 		return m.GetAllByPlayerIDsFn(ctx, playerIDs)
 	}
 	panic("unexpected call to GetAllByPlayerIDs")
-}
-func (m *MockDeckRepo) GetAllByPlayerIDsHydrated(ctx context.Context, playerIDs []int) ([]deckRepo.Model, error) {
-	if m.GetAllByPlayerIDsHydratedFn != nil {
-		return m.GetAllByPlayerIDsHydratedFn(ctx, playerIDs)
-	}
-	panic("unexpected call to GetAllByPlayerIDsHydrated")
 }
 func (m *MockDeckRepo) GetById(ctx context.Context, deckID int) (*deckRepo.Model, error) {
 	m.GetByIdCalled = true
@@ -390,16 +374,13 @@ func (m *MockPodInviteRepo) IncrementUsedCount(ctx context.Context, code string)
 
 // MockGameRepo implements repos.GameRepository.
 type MockGameRepo struct {
-	GetAllByPodFn               func(ctx context.Context, podID int) ([]gameRepo.Model, error)
-	GetByIdFn                   func(ctx context.Context, gameID int) (*gameRepo.Model, error)
-	AddFn                       func(ctx context.Context, description string, podID, formatID int) (int, error)
-	GetAllByPlayerIDFn          func(ctx context.Context, playerID int) ([]gameRepo.Model, error)
-	UpdateFn                    func(ctx context.Context, gameID int, description string) error
-	SoftDeleteFn                func(ctx context.Context, id int) error
-	GetAllByPodWithResultsFn    func(ctx context.Context, podID int) ([]gameRepo.Model, error)
-	GetAllByDeckWithResultsFn   func(ctx context.Context, deckID int) ([]gameRepo.Model, error)
-	GetAllByPlayerWithResultsFn func(ctx context.Context, playerID int) ([]gameRepo.Model, error)
-	GetByIDWithResultsFn        func(ctx context.Context, gameID int) (*gameRepo.Model, error)
+	GetAllByPodFn      func(ctx context.Context, podID int) ([]gameRepo.Model, error)
+	GetAllByDeckFn     func(ctx context.Context, deckID int) ([]gameRepo.Model, error)
+	GetAllByPlayerIDFn func(ctx context.Context, playerID int) ([]gameRepo.Model, error)
+	GetByIDFn          func(ctx context.Context, gameID int) (*gameRepo.Model, error)
+	AddFn              func(ctx context.Context, description string, podID, formatID int) (int, error)
+	UpdateFn           func(ctx context.Context, gameID int, description string) error
+	SoftDeleteFn       func(ctx context.Context, id int) error
 }
 
 func (m *MockGameRepo) GetAllByPod(ctx context.Context, podID int) ([]gameRepo.Model, error) {
@@ -409,6 +390,9 @@ func (m *MockGameRepo) GetAllByPod(ctx context.Context, podID int) ([]gameRepo.M
 	panic("unexpected call to GetAllByPod")
 }
 func (m *MockGameRepo) GetAllByDeck(ctx context.Context, deckID int) ([]gameRepo.Model, error) {
+	if m.GetAllByDeckFn != nil {
+		return m.GetAllByDeckFn(ctx, deckID)
+	}
 	panic("unexpected call to GetAllByDeck")
 }
 func (m *MockGameRepo) GetAllByPlayerID(ctx context.Context, playerID int) ([]gameRepo.Model, error) {
@@ -417,17 +401,11 @@ func (m *MockGameRepo) GetAllByPlayerID(ctx context.Context, playerID int) ([]ga
 	}
 	panic("unexpected call to GetAllByPlayerID")
 }
-func (m *MockGameRepo) Update(ctx context.Context, gameID int, description string) error {
-	if m.UpdateFn != nil {
-		return m.UpdateFn(ctx, gameID, description)
+func (m *MockGameRepo) GetByID(ctx context.Context, gameID int) (*gameRepo.Model, error) {
+	if m.GetByIDFn != nil {
+		return m.GetByIDFn(ctx, gameID)
 	}
-	panic("unexpected call to Update")
-}
-func (m *MockGameRepo) GetById(ctx context.Context, gameID int) (*gameRepo.Model, error) {
-	if m.GetByIdFn != nil {
-		return m.GetByIdFn(ctx, gameID)
-	}
-	panic("unexpected call to GetById")
+	panic("unexpected call to GetByID")
 }
 func (m *MockGameRepo) Add(ctx context.Context, description string, podID, formatID int) (int, error) {
 	if m.AddFn != nil {
@@ -438,35 +416,17 @@ func (m *MockGameRepo) Add(ctx context.Context, description string, podID, forma
 func (m *MockGameRepo) BulkAdd(ctx context.Context, games []gameRepo.Model) ([]int, error) {
 	panic("unexpected call to BulkAdd")
 }
+func (m *MockGameRepo) Update(ctx context.Context, gameID int, description string) error {
+	if m.UpdateFn != nil {
+		return m.UpdateFn(ctx, gameID, description)
+	}
+	panic("unexpected call to Update")
+}
 func (m *MockGameRepo) SoftDelete(ctx context.Context, id int) error {
 	if m.SoftDeleteFn != nil {
 		return m.SoftDeleteFn(ctx, id)
 	}
 	panic("unexpected call to SoftDelete")
-}
-func (m *MockGameRepo) GetAllByPodWithResults(ctx context.Context, podID int) ([]gameRepo.Model, error) {
-	if m.GetAllByPodWithResultsFn != nil {
-		return m.GetAllByPodWithResultsFn(ctx, podID)
-	}
-	panic("unexpected call to GetAllByPodWithResults")
-}
-func (m *MockGameRepo) GetAllByDeckWithResults(ctx context.Context, deckID int) ([]gameRepo.Model, error) {
-	if m.GetAllByDeckWithResultsFn != nil {
-		return m.GetAllByDeckWithResultsFn(ctx, deckID)
-	}
-	panic("unexpected call to GetAllByDeckWithResults")
-}
-func (m *MockGameRepo) GetAllByPlayerWithResults(ctx context.Context, playerID int) ([]gameRepo.Model, error) {
-	if m.GetAllByPlayerWithResultsFn != nil {
-		return m.GetAllByPlayerWithResultsFn(ctx, playerID)
-	}
-	panic("unexpected call to GetAllByPlayerWithResults")
-}
-func (m *MockGameRepo) GetByIDWithResults(ctx context.Context, gameID int) (*gameRepo.Model, error) {
-	if m.GetByIDWithResultsFn != nil {
-		return m.GetByIDWithResultsFn(ctx, gameID)
-	}
-	panic("unexpected call to GetByIDWithResults")
 }
 
 // MockFormatRepo implements repos.FormatRepository.

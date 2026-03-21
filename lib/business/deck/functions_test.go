@@ -293,7 +293,7 @@ func TestDeckGetAllByPod_Success(t *testing.T) {
 		},
 	}
 	dr := &testHelpers.MockDeckRepo{
-		GetAllByPlayerIDsHydratedFn: func(ctx context.Context, playerIDs []int) ([]deckRepo.Model, error) {
+		GetAllByPlayerIDsFn: func(ctx context.Context, playerIDs []int) ([]deckRepo.Model, error) {
 			return []deckRepo.Model{
 				{
 					GormModelBase: base.GormModelBase{ID: 10},

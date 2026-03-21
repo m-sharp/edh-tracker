@@ -141,7 +141,7 @@ func TestCreate_InvalidInput_Error(t *testing.T) {
 
 func TestGetByID_NotFound(t *testing.T) {
 	gameRepo := &testHelpers.MockGameRepo{
-		GetByIDWithResultsFn: func(ctx context.Context, gameID int) (*gamerepo.Model, error) {
+		GetByIDFn: func(ctx context.Context, gameID int) (*gamerepo.Model, error) {
 			return nil, nil
 		},
 	}
@@ -157,7 +157,7 @@ func TestGetByID_NotFound(t *testing.T) {
 
 func TestGetAllByPod_ResultErrorDropsGame(t *testing.T) {
 	gameRepo := &testHelpers.MockGameRepo{
-		GetAllByPodWithResultsFn: func(ctx context.Context, podID int) ([]gamerepo.Model, error) {
+		GetAllByPodFn: func(ctx context.Context, podID int) ([]gamerepo.Model, error) {
 			return []gamerepo.Model{
 				{GormModelBase: base.GormModelBase{ID: 1}, PodID: podID, FormatID: 1, Results: []gameresultrepo.Model{{GameID: 1, DeckID: 1}}},
 				{GormModelBase: base.GormModelBase{ID: 2}, PodID: podID, FormatID: 1, Results: []gameresultrepo.Model{{GameID: 2, DeckID: 2}}},
@@ -181,7 +181,7 @@ func TestGetAllByPod_ResultErrorDropsGame(t *testing.T) {
 
 func TestGetAllByPlayer_ResultErrorDropsGame(t *testing.T) {
 	gameRepo := &testHelpers.MockGameRepo{
-		GetAllByPlayerWithResultsFn: func(ctx context.Context, playerID int) ([]gamerepo.Model, error) {
+		GetAllByPlayerIDFn: func(ctx context.Context, playerID int) ([]gamerepo.Model, error) {
 			return []gamerepo.Model{
 				{GormModelBase: base.GormModelBase{ID: 1}, Results: []gameresultrepo.Model{{GameID: 1, DeckID: 1}}},
 				{GormModelBase: base.GormModelBase{ID: 2}, Results: []gameresultrepo.Model{{GameID: 2, DeckID: 2}}},
@@ -204,7 +204,7 @@ func TestGetAllByPlayer_ResultErrorDropsGame(t *testing.T) {
 
 func TestGetAllByPlayer_RepoError(t *testing.T) {
 	gameRepo := &testHelpers.MockGameRepo{
-		GetAllByPlayerWithResultsFn: func(ctx context.Context, playerID int) ([]gamerepo.Model, error) {
+		GetAllByPlayerIDFn: func(ctx context.Context, playerID int) ([]gamerepo.Model, error) {
 			return nil, errors.New("db error")
 		},
 	}

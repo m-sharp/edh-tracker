@@ -11,7 +11,7 @@ import (
 	"github.com/m-sharp/edh-tracker/lib/repositories/testHelpers"
 )
 
-func TestGetByGameIDWithDeckInfo(t *testing.T) {
+func TestGetByGameID(t *testing.T) {
 	db := testHelpers.NewTestDB(t)
 	repo := testHelpers.NewGameResultRepo(db)
 	ctx := context.Background()
@@ -22,7 +22,7 @@ func TestGetByGameIDWithDeckInfo(t *testing.T) {
 	_, err := repo.Add(ctx, gameResult.Model{GameID: gameID, DeckID: testDeck.ID, Place: 1, KillCount: 2})
 	require.NoError(t, err)
 
-	got, err := repo.GetByGameIDWithDeckInfo(ctx, gameID)
+	got, err := repo.GetByGameID(ctx, gameID)
 	require.NoError(t, err)
 	require.Len(t, got, 1)
 	assert.Equal(t, testDeck.Name, got[0].Deck.Name)
@@ -31,41 +31,12 @@ func TestGetByGameIDWithDeckInfo(t *testing.T) {
 	assert.NotEmpty(t, got[0].Deck.Commander.Commander.Name)
 }
 
-func TestGetByGameIDWithDeckInfo_Empty(t *testing.T) {
+func TestGetByGameID_Empty(t *testing.T) {
 	db := testHelpers.NewTestDB(t)
 	repo := testHelpers.NewGameResultRepo(db)
 
-	got, err := repo.GetByGameIDWithDeckInfo(context.Background(), 999999)
+	got, err := repo.GetByGameID(context.Background(), 999999)
 	require.NoError(t, err)
-	assert.Len(t, got, 0)
-}
-
-func TestGetByGameId(t *testing.T) {
-	db := testHelpers.NewTestDB(t)
-	repo := testHelpers.NewGameResultRepo(db)
-	ctx := context.Background()
-
-	gameID := testHelpers.CreateTestGame(t, db)
-	deckID1 := testHelpers.CreateTestDeck(t, db).ID
-	deckID2 := testHelpers.CreateTestDeck(t, db).ID
-
-	_, err := repo.Add(ctx, gameResult.Model{GameID: gameID, DeckID: deckID1, Place: 1, KillCount: 2})
-	require.NoError(t, err)
-	_, err = repo.Add(ctx, gameResult.Model{GameID: gameID, DeckID: deckID2, Place: 2, KillCount: 0})
-	require.NoError(t, err)
-
-	got, err := repo.GetByGameId(ctx, gameID)
-	require.NoError(t, err)
-	assert.Len(t, got, 2)
-}
-
-func TestGetByGameId_Empty(t *testing.T) {
-	db := testHelpers.NewTestDB(t)
-	repo := testHelpers.NewGameResultRepo(db)
-
-	got, err := repo.GetByGameId(context.Background(), 999999)
-	require.NoError(t, err)
-	assert.NotNil(t, got)
 	assert.Len(t, got, 0)
 }
 
@@ -128,7 +99,7 @@ func TestBulkAdd(t *testing.T) {
 	err := repo.BulkAdd(ctx, results)
 	require.NoError(t, err)
 
-	got, err := repo.GetByGameId(ctx, gameID)
+	got, err := repo.GetByGameID(ctx, gameID)
 	require.NoError(t, err)
 	assert.Len(t, got, 2)
 }
