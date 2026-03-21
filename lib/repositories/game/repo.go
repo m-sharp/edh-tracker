@@ -2,44 +2,29 @@ package game
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"strings"
+
+	"gorm.io/gorm"
 
 	"github.com/m-sharp/edh-tracker/lib"
 )
 
-const (
-	getGameByID      = `SELECT id, description, pod_id, format_id, created_at, updated_at, deleted_at FROM game WHERE id = ? AND deleted_at IS NULL;`
-	getGamesByDeckId = `SELECT game.id, game.description, game.pod_id, game.format_id, game.created_at, game.updated_at, game.deleted_at
-						  FROM (game INNER JOIN game_result on game.id = game_result.game_id)
-						 WHERE game_result.deck_id = ?
-						   AND game.deleted_at IS NULL
-						   AND game_result.deleted_at IS NULL;`
-	getGamesByPodId    = `SELECT id, description, pod_id, format_id, created_at, updated_at, deleted_at FROM game WHERE pod_id = ? AND deleted_at IS NULL;`
-	getGamesByPlayerID = `SELECT DISTINCT game.id, game.description, game.pod_id, game.format_id, game.created_at, game.updated_at, game.deleted_at
-						    FROM game
-						    INNER JOIN game_result ON game.id = game_result.game_id
-						    INNER JOIN deck ON game_result.deck_id = deck.id
-						   WHERE deck.player_id = ?
-						     AND game.deleted_at IS NULL
-						     AND game_result.deleted_at IS NULL
-						     AND deck.deleted_at IS NULL;`
-	insertGame     = `INSERT INTO game (description, pod_id, format_id) VALUES (?, ?, ?);`
-	updateGame     = `UPDATE game SET description = ? WHERE id = ? AND deleted_at IS NULL;`
-	softDeleteGame = `UPDATE game SET deleted_at = NOW() WHERE id = ?;`
-)
-
 type Repository struct {
-	client *lib.DBClient
+	db *gorm.DB
 }
 
 func NewRepository(client *lib.DBClient) *Repository {
-	return &Repository{client: client}
+	return &Repository{db: client.GormDb}
+}
+
+func NewRepositoryFromDB(db *gorm.DB) *Repository {
+	return &Repository{db: db}
 }
 
 func (r *Repository) GetAllByPod(ctx context.Context, podID int) ([]Model, error) {
 	var games []Model
-	if err := r.client.Db.SelectContext(ctx, &games, getGamesByPodId, podID); err != nil {
+	if err := r.db.WithContext(ctx).Where("pod_id = ?", podID).Find(&games).Error; err != nil {
 		return nil, fmt.Errorf("failed to get Game records for pod %d: %w", podID, err)
 	}
 	if games == nil {
@@ -50,7 +35,11 @@ func (r *Repository) GetAllByPod(ctx context.Context, podID int) ([]Model, error
 
 func (r *Repository) GetAllByDeck(ctx context.Context, deckID int) ([]Model, error) {
 	var games []Model
-	if err := r.client.Db.SelectContext(ctx, &games, getGamesByDeckId, deckID); err != nil {
+	err := r.db.WithContext(ctx).
+		Joins("INNER JOIN game_result ON game.id = game_result.game_id").
+		Where("game_result.deck_id = ? AND game_result.deleted_at IS NULL", deckID).
+		Find(&games).Error
+	if err != nil {
 		return nil, fmt.Errorf("failed to get Game records for deck %d: %w", deckID, err)
 	}
 	if games == nil {
@@ -59,20 +48,15 @@ func (r *Repository) GetAllByDeck(ctx context.Context, deckID int) ([]Model, err
 	return games, nil
 }
 
-func (r *Repository) GetById(ctx context.Context, gameID int) (*Model, error) {
-	var games []Model
-	if err := r.client.Db.SelectContext(ctx, &games, getGameByID, gameID); err != nil {
-		return nil, fmt.Errorf("failed to get Game record for id %d: %w", gameID, err)
-	}
-	if len(games) == 0 {
-		return nil, nil
-	}
-	return &games[0], nil
-}
-
 func (r *Repository) GetAllByPlayerID(ctx context.Context, playerID int) ([]Model, error) {
 	var games []Model
-	if err := r.client.Db.SelectContext(ctx, &games, getGamesByPlayerID, playerID); err != nil {
+	err := r.db.WithContext(ctx).
+		Distinct("game.id, game.description, game.pod_id, game.format_id, game.created_at, game.updated_at, game.deleted_at").
+		Joins("INNER JOIN game_result ON game.id = game_result.game_id").
+		Joins("INNER JOIN deck ON game_result.deck_id = deck.id").
+		Where("deck.player_id = ? AND game_result.deleted_at IS NULL AND deck.deleted_at IS NULL", playerID).
+		Find(&games).Error
+	if err != nil {
 		return nil, fmt.Errorf("failed to get Game records for player %d: %w", playerID, err)
 	}
 	if games == nil {
@@ -81,87 +65,56 @@ func (r *Repository) GetAllByPlayerID(ctx context.Context, playerID int) ([]Mode
 	return games, nil
 }
 
-func (r *Repository) Update(ctx context.Context, gameID int, description string) error {
-	result, err := r.client.Db.ExecContext(ctx, updateGame, description, gameID)
+func (r *Repository) GetById(ctx context.Context, gameID int) (*Model, error) {
+	var m Model
+	err := r.db.WithContext(ctx).First(&m, gameID).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
 	if err != nil {
-		return fmt.Errorf("failed to update Game record: %w", err)
+		return nil, fmt.Errorf("failed to get Game record for id %d: %w", gameID, err)
 	}
-
-	numAffected, err := result.RowsAffected()
-	if err != nil {
-		return fmt.Errorf("failed to get number of rows affected by update: %w", err)
-	}
-	if numAffected != 1 {
-		return fmt.Errorf("unexpected number of rows affected by Game update: got %d, expected 1", numAffected)
-	}
-
-	return nil
+	return &m, nil
 }
 
 func (r *Repository) Add(ctx context.Context, description string, podID, formatID int) (int, error) {
-	result, err := r.client.Db.ExecContext(ctx, insertGame, description, podID, formatID)
-	if err != nil {
+	m := Model{Description: description, PodID: podID, FormatID: formatID}
+	if err := r.db.WithContext(ctx).Create(&m).Error; err != nil {
 		return 0, fmt.Errorf("failed to insert Game record: %w", err)
 	}
-
-	numAffected, err := result.RowsAffected()
-	if err != nil {
-		return 0, fmt.Errorf("failed to get number of rows affected by insert: %w", err)
-	}
-	if numAffected != 1 {
-		return 0, fmt.Errorf("unexpected number of rows affected by Game insert: got %d, expected 1", numAffected)
-	}
-
-	id, err := result.LastInsertId()
-	if err != nil {
-		return 0, fmt.Errorf("failed to get last insert ID for new Game: %w", err)
-	}
-
-	return int(id), nil
+	return m.ID, nil
 }
 
 func (r *Repository) BulkAdd(ctx context.Context, games []Model) ([]int, error) {
 	if len(games) == 0 {
 		return []int{}, nil
 	}
-
-	query := "INSERT INTO game (description, pod_id, format_id) VALUES " + strings.TrimSuffix(strings.Repeat("(?,?,?),", len(games)), ",")
-	args := make([]interface{}, 0, len(games)*3)
-	for _, g := range games {
-		args = append(args, g.Description, g.PodID, g.FormatID)
-	}
-	result, err := r.client.Db.ExecContext(ctx, query, args...)
-	if err != nil {
+	if err := r.db.WithContext(ctx).CreateInBatches(&games, 100).Error; err != nil {
 		return nil, fmt.Errorf("failed to bulk insert Game records: %w", err)
 	}
-
-	firstID, err := result.LastInsertId()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get last insert ID for bulk Game insert: %w", err)
-	}
-
 	ids := make([]int, len(games))
-	for i := range games {
-		ids[i] = int(firstID) + i
+	for i, g := range games {
+		ids[i] = g.ID
 	}
 	return ids, nil
+}
+
+func (r *Repository) Update(ctx context.Context, gameID int, description string) error {
+	result := r.db.WithContext(ctx).Model(&Model{}).Where("id = ?", gameID).Update("description", description)
+	if result.Error != nil {
+		return fmt.Errorf("failed to update Game record: %w", result.Error)
+	}
+	if result.RowsAffected != 1 {
+		return fmt.Errorf("unexpected number of rows affected by Game update: got %d, expected 1", result.RowsAffected)
+	}
+	return nil
 }
 
 // TODO: Soft deleting a game should also delete all associated GameResult records
 // TODO: Will need to look for other cascading deletes
 func (r *Repository) SoftDelete(ctx context.Context, id int) error {
-	result, err := r.client.Db.ExecContext(ctx, softDeleteGame, id)
-	if err != nil {
+	if err := r.db.WithContext(ctx).Delete(&Model{}, id).Error; err != nil {
 		return fmt.Errorf("failed to soft-delete Game record: %w", err)
 	}
-
-	numAffected, err := result.RowsAffected()
-	if err != nil {
-		return fmt.Errorf("failed to get number of rows affected by soft-delete: %w", err)
-	}
-	if numAffected != 1 {
-		return fmt.Errorf("unexpected number of rows affected by Game soft-delete: got %d, expected 1", numAffected)
-	}
-
 	return nil
 }

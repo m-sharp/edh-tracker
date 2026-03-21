@@ -13,6 +13,7 @@ import (
 	"github.com/m-sharp/edh-tracker/lib/repositories/deck"
 	"github.com/m-sharp/edh-tracker/lib/repositories/deckCommander"
 	"github.com/m-sharp/edh-tracker/lib/repositories/format"
+	"github.com/m-sharp/edh-tracker/lib/repositories/game"
 	"github.com/m-sharp/edh-tracker/lib/repositories/player"
 	"github.com/m-sharp/edh-tracker/lib/repositories/playerPodRole"
 	"github.com/m-sharp/edh-tracker/lib/repositories/pod"
@@ -52,6 +53,10 @@ func NewPlayerPodRoleRepo(db *gorm.DB) *playerPodRole.Repository {
 	return playerPodRole.NewRepositoryFromDB(db)
 }
 
+func NewGameRepo(db *gorm.DB) *game.Repository {
+	return game.NewRepositoryFromDB(db)
+}
+
 // CreateTestPod inserts a fresh pod row and returns its ID.
 func CreateTestPod(t *testing.T, db *gorm.DB) int {
 	t.Helper()
@@ -72,6 +77,15 @@ func CreateTestPlayer(t *testing.T, db *gorm.DB) int {
 func CreateTestCommander(t *testing.T, db *gorm.DB) int {
 	t.Helper()
 	id, err := commander.NewRepositoryFromDB(db).Add(context.Background(), fmt.Sprintf("Test Commander %d", nextID()))
+	require.NoError(t, err)
+	return id
+}
+
+// CreateTestGame inserts a fresh pod + game row and returns the game ID.
+func CreateTestGame(t *testing.T, db *gorm.DB) int {
+	t.Helper()
+	podID := CreateTestPod(t, db)
+	id, err := game.NewRepositoryFromDB(db).Add(context.Background(), fmt.Sprintf("Test Game %d", nextID()), podID, 1)
 	require.NoError(t, err)
 	return id
 }

@@ -294,8 +294,8 @@ func TestGetAllByPod_ResultErrorDropsGame(t *testing.T) {
 	gameRepo := &mockGameRepo{
 		GetAllByPodFn: func(ctx context.Context, podID int) ([]gamerepo.Model, error) {
 			return []gamerepo.Model{
-				{ModelBase: base.ModelBase{ID: 1}, PodID: podID, FormatID: 1},
-				{ModelBase: base.ModelBase{ID: 2}, PodID: podID, FormatID: 1},
+				{GormModelBase: base.GormModelBase{ID: 1}, PodID: podID, FormatID: 1},
+				{GormModelBase: base.GormModelBase{ID: 2}, PodID: podID, FormatID: 1},
 			}, nil
 		},
 	}
@@ -318,8 +318,8 @@ func TestGetAllByPlayer_ResultErrorDropsGame(t *testing.T) {
 	gameRepo := &mockGameRepo{
 		GetAllByPlayerIDFn: func(ctx context.Context, playerID int) ([]gamerepo.Model, error) {
 			return []gamerepo.Model{
-				{ModelBase: base.ModelBase{ID: 1}},
-				{ModelBase: base.ModelBase{ID: 2}},
+				{GormModelBase: base.GormModelBase{ID: 1}},
+				{GormModelBase: base.GormModelBase{ID: 2}},
 			}, nil
 		},
 	}
