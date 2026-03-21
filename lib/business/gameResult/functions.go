@@ -20,7 +20,7 @@ func GetByGameID(gameResultRepo repos.GameResultRepository) GetByGameIDFunc {
 	}
 }
 
-// TODO: This probably needs to get cleaned up at some point, don't see why it should exist if everything is hydrated coming out of the repo layer
+// TODO: Not a huge fan of this, feeds back into the question of do we need a view for points
 func EnrichModels() EnrichModelsFunc {
 	return func(ctx context.Context, models []gameResultRepo.Model) ([]Entity, error) {
 		numPlayers := len(models)
