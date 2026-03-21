@@ -111,8 +111,29 @@ func (r *Repository) GetAllByPodWithResults(ctx context.Context, podID int) ([]M
 }
 ```
 
-Apply the same three-line `Preload` chain to `GetAllByDeckWithResults`,
-`GetAllByPlayerWithResults`, and `GetByIDWithResults`.
+Apply the same three-line `Preload` chain to `GetAllByDeckWithResults` and
+`GetByIDWithResults`.
+
+For `GetAllByPlayerWithResults` and `GetAllByDeckWithResults`, which use `Joins` to filter
+by player/deck, the established pattern from Phase 1 requires `Select("game.*").Distinct()`
+to avoid duplicate rows when the join multiplies results. Use this form:
+
+```go
+// GetAllByPlayerWithResults example (same pattern for GetAllByDeckWithResults):
+r.db.WithContext(ctx).
+    Preload("Results.Deck.Commander.Commander").
+    Preload("Results.Deck.Commander.PartnerCommander").
+    Preload("Results.Deck.Player").
+    Select("game.*").
+    Joins("INNER JOIN game_result ON game.id = game_result.game_id").
+    Joins("INNER JOIN deck ON game_result.deck_id = deck.id").
+    Where("deck.player_id = ? AND game_result.deleted_at IS NULL AND deck.deleted_at IS NULL", playerID).
+    Distinct().
+    Find(&games).Error
+```
+
+`GetAllByPodWithResults` uses a simple `Where("pod_id = ?")` with no `Joins`, so no
+`Select`/`Distinct` is needed there.
 
 ## Business Layer Changes
 
@@ -183,12 +204,26 @@ can be removed from wiring entirely.
 
 ## Tests
 
-- Integration test for `GetByGameIDWithDeckInfo`: verify `Deck`, `Deck.Commander`, and
-  `Deck.Player` are populated; soft-deleted decks and results are excluded
-- Integration tests for updated `Get*WithResults` methods: verify `Results[*].Deck` is
-  populated with full commander and player data
-- Business layer: verify `EnrichModels` builds correct entities from preloaded deck data
-  (no mock closures needed — pure data transformation)
+**`lib/repositories/gameResult/repo_test.go`:**
+
+Add an integration test for `GetByGameIDWithDeckInfo`. Seed a game result with a deck that
+has a commander and player. Assert that `result.Deck.Name`, `result.Deck.PlayerID`,
+`result.Deck.Commander`, and `result.Deck.Commander.Commander.Name` are all populated.
+Also verify soft-deleted results are excluded.
+
+**`lib/repositories/game/repo_test.go`:**
+
+Update the 4 existing `*WithResults` tests (added in Phase 1) to additionally assert
+`Results[0].Deck.Name` and `Results[0].Deck.PlayerID` are populated after Phase 3 extends
+those methods. No new test functions needed — extend the existing ones.
+
+**`lib/business/gameResult/functions_test.go`:**
+
+`EnrichModels` previously required three mock closure deps (`getDeckName`,
+`getPlayerIDForDeck`, `getCommanderEntry`). After Phase 3 it takes no parameters — update
+any existing tests to remove those mock deps. New tests are pure data-in / entity-out:
+populate `model.Deck`, `model.Deck.Commander`, etc. in the input struct and assert the
+resulting `Entity` fields directly, with no mock closures needed.
 
 ## Verification
 

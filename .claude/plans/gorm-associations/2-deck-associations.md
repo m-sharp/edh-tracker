@@ -251,11 +251,24 @@ The ~5 batched queries: deck fetch + deckCommander batch + commander batch + pla
 
 ## Tests
 
-- Integration tests for each `Get*WithAll` repo method
-- Verify `Commander.Commander`, `Commander.PartnerCommander`, `Player.Name`, `Format.Name`
-  are populated correctly; `Commander` is nil for decks without commanders
-- Business layer: remove `getCommanderEntry`, `getPlayerName`, `getFormat` mocks from
-  listing function tests
+**Repository (`lib/repositories/deck/repo_test.go`):**
+
+Add integration tests to `lib/repositories/deck/repo_test.go` for each `Get*WithAll`
+method. Each test must seed the relevant associations (deckCommander, player, format) and
+assert those fields are populated on the returned model(s). Specifically verify:
+- `Commander.Commander.Name` is correct
+- `Commander.PartnerCommander` is nil when no partner exists, non-nil when one does
+- `Player.Name` matches the seeded player
+- `Format.Name` matches the seeded format
+- `Commander` is nil for decks without a deckCommander row
+
+**Business layer (`lib/business/deck/functions_test.go`):**
+
+Remove `getCommanderEntry`, `getPlayerName`, and `getFormat` mock closures from listing
+function tests. Assertions that previously checked enriched data (player name, format name,
+commander name) can now be driven by populated model fields — seed the `Model.Player`,
+`Model.Format`, and `Model.Commander` fields directly in the test struct instead of
+configuring mock closure return values.
 
 ## Verification
 

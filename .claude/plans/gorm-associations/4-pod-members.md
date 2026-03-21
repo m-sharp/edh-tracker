@@ -97,8 +97,12 @@ Adding `GetByIDWithMembersFunc`, `EntityWithMembers`, and the `Functions` field 
 
 ## Tests
 
-- Integration test for `GetByIDWithMembers`: verify preloaded Members match expected
-  `playerPodRole` rows; verify soft-deleted roles are excluded
+**`lib/repositories/pod/repo_test.go`:**
+
+Add an integration test for `GetByIDWithMembers`. Seed a pod with at least two
+`player_pod_role` rows and assert `m.Members` is populated with the expected entries
+(correct `PlayerID` and `Role` values for each). Also seed a soft-deleted role row and
+verify it is excluded from `m.Members`.
 
 ## Verification
 
