@@ -254,7 +254,7 @@ func TestDeckGetAllByPod_Success(t *testing.T) {
 	require.Len(t, got, 1)
 	assert.Equal(t, "Deck A", got[0].Name)
 	assert.Equal(t, "Alice", got[0].PlayerName)
-	assert.Equal(t, "commander", got[0].FormatName)
+	assert.Equal(t, "Commander", got[0].FormatName)
 	require.NotNil(t, got[0].Commanders)
 	assert.Equal(t, "Krenko", got[0].Commanders.CommanderName)
 	require.NotNil(t, got[0].Commanders.PartnerCommanderName)

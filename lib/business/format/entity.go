@@ -4,6 +4,7 @@ import (
 	"time"
 
 	repo "github.com/m-sharp/edh-tracker/lib/repositories/format"
+	"github.com/m-sharp/edh-tracker/lib/utils"
 )
 
 type Entity struct {
@@ -16,7 +17,7 @@ type Entity struct {
 func ToEntity(m repo.Model) Entity {
 	return Entity{
 		ID:        m.ID,
-		Name:      m.Name,
+		Name:      utils.TitleCase(m.Name),
 		CreatedAt: m.CreatedAt,
 		UpdatedAt: m.UpdatedAt,
 	}

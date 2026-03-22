@@ -7,6 +7,7 @@ import (
 	"github.com/m-sharp/edh-tracker/lib/business/stats"
 	repo "github.com/m-sharp/edh-tracker/lib/repositories/deck"
 	"github.com/m-sharp/edh-tracker/lib/repositories/gameResult"
+	"github.com/m-sharp/edh-tracker/lib/utils"
 )
 
 type Entity struct {
@@ -57,7 +58,7 @@ func ToEntity(m repo.Model, playerName, formatName string, commanders *Commander
 		PlayerName: playerName,
 		Name:       m.Name,
 		FormatID:   m.FormatID,
-		FormatName: formatName, // TODO: Should be title cased - capitalize first letter of each word
+		FormatName: utils.TitleCase(formatName),
 		Retired:    m.Retired,
 		Commanders: commanders,
 		CreatedAt:  m.CreatedAt,
