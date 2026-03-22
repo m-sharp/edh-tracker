@@ -106,6 +106,8 @@ func NewBusiness(log *zap.Logger, r *repositories.Repositories) *Business {
 			Create:          user.Create(r.Users),
 			GetByOAuth:      user.GetByOAuth(r.Users),
 			CreateWithOAuth: user.CreateWithOAuth(r.Users),
+			GetByEmail:      user.GetByEmail(r.Users),
+			LinkOAuth:       user.LinkOAuth(r.Users),
 		},
 	}
 }

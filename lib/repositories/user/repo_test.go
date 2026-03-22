@@ -237,6 +237,74 @@ func TestBulkAdd_Empty(t *testing.T) {
 	require.NoError(t, err)
 }
 
+func TestGetByEmail_Found(t *testing.T) {
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewUserRepo(db)
+	ctx := context.Background()
+
+	playerID := testHelpers.CreateTestPlayer(t, db)
+	id, err := repo.AddWithOAuth(ctx, playerID, 2, testProvider, testSubject+"-email", testEmail, testDisplayName, testAvatarURL)
+	require.NoError(t, err)
+
+	got, err := repo.GetByEmail(ctx, testEmail)
+	require.NoError(t, err)
+	require.NotNil(t, got)
+	assert.Equal(t, id, got.ID)
+	require.NotNil(t, got.Email)
+	assert.Equal(t, testEmail, *got.Email)
+}
+
+func TestGetByEmail_NotFound(t *testing.T) {
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewUserRepo(db)
+
+	got, err := repo.GetByEmail(context.Background(), "nobody@nowhere.example")
+	require.NoError(t, err)
+	assert.Nil(t, got)
+}
+
+func TestUpdateOAuth(t *testing.T) {
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewUserRepo(db)
+	ctx := context.Background()
+
+	playerID := testHelpers.CreateTestPlayer(t, db)
+	id, err := repo.Add(ctx, playerID, 2)
+	require.NoError(t, err)
+
+	err = repo.UpdateOAuth(ctx, id, testProvider, testSubject+"-upd", testEmail, testDisplayName, testAvatarURL)
+	require.NoError(t, err)
+
+	got, err := repo.GetByID(ctx, id)
+	require.NoError(t, err)
+	require.NotNil(t, got)
+	require.NotNil(t, got.OAuthProvider)
+	assert.Equal(t, testProvider, *got.OAuthProvider)
+	require.NotNil(t, got.OAuthSubject)
+	assert.Equal(t, testSubject+"-upd", *got.OAuthSubject)
+	require.NotNil(t, got.Email)
+	assert.Equal(t, testEmail, *got.Email)
+}
+
+func TestSetEmail(t *testing.T) {
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewUserRepo(db)
+	ctx := context.Background()
+
+	playerID := testHelpers.CreateTestPlayer(t, db)
+	_, err := repo.Add(ctx, playerID, 2)
+	require.NoError(t, err)
+
+	err = repo.SetEmail(ctx, playerID, testEmail)
+	require.NoError(t, err)
+
+	got, err := repo.GetByPlayerID(ctx, playerID)
+	require.NoError(t, err)
+	require.NotNil(t, got)
+	require.NotNil(t, got.Email)
+	assert.Equal(t, testEmail, *got.Email)
+}
+
 func TestSoftDelete(t *testing.T) {
 	db := testHelpers.NewTestDB(t)
 	repo := testHelpers.NewUserRepo(db)
