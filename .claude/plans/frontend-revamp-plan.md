@@ -109,9 +109,9 @@ Mark items `[x]` as they are completed during implementation.
 - [x] `app/src/types.ts` — add `Pod`, `PlayerWithRole`, `PaginatedResponse`, `DeckUpdateFields`, `GameResultUpdateFields`, `NewGameResultWithGame`; add `player_id` to `GameResult`
 
 #### 3B — HTTP Client
-- [ ] `app/src/http.ts` — add `credentials: "include"` to all 12 existing fetches
-- [ ] `app/src/http.ts` — add `GetMe`, `Logout`
-- [ ] `app/src/http.ts` — add all remaining new API functions (pod, player, deck, game)
+- [X] `app/src/http.ts` — add `credentials: "include"` to all 12 existing fetches
+- [X] `app/src/http.ts` — add `GetMe`, `Logout`
+- [X] `app/src/http.ts` — add all remaining new API functions (pod, player, deck, game)
 
 #### 3C — AuthContext
 - [ ] `app/src/auth.tsx` — `AuthUser`, `AuthContextValue`, `AuthProvider`, `useAuth`
