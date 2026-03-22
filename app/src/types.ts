@@ -52,6 +52,7 @@ export interface Player {
 export interface Game {
     id: number;
     description: string;
+    pod_id: number;
     format_id: number;
     created_at: string;
     updated_at: string;
@@ -62,6 +63,7 @@ export interface GameResult {
     id: number;
     game_id: number;
     deck_id: number;
+    player_id: number;
     deck_name: string;
     commander_name?: string;
     partner_commander_name?: string;
@@ -70,6 +72,47 @@ export interface GameResult {
     points: number;
     created_at: string;
     updated_at: string;
+}
+
+export interface Pod {
+    id: number;
+    name: string;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface PlayerWithRole {
+    player_id: number;
+    role: "manager" | "member";
+}
+
+export interface PaginatedResponse<T> {
+    items: T[];
+    total: number;
+    limit: number;
+    offset: number;
+}
+
+export interface DeckUpdateFields {
+    name?: string;
+    format_id?: number;
+    commander_id?: number;
+    partner_commander_id?: number;
+    retired?: boolean;
+}
+
+export interface GameResultUpdateFields {
+    place: number;
+    kill_count: number;
+    deck_id: number;
+}
+
+export interface NewGameResultWithGame {
+    game_id: number;
+    deck_id: number;
+    player_id: number;
+    place: number;
+    kill_count: number;
 }
 
 export interface NewGameData {

@@ -106,7 +106,7 @@ Mark items `[x]` as they are completed during implementation.
 **Sub-phase order:** 3A → (3B ∥ 3D) → 3C → (3E ∥ 3G) → 3F
 
 #### 3A — Types
-- [ ] `app/src/types.ts` — add `Pod`, `PlayerWithRole`, `PaginatedResponse`, `DeckUpdateFields`, `GameResultUpdateFields`, `NewGameResultWithGame`; add `player_id` to `GameResult`
+- [x] `app/src/types.ts` — add `Pod`, `PlayerWithRole`, `PaginatedResponse`, `DeckUpdateFields`, `GameResultUpdateFields`, `NewGameResultWithGame`; add `player_id` to `GameResult`
 
 #### 3B — HTTP Client
 - [ ] `app/src/http.ts` — add `credentials: "include"` to all 12 existing fetches
