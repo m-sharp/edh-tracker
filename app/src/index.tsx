@@ -6,13 +6,12 @@ import { CssBaseline, Typography } from "@mui/material";
 import { AuthProvider, useAuth } from "./auth";
 import {
     GetDeck,
-    GetGame,
     GetPlayer,
     GetPodsForPlayer,
 } from "./http";
 import ErrorPage from "./routes/error"
 import DeckView from "./routes/deck";
-import GameView from "./routes/game";
+import GameView, { gameLoader } from "./routes/game";
 import JoinView from "./routes/join";
 import LoginPage from "./routes/login";
 import NewGameView, { newGameLoader, createGame } from "./routes/new";
@@ -90,7 +89,7 @@ const router = createBrowserRouter([
             {
                 path: "pod/:podId/game/:gameId",
                 element: <RequireAuth><GameView /></RequireAuth>,
-                loader: GetGame,
+                loader: gameLoader,
             },
             {
                 path: "player/:playerId",

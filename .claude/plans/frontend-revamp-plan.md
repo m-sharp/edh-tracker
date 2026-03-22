@@ -143,8 +143,8 @@ Mark items `[x]` as they are completed during implementation.
 - [ ] Update deck links in `app/src/routes/game.tsx` (results grid)
 
 ### Phase 4D — Game Page Revamp
-- [ ] `app/src/routes/game.tsx` — new route + inline editing + result CRUD
-- [ ] Update game links in `app/src/matches.tsx` (include `pod_id`)
+- [x] `app/src/routes/game.tsx` — new route + inline editing + result CRUD
+- [x] Update game links in `app/src/matches.tsx` (include `pod_id`)
 
 ### Phase 5 - Unsorted Work
 - [ ] Handle user oath token expiration mid session
