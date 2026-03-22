@@ -1,57 +1,71 @@
-import { ReactElement } from "react";
-import { Outlet, Link, useLocation } from "react-router-dom";
+import { ReactElement, ReactNode, useEffect, useState } from "react";
+import { Link, Outlet, useNavigate, useParams } from "react-router-dom";
 import {
     AppBar,
+    Avatar,
     Box,
     Button,
     Container,
+    MenuItem,
+    Select,
+    SelectChangeEvent,
     SvgIcon,
     Toolbar,
     Typography
 } from "@mui/material";
+import { useAuth } from "../auth";
+import { GetPodsForPlayer } from "../http";
+import { Pod } from "../types";
 
 export default function Root(): ReactElement {
-    const location = useLocation();
-
     return (
         <Box sx={{ display: "flex", width: "auto" }}>
             <DrawerAppBar />
             <Container id="detail" component="main" sx={{ p: 3, width: "90%", bgcolor: "#f0f5fa", mt: 12, mb: 5 }} maxWidth="xl">
-                <RootContent path={location.pathname} />
                 <Outlet />
             </Container>
         </Box>
     );
 }
 
-interface NavLink {
-    link: string;
-    text: string;
-}
-
-const navLinks: Array<NavLink> = [
-    {
-        link: "/players",
-        text: "Players",
-    },
-    {
-        link: "/decks",
-        text: "Decks",
-    },
-    {
-        link: "/games",
-        text: "Games",
-    },
-    {
-        link: "/new-game",
-        text: "Add New Game",
-    }
-]
-
 // TODO: Add mobile menu icon and link menu
 // TODO: Mobile view for all tables
 // TODO: There is a bug where refreshing the browser on a route page results in a 404 - should refetch the current route
 function DrawerAppBar(): ReactElement {
+    const { user, loading, logout } = useAuth();
+    const navigate = useNavigate();
+
+    let authSection: ReactNode = null;
+    if (!loading) {
+        if (!user) {
+            authSection = (
+                <Button href="/api/auth/google" sx={{ color: "white" }}>
+                    Sign in with Google
+                </Button>
+            );
+        } else {
+            authSection = (
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <PodSelector playerId={user.player_id} />
+                    <Link to={`/player/${user.player_id}`} style={{ display: "flex", alignItems: "center", textDecoration: "none", color: "white" }}>
+                        <Avatar
+                            src={user.avatar_url ?? undefined}
+                            alt={user.display_name ?? "User"}
+                            sx={{ width: 32, height: 32, mr: 1 }}
+                        />
+                        <Typography variant="body2">{user.display_name}</Typography>
+                    </Link>
+                    <Button
+                        color="inherit"
+                        onClick={() => logout().then(() => navigate("/login"))}
+                    >
+                        Logout
+                    </Button>
+                </Box>
+            );
+        }
+    }
+
     return (
         <AppBar position="fixed">
             <Container maxWidth="xl">
@@ -70,20 +84,44 @@ function DrawerAppBar(): ReactElement {
                     >
                         <Link to={`/`} style={{textDecoration: "none", color: "white"}}>EDH Tracker</Link>
                     </Typography>
-                    <Box sx={{flexGrow: 1, display:{ xs: "none", md: "flex" }}}>
-                        {navLinks.map(navLink => (
-                            <Button
-                                sx={{my: 2, color: "white", display: "block", textDecoration: "underline"}}
-                                component={Link}
-                                to={navLink.link}
-                            >
-                                {navLink.text}
-                            </Button>
-                        ))}
-                    </Box>
+                    <Box sx={{ flexGrow: 1 }} />
+                    {authSection}
                 </Toolbar>
             </Container>
         </AppBar>
+    );
+}
+
+function PodSelector({ playerId }: { playerId: number }): ReactElement {
+    const [pods, setPods] = useState<Pod[]>([]);
+    const { podId } = useParams<{ podId?: string }>();
+    const navigate = useNavigate();
+
+    const selectedPodId = podId ?? localStorage.getItem("lastPodId") ?? "";
+
+    useEffect(() => {
+        GetPodsForPlayer(playerId).then(setPods).catch(() => setPods([]));
+    }, [playerId]);
+
+    const handleChange = (e: SelectChangeEvent) => {
+        const id = e.target.value;
+        localStorage.setItem("lastPodId", id);
+        navigate(`/pod/${id}`);
+    };
+
+    return (
+        <Select
+            value={selectedPodId}
+            onChange={handleChange}
+            displayEmpty
+            size="small"
+            sx={{ color: "white", mr: 1 }}
+        >
+            {pods.length === 0
+                ? <MenuItem value="" disabled>No pods</MenuItem>
+                : pods.map(p => <MenuItem key={p.id} value={String(p.id)}>{p.name}</MenuItem>)
+            }
+        </Select>
     );
 }
 
@@ -104,21 +142,4 @@ function SvgIconPlayingCards(): ReactElement {
             </svg>
         </SvgIcon>
     );
-}
-
-interface RootContentProps {
-    path: string;
-}
-
-function RootContent({path}: RootContentProps): ReactElement {
-    if (path !== "/") {
-        return (<></>);
-    }
-
-    return (
-        <Box id="rootContent" sx={{display: "flex", flexDirection: "column", alignItems: "center"}}>
-            <h2>Welcome to the EDH Tracker!</h2>
-            <p>We'll have some login stuff here eventually...</p>
-        </Box>
-    )
 }

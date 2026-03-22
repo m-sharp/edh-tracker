@@ -132,7 +132,6 @@ Mark items `[x]` as they are completed during implementation.
 - [ ] `app/src/routes/pod.tsx` (tabs: Decks, Players, Games, Settings)
 - [ ] `app/src/routes/new.tsx` (pod context: drop global pod selector, use `useParams`)
 - [ ] `app/src/routes/join.tsx` (invite code landing page)
-- [ ] Redirect stale top-level routes (`/decks`, `/players`, `/games`)
 
 ### Phase 4B — Player Page Revamp
 - [ ] `app/src/routes/player.tsx` — tabs (Overview, Decks, Games, Settings)
