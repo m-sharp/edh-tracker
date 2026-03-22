@@ -1,0 +1,8 @@
+[
+  { "name": "Dillon",   "userRole": "player", "podRole": "member"  },
+  { "name": "Kyriakos", "userRole": "player", "podRole": "member"  },
+  { "name": "Michaela", "userRole": "player", "podRole": "member"  },
+  { "name": "Mike",     "userRole": "admin",  "podRole": "manager" },
+  { "name": "Peter",    "userRole": "player", "podRole": "member"  },
+  { "name": "Tom",      "userRole": "player", "podRole": "member"  }
+]

@@ -33,6 +33,7 @@ type DeckRepository interface {
 	GetAllForPlayer(ctx context.Context, playerID int) ([]deck.Model, error)
 	GetAllByPlayerIDs(ctx context.Context, playerIDs []int) ([]deck.Model, error)
 	GetById(ctx context.Context, deckID int) (*deck.Model, error)
+	GetByIDHydrated(ctx context.Context, deckID int) (*deck.Model, error)
 	Add(ctx context.Context, playerID int, name string, formatID int) (int, error)
 	BulkAdd(ctx context.Context, decks []deck.Model) ([]deck.Model, error)
 	Update(ctx context.Context, deckID int, fields deck.UpdateFields) error
@@ -44,7 +45,7 @@ type GameRepository interface {
 	GetAllByPod(ctx context.Context, podID int) ([]game.Model, error)
 	GetAllByDeck(ctx context.Context, deckID int) ([]game.Model, error)
 	GetAllByPlayerID(ctx context.Context, playerID int) ([]game.Model, error)
-	GetById(ctx context.Context, gameID int) (*game.Model, error)
+	GetByID(ctx context.Context, gameID int) (*game.Model, error)
 	Add(ctx context.Context, description string, podID, formatID int) (int, error)
 	BulkAdd(ctx context.Context, games []game.Model) ([]int, error)
 	Update(ctx context.Context, gameID int, description string) error
@@ -52,7 +53,7 @@ type GameRepository interface {
 }
 
 type GameResultRepository interface {
-	GetByGameId(ctx context.Context, gameID int) ([]gameResult.Model, error)
+	GetByGameID(ctx context.Context, gameID int) ([]gameResult.Model, error)
 	GetByID(ctx context.Context, resultID int) (*gameResult.Model, error)
 	GetStatsForPlayer(ctx context.Context, playerID int) (*gameResult.Aggregate, error)
 	GetStatsForDeck(ctx context.Context, deckID int) (*gameResult.Aggregate, error)
@@ -65,6 +66,7 @@ type GameResultRepository interface {
 type PodRepository interface {
 	GetAll(ctx context.Context) ([]pod.Model, error)
 	GetByID(ctx context.Context, podID int) (*pod.Model, error)
+	GetByIDWithMembers(ctx context.Context, podID int) (*pod.Model, error)
 	GetByPlayerID(ctx context.Context, playerID int) ([]pod.Model, error)
 	GetByName(ctx context.Context, name string) (*pod.Model, error)
 	GetIDsByPlayerID(ctx context.Context, playerID int) ([]int, error)

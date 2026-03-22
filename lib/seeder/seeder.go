@@ -13,6 +13,7 @@ import (
 	"github.com/m-sharp/edh-tracker/lib/repositories/deckCommander"
 	"github.com/m-sharp/edh-tracker/lib/repositories/game"
 	"github.com/m-sharp/edh-tracker/lib/repositories/gameResult"
+	"github.com/m-sharp/edh-tracker/lib/repositories/playerPodRole"
 	"github.com/m-sharp/edh-tracker/lib/repositories/user"
 )
 
@@ -30,11 +31,13 @@ func NewSeeder(log *zap.Logger, repos *repositories.Repositories) *Seeder {
 	}
 }
 
-// deckEntry holds the unique player+commander+format combinations found across all games.
+// deckEntry holds the unique player+deck+format combinations found across all games.
 type deckEntry struct {
-	playerName    string
-	commanderName string
-	formatID      int
+	playerName           string
+	deckName             string // display name stored in deck.name
+	commanderName        string // primary commander for deck_commander
+	partnerCommanderName string // optional partner commander
+	formatID             int
 }
 
 func (s *Seeder) Run(ctx context.Context) error {
@@ -60,6 +63,20 @@ func (s *Seeder) Run(ctx context.Context) error {
 		formatIDs[f.Name] = f.ID
 	}
 
+	// Load player info from JSON (authoritative player list with roles)
+	piData, err := os.ReadFile("./data/playerInfos.json")
+	if err != nil {
+		return fmt.Errorf("failed to read player info json file: %w", err)
+	}
+	var playerInfos []PlayerInfo
+	if err = json.Unmarshal(piData, &playerInfos); err != nil {
+		return fmt.Errorf("failed to unmarshal player info: %w", err)
+	}
+	playerInfoMap := make(map[string]PlayerInfo, len(playerInfos))
+	for _, pi := range playerInfos {
+		playerInfoMap[pi.Name] = pi
+	}
+
 	// Load game data from JSON
 	data, err := os.ReadFile("./data/gameInfos.json")
 	if err != nil {
@@ -71,26 +88,20 @@ func (s *Seeder) Run(ctx context.Context) error {
 	}
 	s.log.Info("Seeding Games", zap.Int("Count", len(games)))
 
-	// Look up the player role once
-	role, err := s.repos.Users.GetRoleByName(ctx, user.RolePlayer)
-	if err != nil {
-		return fmt.Errorf("failed to get player role: %w", err)
-	}
-
 	// Create the default pod
 	podID, err := s.repos.Pods.Add(ctx, DefaultPodName)
 	if err != nil {
 		return fmt.Errorf("failed to create default pod: %w", err)
 	}
 
-	// Pre-processing pass: collect unique players, commanders, and deck entries from game data
-	playerNames, commanderNames, deckEntries, err := s.collectEntities(games, formatIDs)
+	// Pre-processing pass: collect unique commanders and deck entries from game data
+	commanderNames, deckEntries, err := s.collectEntities(games, formatIDs, playerInfoMap)
 	if err != nil {
 		return err
 	}
 
 	// Seed players, create user accounts, and add them to the pod
-	playerIDs, err := s.seedPlayersAndUsers(ctx, playerNames, podID, role.ID)
+	playerIDs, err := s.seedPlayersAndUsers(ctx, playerInfos, podID)
 	if err != nil {
 		return err
 	}
@@ -117,47 +128,55 @@ func (s *Seeder) Run(ctx context.Context) error {
 }
 
 // collectEntities performs a pre-processing pass over the raw game data to collect
-// unique player names, commander names, and deck entries (player+commander+format combos).
-func (s *Seeder) collectEntities(games []Game, formatIDs map[string]int) (playerNames, commanderNames []string, entries []deckEntry, err error) {
-	playerNameSet := map[string]struct{}{}
+// unique commander names and deck entries (player+commander+format combos).
+// Returns an error if any player in gameInfos.json is absent from playerInfoMap.
+func (s *Seeder) collectEntities(games []Game, formatIDs map[string]int, playerInfoMap map[string]PlayerInfo) (commanderNames []string, entries []deckEntry, err error) {
 	commanderNameSet := map[string]struct{}{}
 	deckKeySet := map[string]struct{}{}
 
 	for i, gameToSeed := range games {
 		formatID, ok := formatIDs[gameToSeed.Format]
 		if !ok {
-			return nil, nil, nil, fmt.Errorf("unknown format %q in gameToSeed %d", gameToSeed.Format, i+1)
+			return nil, nil, fmt.Errorf("unknown format %q in gameToSeed %d", gameToSeed.Format, i+1)
 		}
 		for _, result := range gameToSeed.Results {
-			playerNameSet[result.Player] = struct{}{}
-			commanderNameSet[result.Name] = struct{}{}
-			key := result.Player + ":" + result.Name
+			if _, ok := playerInfoMap[result.Player]; !ok {
+				return nil, nil, fmt.Errorf("player %q in gameInfos.json is not listed in playerInfos.json", result.Player)
+			}
+			commanderNameSet[result.CommanderName()] = struct{}{}
+			if result.PartnerCommander != "" {
+				commanderNameSet[result.PartnerCommander] = struct{}{}
+			}
+			key := result.Player + ":" + result.DeckName()
 			if _, exists := deckKeySet[key]; !exists {
 				deckKeySet[key] = struct{}{}
 				entries = append(entries, deckEntry{
-					playerName:    result.Player,
-					commanderName: result.Name,
-					formatID:      formatID,
+					playerName:           result.Player,
+					deckName:             result.DeckName(),
+					commanderName:        result.CommanderName(),
+					partnerCommanderName: result.PartnerCommander,
+					formatID:             formatID,
 				})
 			}
 		}
 	}
 
-	playerNames = make([]string, 0, len(playerNameSet))
-	for name := range playerNameSet {
-		playerNames = append(playerNames, name)
-	}
 	commanderNames = make([]string, 0, len(commanderNameSet))
 	for name := range commanderNameSet {
 		commanderNames = append(commanderNames, name)
 	}
 
-	return playerNames, commanderNames, entries, nil
+	return commanderNames, entries, nil
 }
 
 // seedPlayersAndUsers bulk-inserts players, creates their user accounts, and adds them to the pod.
 // Returns a name→ID map for use in subsequent seeding steps.
-func (s *Seeder) seedPlayersAndUsers(ctx context.Context, playerNames []string, podID, roleID int) (map[string]int, error) {
+func (s *Seeder) seedPlayersAndUsers(ctx context.Context, playerInfos []PlayerInfo, podID int) (map[string]int, error) {
+	playerNames := make([]string, len(playerInfos))
+	for i, pi := range playerInfos {
+		playerNames[i] = pi.Name
+	}
+
 	players, err := s.repos.Players.BulkAdd(ctx, playerNames)
 	if err != nil {
 		return nil, fmt.Errorf("failed to bulk add players: %w", err)
@@ -170,23 +189,60 @@ func (s *Seeder) seedPlayersAndUsers(ctx context.Context, playerNames []string, 
 		playerIDSlice[i] = p.ID
 	}
 
-	if err = s.repos.Users.BulkAdd(ctx, playerIDSlice, roleID); err != nil {
-		return nil, fmt.Errorf("failed to bulk add users: %w", err)
+	playerRole, err := s.repos.Users.GetRoleByName(ctx, user.RolePlayer)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get player role: %w", err)
+	}
+	adminRole, err := s.repos.Users.GetRoleByName(ctx, user.RoleAdmin)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get admin role: %w", err)
+	}
+
+	var (
+		regularPlayerIDs []int
+		adminPlayerIDs   []int
+
+		podMemberPlayerIDs  []int
+		podManagerPlayerIDs []int
+	)
+	for _, pi := range playerInfos {
+		id := playerIDs[pi.Name]
+		switch pi.UserRole {
+		case user.RoleAdmin:
+			adminPlayerIDs = append(adminPlayerIDs, id)
+		case user.RolePlayer:
+			regularPlayerIDs = append(regularPlayerIDs, id)
+		default:
+			return nil, fmt.Errorf("unknown user role specified for player %q: %q", pi.Name, pi.UserRole)
+		}
+
+		switch pi.PodRole {
+		case playerPodRole.RoleMember:
+			podMemberPlayerIDs = append(podMemberPlayerIDs, id)
+		case playerPodRole.RoleManager:
+			podManagerPlayerIDs = append(podManagerPlayerIDs, id)
+		default:
+			return nil, fmt.Errorf("unknown pod role specified for player %q: %q", pi.Name, pi.PodRole)
+		}
+	}
+	if err = s.repos.Users.BulkAdd(ctx, regularPlayerIDs, playerRole.ID); err != nil {
+		return nil, fmt.Errorf("failed to bulk add player users: %w", err)
+	}
+
+	if err = s.repos.Users.BulkAdd(ctx, adminPlayerIDs, adminRole.ID); err != nil {
+		return nil, fmt.Errorf("failed to bulk add admin users: %w", err)
 	}
 
 	if err = s.repos.Pods.BulkAddPlayers(ctx, podID, playerIDSlice); err != nil {
 		return nil, fmt.Errorf("failed to bulk add players to pod: %w", err)
 	}
 
-	if err = s.repos.PlayerPodRoles.BulkAdd(ctx, podID, playerIDSlice, "member"); err != nil {
-		return nil, fmt.Errorf("failed to bulk add player pod roles: %w", err)
+	if err = s.repos.PlayerPodRoles.BulkAdd(ctx, podID, podMemberPlayerIDs, playerPodRole.RoleMember); err != nil {
+		return nil, fmt.Errorf("failed to bulk add player pod member roles: %w", err)
 	}
 
-	mikeID, ok := playerIDs["Mike"]
-	if ok {
-		if err = s.repos.PlayerPodRoles.SetRole(ctx, podID, mikeID, "manager"); err != nil {
-			return nil, fmt.Errorf("failed to set Mike as pod manager: %w", err)
-		}
+	if err = s.repos.PlayerPodRoles.BulkAdd(ctx, podID, podManagerPlayerIDs, playerPodRole.RoleManager); err != nil {
+		return nil, fmt.Errorf("failed to bulk add player pod manager roles: %w", err)
 	}
 
 	return playerIDs, nil
@@ -215,7 +271,7 @@ func (s *Seeder) seedDecks(ctx context.Context, entries []deckEntry, playerIDs, 
 	for i, de := range entries {
 		deckSlice[i] = deck.Model{
 			PlayerID: playerIDs[de.playerName],
-			Name:     de.commanderName,
+			Name:     de.deckName,
 			FormatID: de.formatID,
 		}
 	}
@@ -235,11 +291,16 @@ func (s *Seeder) seedDecks(ctx context.Context, entries []deckEntry, playerIDs, 
 	dcSlice := make([]deckCommander.Model, len(entries))
 	for i, de := range entries {
 		playerID := playerIDs[de.playerName]
-		deckKey := fmt.Sprintf("%d:%s", playerID, de.commanderName)
-		dcSlice[i] = deckCommander.Model{
+		deckKey := fmt.Sprintf("%d:%s", playerID, de.deckName)
+		dc := deckCommander.Model{
 			DeckID:      deckIDs[deckKey],
 			CommanderID: commanderIDs[de.commanderName],
 		}
+		if de.partnerCommanderName != "" {
+			partnerID := commanderIDs[de.partnerCommanderName]
+			dc.PartnerCommanderID = &partnerID
+		}
+		dcSlice[i] = dc
 	}
 
 	if err = s.repos.DeckCommanders.BulkAdd(ctx, dcSlice); err != nil {
@@ -270,7 +331,7 @@ func (s *Seeder) seedGames(ctx context.Context, games []Game, formatIDs, playerI
 	for i, g := range games {
 		for _, result := range g.Results {
 			playerID := playerIDs[result.Player]
-			deckKey := fmt.Sprintf("%d:%s", playerID, result.Name)
+			deckKey := fmt.Sprintf("%d:%s", playerID, result.DeckName())
 			allResults = append(allResults, gameResult.Model{
 				GameID:    gameIDs[i],
 				DeckID:    deckIDs[deckKey],

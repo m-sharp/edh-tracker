@@ -21,19 +21,15 @@ type UpdateFunc func(ctx context.Context, deckID int, callerPlayerID int, fields
 type SoftDeleteFunc func(ctx context.Context, deckID int, callerPlayerID int) error
 type RetireFunc func(ctx context.Context, deckID int, callerPlayerID int) error
 type GetDeckNameFunc func(ctx context.Context, deckID int) (string, error)
-type GetPlayerIDForDeckFunc func(ctx context.Context, deckID int) (int, error)
-type GetCommanderEntryFunc func(ctx context.Context, deckID int) (*CommanderInfo, error)
 
 type Functions struct {
-	GetAll            GetAllFunc
-	GetAllForPlayer   GetAllForPlayerFunc
-	GetAllByPod       GetAllByPodFunc
-	GetByID           GetByIDFunc
-	Create            CreateFunc
-	Update            UpdateFunc
-	SoftDelete        SoftDeleteFunc
-	Retire               RetireFunc
-	GetDeckName          GetDeckNameFunc
-	GetCommanderEntry    GetCommanderEntryFunc
-	GetPlayerIDForDeck   GetPlayerIDForDeckFunc
+	GetAll          GetAllFunc
+	GetAllForPlayer GetAllForPlayerFunc
+	GetAllByPod     GetAllByPodFunc
+	GetByID         GetByIDFunc
+	Create          CreateFunc
+	Update          UpdateFunc
+	SoftDelete      SoftDeleteFunc
+	Retire          RetireFunc
+	GetDeckName     GetDeckNameFunc
 }

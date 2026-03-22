@@ -78,9 +78,7 @@ func (g *GameRouter) GetRoutes() []*trackerHttp.Route {
 
 // requirePodManager fetches the game by gameID, then checks that callerPlayerID is a pod manager.
 // Returns false and writes the appropriate error response if the check fails.
-// TODO: I foresee all of these permissions becoming quite cumbersome to to figure out.
-// TODO: This along with the some of the very heavy queries that need to make lot's of round trip to fill out data point to needing either GORM, mysql views, or both.
-// TODO: For permissions in particularly, fetching a player view that includes their permissions for pods & decks would give us lists/maps to just check ids against.
+// TODO: For permissions, do we need a view for fetching a player that includes their permissions for pods & decks would give us lists/maps to just check ids against?
 func (g *GameRouter) requirePodManager(w http.ResponseWriter, r *http.Request, gameID, callerPlayerID int) bool {
 	gameEntity, err := g.games.GetByID(r.Context(), gameID)
 	if err != nil {

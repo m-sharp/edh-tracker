@@ -4,84 +4,50 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/m-sharp/edh-tracker/lib/business/deck"
 	repos "github.com/m-sharp/edh-tracker/lib/repositories"
+	gameResultRepo "github.com/m-sharp/edh-tracker/lib/repositories/gameResult"
 	"github.com/m-sharp/edh-tracker/lib/utils"
 )
 
-func GetByGameID(
-	gameResultRepo repos.GameResultRepository,
-	getDeckName deck.GetDeckNameFunc,
-	getCommanderEntry deck.GetCommanderEntryFunc,
-	getPlayerIDForDeck deck.GetPlayerIDForDeckFunc,
-) GetByGameIDFunc {
+func GetByGameID(gameResultRepo repos.GameResultRepository) GetByGameIDFunc {
+	enrich := EnrichModels()
 	return func(ctx context.Context, gameID int) ([]Entity, error) {
-		resultModels, err := gameResultRepo.GetByGameId(ctx, gameID)
+		resultModels, err := gameResultRepo.GetByGameID(ctx, gameID)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get results for game %d: %w", gameID, err)
 		}
+		return enrich(ctx, resultModels)
+	}
+}
 
-		numPlayers := len(resultModels)
-		deckNameCache := map[int]string{}
-		playerIDCache := map[int]int{}
-
-		results := make([]Entity, 0, len(resultModels))
-		for _, r := range resultModels {
-			var deckName string
-			if name, ok := deckNameCache[r.DeckID]; ok {
-				deckName = name
-			} else {
-				name, err := getDeckName(ctx, r.DeckID)
-				if err != nil {
-					return nil, err
-				}
-				deckNameCache[r.DeckID] = name
-				deckName = name
-			}
-
-			playerID, err := cachedPlayerIDForDeck(ctx, r.DeckID, playerIDCache, getPlayerIDForDeck)
-			if err != nil {
-				return nil, err
-			}
-
+// TODO: Not a huge fan of this, feeds back into the question of do we need a view for points
+func EnrichModels() EnrichModelsFunc {
+	return func(ctx context.Context, models []gameResultRepo.Model) ([]Entity, error) {
+		numPlayers := len(models)
+		results := make([]Entity, 0, len(models))
+		for _, r := range models {
 			entity := Entity{
 				ID:       r.ID,
 				GameID:   r.GameID,
 				DeckID:   r.DeckID,
-				PlayerID: playerID,
-				DeckName: deckName,
+				PlayerID: r.Deck.PlayerID,
+				DeckName: r.Deck.Name,
 				Place:    r.Place,
 				Kills:    r.KillCount,
 				Points:   utils.GetPointsForPlace(r.KillCount, r.Place, numPlayers),
 			}
-
-			commanders, err := getCommanderEntry(ctx, r.DeckID)
-			if err != nil {
-				return nil, fmt.Errorf("failed to get commander for deck %d: %w", r.DeckID, err)
-			}
-			if commanders != nil {
-				name := commanders.CommanderName
+			if r.Deck.Commander != nil {
+				name := r.Deck.Commander.Commander.Name
 				entity.CommanderName = &name
-				entity.PartnerCommanderName = commanders.PartnerCommanderName
+				if r.Deck.Commander.PartnerCommander != nil {
+					partnerName := r.Deck.Commander.PartnerCommander.Name
+					entity.PartnerCommanderName = &partnerName
+				}
 			}
-
 			results = append(results, entity)
 		}
-
 		return results, nil
 	}
-}
-
-func cachedPlayerIDForDeck(ctx context.Context, deckID int, cache map[int]int, getPlayerIDForDeck deck.GetPlayerIDForDeckFunc) (int, error) {
-	if pid, ok := cache[deckID]; ok {
-		return pid, nil
-	}
-	pid, err := getPlayerIDForDeck(ctx, deckID)
-	if err != nil {
-		return 0, fmt.Errorf("failed to get player for deck %d: %w", deckID, err)
-	}
-	cache[deckID] = pid
-	return pid, nil
 }
 
 func GetGameIDForResult(gameResultRepo repos.GameResultRepository) GetGameIDForResultFunc {

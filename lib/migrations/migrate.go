@@ -2,13 +2,13 @@ package migrations
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"fmt"
 	"sort"
 	"time"
 
 	"go.uber.org/zap"
+	"gorm.io/gorm"
 
 	"github.com/m-sharp/edh-tracker/lib"
 )
@@ -27,8 +27,8 @@ const (
 )
 
 type Migration interface {
-	Upgrade(ctx context.Context, client *lib.DBClient) error
-	Downgrade(ctx context.Context, client *lib.DBClient) error
+	Upgrade(ctx context.Context, db *gorm.DB) error
+	Downgrade(ctx context.Context, db *gorm.DB) error
 }
 
 func RunAll(ctx context.Context, client *lib.DBClient, log *zap.Logger) error {
@@ -59,7 +59,7 @@ func RunAll(ctx context.Context, client *lib.DBClient, log *zap.Logger) error {
 		}
 
 		log.Debug("Running migration", zap.Int("Migration Number", i))
-		if err = migration.Upgrade(ctx, client); err != nil {
+		if err = migration.Upgrade(ctx, client.GormDb); err != nil {
 			log.Error("Error running migration", zap.Int("Migration Number", i), zap.Error(err))
 			if innerErr := rollback(ctx, client, log, ran...); innerErr != nil {
 				log.Error("Failed to rollback migrations", zap.Int("Migration Number", i), zap.Error(err))
@@ -84,7 +84,7 @@ func rollback(ctx context.Context, client *lib.DBClient, log *zap.Logger, toRoll
 		migration := toRollback[i-1]
 		log = log.With(zap.Int("Migration Number", i))
 		log.Debug("Rolling back migration")
-		if err := migration.Downgrade(ctx, client); err != nil {
+		if err := migration.Downgrade(ctx, client.GormDb); err != nil {
 			return errors.New(fmt.Sprintf("Failed to roll back migration #%v: %s", i, err))
 		}
 
@@ -98,39 +98,33 @@ func rollback(ctx context.Context, client *lib.DBClient, log *zap.Logger, toRoll
 
 func GetCurrentMigrationCount(ctx context.Context, client *lib.DBClient) (int, error) {
 	var tableCheck int
-	if err := client.Db.QueryRowContext(ctx, checkForTable, lib.DBName).Scan(&tableCheck); err != nil {
+	if err := client.GormDb.WithContext(ctx).Raw(checkForTable, lib.DBName).Scan(&tableCheck).Error; err != nil {
 		return 0, fmt.Errorf("error checking for migration table: %w", err)
 	} else if tableCheck == 0 {
 		return 0, nil
 	}
 
 	var result int
-	if err := client.Db.QueryRowContext(ctx, countMigrations).Scan(&result); errors.Is(err, sql.ErrNoRows) {
-		return 0, nil
-	} else if err != nil {
+	if err := client.GormDb.WithContext(ctx).Raw(countMigrations).Scan(&result).Error; err != nil {
 		return 0, fmt.Errorf("error getting current migration count: %w", err)
 	}
 	return result, nil
 }
 
 func incrementMigrationTable(ctx context.Context, client *lib.DBClient) error {
-	if _, err := client.Db.ExecContext(ctx, increment, time.Now()); err != nil {
+	if err := client.GormDb.WithContext(ctx).Exec(increment, time.Now()).Error; err != nil {
 		return lib.NewDBError(increment, err)
 	}
 	return nil
 }
 
 func decrementMigrationTable(ctx context.Context, client *lib.DBClient) error {
-	result, err := client.Db.QueryContext(ctx, getMaxID)
-	if err != nil {
+	var maxId int
+	if err := client.GormDb.WithContext(ctx).Raw(getMaxID).Scan(&maxId).Error; err != nil {
 		return lib.NewDBError(getMaxID, err)
 	}
-	maxId := 0
-	if err := result.Scan(maxId); err != nil {
-		return lib.NewDBError(getMaxID, fmt.Errorf("failed to scan max ID result: %w", err))
-	}
 
-	if _, err := client.Db.ExecContext(ctx, decrement, maxId); err != nil {
+	if err := client.GormDb.WithContext(ctx).Exec(decrement, maxId).Error; err != nil {
 		return lib.NewDBError(decrement, err)
 	}
 	return nil
@@ -156,5 +150,6 @@ func getAllMigrations() map[int]Migration {
 		16: &Migration16{},
 		17: &Migration17{},
 		18: &Migration18{},
+		19: &Migration19{},
 	}
 }

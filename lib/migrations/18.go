@@ -2,8 +2,9 @@ package migrations
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/m-sharp/edh-tracker/lib"
+	"gorm.io/gorm"
 )
 
 const (
@@ -29,16 +30,16 @@ const (
 
 type Migration18 struct{}
 
-func (m *Migration18) Upgrade(ctx context.Context, client *lib.DBClient) error {
-	if _, err := client.Db.ExecContext(ctx, createPodInviteTable); err != nil {
-		return lib.NewDBError(createPodInviteTable, err)
+func (m *Migration18) Upgrade(ctx context.Context, db *gorm.DB) error {
+	if err := db.WithContext(ctx).Exec(createPodInviteTable).Error; err != nil {
+		return fmt.Errorf("query %q: %w", createPodInviteTable, err)
 	}
 	return nil
 }
 
-func (m *Migration18) Downgrade(ctx context.Context, client *lib.DBClient) error {
-	if _, err := client.Db.ExecContext(ctx, dropPodInviteTable); err != nil {
-		return lib.NewDBError(dropPodInviteTable, err)
+func (m *Migration18) Downgrade(ctx context.Context, db *gorm.DB) error {
+	if err := db.WithContext(ctx).Exec(dropPodInviteTable).Error; err != nil {
+		return fmt.Errorf("query %q: %w", dropPodInviteTable, err)
 	}
 	return nil
 }

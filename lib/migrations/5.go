@@ -2,8 +2,9 @@ package migrations
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/m-sharp/edh-tracker/lib"
+	"gorm.io/gorm"
 )
 
 const (
@@ -19,19 +20,18 @@ const (
 	destroyGameResultTable = `DROP TABLE game_result;`
 )
 
-// ToDo: MOve this up in order
 type Migration5 struct{}
 
-func (m *Migration5) Upgrade(ctx context.Context, client *lib.DBClient) error {
-	if _, err := client.Db.ExecContext(ctx, createGameResultTable); err != nil {
-		return lib.NewDBError(createGameResultTable, err)
+func (m *Migration5) Upgrade(ctx context.Context, db *gorm.DB) error {
+	if err := db.WithContext(ctx).Exec(createGameResultTable).Error; err != nil {
+		return fmt.Errorf("query %q: %w", createGameResultTable, err)
 	}
 	return nil
 }
 
-func (m *Migration5) Downgrade(ctx context.Context, client *lib.DBClient) error {
-	if _, err := client.Db.ExecContext(ctx, destroyGameResultTable); err != nil {
-		return lib.NewDBError(destroyGameResultTable, err)
+func (m *Migration5) Downgrade(ctx context.Context, db *gorm.DB) error {
+	if err := db.WithContext(ctx).Exec(destroyGameResultTable).Error; err != nil {
+		return fmt.Errorf("query %q: %w", destroyGameResultTable, err)
 	}
 	return nil
 }

@@ -1,175 +1,216 @@
-package gameResult
+package gameResult_test
 
 import (
 	"context"
-	"regexp"
 	"testing"
-	"time"
 
-	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/m-sharp/edh-tracker/lib"
+	"github.com/m-sharp/edh-tracker/lib/repositories/gameResult"
+	"github.com/m-sharp/edh-tracker/lib/repositories/testHelpers"
 )
 
-func newMockDB(t *testing.T) (*lib.DBClient, sqlmock.Sqlmock) {
-	db, mock, err := sqlmock.New()
+func TestGetByGameID(t *testing.T) {
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewGameResultRepo(db)
+	ctx := context.Background()
+
+	gameID := testHelpers.CreateTestGame(t, db)
+	testDeck := testHelpers.CreateTestDeckWithCommander(t, db)
+
+	_, err := repo.Add(ctx, gameResult.Model{GameID: gameID, DeckID: testDeck.ID, Place: 1, KillCount: 2})
 	require.NoError(t, err)
-	return &lib.DBClient{Db: sqlx.NewDb(db, "sqlmock")}, mock
+
+	got, err := repo.GetByGameID(ctx, gameID)
+	require.NoError(t, err)
+	require.Len(t, got, 1)
+	assert.Equal(t, testDeck.Name, got[0].Deck.Name)
+	assert.Equal(t, testDeck.PlayerID, got[0].Deck.PlayerID)
+	require.NotNil(t, got[0].Deck.Commander)
+	assert.NotEmpty(t, got[0].Deck.Commander.Commander.Name)
 }
 
-func TestGetByGameId_Success(t *testing.T) {
-	client, mock := newMockDB(t)
-	repo := NewRepository(client)
+func TestGetByGameID_Empty(t *testing.T) {
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewGameResultRepo(db)
 
-	now := time.Now()
-	rows := sqlmock.NewRows([]string{"id", "game_id", "deck_id", "place", "kill_count", "created_at", "updated_at", "deleted_at"}).
-		AddRow(1, 5, 10, 1, 2, now, now, nil).
-		AddRow(2, 5, 11, 2, 0, now, now, nil)
-	mock.ExpectQuery(regexp.QuoteMeta(getGameResultsByGameID)).WithArgs(5).WillReturnRows(rows)
+	got, err := repo.GetByGameID(context.Background(), 999999)
+	require.NoError(t, err)
+	assert.Len(t, got, 0)
+}
 
-	got, err := repo.GetByGameId(context.Background(), 5)
+func TestGetByID_Found(t *testing.T) {
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewGameResultRepo(db)
+	ctx := context.Background()
+
+	gameID := testHelpers.CreateTestGame(t, db)
+	deckID := testHelpers.CreateTestDeck(t, db).ID
+
+	id, err := repo.Add(ctx, gameResult.Model{GameID: gameID, DeckID: deckID, Place: 1, KillCount: 1})
+	require.NoError(t, err)
+
+	got, err := repo.GetByID(ctx, id)
+	require.NoError(t, err)
+	require.NotNil(t, got)
+	assert.Equal(t, id, got.ID)
+	assert.Equal(t, gameID, got.GameID)
+	assert.Equal(t, deckID, got.DeckID)
+	assert.Equal(t, 1, got.Place)
+	assert.Equal(t, 1, got.KillCount)
+}
+
+func TestGetByID_NotFound(t *testing.T) {
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewGameResultRepo(db)
+
+	got, err := repo.GetByID(context.Background(), 999999)
+	require.NoError(t, err)
+	assert.Nil(t, got)
+}
+
+func TestAdd(t *testing.T) {
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewGameResultRepo(db)
+	ctx := context.Background()
+
+	gameID := testHelpers.CreateTestGame(t, db)
+	deckID := testHelpers.CreateTestDeck(t, db).ID
+
+	id, err := repo.Add(ctx, gameResult.Model{GameID: gameID, DeckID: deckID, Place: 2, KillCount: 1})
+	require.NoError(t, err)
+	assert.Greater(t, id, 0)
+}
+
+func TestBulkAdd(t *testing.T) {
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewGameResultRepo(db)
+	ctx := context.Background()
+
+	gameID := testHelpers.CreateTestGame(t, db)
+	deckID1 := testHelpers.CreateTestDeck(t, db).ID
+	deckID2 := testHelpers.CreateTestDeck(t, db).ID
+
+	results := []gameResult.Model{
+		{GameID: gameID, DeckID: deckID1, Place: 1, KillCount: 2},
+		{GameID: gameID, DeckID: deckID2, Place: 2, KillCount: 0},
+	}
+	err := repo.BulkAdd(ctx, results)
+	require.NoError(t, err)
+
+	got, err := repo.GetByGameID(ctx, gameID)
 	require.NoError(t, err)
 	assert.Len(t, got, 2)
-	assert.Equal(t, 1, got[0].ID)
-	assert.Equal(t, 5, got[0].GameID)
-	assert.Equal(t, 10, got[0].DeckID)
-	assert.Equal(t, 1, got[0].Place)
-	assert.Equal(t, 2, got[0].KillCount)
-	assert.NoError(t, mock.ExpectationsWereMet())
 }
 
-func TestGetByGameId_Empty(t *testing.T) {
-	client, mock := newMockDB(t)
-	repo := NewRepository(client)
+func TestUpdate(t *testing.T) {
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewGameResultRepo(db)
+	ctx := context.Background()
 
-	rows := sqlmock.NewRows([]string{"id", "game_id", "deck_id", "place", "kill_count", "created_at", "updated_at", "deleted_at"})
-	mock.ExpectQuery(regexp.QuoteMeta(getGameResultsByGameID)).WithArgs(99).WillReturnRows(rows)
+	gameID := testHelpers.CreateTestGame(t, db)
+	deckID := testHelpers.CreateTestDeck(t, db).ID
 
-	got, err := repo.GetByGameId(context.Background(), 99)
+	id, err := repo.Add(ctx, gameResult.Model{GameID: gameID, DeckID: deckID, Place: 2, KillCount: 0})
 	require.NoError(t, err)
-	assert.NotNil(t, got)
-	assert.Len(t, got, 0)
-	assert.NoError(t, mock.ExpectationsWereMet())
-}
 
-func TestGameResultSoftDelete_Success(t *testing.T) {
-	client, mock := newMockDB(t)
-	repo := NewRepository(client)
+	require.NoError(t, repo.Update(ctx, id, 1, 3, deckID))
 
-	mock.ExpectExec(regexp.QuoteMeta(softDeleteGameResult)).
-		WithArgs(1).
-		WillReturnResult(sqlmock.NewResult(0, 1))
-
-	err := repo.SoftDelete(context.Background(), 1)
+	got, err := repo.GetByID(ctx, id)
 	require.NoError(t, err)
-	assert.NoError(t, mock.ExpectationsWereMet())
+	require.NotNil(t, got)
+	assert.Equal(t, 1, got.Place)
+	assert.Equal(t, 3, got.KillCount)
 }
 
-func TestGetStatsForPlayer_WithGames(t *testing.T) {
-	client, mock := newMockDB(t)
-	repo := NewRepository(client)
+func TestUpdate_NotFound(t *testing.T) {
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewGameResultRepo(db)
 
-	rows := sqlmock.NewRows([]string{"game_id", "place", "kill_count", "player_count"}).
-		AddRow(1, 1, 2, 4).
-		AddRow(2, 2, 0, 4).
-		AddRow(3, 1, 1, 4)
-	mock.ExpectQuery(regexp.QuoteMeta(getStatsForPlayer)).WithArgs(7).WillReturnRows(rows)
+	err := repo.Update(context.Background(), 999999, 1, 0, 1)
+	assert.ErrorContains(t, err, "unexpected number of rows")
+}
 
-	got, err := repo.GetStatsForPlayer(context.Background(), 7)
+func TestSoftDelete(t *testing.T) {
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewGameResultRepo(db)
+	ctx := context.Background()
+
+	id := testHelpers.CreateTestGameResult(t, db, testHelpers.CreateTestGame(t, db), testHelpers.CreateTestDeck(t, db).ID, 1, 0)
+
+	require.NoError(t, repo.SoftDelete(ctx, id))
+
+	got, err := repo.GetByID(ctx, id)
+	require.NoError(t, err)
+	assert.Nil(t, got)
+}
+
+func TestGetStatsForPlayer(t *testing.T) {
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewGameResultRepo(db)
+	ctx := context.Background()
+
+	// Create a player with a deck
+	testDeck := testHelpers.CreateTestDeck(t, db)
+	playerID := testDeck.PlayerID
+
+	// Three games for that player's deck
+	game1 := testHelpers.CreateTestGame(t, db)
+	game2 := testHelpers.CreateTestGame(t, db)
+	game3 := testHelpers.CreateTestGame(t, db)
+
+	_, err := repo.Add(ctx, gameResult.Model{GameID: game1, DeckID: testDeck.ID, Place: 1, KillCount: 2})
+	require.NoError(t, err)
+	_, err = repo.Add(ctx, gameResult.Model{GameID: game2, DeckID: testDeck.ID, Place: 2, KillCount: 0})
+	require.NoError(t, err)
+	_, err = repo.Add(ctx, gameResult.Model{GameID: game3, DeckID: testDeck.ID, Place: 1, KillCount: 1})
+	require.NoError(t, err)
+
+	got, err := repo.GetStatsForPlayer(ctx, playerID)
 	require.NoError(t, err)
 	require.NotNil(t, got)
 	assert.Equal(t, 3, got.Games)
 	assert.Equal(t, 3, got.Kills)
-	assert.Equal(t, 11, got.Points) // 5 + 2 + 4
 	assert.Equal(t, map[int]int{1: 2, 2: 1}, got.Record)
-	assert.NoError(t, mock.ExpectationsWereMet())
 }
 
-func TestGetByID_Success(t *testing.T) {
-	client, mock := newMockDB(t)
-	repo := NewRepository(client)
+func TestGetStatsForPlayer_Empty(t *testing.T) {
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewGameResultRepo(db)
 
-	now := time.Now()
-	rows := sqlmock.NewRows([]string{"id", "game_id", "deck_id", "place", "kill_count", "created_at", "updated_at", "deleted_at"}).
-		AddRow(7, 1, 10, 2, 1, now, now, nil)
-	mock.ExpectQuery(regexp.QuoteMeta(getGameResultByID)).WithArgs(7).WillReturnRows(rows)
-
-	got, err := repo.GetByID(context.Background(), 7)
-	require.NoError(t, err)
-	require.NotNil(t, got)
-	assert.Equal(t, 7, got.ID)
-	assert.Equal(t, 1, got.GameID)
-	assert.Equal(t, 10, got.DeckID)
-	assert.NoError(t, mock.ExpectationsWereMet())
-}
-
-func TestGetByID_NotFound(t *testing.T) {
-	client, mock := newMockDB(t)
-	repo := NewRepository(client)
-
-	rows := sqlmock.NewRows([]string{"id", "game_id", "deck_id", "place", "kill_count", "created_at", "updated_at", "deleted_at"})
-	mock.ExpectQuery(regexp.QuoteMeta(getGameResultByID)).WithArgs(99).WillReturnRows(rows)
-
-	got, err := repo.GetByID(context.Background(), 99)
-	require.NoError(t, err)
-	assert.Nil(t, got)
-	assert.NoError(t, mock.ExpectationsWereMet())
-}
-
-func TestAdd_Success(t *testing.T) {
-	client, mock := newMockDB(t)
-	repo := NewRepository(client)
-
-	mock.ExpectExec(regexp.QuoteMeta(insertGameResult)).
-		WithArgs(1, 10, 2, 1).
-		WillReturnResult(sqlmock.NewResult(7, 1))
-
-	id, err := repo.Add(context.Background(), Model{GameID: 1, DeckID: 10, Place: 2, KillCount: 1})
-	require.NoError(t, err)
-	assert.Equal(t, 7, id)
-	assert.NoError(t, mock.ExpectationsWereMet())
-}
-
-func TestUpdate_Success(t *testing.T) {
-	client, mock := newMockDB(t)
-	repo := NewRepository(client)
-
-	mock.ExpectExec(regexp.QuoteMeta(updateGameResult)).
-		WithArgs(3, 2, 11, 7).
-		WillReturnResult(sqlmock.NewResult(0, 1))
-
-	err := repo.Update(context.Background(), 7, 3, 2, 11)
-	require.NoError(t, err)
-	assert.NoError(t, mock.ExpectationsWereMet())
-}
-
-func TestUpdate_NotFound(t *testing.T) {
-	client, mock := newMockDB(t)
-	repo := NewRepository(client)
-
-	mock.ExpectExec(regexp.QuoteMeta(updateGameResult)).
-		WithArgs(1, 0, 10, 99).
-		WillReturnResult(sqlmock.NewResult(0, 0))
-
-	err := repo.Update(context.Background(), 99, 1, 0, 10)
-	assert.ErrorContains(t, err, "unexpected number of rows")
-	assert.NoError(t, mock.ExpectationsWereMet())
-}
-
-func TestGetStatsForDeck_Empty(t *testing.T) {
-	client, mock := newMockDB(t)
-	repo := NewRepository(client)
-
-	rows := sqlmock.NewRows([]string{"game_id", "place", "kill_count", "player_count"})
-	mock.ExpectQuery(regexp.QuoteMeta(getStatsForDeck)).WithArgs(10).WillReturnRows(rows)
-
-	got, err := repo.GetStatsForDeck(context.Background(), 10)
+	got, err := repo.GetStatsForPlayer(context.Background(), 999999)
 	require.NoError(t, err)
 	require.NotNil(t, got)
 	assert.Equal(t, 0, got.Games)
 	assert.Len(t, got.Record, 0)
-	assert.NoError(t, mock.ExpectationsWereMet())
+}
+
+func TestGetStatsForDeck(t *testing.T) {
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewGameResultRepo(db)
+	ctx := context.Background()
+
+	deckID := testHelpers.CreateTestDeck(t, db).ID
+	gameID := testHelpers.CreateTestGame(t, db)
+
+	_, err := repo.Add(ctx, gameResult.Model{GameID: gameID, DeckID: deckID, Place: 1, KillCount: 2})
+	require.NoError(t, err)
+
+	got, err := repo.GetStatsForDeck(ctx, deckID)
+	require.NoError(t, err)
+	require.NotNil(t, got)
+	assert.Equal(t, 1, got.Games)
+	assert.Equal(t, 2, got.Kills)
+}
+
+func TestGetStatsForDeck_Empty(t *testing.T) {
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewGameResultRepo(db)
+
+	got, err := repo.GetStatsForDeck(context.Background(), 999999)
+	require.NoError(t, err)
+	require.NotNil(t, got)
+	assert.Equal(t, 0, got.Games)
+	assert.Len(t, got.Record, 0)
 }

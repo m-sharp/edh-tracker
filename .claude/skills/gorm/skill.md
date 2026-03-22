@@ -1,3 +1,9 @@
+---
+name: gorm
+description: Use this skill to load GORM patterns, conventions, and code examples for the EDH Tracker. Invoke at the start of any GORM repository implementation or migration session to get import paths, model definitions, query patterns, bulk insert, upsert, transactions, soft-delete, and test infrastructure.
+version: 1.0.0
+---
+
 # GORM Patterns — EDH Tracker Reference
 
 ## Import Paths
@@ -121,21 +127,29 @@ r.db.WithContext(ctx).Delete(&Model{}, id)
 r.db.WithContext(ctx).Model(&Model{}).Where("id = ?", id).Update("name", name)
 ```
 
-### Update multiple fields (map avoids zero-value skipping)
+### Update multiple fields using a struct (UpdateFields pattern)
+
+When fields are controlled via pointer-based UpdateFields, build a minimal Model{} struct
+and pass it to .Updates(). GORM skips zero-value fields in structs, which is safe here
+because only non-nil pointer fields are set:
+
 ```go
-r.db.WithContext(ctx).Model(&Model{}).Where("id = ?", id).Updates(map[string]any{
-    "name":      newName,
-    "format_id": newFormatID,
-})
+updated := Model{}
+if f.HasChanges() { ... } // guard from HasChanges() on UpdateFields
+if f.Name != nil     { updated.Name = *f.Name }
+if f.FormatID != nil { updated.FormatID = *f.FormatID }
+if f.Retired != nil  { updated.Retired = *f.Retired }
+result := r.db.WithContext(ctx).Model(&Model{}).Where("id = ?", id).Updates(updated)
 ```
 
-### Dynamic partial update (UpdateFields pattern)
+**When to use map[string]any instead**: If any updated field can legitimately be a zero
+value (e.g. int `place = 0`), use a map to prevent GORM silently skipping it:
+
 ```go
-updates := map[string]any{}
-if f.Name != nil     { updates["name"] = *f.Name }
-if f.FormatID != nil { updates["format_id"] = *f.FormatID }
-if len(updates) == 0 { return nil }
-return r.db.WithContext(ctx).Model(&Model{}).Where("id = ?", id).Updates(updates).Error
+r.db.WithContext(ctx).Model(&Model{}).Where("id = ?", id).Updates(map[string]any{
+    "place":      place,
+    "kill_count": killCount,
+})
 ```
 
 ### Retire / toggle bool field

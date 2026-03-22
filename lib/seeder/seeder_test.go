@@ -14,9 +14,8 @@ func newTestSeeder() *Seeder {
 
 func TestCollectEntities_Empty(t *testing.T) {
 	s := newTestSeeder()
-	players, commanders, entries, err := s.collectEntities([]Game{}, map[string]int{"commander": 1})
+	commanders, entries, err := s.collectEntities([]Game{}, map[string]int{"commander": 1}, map[string]PlayerInfo{})
 	require.NoError(t, err)
-	assert.Empty(t, players)
 	assert.Empty(t, commanders)
 	assert.Empty(t, entries)
 }
@@ -24,6 +23,10 @@ func TestCollectEntities_Empty(t *testing.T) {
 func TestCollectEntities_Dedup(t *testing.T) {
 	s := newTestSeeder()
 	formatIDs := map[string]int{"commander": 1}
+	playerInfoMap := map[string]PlayerInfo{
+		"Alice": {Name: "Alice", UserRole: "player", PodRole: "member"},
+		"Bob":   {Name: "Bob", UserRole: "player", PodRole: "member"},
+	}
 	games := []Game{
 		{
 			Format: "commander",
@@ -40,9 +43,8 @@ func TestCollectEntities_Dedup(t *testing.T) {
 			},
 		},
 	}
-	players, commanders, entries, err := s.collectEntities(games, formatIDs)
+	commanders, entries, err := s.collectEntities(games, formatIDs, playerInfoMap)
 	require.NoError(t, err)
-	assert.Len(t, players, 2)
 	assert.Len(t, commanders, 2)
 	assert.Len(t, entries, 2, "duplicate player+commander pairs should be deduped")
 }
@@ -50,13 +52,33 @@ func TestCollectEntities_Dedup(t *testing.T) {
 func TestCollectEntities_UnknownFormat(t *testing.T) {
 	s := newTestSeeder()
 	formatIDs := map[string]int{"commander": 1}
+	playerInfoMap := map[string]PlayerInfo{
+		"Alice": {Name: "Alice", UserRole: "player", PodRole: "member"},
+	}
 	games := []Game{
 		{
 			Format:  "unknown-format",
 			Results: []Result{{Player: "Alice", Name: "Atraxa", Place: 1}},
 		},
 	}
-	_, _, _, err := s.collectEntities(games, formatIDs)
+	_, _, err := s.collectEntities(games, formatIDs, playerInfoMap)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "unknown format")
+}
+
+func TestCollectEntities_UnknownPlayer(t *testing.T) {
+	s := newTestSeeder()
+	formatIDs := map[string]int{"commander": 1}
+	playerInfoMap := map[string]PlayerInfo{
+		"Alice": {Name: "Alice", UserRole: "player", PodRole: "member"},
+	}
+	games := []Game{
+		{
+			Format:  "commander",
+			Results: []Result{{Player: "Unknown", Name: "Atraxa", Place: 1}},
+		},
+	}
+	_, _, err := s.collectEntities(games, formatIDs, playerInfoMap)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "not listed in playerInfos.json")
 }

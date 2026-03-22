@@ -9,7 +9,6 @@ const (
 	playerIDKey contextKey = "playerID"
 )
 
-// TODO: Is player even necessary?
 func ContextWithUserInfo(ctx context.Context, userID, playerID int) context.Context {
 	ctx = context.WithValue(ctx, userIDKey, userID)
 	ctx = context.WithValue(ctx, playerIDKey, playerID)

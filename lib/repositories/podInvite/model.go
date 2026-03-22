@@ -7,10 +7,12 @@ import (
 )
 
 type Model struct {
-	base.ModelBase
-	PodID             int        `db:"pod_id"`
-	InviteCode        string     `db:"invite_code"`
-	CreatedByPlayerID int        `db:"created_by_player_id"`
-	ExpiresAt         *time.Time `db:"expires_at"`
-	UsedCount         int        `db:"used_count"`
+	base.GormModelBase
+	PodID             int
+	InviteCode        string
+	CreatedByPlayerID int
+	ExpiresAt         *time.Time
+	UsedCount         int
 }
+
+func (Model) TableName() string { return "pod_invite" }

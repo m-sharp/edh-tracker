@@ -4,61 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/m-sharp/edh-tracker/lib/business/commander"
 	"github.com/m-sharp/edh-tracker/lib/business/format"
-	"github.com/m-sharp/edh-tracker/lib/business/player"
 	repos "github.com/m-sharp/edh-tracker/lib/repositories"
 	deckRepository "github.com/m-sharp/edh-tracker/lib/repositories/deck"
 )
-
-func GetCommanderEntry(
-	deckCmdrRepo repos.DeckCommanderRepository,
-	getCommanderName commander.GetCommanderNameFunc,
-) GetCommanderEntryFunc {
-	return func(ctx context.Context, deckID int) (*CommanderInfo, error) {
-		dcm, err := deckCmdrRepo.GetByDeckId(ctx, deckID)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get commander for deck %d: %w", deckID, err)
-		}
-		if dcm == nil {
-			return nil, nil
-		}
-
-		cmdName, err := getCommanderName(ctx, dcm.CommanderID)
-		if err != nil {
-			return nil, err
-		}
-
-		entry := &CommanderInfo{
-			CommanderID:   dcm.CommanderID,
-			CommanderName: cmdName,
-		}
-
-		if dcm.PartnerCommanderID != nil {
-			partnerName, err := getCommanderName(ctx, *dcm.PartnerCommanderID)
-			if err != nil {
-				return nil, err
-			}
-			entry.PartnerCommanderID = dcm.PartnerCommanderID
-			entry.PartnerCommanderName = &partnerName
-		}
-
-		return entry, nil
-	}
-}
-
-func GetPlayerIDForDeck(deckRepo repos.DeckRepository) GetPlayerIDForDeckFunc {
-	return func(ctx context.Context, deckID int) (int, error) {
-		d, err := deckRepo.GetById(ctx, deckID)
-		if err != nil {
-			return 0, fmt.Errorf("failed to look up deck %d: %w", deckID, err)
-		}
-		if d == nil {
-			return 0, fmt.Errorf("deck %d not found", deckID)
-		}
-		return d.PlayerID, nil
-	}
-}
 
 func GetDeckName(deckRepo repos.DeckRepository) GetDeckNameFunc {
 	return func(ctx context.Context, deckID int) (string, error) {
@@ -73,12 +22,25 @@ func GetDeckName(deckRepo repos.DeckRepository) GetDeckNameFunc {
 	}
 }
 
+func commanderInfoFromModel(d deckRepository.Model) *CommanderInfo {
+	if d.Commander == nil {
+		return nil
+	}
+	info := &CommanderInfo{
+		CommanderID:   d.Commander.CommanderID,
+		CommanderName: d.Commander.Commander.Name,
+	}
+	if d.Commander.PartnerCommanderID != nil {
+		info.PartnerCommanderID = d.Commander.PartnerCommanderID
+		name := d.Commander.PartnerCommander.Name
+		info.PartnerCommanderName = &name
+	}
+	return info
+}
+
 func GetAll(
 	deckRepo repos.DeckRepository,
 	gameResultRepo repos.GameResultRepository,
-	getPlayerName player.GetPlayerNameFunc,
-	getFormat format.GetByIDFunc,
-	getCommanderEntry GetCommanderEntryFunc,
 ) GetAllFunc {
 	return func(ctx context.Context) ([]EntityWithStats, error) {
 		decks, err := deckRepo.GetAll(ctx)
@@ -86,29 +48,9 @@ func GetAll(
 			return nil, fmt.Errorf("failed to get decks: %w", err)
 		}
 
-		playerCache := map[int]string{}
-
 		result := make([]EntityWithStats, 0, len(decks))
 		for _, d := range decks {
-			f, err := getFormat(ctx, d.FormatID)
-			if err != nil {
-				return nil, fmt.Errorf("failed to look up format %d: %w", d.FormatID, err)
-			}
-			if f == nil {
-				return nil, fmt.Errorf("format %d not found", d.FormatID)
-			}
-
-			playerName, err := cachedPlayerName(ctx, d.PlayerID, playerCache, getPlayerName)
-			if err != nil {
-				return nil, err
-			}
-
-			commanders, err := getCommanderEntry(ctx, d.ID)
-			if err != nil {
-				return nil, err
-			}
-
-			entity := ToEntity(d, playerName, f.Name, commanders)
+			entity := ToEntity(d, d.Player.Name, d.Format.Name, commanderInfoFromModel(d))
 
 			agg, err := gameResultRepo.GetStatsForDeck(ctx, d.ID)
 			if err != nil {
@@ -125,9 +67,6 @@ func GetAll(
 func GetAllForPlayer(
 	deckRepo repos.DeckRepository,
 	gameResultRepo repos.GameResultRepository,
-	getPlayerName player.GetPlayerNameFunc,
-	getFormat format.GetByIDFunc,
-	getCommanderEntry GetCommanderEntryFunc,
 ) GetAllForPlayerFunc {
 	return func(ctx context.Context, playerID int) ([]EntityWithStats, error) {
 		decks, err := deckRepo.GetAllForPlayer(ctx, playerID)
@@ -135,27 +74,9 @@ func GetAllForPlayer(
 			return nil, fmt.Errorf("failed to get decks for player %d: %w", playerID, err)
 		}
 
-		playerName, err := getPlayerName(ctx, playerID)
-		if err != nil {
-			return nil, err
-		}
-
 		result := make([]EntityWithStats, 0, len(decks))
 		for _, d := range decks {
-			f, err := getFormat(ctx, d.FormatID)
-			if err != nil {
-				return nil, fmt.Errorf("failed to look up format %d: %w", d.FormatID, err)
-			}
-			if f == nil {
-				return nil, fmt.Errorf("format %d not found", d.FormatID)
-			}
-
-			commanders, err := getCommanderEntry(ctx, d.ID)
-			if err != nil {
-				return nil, err
-			}
-
-			entity := ToEntity(d, playerName, f.Name, commanders)
+			entity := ToEntity(d, d.Player.Name, d.Format.Name, commanderInfoFromModel(d))
 
 			agg, err := gameResultRepo.GetStatsForDeck(ctx, d.ID)
 			if err != nil {
@@ -172,12 +93,9 @@ func GetAllForPlayer(
 func GetByID(
 	deckRepo repos.DeckRepository,
 	gameResultRepo repos.GameResultRepository,
-	getPlayerName player.GetPlayerNameFunc,
-	getFormat format.GetByIDFunc,
-	getCommanderEntry GetCommanderEntryFunc,
 ) GetByIDFunc {
 	return func(ctx context.Context, deckID int) (*EntityWithStats, error) {
-		d, err := deckRepo.GetById(ctx, deckID)
+		d, err := deckRepo.GetByIDHydrated(ctx, deckID)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get deck %d: %w", deckID, err)
 		}
@@ -185,25 +103,7 @@ func GetByID(
 			return nil, nil
 		}
 
-		f, err := getFormat(ctx, d.FormatID)
-		if err != nil {
-			return nil, fmt.Errorf("failed to look up format %d: %w", d.FormatID, err)
-		}
-		if f == nil {
-			return nil, fmt.Errorf("format %d not found", d.FormatID)
-		}
-
-		playerName, err := getPlayerName(ctx, d.PlayerID)
-		if err != nil {
-			return nil, err
-		}
-
-		commanders, err := getCommanderEntry(ctx, d.ID)
-		if err != nil {
-			return nil, err
-		}
-
-		entity := ToEntity(*d, playerName, f.Name, commanders)
+		entity := ToEntity(*d, d.Player.Name, d.Format.Name, commanderInfoFromModel(*d))
 
 		agg, err := gameResultRepo.GetStatsForDeck(ctx, deckID)
 		if err != nil {
@@ -252,9 +152,6 @@ func GetAllByPod(
 	deckRepo repos.DeckRepository,
 	podRepo repos.PodRepository,
 	gameResultRepo repos.GameResultRepository,
-	getPlayerName player.GetPlayerNameFunc,
-	getFormat format.GetByIDFunc,
-	getCommanderEntry GetCommanderEntryFunc,
 ) GetAllByPodFunc {
 	return func(ctx context.Context, podID int) ([]EntityWithStats, error) {
 		playerIDs, err := podRepo.GetPlayerIDs(ctx, podID)
@@ -270,29 +167,9 @@ func GetAllByPod(
 			return nil, fmt.Errorf("failed to get decks for pod %d: %w", podID, err)
 		}
 
-		playerCache := map[int]string{}
-
 		result := make([]EntityWithStats, 0, len(decks))
 		for _, d := range decks {
-			f, err := getFormat(ctx, d.FormatID)
-			if err != nil {
-				return nil, fmt.Errorf("failed to look up format %d: %w", d.FormatID, err)
-			}
-			if f == nil {
-				return nil, fmt.Errorf("format %d not found", d.FormatID)
-			}
-
-			playerName, err := cachedPlayerName(ctx, d.PlayerID, playerCache, getPlayerName)
-			if err != nil {
-				return nil, err
-			}
-
-			commanders, err := getCommanderEntry(ctx, d.ID)
-			if err != nil {
-				return nil, err
-			}
-
-			entity := ToEntity(d, playerName, f.Name, commanders)
+			entity := ToEntity(d, d.Player.Name, d.Format.Name, commanderInfoFromModel(d))
 
 			agg, err := gameResultRepo.GetStatsForDeck(ctx, d.ID)
 			if err != nil {
@@ -367,16 +244,4 @@ func Retire(deckRepo repos.DeckRepository) RetireFunc {
 		}
 		return deckRepo.Retire(ctx, deckID)
 	}
-}
-
-func cachedPlayerName(ctx context.Context, playerID int, cache map[int]string, getPlayerName player.GetPlayerNameFunc) (string, error) {
-	if name, ok := cache[playerID]; ok {
-		return name, nil
-	}
-	name, err := getPlayerName(ctx, playerID)
-	if err != nil {
-		return "", err
-	}
-	cache[playerID] = name
-	return name, nil
 }

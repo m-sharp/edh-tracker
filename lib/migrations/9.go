@@ -2,8 +2,9 @@ package migrations
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/m-sharp/edh-tracker/lib"
+	"gorm.io/gorm"
 )
 
 const (
@@ -13,16 +14,16 @@ const (
 
 type Migration9 struct{}
 
-func (m *Migration9) Upgrade(ctx context.Context, client *lib.DBClient) error {
-	if _, err := client.Db.ExecContext(ctx, addPodIDToGame); err != nil {
-		return lib.NewDBError(addPodIDToGame, err)
+func (m *Migration9) Upgrade(ctx context.Context, db *gorm.DB) error {
+	if err := db.WithContext(ctx).Exec(addPodIDToGame).Error; err != nil {
+		return fmt.Errorf("query %q: %w", addPodIDToGame, err)
 	}
 	return nil
 }
 
-func (m *Migration9) Downgrade(ctx context.Context, client *lib.DBClient) error {
-	if _, err := client.Db.ExecContext(ctx, dropPodIDFromGame); err != nil {
-		return lib.NewDBError(dropPodIDFromGame, err)
+func (m *Migration9) Downgrade(ctx context.Context, db *gorm.DB) error {
+	if err := db.WithContext(ctx).Exec(dropPodIDFromGame).Error; err != nil {
+		return fmt.Errorf("query %q: %w", dropPodIDFromGame, err)
 	}
 	return nil
 }

@@ -2,39 +2,48 @@ package playerPodRole
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"strings"
+
+	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 
 	"github.com/m-sharp/edh-tracker/lib"
 )
 
-const (
-	getRole            = `SELECT id, pod_id, player_id, role, created_at, updated_at, deleted_at FROM player_pod_role WHERE pod_id = ? AND player_id = ? AND deleted_at IS NULL LIMIT 1;`
-	getMembersWithRole = `SELECT id, pod_id, player_id, role, created_at, updated_at, deleted_at FROM player_pod_role WHERE pod_id = ? AND deleted_at IS NULL;`
-	setRole            = `INSERT INTO player_pod_role (pod_id, player_id, role) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE role = VALUES(role), deleted_at = NULL;`
-)
-
 type Repository struct {
-	client *lib.DBClient
+	db *gorm.DB
 }
 
 func NewRepository(client *lib.DBClient) *Repository {
-	return &Repository{client: client}
+	return &Repository{db: client.GormDb}
+}
+
+func NewRepositoryFromDB(db *gorm.DB) *Repository {
+	return &Repository{db: db}
 }
 
 func (r *Repository) GetRole(ctx context.Context, podID, playerID int) (*Model, error) {
-	var rows []Model
-	if err := r.client.Db.SelectContext(ctx, &rows, getRole, podID, playerID); err != nil {
-		return nil, fmt.Errorf("failed to get role for player %d in pod %d: %w", playerID, podID, err)
-	}
-	if len(rows) == 0 {
+	var m Model
+	err := r.db.WithContext(ctx).Where("pod_id = ? AND player_id = ?", podID, playerID).First(&m).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, nil
 	}
-	return &rows[0], nil
+	if err != nil {
+		return nil, fmt.Errorf("failed to get role for player %d in pod %d: %w", playerID, podID, err)
+	}
+	return &m, nil
 }
 
 func (r *Repository) SetRole(ctx context.Context, podID, playerID int, role string) error {
-	if _, err := r.client.Db.ExecContext(ctx, setRole, podID, playerID, role); err != nil {
+	m := Model{PodID: podID, PlayerID: playerID, Role: role}
+	err := r.db.WithContext(ctx).Clauses(clause.OnConflict{
+		DoUpdates: clause.Assignments(map[string]any{
+			"role":       role,
+			"deleted_at": nil,
+		}),
+	}).Create(&m).Error
+	if err != nil {
 		return fmt.Errorf("failed to set role %q for player %d in pod %d: %w", role, playerID, podID, err)
 	}
 	return nil
@@ -42,7 +51,7 @@ func (r *Repository) SetRole(ctx context.Context, podID, playerID int, role stri
 
 func (r *Repository) GetMembersWithRoles(ctx context.Context, podID int) ([]Model, error) {
 	var rows []Model
-	if err := r.client.Db.SelectContext(ctx, &rows, getMembersWithRole, podID); err != nil {
+	if err := r.db.WithContext(ctx).Where("pod_id = ?", podID).Find(&rows).Error; err != nil {
 		return nil, fmt.Errorf("failed to get members with roles for pod %d: %w", podID, err)
 	}
 	if rows == nil {
@@ -55,15 +64,11 @@ func (r *Repository) BulkAdd(ctx context.Context, podID int, playerIDs []int, ro
 	if len(playerIDs) == 0 {
 		return nil
 	}
-
-	query := "INSERT INTO player_pod_role (pod_id, player_id, role) VALUES " +
-		strings.TrimSuffix(strings.Repeat("(?,?,?),", len(playerIDs)), ",")
-	args := make([]interface{}, 0, len(playerIDs)*3)
-	for _, id := range playerIDs {
-		args = append(args, podID, id, role)
+	entries := make([]Model, len(playerIDs))
+	for i, id := range playerIDs {
+		entries[i] = Model{PodID: podID, PlayerID: id, Role: role}
 	}
-
-	if _, err := r.client.Db.ExecContext(ctx, query, args...); err != nil {
+	if err := r.db.WithContext(ctx).CreateInBatches(&entries, 100).Error; err != nil {
 		return fmt.Errorf("failed to bulk insert player_pod_role records: %w", err)
 	}
 	return nil

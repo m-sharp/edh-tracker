@@ -27,17 +27,11 @@ type Business struct {
 
 func NewBusiness(log *zap.Logger, r *repositories.Repositories) *Business {
 	// Build leaf functions first (no cross-domain deps).
-	getPlayerName := player.GetPlayerName(r.Players)
 	getFormat := format.GetByID(r.Formats)
 	getCommanderName := commander.GetCommanderName(r.Commanders)
 
-	// Build deck cross-domain functions.
-	getCommanderEntry := deck.GetCommanderEntry(r.DeckCommanders, getCommanderName)
-	getDeckName := deck.GetDeckName(r.Decks)
-	getPlayerIDForDeck := deck.GetPlayerIDForDeck(r.Decks)
-
-	// Build game result function.
-	getGameResults := gameResult.GetByGameID(r.GameResults, getDeckName, getCommanderEntry, getPlayerIDForDeck)
+	// Build game result functions.
+	enrichGameResults := gameResult.EnrichModels()
 
 	return &Business{
 		Players: player.Functions{
@@ -46,26 +40,24 @@ func NewBusiness(log *zap.Logger, r *repositories.Repositories) *Business {
 			GetByID:       player.GetByID(r.Players, r.GameResults, r.Pods),
 			Create:        player.Create(r.Players),
 			Update:        player.Update(r.Players),
-			GetPlayerName: getPlayerName,
+			GetPlayerName: player.GetPlayerName(r.Players),
 		},
 		Decks: deck.Functions{
-			GetAll:            deck.GetAll(r.Decks, r.GameResults, getPlayerName, getFormat, getCommanderEntry),
-			GetAllForPlayer:   deck.GetAllForPlayer(r.Decks, r.GameResults, getPlayerName, getFormat, getCommanderEntry),
-			GetAllByPod:       deck.GetAllByPod(r.Decks, r.Pods, r.GameResults, getPlayerName, getFormat, getCommanderEntry),
-			GetByID:           deck.GetByID(r.Decks, r.GameResults, getPlayerName, getFormat, getCommanderEntry),
-			Create:            deck.Create(r.Decks, r.DeckCommanders, getFormat),
-			Update:            deck.Update(r.Decks, r.DeckCommanders),
-			SoftDelete:        deck.SoftDelete(r.Decks),
-			Retire:             deck.Retire(r.Decks),
-			GetDeckName:        getDeckName,
-			GetCommanderEntry:  getCommanderEntry,
-			GetPlayerIDForDeck: getPlayerIDForDeck,
+			GetAll:          deck.GetAll(r.Decks, r.GameResults),
+			GetAllForPlayer: deck.GetAllForPlayer(r.Decks, r.GameResults),
+			GetAllByPod:     deck.GetAllByPod(r.Decks, r.Pods, r.GameResults),
+			GetByID:         deck.GetByID(r.Decks, r.GameResults),
+			Create:          deck.Create(r.Decks, r.DeckCommanders, getFormat),
+			Update:          deck.Update(r.Decks, r.DeckCommanders),
+			SoftDelete:      deck.SoftDelete(r.Decks),
+			Retire:          deck.Retire(r.Decks),
+			GetDeckName:     deck.GetDeckName(r.Decks),
 		},
 		Games: game.Functions{
-			GetAllByPod:    game.GetAllByPod(log, r.Games, getGameResults),
-			GetAllByDeck:   game.GetAllByDeck(log, r.Games, getGameResults),
-			GetAllByPlayer: game.GetAllByPlayer(log, r.Games, getGameResults),
-			GetByID:        game.GetByID(log, r.Games, getGameResults),
+			GetAllByPod:    game.GetAllByPod(log, r.Games, enrichGameResults),
+			GetAllByDeck:   game.GetAllByDeck(log, r.Games, enrichGameResults),
+			GetAllByPlayer: game.GetAllByPlayer(log, r.Games, enrichGameResults),
+			GetByID:        game.GetByID(log, r.Games, enrichGameResults),
 			Create:         game.Create(log, r.Games, r.GameResults, r.Decks, getFormat),
 			Update:         game.Update(r.Games),
 			SoftDelete:     game.SoftDelete(r.Games),
@@ -74,8 +66,9 @@ func NewBusiness(log *zap.Logger, r *repositories.Repositories) *Business {
 			DeleteResult:   game.DeleteResult(r.GameResults),
 		},
 		GameResults: gameResult.Functions{
-			GetByGameID:        getGameResults,
+			GetByGameID:        gameResult.GetByGameID(r.GameResults),
 			GetGameIDForResult: gameResult.GetGameIDForResult(r.GameResults),
+			EnrichModels:       enrichGameResults,
 		},
 		Formats: format.Functions{
 			GetAll:  format.GetAll(r.Formats),

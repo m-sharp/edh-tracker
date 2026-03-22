@@ -1,125 +1,225 @@
-package game
+package game_test
 
 import (
 	"context"
-	"regexp"
+	"fmt"
 	"testing"
-	"time"
 
-	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/m-sharp/edh-tracker/lib"
+	"github.com/m-sharp/edh-tracker/lib/repositories/game"
+	"github.com/m-sharp/edh-tracker/lib/repositories/testHelpers"
 )
 
-func newMockDB(t *testing.T) (*lib.DBClient, sqlmock.Sqlmock) {
-	db, mock, err := sqlmock.New()
+func TestGetAllByPod(t *testing.T) {
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewGameRepo(db)
+	ctx := context.Background()
+	formatID := testHelpers.GetCommanderFormatID(t, db)
+
+	podID := testHelpers.CreateTestPod(t, db)
+	gameID, err := repo.Add(ctx, "Game With Results", podID, formatID)
 	require.NoError(t, err)
-	return &lib.DBClient{Db: sqlx.NewDb(db, "sqlmock")}, mock
+	testDeck := testHelpers.CreateTestDeck(t, db)
+	testHelpers.CreateTestGameResult(t, db, gameID, testDeck.ID, 1, 2)
+
+	games, err := repo.GetAllByPod(ctx, podID)
+	require.NoError(t, err)
+	require.Len(t, games, 1)
+	assert.Equal(t, gameID, games[0].ID)
+	require.Len(t, games[0].Results, 1)
+	assert.Equal(t, gameID, games[0].Results[0].GameID)
+	assert.Equal(t, testDeck.ID, games[0].Results[0].DeckID)
+	assert.Equal(t, 1, games[0].Results[0].Place)
+	assert.Equal(t, 2, games[0].Results[0].KillCount)
+	assert.Equal(t, testDeck.Name, games[0].Results[0].Deck.Name)
+	assert.Equal(t, testDeck.PlayerID, games[0].Results[0].Deck.PlayerID)
+
+	// Add another deck result
+	deck2ID := testHelpers.CreateTestDeck(t, db).ID
+	testHelpers.CreateTestGameResult(t, db, gameID, deck2ID, 2, 1)
+	games, err = repo.GetAllByPod(ctx, podID)
+	require.NoError(t, err)
+	require.Len(t, games, 1)
+	require.Len(t, games[0].Results, 2)
 }
 
-func gameColumns() []string {
-	return []string{"id", "description", "pod_id", "format_id", "created_at", "updated_at", "deleted_at"}
+func TestGetAllByDeck(t *testing.T) {
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewGameRepo(db)
+	ctx := context.Background()
+
+	gameID := testHelpers.CreateTestGame(t, db)
+	testDeck := testHelpers.CreateTestDeck(t, db)
+	testHelpers.CreateTestGameResult(t, db, gameID, testDeck.ID, 1, 0)
+
+	games, err := repo.GetAllByDeck(ctx, testDeck.ID)
+	require.NoError(t, err)
+	require.Len(t, games, 1)
+	assert.Equal(t, gameID, games[0].ID)
+	require.Len(t, games[0].Results, 1)
+	assert.Equal(t, gameID, games[0].Results[0].GameID)
+	assert.Equal(t, testDeck.ID, games[0].Results[0].DeckID)
+	assert.Equal(t, testDeck.Name, games[0].Results[0].Deck.Name)
+	assert.Equal(t, testDeck.PlayerID, games[0].Results[0].Deck.PlayerID)
 }
 
-func TestGetById_Success(t *testing.T) {
-	client, mock := newMockDB(t)
-	repo := NewRepository(client)
+func TestGetAllByPlayerID(t *testing.T) {
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewGameRepo(db)
+	ctx := context.Background()
 
-	now := time.Now()
-	rows := sqlmock.NewRows(gameColumns()).
-		AddRow(5, "Friday Night", 2, 1, now, now, nil)
-	mock.ExpectQuery(regexp.QuoteMeta(getGameByID)).WithArgs(5).WillReturnRows(rows)
+	gameID := testHelpers.CreateTestGame(t, db)
+	testDeck := testHelpers.CreateTestDeck(t, db)
+	testHelpers.CreateTestGameResult(t, db, gameID, testDeck.ID, 1, 0)
 
-	got, err := repo.GetById(context.Background(), 5)
+	games, err := repo.GetAllByPlayerID(ctx, testDeck.PlayerID)
+	require.NoError(t, err)
+	require.Len(t, games, 1)
+	assert.Equal(t, gameID, games[0].ID)
+	require.Len(t, games[0].Results, 1)
+	assert.Equal(t, gameID, games[0].Results[0].GameID)
+	assert.Equal(t, testDeck.ID, games[0].Results[0].DeckID)
+	assert.Equal(t, testDeck.Name, games[0].Results[0].Deck.Name)
+	assert.Equal(t, testDeck.PlayerID, games[0].Results[0].Deck.PlayerID)
+}
+
+func TestGetByID_Found(t *testing.T) {
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewGameRepo(db)
+	ctx := context.Background()
+	formatID := testHelpers.GetCommanderFormatID(t, db)
+
+	podID := testHelpers.CreateTestPod(t, db)
+	gameID, err := repo.Add(ctx, "Friday Night", podID, formatID)
+	require.NoError(t, err)
+	testDeck := testHelpers.CreateTestDeck(t, db)
+	testHelpers.CreateTestGameResult(t, db, gameID, testDeck.ID, 2, 1)
+
+	got, err := repo.GetByID(ctx, gameID)
 	require.NoError(t, err)
 	require.NotNil(t, got)
-	assert.Equal(t, 5, got.ID)
+	assert.Equal(t, gameID, got.ID)
 	assert.Equal(t, "Friday Night", got.Description)
-	assert.Equal(t, 2, got.PodID)
-	assert.NoError(t, mock.ExpectationsWereMet())
+	require.Len(t, got.Results, 1)
+	assert.Equal(t, gameID, got.Results[0].GameID)
+	assert.Equal(t, testDeck.ID, got.Results[0].DeckID)
+	assert.Equal(t, testDeck.Name, got.Results[0].Deck.Name)
+	assert.Equal(t, testDeck.PlayerID, got.Results[0].Deck.PlayerID)
 }
 
-func TestGetById_NotFound(t *testing.T) {
-	client, mock := newMockDB(t)
-	repo := NewRepository(client)
+func TestGetByID_NotFound(t *testing.T) {
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewGameRepo(db)
 
-	rows := sqlmock.NewRows(gameColumns())
-	mock.ExpectQuery(regexp.QuoteMeta(getGameByID)).WithArgs(99).WillReturnRows(rows)
-
-	got, err := repo.GetById(context.Background(), 99)
+	got, err := repo.GetByID(context.Background(), 999999)
 	require.NoError(t, err)
 	assert.Nil(t, got)
-	assert.NoError(t, mock.ExpectationsWereMet())
 }
 
-func TestUpdate_Success(t *testing.T) {
-	client, mock := newMockDB(t)
-	repo := NewRepository(client)
+func TestAdd(t *testing.T) {
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewGameRepo(db)
+	ctx := context.Background()
+	formatID := testHelpers.GetCommanderFormatID(t, db)
 
-	mock.ExpectExec(regexp.QuoteMeta(updateGame)).
-		WithArgs("New Description", 5).
-		WillReturnResult(sqlmock.NewResult(0, 1))
-
-	err := repo.Update(context.Background(), 5, "New Description")
+	podID := testHelpers.CreateTestPod(t, db)
+	id, err := repo.Add(ctx, "Test Game", podID, formatID)
 	require.NoError(t, err)
-	assert.NoError(t, mock.ExpectationsWereMet())
+	assert.Greater(t, id, 0)
+
+	got, err := repo.GetByID(ctx, id)
+	require.NoError(t, err)
+	require.NotNil(t, got)
+	assert.Equal(t, "Test Game", got.Description)
+	assert.Equal(t, podID, got.PodID)
+	assert.Equal(t, formatID, got.FormatID)
+}
+
+func TestBulkAdd(t *testing.T) {
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewGameRepo(db)
+	ctx := context.Background()
+	formatID := testHelpers.GetCommanderFormatID(t, db)
+
+	podID := testHelpers.CreateTestPod(t, db)
+	games := []game.Model{
+		{Description: fmt.Sprintf("Bulk Game %d", 1), PodID: podID, FormatID: formatID},
+		{Description: fmt.Sprintf("Bulk Game %d", 2), PodID: podID, FormatID: formatID},
+		{Description: fmt.Sprintf("Bulk Game %d", 3), PodID: podID, FormatID: formatID},
+	}
+
+	ids, err := repo.BulkAdd(ctx, games)
+	require.NoError(t, err)
+	require.Len(t, ids, 3)
+
+	seen := make(map[int]bool)
+	for _, id := range ids {
+		assert.Greater(t, id, 0)
+		assert.False(t, seen[id], "duplicate ID returned: %d", id)
+		seen[id] = true
+	}
+}
+
+func TestUpdate(t *testing.T) {
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewGameRepo(db)
+	ctx := context.Background()
+	formatID := testHelpers.GetCommanderFormatID(t, db)
+
+	podID := testHelpers.CreateTestPod(t, db)
+	id, err := repo.Add(ctx, "Old Description", podID, formatID)
+	require.NoError(t, err)
+
+	require.NoError(t, repo.Update(ctx, id, "New Description"))
+
+	got, err := repo.GetByID(ctx, id)
+	require.NoError(t, err)
+	require.NotNil(t, got)
+	assert.Equal(t, "New Description", got.Description)
 }
 
 func TestUpdate_NotFound(t *testing.T) {
-	client, mock := newMockDB(t)
-	repo := NewRepository(client)
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewGameRepo(db)
 
-	mock.ExpectExec(regexp.QuoteMeta(updateGame)).
-		WithArgs("New Description", 99).
-		WillReturnResult(sqlmock.NewResult(0, 0))
-
-	err := repo.Update(context.Background(), 99, "New Description")
+	err := repo.Update(context.Background(), 999999, "New Description")
 	assert.ErrorContains(t, err, "unexpected number of rows")
-	assert.NoError(t, mock.ExpectationsWereMet())
 }
 
-func TestGetAllByPlayerID_Success(t *testing.T) {
-	client, mock := newMockDB(t)
-	repo := NewRepository(client)
+func TestSoftDelete(t *testing.T) {
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewGameRepo(db)
+	ctx := context.Background()
+	formatID := testHelpers.GetCommanderFormatID(t, db)
 
-	now := time.Now()
-	rows := sqlmock.NewRows(gameColumns()).
-		AddRow(1, "Game 1", 2, 1, now, now, nil).
-		AddRow(2, "Game 2", 2, 1, now, now, nil)
-	mock.ExpectQuery(regexp.QuoteMeta(getGamesByPlayerID)).WithArgs(7).WillReturnRows(rows)
-
-	got, err := repo.GetAllByPlayerID(context.Background(), 7)
+	podID := testHelpers.CreateTestPod(t, db)
+	id, err := repo.Add(ctx, "To Delete", podID, formatID)
 	require.NoError(t, err)
-	assert.Len(t, got, 2)
-	assert.NoError(t, mock.ExpectationsWereMet())
+
+	require.NoError(t, repo.SoftDelete(ctx, id))
+
+	got, err := repo.GetByID(ctx, id)
+	require.NoError(t, err)
+	assert.Nil(t, got)
 }
 
-func TestGetAllByPlayerID_Empty(t *testing.T) {
-	client, mock := newMockDB(t)
-	repo := NewRepository(client)
+func TestSoftDelete_CascadesToGameResults(t *testing.T) {
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewGameRepo(db)
+	ctx := context.Background()
 
-	rows := sqlmock.NewRows(gameColumns())
-	mock.ExpectQuery(regexp.QuoteMeta(getGamesByPlayerID)).WithArgs(99).WillReturnRows(rows)
+	gameID := testHelpers.CreateTestGame(t, db)
+	testDeck := testHelpers.CreateTestDeck(t, db)
+	testHelpers.CreateTestGameResult(t, db, gameID, testDeck.ID, 1, 0)
+	testHelpers.CreateTestGameResult(t, db, gameID, testHelpers.CreateTestDeck(t, db).ID, 2, 1)
 
-	got, err := repo.GetAllByPlayerID(context.Background(), 99)
-	require.NoError(t, err)
-	assert.NotNil(t, got)
-	assert.Len(t, got, 0)
-	assert.NoError(t, mock.ExpectationsWereMet())
-}
+	require.NoError(t, repo.SoftDelete(ctx, gameID))
 
-func TestSoftDelete_Success(t *testing.T) {
-	client, mock := newMockDB(t)
-	repo := NewRepository(client)
-
-	mock.ExpectExec(regexp.QuoteMeta(softDeleteGame)).
-		WithArgs(5).
-		WillReturnResult(sqlmock.NewResult(0, 1))
-
-	err := repo.SoftDelete(context.Background(), 5)
-	require.NoError(t, err)
-	assert.NoError(t, mock.ExpectationsWereMet())
+	var count int64
+	require.NoError(t, db.Unscoped().Table("game_result").
+		Where("game_id = ? AND deleted_at IS NOT NULL", gameID).
+		Count(&count).Error)
+	assert.Equal(t, int64(2), count)
 }
