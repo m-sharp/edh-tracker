@@ -9,6 +9,9 @@ import (
 type GetAllByPodFunc func(ctx context.Context, podID int) ([]Entity, error)
 type GetAllByDeckFunc func(ctx context.Context, deckID int) ([]Entity, error)
 type GetAllByPlayerFunc func(ctx context.Context, playerID int) ([]Entity, error)
+type GetAllByPodPaginatedFunc func(ctx context.Context, podID, limit, offset int) ([]Entity, int, error)
+type GetAllByDeckPaginatedFunc func(ctx context.Context, deckID, limit, offset int) ([]Entity, int, error)
+type GetAllByPlayerIDPaginatedFunc func(ctx context.Context, playerID, limit, offset int) ([]Entity, int, error)
 type GetByIDFunc func(ctx context.Context, gameID int) (*Entity, error)
 type CreateFunc func(ctx context.Context, description string, podID, formatID int, results []gameResult.InputEntity) error
 type UpdateFunc func(ctx context.Context, gameID int, description string) error
@@ -18,14 +21,17 @@ type UpdateResultFunc func(ctx context.Context, resultID, place, killCount, deck
 type DeleteResultFunc func(ctx context.Context, resultID int) error
 
 type Functions struct {
-	GetAllByPod    GetAllByPodFunc
-	GetAllByDeck   GetAllByDeckFunc
-	GetAllByPlayer GetAllByPlayerFunc
-	GetByID        GetByIDFunc
-	Create         CreateFunc
-	Update         UpdateFunc
-	SoftDelete     SoftDeleteFunc
-	AddResult      AddResultFunc
-	UpdateResult   UpdateResultFunc
-	DeleteResult   DeleteResultFunc
+	GetAllByPod               GetAllByPodFunc
+	GetAllByDeck              GetAllByDeckFunc
+	GetAllByPlayer            GetAllByPlayerFunc
+	GetAllByPodPaginated      GetAllByPodPaginatedFunc
+	GetAllByDeckPaginated     GetAllByDeckPaginatedFunc
+	GetAllByPlayerIDPaginated GetAllByPlayerIDPaginatedFunc
+	GetByID                   GetByIDFunc
+	Create                    CreateFunc
+	Update                    UpdateFunc
+	SoftDelete                SoftDeleteFunc
+	AddResult                 AddResultFunc
+	UpdateResult              UpdateResultFunc
+	DeleteResult              DeleteResultFunc
 }

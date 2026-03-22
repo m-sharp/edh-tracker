@@ -94,10 +94,10 @@ Mark items `[x]` as they are completed during implementation.
 - [x] New GET filters: `GET /api/players?pod_id`, `GET /api/decks?pod_id`, `GET /api/games?player_id`
 
 ### Phase 2D — Server-Side Pagination
-- [ ] `PaginatedResponse[T]` type in `lib/business/pagination.go`
-- [ ] Game repo: `GetAllByPodPaginated`, `GetAllByDeckPaginated`
-- [ ] Deck repo: `GetAllByPodPaginated`, `GetAllByPlayerPaginated`
-- [ ] Router changes for `GET /api/games` and `GET /api/decks`
+- [x] `PaginatedResponse[T]` type in `lib/business/pagination.go`
+- [x] Game repo: `GetAllByPodPaginated`, `GetAllByDeckPaginated`
+- [x] Deck repo: `GetAllByPodPaginated`, `GetAllByPlayerPaginated`
+- [x] Router changes for `GET /api/games` and `GET /api/decks`
 
 > **GORM Implementation Notes:** Pagination is straightforward with GORM. Use `.Limit(limit).Offset(offset)` chained onto existing GORM queries for data retrieval. Count queries use `.Model(&T{}).Where(...).Count(&total)` with the same WHERE clause as the data query — no raw SQL needed. Each paginated repo method must also be added to the corresponding interface in `lib/repositories/interfaces.go`. Repository tests use `testHelpers.NewTestDB(t)` with real fixtures (not mocks).
 

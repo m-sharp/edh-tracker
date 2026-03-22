@@ -283,3 +283,85 @@ func TestDeckGetAllByPod_Error(t *testing.T) {
 	_, err := fn(context.Background(), 5)
 	assert.Error(t, err)
 }
+
+func TestGetAllByPodPaginated_Success(t *testing.T) {
+	dr := &testHelpers.MockDeckRepo{
+		GetAllByPodPaginatedFn: func(ctx context.Context, podID, limit, offset int) ([]deckRepo.Model, int, error) {
+			return []deckRepo.Model{
+				{
+					GormModelBase: base.GormModelBase{ID: 10},
+					PlayerID:      1,
+					Name:          "Deck A",
+					FormatID:      1,
+					Player:        playerRepo.Model{Name: "Alice"},
+					Format:        formatRepo.Model{Name: "commander"},
+				},
+			}, 15, nil
+		},
+	}
+	grRepo := &testHelpers.MockGameResultRepo{
+		GetStatsForDeckFn: func(ctx context.Context, deckID int) (*gameResultRepo.Aggregate, error) {
+			return nil, nil
+		},
+	}
+
+	fn := GetAllByPodPaginated(dr, grRepo)
+	got, total, err := fn(context.Background(), 5, 10, 0)
+	require.NoError(t, err)
+	assert.Equal(t, 15, total)
+	require.Len(t, got, 1)
+	assert.Equal(t, "Deck A", got[0].Name)
+	assert.Equal(t, "Alice", got[0].PlayerName)
+}
+
+func TestGetAllByPodPaginated_RepoError(t *testing.T) {
+	dr := &testHelpers.MockDeckRepo{
+		GetAllByPodPaginatedFn: func(ctx context.Context, podID, limit, offset int) ([]deckRepo.Model, int, error) {
+			return nil, 0, errors.New("db error")
+		},
+	}
+	fn := GetAllByPodPaginated(dr, &testHelpers.MockGameResultRepo{})
+	_, _, err := fn(context.Background(), 5, 10, 0)
+	assert.Error(t, err)
+}
+
+func TestGetAllByPlayerPaginated_Success(t *testing.T) {
+	dr := &testHelpers.MockDeckRepo{
+		GetAllByPlayerPaginatedFn: func(ctx context.Context, playerID, limit, offset int) ([]deckRepo.Model, int, error) {
+			return []deckRepo.Model{
+				{
+					GormModelBase: base.GormModelBase{ID: 20},
+					PlayerID:      playerID,
+					Name:          "Deck B",
+					FormatID:      1,
+					Player:        playerRepo.Model{Name: "Bob"},
+					Format:        formatRepo.Model{Name: "other"},
+				},
+			}, 3, nil
+		},
+	}
+	grRepo := &testHelpers.MockGameResultRepo{
+		GetStatsForDeckFn: func(ctx context.Context, deckID int) (*gameResultRepo.Aggregate, error) {
+			return nil, nil
+		},
+	}
+
+	fn := GetAllByPlayerPaginated(dr, grRepo)
+	got, total, err := fn(context.Background(), 7, 5, 0)
+	require.NoError(t, err)
+	assert.Equal(t, 3, total)
+	require.Len(t, got, 1)
+	assert.Equal(t, "Deck B", got[0].Name)
+	assert.Equal(t, "Bob", got[0].PlayerName)
+}
+
+func TestGetAllByPlayerPaginated_RepoError(t *testing.T) {
+	dr := &testHelpers.MockDeckRepo{
+		GetAllByPlayerPaginatedFn: func(ctx context.Context, playerID, limit, offset int) ([]deckRepo.Model, int, error) {
+			return nil, 0, errors.New("db error")
+		},
+	}
+	fn := GetAllByPlayerPaginated(dr, &testHelpers.MockGameResultRepo{})
+	_, _, err := fn(context.Background(), 7, 5, 0)
+	assert.Error(t, err)
+}

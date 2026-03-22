@@ -13,6 +13,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 
+	"github.com/m-sharp/edh-tracker/lib/business"
 	"github.com/m-sharp/edh-tracker/lib/business/game"
 	"github.com/m-sharp/edh-tracker/lib/business/gameResult"
 )
@@ -387,4 +388,99 @@ func TestGameRouter_DeleteGameResult_MissingParam(t *testing.T) {
 	router.DeleteGameResult(rr, req)
 
 	assert.Equal(t, http.StatusBadRequest, rr.Code)
+}
+
+func TestGameRouter_GetAll_Paginated_ByPod(t *testing.T) {
+	entities := []game.Entity{{ID: 1, Description: "Game 1"}, {ID: 2, Description: "Game 2"}}
+	router := newTestGameRouter(game.Functions{
+		GetAllByPodPaginated: func(ctx context.Context, podID, limit, offset int) ([]game.Entity, int, error) {
+			assert.Equal(t, 5, podID)
+			assert.Equal(t, 10, limit)
+			assert.Equal(t, 0, offset)
+			return entities, 25, nil
+		},
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/api/games?pod_id=5&limit=10&offset=0", nil)
+	rr := httptest.NewRecorder()
+	router.GetAll(rr, req)
+
+	assert.Equal(t, http.StatusOK, rr.Code)
+	var got business.PaginatedResponse[game.Entity]
+	require.NoError(t, json.Unmarshal(rr.Body.Bytes(), &got))
+	assert.Equal(t, 25, got.Total)
+	assert.Equal(t, 10, got.Limit)
+	assert.Equal(t, 0, got.Offset)
+	assert.Len(t, got.Items, 2)
+}
+
+func TestGameRouter_GetAll_Paginated_ByDeck(t *testing.T) {
+	entities := []game.Entity{{ID: 3}}
+	router := newTestGameRouter(game.Functions{
+		GetAllByDeckPaginated: func(ctx context.Context, deckID, limit, offset int) ([]game.Entity, int, error) {
+			return entities, 1, nil
+		},
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/api/games?deck_id=2&limit=5&offset=0", nil)
+	rr := httptest.NewRecorder()
+	router.GetAll(rr, req)
+
+	assert.Equal(t, http.StatusOK, rr.Code)
+	var got business.PaginatedResponse[game.Entity]
+	require.NoError(t, json.Unmarshal(rr.Body.Bytes(), &got))
+	assert.Equal(t, 1, got.Total)
+	assert.Len(t, got.Items, 1)
+}
+
+func TestGameRouter_GetAll_Paginated_ByPlayer(t *testing.T) {
+	entities := []game.Entity{{ID: 7}}
+	router := newTestGameRouter(game.Functions{
+		GetAllByPlayerIDPaginated: func(ctx context.Context, playerID, limit, offset int) ([]game.Entity, int, error) {
+			return entities, 50, nil
+		},
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/api/games?player_id=42&limit=25&offset=25", nil)
+	rr := httptest.NewRecorder()
+	router.GetAll(rr, req)
+
+	assert.Equal(t, http.StatusOK, rr.Code)
+	var got business.PaginatedResponse[game.Entity]
+	require.NoError(t, json.Unmarshal(rr.Body.Bytes(), &got))
+	assert.Equal(t, 50, got.Total)
+	assert.Equal(t, 25, got.Limit)
+	assert.Equal(t, 25, got.Offset)
+}
+
+func TestGameRouter_GetAll_Paginated_Error(t *testing.T) {
+	router := newTestGameRouter(game.Functions{
+		GetAllByPodPaginated: func(ctx context.Context, podID, limit, offset int) ([]game.Entity, int, error) {
+			return nil, 0, errors.New("db error")
+		},
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/api/games?pod_id=1&limit=10", nil)
+	rr := httptest.NewRecorder()
+	router.GetAll(rr, req)
+
+	assert.Equal(t, http.StatusInternalServerError, rr.Code)
+}
+
+func TestGameRouter_GetAll_NoLimit_PlainArray(t *testing.T) {
+	games := []game.Entity{{ID: 1}, {ID: 2}, {ID: 3}}
+	router := newTestGameRouter(game.Functions{
+		GetAllByPod: func(ctx context.Context, podID int) ([]game.Entity, error) {
+			return games, nil
+		},
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/api/games?pod_id=1", nil)
+	rr := httptest.NewRecorder()
+	router.GetAll(rr, req)
+
+	assert.Equal(t, http.StatusOK, rr.Code)
+	var got []game.Entity
+	require.NoError(t, json.Unmarshal(rr.Body.Bytes(), &got))
+	assert.Len(t, got, 3)
 }

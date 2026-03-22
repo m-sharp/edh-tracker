@@ -8,7 +8,7 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/m-sharp/edh-tracker/lib/business"
+	bizpkg "github.com/m-sharp/edh-tracker/lib/business"
 	"github.com/m-sharp/edh-tracker/lib/business/game"
 	"github.com/m-sharp/edh-tracker/lib/business/gameResult"
 	"github.com/m-sharp/edh-tracker/lib/business/pod"
@@ -22,7 +22,7 @@ type GameRouter struct {
 	getPodRole  pod.GetRoleFunc
 }
 
-func NewGameRouter(log *zap.Logger, biz *business.Business) *GameRouter {
+func NewGameRouter(log *zap.Logger, biz *bizpkg.Business) *GameRouter {
 	return &GameRouter{
 		log:         log.Named("GameRouter"),
 		games:       biz.Games,
@@ -109,7 +109,6 @@ type createGameRequest struct {
 	Results     []gameResult.InputEntity `json:"results"`
 }
 
-// ToDo: Eventually, this will probably need pagination
 func (g *GameRouter) GetAll(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	errMsg := "Failed to get Game records"
@@ -120,6 +119,14 @@ func (g *GameRouter) GetAll(w http.ResponseWriter, r *http.Request) {
 
 	if podId == 0 && deckId == 0 && playerID == 0 {
 		trackerHttp.WriteError(g.log, w, http.StatusBadRequest, fmt.Errorf("missing required query param"), "Missing required query param", "pod_id, deck_id, or player_id query param is required")
+		return
+	}
+
+	limit, _ := trackerHttp.GetQueryId(r, "limit")
+	offset, _ := trackerHttp.GetQueryId(r, "offset")
+
+	if limit > 0 {
+		g.getAllPaginated(w, r, podId, deckId, playerID, limit, offset)
 		return
 	}
 
@@ -146,6 +153,42 @@ func (g *GameRouter) GetAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	trackerHttp.WriteJson(g.log, w, marshalled)
+}
+
+func (g *GameRouter) getAllPaginated(w http.ResponseWriter, r *http.Request, podId, deckId, playerID, limit, offset int) {
+	ctx := r.Context()
+	errMsg := "Failed to get Game records"
+
+	var (
+		entities []game.Entity
+		total    int
+		err      error
+	)
+	switch {
+	case deckId != 0:
+		entities, total, err = g.games.GetAllByDeckPaginated(ctx, deckId, limit, offset)
+	case playerID != 0:
+		entities, total, err = g.games.GetAllByPlayerIDPaginated(ctx, playerID, limit, offset)
+	default:
+		entities, total, err = g.games.GetAllByPodPaginated(ctx, podId, limit, offset)
+	}
+	if err != nil {
+		trackerHttp.WriteError(g.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
+		return
+	}
+
+	resp := bizpkg.PaginatedResponse[game.Entity]{
+		Items:  entities,
+		Total:  total,
+		Limit:  limit,
+		Offset: offset,
+	}
+	marshalled, err := json.Marshal(resp)
+	if err != nil {
+		trackerHttp.WriteError(g.log, w, http.StatusInternalServerError, err, "Failed to marshall records as JSON", errMsg)
+		return
+	}
 	trackerHttp.WriteJson(g.log, w, marshalled)
 }
 

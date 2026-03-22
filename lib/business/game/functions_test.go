@@ -279,3 +279,98 @@ func TestDeleteResult_Success(t *testing.T) {
 	err := fn(context.Background(), 1)
 	require.NoError(t, err)
 }
+
+func TestGetAllByPodPaginated_Success(t *testing.T) {
+	gameRepo := &testHelpers.MockGameRepo{
+		GetAllByPodPaginatedFn: func(ctx context.Context, podID, limit, offset int) ([]gamerepo.Model, int, error) {
+			return []gamerepo.Model{
+				{GormModelBase: base.GormModelBase{ID: 1}, PodID: podID, FormatID: 1},
+			}, 10, nil
+		},
+	}
+	enrichGameResults := func(ctx context.Context, models []gameresultrepo.Model) ([]gameResult.Entity, error) {
+		return []gameResult.Entity{}, nil
+	}
+
+	fn := GetAllByPodPaginated(zap.NewNop(), gameRepo, enrichGameResults)
+	got, total, err := fn(context.Background(), 5, 1, 0)
+	require.NoError(t, err)
+	assert.Equal(t, 10, total)
+	assert.Len(t, got, 1)
+	assert.Equal(t, 1, got[0].ID)
+}
+
+func TestGetAllByPodPaginated_RepoError(t *testing.T) {
+	gameRepo := &testHelpers.MockGameRepo{
+		GetAllByPodPaginatedFn: func(ctx context.Context, podID, limit, offset int) ([]gamerepo.Model, int, error) {
+			return nil, 0, errors.New("db error")
+		},
+	}
+	fn := GetAllByPodPaginated(zap.NewNop(), gameRepo, nil)
+	_, _, err := fn(context.Background(), 5, 10, 0)
+	assert.Error(t, err)
+}
+
+func TestGetAllByPodPaginated_ResultErrorDropsGame(t *testing.T) {
+	gameRepo := &testHelpers.MockGameRepo{
+		GetAllByPodPaginatedFn: func(ctx context.Context, podID, limit, offset int) ([]gamerepo.Model, int, error) {
+			return []gamerepo.Model{
+				{GormModelBase: base.GormModelBase{ID: 1}, Results: []gameresultrepo.Model{{GameID: 1}}},
+				{GormModelBase: base.GormModelBase{ID: 2}, Results: []gameresultrepo.Model{{GameID: 2}}},
+			}, 5, nil
+		},
+	}
+	enrichGameResults := func(ctx context.Context, models []gameresultrepo.Model) ([]gameResult.Entity, error) {
+		if len(models) > 0 && models[0].GameID == 1 {
+			return nil, errors.New("enrich error")
+		}
+		return []gameResult.Entity{}, nil
+	}
+
+	fn := GetAllByPodPaginated(zap.NewNop(), gameRepo, enrichGameResults)
+	got, total, err := fn(context.Background(), 5, 10, 0)
+	require.NoError(t, err)
+	assert.Equal(t, 5, total)
+	assert.Len(t, got, 1)
+	assert.Equal(t, 2, got[0].ID)
+}
+
+func TestGetAllByDeckPaginated_Success(t *testing.T) {
+	gameRepo := &testHelpers.MockGameRepo{
+		GetAllByDeckPaginatedFn: func(ctx context.Context, deckID, limit, offset int) ([]gamerepo.Model, int, error) {
+			return []gamerepo.Model{
+				{GormModelBase: base.GormModelBase{ID: 3}, FormatID: 1},
+			}, 7, nil
+		},
+	}
+	enrichGameResults := func(ctx context.Context, models []gameresultrepo.Model) ([]gameResult.Entity, error) {
+		return []gameResult.Entity{}, nil
+	}
+
+	fn := GetAllByDeckPaginated(zap.NewNop(), gameRepo, enrichGameResults)
+	got, total, err := fn(context.Background(), 10, 5, 0)
+	require.NoError(t, err)
+	assert.Equal(t, 7, total)
+	assert.Len(t, got, 1)
+	assert.Equal(t, 3, got[0].ID)
+}
+
+func TestGetAllByPlayerIDPaginated_Success(t *testing.T) {
+	gameRepo := &testHelpers.MockGameRepo{
+		GetAllByPlayerIDPaginatedFn: func(ctx context.Context, playerID, limit, offset int) ([]gamerepo.Model, int, error) {
+			return []gamerepo.Model{
+				{GormModelBase: base.GormModelBase{ID: 5}, FormatID: 1},
+				{GormModelBase: base.GormModelBase{ID: 6}, FormatID: 1},
+			}, 20, nil
+		},
+	}
+	enrichGameResults := func(ctx context.Context, models []gameresultrepo.Model) ([]gameResult.Entity, error) {
+		return []gameResult.Entity{}, nil
+	}
+
+	fn := GetAllByPlayerIDPaginated(zap.NewNop(), gameRepo, enrichGameResults)
+	got, total, err := fn(context.Background(), 42, 10, 10)
+	require.NoError(t, err)
+	assert.Equal(t, 20, total)
+	assert.Len(t, got, 2)
+}

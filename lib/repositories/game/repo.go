@@ -43,6 +43,26 @@ func (r *Repository) GetAllByPod(ctx context.Context, podID int) ([]Model, error
 	return games, nil
 }
 
+func (r *Repository) GetAllByPodPaginated(ctx context.Context, podID, limit, offset int) ([]Model, int, error) {
+	var total int64
+	if err := r.db.WithContext(ctx).Model(&Model{}).Where("pod_id = ?", podID).Count(&total).Error; err != nil {
+		return nil, 0, fmt.Errorf("failed to count Game records for pod %d: %w", podID, err)
+	}
+
+	var games []Model
+	err := r.preloadAll(r.db.WithContext(ctx)).
+		Where("pod_id = ?", podID).
+		Limit(limit).Offset(offset).
+		Find(&games).Error
+	if err != nil {
+		return nil, 0, fmt.Errorf("failed to get Game records with results for pod %d: %w", podID, err)
+	}
+	if games == nil {
+		return []Model{}, int(total), nil
+	}
+	return games, int(total), nil
+}
+
 func (r *Repository) GetAllByDeck(ctx context.Context, deckID int) ([]Model, error) {
 	var games []Model
 	err := r.preloadAll(r.db.WithContext(ctx)).
@@ -56,6 +76,30 @@ func (r *Repository) GetAllByDeck(ctx context.Context, deckID int) ([]Model, err
 		return []Model{}, nil
 	}
 	return games, nil
+}
+
+func (r *Repository) GetAllByDeckPaginated(ctx context.Context, deckID, limit, offset int) ([]Model, int, error) {
+	var total int64
+	if err := r.db.WithContext(ctx).Model(&Model{}).
+		Joins("INNER JOIN game_result ON game.id = game_result.game_id").
+		Where("game_result.deck_id = ? AND game_result.deleted_at IS NULL", deckID).
+		Count(&total).Error; err != nil {
+		return nil, 0, fmt.Errorf("failed to count Game records for deck %d: %w", deckID, err)
+	}
+
+	var games []Model
+	err := r.preloadAll(r.db.WithContext(ctx)).
+		Joins("INNER JOIN game_result ON game.id = game_result.game_id").
+		Where("game_result.deck_id = ? AND game_result.deleted_at IS NULL", deckID).
+		Limit(limit).Offset(offset).
+		Find(&games).Error
+	if err != nil {
+		return nil, 0, fmt.Errorf("failed to get Game records with results for deck %d: %w", deckID, err)
+	}
+	if games == nil {
+		return []Model{}, int(total), nil
+	}
+	return games, int(total), nil
 }
 
 func (r *Repository) GetAllByPlayerID(ctx context.Context, playerID int) ([]Model, error) {
@@ -74,6 +118,36 @@ func (r *Repository) GetAllByPlayerID(ctx context.Context, playerID int) ([]Mode
 		return []Model{}, nil
 	}
 	return games, nil
+}
+
+func (r *Repository) GetAllByPlayerIDPaginated(ctx context.Context, playerID, limit, offset int) ([]Model, int, error) {
+	var total int64
+	if err := r.db.WithContext(ctx).Model(&Model{}).
+		Select("game.*").
+		Joins("INNER JOIN game_result ON game.id = game_result.game_id").
+		Joins("INNER JOIN deck ON game_result.deck_id = deck.id").
+		Where("deck.player_id = ? AND game_result.deleted_at IS NULL AND deck.deleted_at IS NULL", playerID).
+		Distinct().
+		Count(&total).Error; err != nil {
+		return nil, 0, fmt.Errorf("failed to count Game records for player %d: %w", playerID, err)
+	}
+
+	var games []Model
+	err := r.preloadAll(r.db.WithContext(ctx)).
+		Select("game.*").
+		Joins("INNER JOIN game_result ON game.id = game_result.game_id").
+		Joins("INNER JOIN deck ON game_result.deck_id = deck.id").
+		Where("deck.player_id = ? AND game_result.deleted_at IS NULL AND deck.deleted_at IS NULL", playerID).
+		Distinct().
+		Limit(limit).Offset(offset).
+		Find(&games).Error
+	if err != nil {
+		return nil, 0, fmt.Errorf("failed to get Game records with results for player %d: %w", playerID, err)
+	}
+	if games == nil {
+		return []Model{}, int(total), nil
+	}
+	return games, int(total), nil
 }
 
 func (r *Repository) GetByID(ctx context.Context, gameID int) (*Model, error) {

@@ -55,12 +55,18 @@ func (d *DeckRouter) GetRoutes() []*trackerHttp.Route {
 	}
 }
 
-// ToDo: Eventually, this will probably need paging
 func (d *DeckRouter) GetAll(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	errMsg := "Failed to get Deck records"
 	playerID, _ := trackerHttp.GetQueryId(r, "player_id")
 	podID, _ := trackerHttp.GetQueryId(r, "pod_id")
+	limit, _ := trackerHttp.GetQueryId(r, "limit")
+	offset, _ := trackerHttp.GetQueryId(r, "offset")
+
+	if limit > 0 {
+		d.getAllPaginated(w, r, podID, playerID, limit, offset)
+		return
+	}
 
 	var (
 		decks []deck.EntityWithStats
@@ -86,6 +92,49 @@ func (d *DeckRouter) GetAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	trackerHttp.WriteJson(d.log, w, marshalled)
+}
+
+func (d *DeckRouter) getAllPaginated(w http.ResponseWriter, r *http.Request, podID, playerID, limit, offset int) {
+	ctx := r.Context()
+	errMsg := "Failed to get Deck records"
+
+	var (
+		entities []deck.EntityWithStats
+		total    int
+		err      error
+	)
+	switch {
+	case podID != 0:
+		entities, total, err = d.decks.GetAllByPodPaginated(ctx, podID, limit, offset)
+	case playerID != 0:
+		entities, total, err = d.decks.GetAllByPlayerPaginated(ctx, playerID, limit, offset)
+	default:
+		// TODO: Should probably not exist. Also, it's slowwwww
+		decks, decksErr := d.decks.GetAll(ctx)
+		if decksErr != nil {
+			trackerHttp.WriteError(d.log, w, http.StatusInternalServerError, decksErr, errMsg, errMsg)
+			return
+		}
+		entities = decks
+		total = len(decks)
+	}
+	if err != nil {
+		trackerHttp.WriteError(d.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
+		return
+	}
+
+	resp := business.PaginatedResponse[deck.EntityWithStats]{
+		Items:  entities,
+		Total:  total,
+		Limit:  limit,
+		Offset: offset,
+	}
+	marshalled, err := json.Marshal(resp)
+	if err != nil {
+		trackerHttp.WriteError(d.log, w, http.StatusInternalServerError, err, "Failed to marshall records as JSON", errMsg)
+		return
+	}
 	trackerHttp.WriteJson(d.log, w, marshalled)
 }
 
