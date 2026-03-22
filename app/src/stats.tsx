@@ -87,10 +87,7 @@ export const CommanderColumn: GridColDef = {
     field: "name",
     headerName: "Deck",
     renderCell: (params) => (
-        <Link to={`/deck/${params.row.id}`}>
-            {params.row.name}
-            {params.row.commanders && ` (${params.row.commanders.commander_name})`}
-        </Link>
+        <Link to={`/player/${params.row.player_id}/deck/${params.row.id}`}>{params.row.name}</Link>
     ),
     hideable: false,
     flex: 1,

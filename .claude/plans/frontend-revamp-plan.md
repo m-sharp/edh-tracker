@@ -134,8 +134,8 @@ Mark items `[x]` as they are completed during implementation.
 - [x] `app/src/routes/join.tsx` (invite code landing page)
 
 ### Phase 4B — Player Page Revamp
-- [ ] `app/src/routes/player.tsx` — tabs (Overview, Decks, Games, Settings)
-- [ ] `PlayerSettingsTab` (edit name, pod list with leave button, create pod)
+- [x] `app/src/routes/player.tsx` — tabs (Overview, Decks, Games, Settings)
+- [x] `PlayerSettingsTab` (edit name, pod list with leave button, create pod)
 
 ### Phase 4C — Deck Page Revamp
 - [ ] `app/src/routes/deck.tsx` — new route + tabs (Overview, Games, Settings)

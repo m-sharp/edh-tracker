@@ -254,12 +254,17 @@ export async function PostPodJoin(inviteCode: string): Promise<Pod> {
 }
 
 export async function PostPodLeave(podId: number): Promise<void> {
-    await fetch(`${API_BASE_URL}/api/pod/leave`, {
+    const res = await fetch(`${API_BASE_URL}/api/pod/leave`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({ pod_id: podId }),
     });
+    if (!res.ok) {
+        const err: any = new Error(`Failed to leave pod: ${res.status}`);
+        err.status = res.status;
+        throw err;
+    }
 }
 
 export async function PatchPodPlayerRole(podId: number, playerId: number): Promise<void> {
