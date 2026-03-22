@@ -102,7 +102,9 @@ func (r *Repository) Update(ctx context.Context, playerID int, name string) erro
 }
 
 func (r *Repository) SoftDelete(ctx context.Context, id int) error {
-	result := r.db.WithContext(ctx).Delete(&Model{}, id)
+	m := Model{}
+	m.ID = id
+	result := r.db.WithContext(ctx).Delete(&m)
 	if result.Error != nil {
 		return fmt.Errorf("failed to soft-delete Player record: %w", result.Error)
 	}

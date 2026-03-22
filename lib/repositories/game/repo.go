@@ -121,10 +121,10 @@ func (r *Repository) Update(ctx context.Context, gameID int, description string)
 	return nil
 }
 
-// TODO: Soft deleting a game should also delete all associated GameResult records
-// TODO: Will need to look for other cascading deletes
 func (r *Repository) SoftDelete(ctx context.Context, id int) error {
-	if err := r.db.WithContext(ctx).Delete(&Model{}, id).Error; err != nil {
+	m := Model{}
+	m.ID = id
+	if err := r.db.WithContext(ctx).Delete(&m).Error; err != nil {
 		return fmt.Errorf("failed to soft-delete Game record: %w", err)
 	}
 	return nil

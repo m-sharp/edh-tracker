@@ -399,3 +399,19 @@ func TestSoftDelete(t *testing.T) {
 	require.NoError(t, err)
 	assert.Nil(t, got)
 }
+
+func TestSoftDelete_CascadesToDeckCommander(t *testing.T) {
+	db := testHelpers.NewTestDB(t)
+	ctx := context.Background()
+
+	testDeck := testHelpers.CreateTestDeckWithCommander(t, db)
+	repo := testHelpers.NewDeckRepo(db)
+
+	require.NoError(t, repo.SoftDelete(ctx, testDeck.ID))
+
+	var count int64
+	require.NoError(t, db.Unscoped().Table("deck_commander").
+		Where("deck_id = ? AND deleted_at IS NOT NULL", testDeck.ID).
+		Count(&count).Error)
+	assert.Equal(t, int64(1), count)
+}

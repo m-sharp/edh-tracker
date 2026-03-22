@@ -150,5 +150,6 @@ func getAllMigrations() map[int]Migration {
 		16: &Migration16{},
 		17: &Migration17{},
 		18: &Migration18{},
+		19: &Migration19{},
 	}
 }

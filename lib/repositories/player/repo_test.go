@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/m-sharp/edh-tracker/lib/repositories/playerPodRole"
 	"github.com/m-sharp/edh-tracker/lib/repositories/testHelpers"
 )
 
@@ -158,4 +159,50 @@ func TestSoftDelete_NotFound(t *testing.T) {
 	repo := testHelpers.NewPlayerRepo(db)
 	err := repo.SoftDelete(context.Background(), 999999)
 	assert.ErrorContains(t, err, "unexpected number of rows")
+}
+
+func TestSoftDelete_CascadesToAllPlayerRows(t *testing.T) {
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewPlayerRepo(db)
+	podRepo := testHelpers.NewPodRepo(db)
+	roleRepo := testHelpers.NewPlayerPodRoleRepo(db)
+	ctx := context.Background()
+
+	playerID, err := repo.Add(ctx, "CascadeTestPlayer")
+	require.NoError(t, err)
+
+	testDeck := testHelpers.CreateTestDeckWithCommander(t, db)
+	// Reassign the deck to our player by creating a new one directly
+	deckRepo := testHelpers.NewDeckRepo(db)
+	formatID := testHelpers.GetCommanderFormatID(t, db)
+	deckID, err := deckRepo.Add(ctx, playerID, "Player Deck", formatID)
+	require.NoError(t, err)
+
+	dcRepo := testHelpers.NewDeckCommanderRepo(db)
+	cmdID := testHelpers.CreateTestCommander(t, db)
+	_, err = dcRepo.Add(ctx, deckID, cmdID, nil)
+	require.NoError(t, err)
+
+	podID := testHelpers.CreateTestPod(t, db)
+	require.NoError(t, podRepo.AddPlayerToPod(ctx, podID, playerID))
+	require.NoError(t, roleRepo.BulkAdd(ctx, podID, []int{playerID}, playerPodRole.RoleMember))
+
+	require.NoError(t, repo.SoftDelete(ctx, playerID))
+
+	var deckCount, dcCount, podCount, roleCount int64
+	require.NoError(t, db.Unscoped().Table("deck").
+		Where("player_id = ? AND deleted_at IS NOT NULL", playerID).Count(&deckCount).Error)
+	require.NoError(t, db.Unscoped().Table("deck_commander").
+		Where("deck_id = ? AND deleted_at IS NOT NULL", deckID).Count(&dcCount).Error)
+	require.NoError(t, db.Unscoped().Table("player_pod").
+		Where("player_id = ? AND deleted_at IS NOT NULL", playerID).Count(&podCount).Error)
+	require.NoError(t, db.Unscoped().Table("player_pod_role").
+		Where("player_id = ? AND deleted_at IS NOT NULL", playerID).Count(&roleCount).Error)
+
+	assert.Equal(t, int64(1), deckCount)
+	assert.Equal(t, int64(1), dcCount)
+	assert.Equal(t, int64(1), podCount)
+	assert.Equal(t, int64(1), roleCount)
+
+	_ = testDeck // created to ensure no cross-contamination
 }

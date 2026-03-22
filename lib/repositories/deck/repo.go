@@ -146,7 +146,9 @@ func (r *Repository) Retire(ctx context.Context, deckID int) error {
 }
 
 func (r *Repository) SoftDelete(ctx context.Context, id int) error {
-	if err := r.db.WithContext(ctx).Delete(&Model{}, id).Error; err != nil {
+	m := Model{}
+	m.ID = id
+	if err := r.db.WithContext(ctx).Delete(&m).Error; err != nil {
 		return fmt.Errorf("failed to soft-delete Deck record: %w", err)
 	}
 	return nil

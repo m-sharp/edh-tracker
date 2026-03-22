@@ -165,9 +165,6 @@ func Leave(podRepo repos.PodRepository, roleRepo repos.PlayerPodRoleRepository) 
 		if err = podRepo.RemovePlayer(ctx, podID, playerID); err != nil {
 			return fmt.Errorf("failed to remove player from pod: %w", err)
 		}
-		// player_pod_role rows remain but are logically orphaned;
-		// all member queries filter by player_pod.deleted_at IS NULL.
-		// TODO: ^ Need to have logic cascading deletes set up for everything
 		return nil
 	}
 }

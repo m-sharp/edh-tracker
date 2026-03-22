@@ -204,3 +204,22 @@ func TestSoftDelete(t *testing.T) {
 	require.NoError(t, err)
 	assert.Nil(t, got)
 }
+
+func TestSoftDelete_CascadesToGameResults(t *testing.T) {
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewGameRepo(db)
+	ctx := context.Background()
+
+	gameID := testHelpers.CreateTestGame(t, db)
+	testDeck := testHelpers.CreateTestDeck(t, db)
+	testHelpers.CreateTestGameResult(t, db, gameID, testDeck.ID, 1, 0)
+	testHelpers.CreateTestGameResult(t, db, gameID, testHelpers.CreateTestDeck(t, db).ID, 2, 1)
+
+	require.NoError(t, repo.SoftDelete(ctx, gameID))
+
+	var count int64
+	require.NoError(t, db.Unscoped().Table("game_result").
+		Where("game_id = ? AND deleted_at IS NOT NULL", gameID).
+		Count(&count).Error)
+	assert.Equal(t, int64(2), count)
+}

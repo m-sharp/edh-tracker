@@ -146,7 +146,9 @@ func (r *Repository) AddPlayerToPod(ctx context.Context, podID, playerID int) er
 }
 
 func (r *Repository) SoftDelete(ctx context.Context, podID int) error {
-	if err := r.db.WithContext(ctx).Delete(&Model{}, podID).Error; err != nil {
+	m := Model{}
+	m.ID = podID
+	if err := r.db.WithContext(ctx).Delete(&m).Error; err != nil {
 		return fmt.Errorf("failed to soft delete pod %d: %w", podID, err)
 	}
 	return nil
@@ -161,10 +163,17 @@ func (r *Repository) Update(ctx context.Context, podID int, name string) error {
 }
 
 func (r *Repository) RemovePlayer(ctx context.Context, podID, playerID int) error {
+	var m PlayerPodModel
 	err := r.db.WithContext(ctx).
 		Where("pod_id = ? AND player_id = ?", podID, playerID).
-		Delete(&PlayerPodModel{}).Error
+		First(&m).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil
+	}
 	if err != nil {
+		return fmt.Errorf("failed to find PlayerPod record for player %d in pod %d: %w", playerID, podID, err)
+	}
+	if err = r.db.WithContext(ctx).Delete(&m).Error; err != nil {
 		return fmt.Errorf("failed to remove player %d from pod %d: %w", playerID, podID, err)
 	}
 	return nil

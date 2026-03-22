@@ -289,3 +289,54 @@ func TestRemovePlayer(t *testing.T) {
 	assert.NotContains(t, ids, p1)
 	assert.Contains(t, ids, p2)
 }
+
+func TestRemovePlayer_CascadesToPlayerPodRole(t *testing.T) {
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewPodRepo(db)
+	roleRepo := testHelpers.NewPlayerPodRoleRepo(db)
+	ctx := context.Background()
+
+	podID := testHelpers.CreateTestPod(t, db)
+	playerID := testHelpers.CreateTestPlayer(t, db)
+
+	require.NoError(t, repo.AddPlayerToPod(ctx, podID, playerID))
+	require.NoError(t, roleRepo.BulkAdd(ctx, podID, []int{playerID}, playerPodRole.RoleMember))
+
+	require.NoError(t, repo.RemovePlayer(ctx, podID, playerID))
+
+	var count int64
+	require.NoError(t, db.Unscoped().Table("player_pod_role").
+		Where("pod_id = ? AND player_id = ? AND deleted_at IS NOT NULL", podID, playerID).
+		Count(&count).Error)
+	assert.Equal(t, int64(1), count)
+}
+
+func TestSoftDelete_CascadesToChildTables(t *testing.T) {
+	db := testHelpers.NewTestDB(t)
+	repo := testHelpers.NewPodRepo(db)
+	roleRepo := testHelpers.NewPlayerPodRoleRepo(db)
+	inviteRepo := testHelpers.NewPodInviteRepo(db)
+	ctx := context.Background()
+
+	podID := testHelpers.CreateTestPod(t, db)
+	p1 := testHelpers.CreateTestPlayer(t, db)
+	p2 := testHelpers.CreateTestPlayer(t, db)
+
+	require.NoError(t, repo.BulkAddPlayers(ctx, podID, []int{p1, p2}))
+	require.NoError(t, roleRepo.BulkAdd(ctx, podID, []int{p1, p2}, playerPodRole.RoleMember))
+	require.NoError(t, inviteRepo.Add(ctx, podID, p1, "test-invite-code", nil))
+
+	require.NoError(t, repo.SoftDelete(ctx, podID))
+
+	var playerPodCount, roleCount, inviteCount int64
+	require.NoError(t, db.Unscoped().Table("player_pod").
+		Where("pod_id = ? AND deleted_at IS NOT NULL", podID).Count(&playerPodCount).Error)
+	require.NoError(t, db.Unscoped().Table("player_pod_role").
+		Where("pod_id = ? AND deleted_at IS NOT NULL", podID).Count(&roleCount).Error)
+	require.NoError(t, db.Unscoped().Table("pod_invite").
+		Where("pod_id = ? AND deleted_at IS NOT NULL", podID).Count(&inviteCount).Error)
+
+	assert.Equal(t, int64(2), playerPodCount)
+	assert.Equal(t, int64(2), roleCount)
+	assert.Equal(t, int64(1), inviteCount)
+}
