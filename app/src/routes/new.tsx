@@ -1,5 +1,6 @@
 import { Dispatch, ReactElement, SetStateAction, SyntheticEvent, useState } from "react";
-import { Form, useLoaderData, useSubmit } from "react-router-dom";
+import { Form, redirect, useLoaderData, useParams, useSubmit } from "react-router-dom";
+import { LoaderFunctionArgs } from "@remix-run/router/utils";
 import {
     Autocomplete,
     Box,
@@ -12,15 +13,21 @@ import {
 import AddIcon from '@mui/icons-material/Add';
 import PublishIcon from '@mui/icons-material/Publish';
 
-import { PostGame } from "../http";
+import { GetAllDecksForPod, GetFormats, GetPlayersForPod, PostGame } from "../http";
 import { Deck, Format, NewGame, NewGameData, NewGameResult, Player } from "../types";
 
-interface CreateActionProps {
-    request: Request;
+export async function newGameLoader({ params }: LoaderFunctionArgs): Promise<NewGameData> {
+    const podId = Number(params.podId);
+    const [decks, players, formats] = await Promise.all([
+        GetAllDecksForPod(podId),
+        GetPlayersForPod(podId),
+        GetFormats(),
+    ]);
+    return { decks, players, formats };
 }
 
 // ToDo: Validation
-export async function createGame({request}: CreateActionProps): Promise<null> {
+export async function createGame({request, params}: {request: Request, params: Record<string, string | undefined>}): Promise<Response> {
     const body = await request.json()
 
     const resp = await PostGame(body);
@@ -28,9 +35,7 @@ export async function createGame({request}: CreateActionProps): Promise<null> {
         throw new Error("Failed to create new game record: received " + resp.status + " " + resp.statusText);
     }
 
-    // ToDo: Doesn't trigger any reload, probably need to return an object back?
-    // ToDo: Toast alerts?
-    return null;
+    return redirect(`/pod/${params.podId}`);
 }
 
 interface ResultsMap {
@@ -41,6 +46,7 @@ interface ResultsMap {
 // TODO: Review and develop plan with Claude from TODOs
 export default function View(): ReactElement {
     const newGameInfo = useLoaderData() as NewGameData;
+    const { podId } = useParams();
     const submit = useSubmit();
 
     const [formatID, setFormatID] = useState<number>(0);
@@ -131,7 +137,7 @@ export default function View(): ReactElement {
                         const result: NewGame = {
                             description: desc,
                             format_id: formatID,
-                            pod_id: 0,
+                            pod_id: Number(podId),
                             results: Object.values(results),
                         }
                         submit(result as {[key: string]: any}, {method: "post", encType: "application/json"});

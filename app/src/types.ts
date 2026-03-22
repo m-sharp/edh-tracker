@@ -49,6 +49,10 @@ export interface Player {
     stats: Stats;
 }
 
+export interface PlayerWithRole extends Player {
+    role: string;
+}
+
 export interface Game {
     id: number;
     description: string;
@@ -79,11 +83,6 @@ export interface Pod {
     name: string;
     created_at: string;
     updated_at: string;
-}
-
-export interface PlayerWithRole {
-    player_id: number;
-    role: "manager" | "member";
 }
 
 export interface PaginatedResponse<T> {

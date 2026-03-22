@@ -126,12 +126,12 @@ Mark items `[x]` as they are completed during implementation.
 - [x] `app/src/index.tsx` — wrap with `AuthProvider`; new route tree with `RequireAuth`; stub components for Phase 4 routes; redirects for `/decks`, `/players`, `/games`
 
 #### 3G — Navigation Revamp (depends on 3C; parallel with 3E)
-- [ ] `app/src/routes/root.tsx` — remove old nav links; logged-out/in states (avatar, pod selector with `localStorage`, logout) (pod selector + auth UI)
+- [x] `app/src/routes/root.tsx` — remove old nav links; logged-out/in states (avatar, pod selector with `localStorage`, logout) (pod selector + auth UI)
 
 ### Phase 4A — Pod Landing Page
-- [ ] `app/src/routes/pod.tsx` (tabs: Decks, Players, Games, Settings)
-- [ ] `app/src/routes/new.tsx` (pod context: drop global pod selector, use `useParams`)
-- [ ] `app/src/routes/join.tsx` (invite code landing page)
+- [x] `app/src/routes/pod.tsx` (tabs: Decks, Players, Games, Settings)
+- [x] `app/src/routes/new.tsx` (pod context: drop global pod selector, use `useParams`)
+- [x] `app/src/routes/join.tsx` (invite code landing page)
 
 ### Phase 4B — Player Page Revamp
 - [ ] `app/src/routes/player.tsx` — tabs (Overview, Decks, Games, Settings)

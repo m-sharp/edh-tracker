@@ -263,17 +263,26 @@ export async function PostPodLeave(podId: number): Promise<void> {
 }
 
 export async function PatchPodPlayerRole(podId: number, playerId: number): Promise<void> {
-    await fetch(`http://localhost:8080/api/pod/player?pod_id=${podId}&player_id=${playerId}`, {
+    await fetch(`http://localhost:8080/api/pod/player`, {
         method: "PATCH",
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
+        body: JSON.stringify({ pod_id: podId, player_id: playerId }),
     });
 }
 
 export async function DeletePodPlayer(podId: number, playerId: number): Promise<void> {
-    await fetch(`http://localhost:8080/api/pod/player?pod_id=${podId}&player_id=${playerId}`, {
+    await fetch(`http://localhost:8080/api/pod/player`, {
         method: "DELETE",
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
+        body: JSON.stringify({ pod_id: podId, player_id: playerId }),
     });
+}
+
+export async function GetAllDecksForPod(podId: number): Promise<Array<Deck>> {
+    const res = await fetch(`http://localhost:8080/api/decks?pod_id=${podId}`, { credentials: "include" });
+    return await res.json();
 }
 
 // Loaders

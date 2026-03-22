@@ -7,16 +7,17 @@ import { AuthProvider, useAuth } from "./auth";
 import {
     GetDeck,
     GetGame,
-    GetNewDeckInfo,
     GetPlayer,
     GetPodsForPlayer,
 } from "./http";
 import ErrorPage from "./routes/error"
 import DeckView from "./routes/deck";
 import GameView from "./routes/game";
+import JoinView from "./routes/join";
 import LoginPage from "./routes/login";
-import NewGameView, { createGame } from "./routes/new";
+import NewGameView, { newGameLoader, createGame } from "./routes/new";
 import PlayerView from "./routes/player";
+import PodView, { podLoader } from "./routes/pod";
 import RequireAuth from "./routes/RequireAuth";
 import Root from "./routes/root";
 
@@ -42,14 +43,6 @@ function HomeView(): ReactElement {
     return <Typography>No pods yet. Create your first pod to get started.</Typography>;
 }
 
-function PodView(): ReactElement {
-    return <Typography>Coming soon</Typography>;
-}
-
-function JoinView(): ReactElement {
-    return <Typography>Coming soon</Typography>;
-}
-
 const router = createBrowserRouter([
     {
         path: "/",
@@ -71,12 +64,26 @@ const router = createBrowserRouter([
             {
                 path: "pod/:podId",
                 element: <RequireAuth><PodView /></RequireAuth>,
+                loader: podLoader,
             },
             {
                 path: "pod/:podId/new-game",
                 element: <RequireAuth><NewGameView /></RequireAuth>,
-                loader: GetNewDeckInfo,
+                loader: newGameLoader,
                 action: createGame,
+            },
+            // TODO: These redirects aren't needed
+            {
+                path: "decks",
+                element: <Navigate to="/" replace />,
+            },
+            {
+                path: "players",
+                element: <Navigate to="/" replace />,
+            },
+            {
+                path: "games",
+                element: <Navigate to="/" replace />,
             },
             {
                 path: "pod/:podId/game/:gameId",

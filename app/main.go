@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/gorilla/mux"
-	"go.uber.org/zap"
 	"log"
 	"net/http"
+
+	"github.com/gorilla/mux"
+	"go.uber.org/zap"
 
 	"github.com/m-sharp/edh-tracker/lib"
 )
@@ -30,3 +31,4 @@ func main() {
 // ToDo: Add sitemap.xml
 // ToDo: Add robots.txt
 // ToDo: Add a favicon.ico
+// TODO: Do we even need this? Serve some other way?
