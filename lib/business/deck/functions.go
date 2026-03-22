@@ -4,60 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/m-sharp/edh-tracker/lib/business/commander"
 	"github.com/m-sharp/edh-tracker/lib/business/format"
 	repos "github.com/m-sharp/edh-tracker/lib/repositories"
 	deckRepository "github.com/m-sharp/edh-tracker/lib/repositories/deck"
 )
-
-func GetCommanderEntry(
-	deckCmdrRepo repos.DeckCommanderRepository,
-	getCommanderName commander.GetCommanderNameFunc,
-) GetCommanderEntryFunc {
-	return func(ctx context.Context, deckID int) (*CommanderInfo, error) {
-		dcm, err := deckCmdrRepo.GetByDeckId(ctx, deckID)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get commander for deck %d: %w", deckID, err)
-		}
-		if dcm == nil {
-			return nil, nil
-		}
-
-		cmdName, err := getCommanderName(ctx, dcm.CommanderID)
-		if err != nil {
-			return nil, err
-		}
-
-		entry := &CommanderInfo{
-			CommanderID:   dcm.CommanderID,
-			CommanderName: cmdName,
-		}
-
-		if dcm.PartnerCommanderID != nil {
-			partnerName, err := getCommanderName(ctx, *dcm.PartnerCommanderID)
-			if err != nil {
-				return nil, err
-			}
-			entry.PartnerCommanderID = dcm.PartnerCommanderID
-			entry.PartnerCommanderName = &partnerName
-		}
-
-		return entry, nil
-	}
-}
-
-func GetPlayerIDForDeck(deckRepo repos.DeckRepository) GetPlayerIDForDeckFunc {
-	return func(ctx context.Context, deckID int) (int, error) {
-		d, err := deckRepo.GetById(ctx, deckID)
-		if err != nil {
-			return 0, fmt.Errorf("failed to look up deck %d: %w", deckID, err)
-		}
-		if d == nil {
-			return 0, fmt.Errorf("deck %d not found", deckID)
-		}
-		return d.PlayerID, nil
-	}
-}
 
 func GetDeckName(deckRepo repos.DeckRepository) GetDeckNameFunc {
 	return func(ctx context.Context, deckID int) (string, error) {
