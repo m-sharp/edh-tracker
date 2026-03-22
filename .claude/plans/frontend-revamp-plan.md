@@ -102,13 +102,31 @@ Mark items `[x]` as they are completed during implementation.
 > **GORM Implementation Notes:** Pagination is straightforward with GORM. Use `.Limit(limit).Offset(offset)` chained onto existing GORM queries for data retrieval. Count queries use `.Model(&T{}).Where(...).Count(&total)` with the same WHERE clause as the data query — no raw SQL needed. Each paginated repo method must also be added to the corresponding interface in `lib/repositories/interfaces.go`. Repository tests use `testHelpers.NewTestDB(t)` with real fixtures (not mocks).
 
 ### Phase 3 — Frontend Foundation
-- [ ] `app/src/auth.tsx` (`AuthContext` + `AuthProvider` + `useAuth`)
+
+**Sub-phase order:** 3A → (3B ∥ 3D) → 3C → (3E ∥ 3G) → 3F
+
+#### 3A — Types
+- [ ] `app/src/types.ts` — add `Pod`, `PlayerWithRole`, `PaginatedResponse`, `DeckUpdateFields`, `GameResultUpdateFields`, `NewGameResultWithGame`; add `player_id` to `GameResult`
+
+#### 3B — HTTP Client
+- [ ] `app/src/http.ts` — add `credentials: "include"` to all 12 existing fetches
+- [ ] `app/src/http.ts` — add `GetMe`, `Logout`
+- [ ] `app/src/http.ts` — add all remaining new API functions (pod, player, deck, game)
+
+#### 3C — AuthContext
+- [ ] `app/src/auth.tsx` — `AuthUser`, `AuthContextValue`, `AuthProvider`, `useAuth`
+
+#### 3D — Login Page (no deps; parallel with 3B)
 - [ ] `app/src/routes/login.tsx`
+
+#### 3E — RequireAuth (depends on 3C)
 - [ ] `app/src/routes/RequireAuth.tsx`
-- [ ] `app/src/http.ts` — add `credentials: "include"` everywhere + all new functions
-- [ ] `app/src/types.ts` — add `Pod`, `PlayerWithRole`, `PaginatedResponse`, etc.
-- [ ] Route restructure in `app/src/index.tsx`
-- [ ] Navigation revamp in `app/src/routes/root.tsx` (pod selector + auth UI)
+
+#### 3F — Route Restructure (depends on 3C, 3D, 3E)
+- [ ] `app/src/index.tsx` — wrap with `AuthProvider`; new route tree with `RequireAuth`; stub components for Phase 4 routes; redirects for `/decks`, `/players`, `/games`
+
+#### 3G — Navigation Revamp (depends on 3C; parallel with 3E)
+- [ ] `app/src/routes/root.tsx` — remove old nav links; logged-out/in states (avatar, pod selector with `localStorage`, logout) (pod selector + auth UI)
 
 ### Phase 4A — Pod Landing Page
 - [ ] `app/src/routes/pod.tsx` (tabs: Decks, Players, Games, Settings)
@@ -593,77 +611,27 @@ Each uses `SELECT ... LIMIT ? OFFSET ?` alongside `SELECT COUNT(*) FROM ...` wit
 
 **Requires Phase 2A (auth backend). Blocks Phase 4A–4D.**
 
-### Auth context (`app/src/auth.tsx`)
+### Dependency Graph
 
-```typescript
-interface AuthUser {
-    id: number;           // user.id
-    player_id: number;
-    display_name: string; // from user.display_name (Google name)
-    avatar_url?: string;
-}
-
-interface AuthContextValue {
-    user: AuthUser | null;
-    loading: boolean;
-    logout: () => Promise<void>;
-}
-
-const AuthContext = createContext<AuthContextValue>(...);
-export function AuthProvider({ children }): ReactElement
-export function useAuth(): AuthContextValue
+```
+3A (Types)
+  ↓
+3B (HTTP client — credentials + GetMe/Logout + new functions)   ← depends on 3A
+  ↓                                                3D (LoginPage) — no deps; run in parallel with 3B
+3C (AuthContext)                                              ↓
+  ├──→ 3E (RequireAuth)                    ─────────────────┐
+  └──→ 3G (Navigation revamp)                               ↓
+                                            3F (Route restructure) ← depends on 3C + 3D + 3E
 ```
 
-`AuthProvider` calls `GET /api/auth/me` on mount with `credentials: "include"`. If 401 → `user = null`.
+**Parallel opportunities:** 3D with 3A/3B; 3E and 3G with each other (both depend only on 3C).
 
-### Login page (`app/src/routes/login.tsx`)
+---
 
-Simple centered page: "Sign in with Google" → `<a href="/api/auth/google">`. No loader needed.
+### Sub-Phase 3A — Types
 
-### Protected route wrapper (`app/src/routes/RequireAuth.tsx`)
+**File:** `app/src/types.ts` — additions only. `AuthUser` lives in `auth.tsx`, not here.
 
-```typescript
-function RequireAuth({ children }): ReactElement {
-    const { user, loading } = useAuth();
-    if (loading) return <CircularProgress />;
-    if (!user) return <Navigate to="/login" replace />;
-    return <>{children}</>;
-}
-```
-
-### HTTP client updates (`app/src/http.ts`)
-
-Add `credentials: "include"` to every existing `fetch` call.
-
-Add new functions:
-- `GetMe(): Promise<AuthUser>` — `GET /api/auth/me`
-- `Logout(): Promise<void>` — `POST /api/auth/logout`
-- `GetPod(podId: number): Promise<Pod>` — `GET /api/pod?pod_id=X`
-- `GetPodsForPlayer(playerId: number): Promise<Array<Pod>>` — `GET /api/pod?player_id=X`
-- `GetPlayersForPod(podId: number): Promise<Array<PlayerWithRole>>` — `GET /api/players?pod_id=X`
-- `GetDecksForPod(podId: number, limit?: number, offset?: number): Promise<PaginatedResponse<Deck>>`
-- `GetGamesForPod(podId: number, limit?: number, offset?: number): Promise<PaginatedResponse<Game>>`
-- `GetGamesForPlayer(playerId: number): Promise<Array<Game>>` — `GET /api/games?player_id=X`
-- `PostPod(name: string): Promise<Pod>` — `POST /api/pod`
-- `PostPodInvite(podId: number): Promise<{invite_code: string}>` — `POST /api/pod/invite`
-- `PostPodJoin(inviteCode: string): Promise<Pod>` — `POST /api/pod/join`
-- `PostPodLeave(podId: number): Promise<void>` — `POST /api/pod/leave`
-- `PatchPod(podId: number, name: string): Promise<void>`
-- `DeletePod(podId: number): Promise<void>`
-- `PatchPodPlayerRole(podId: number, playerId: number): Promise<void>` — promote to manager
-- `DeletePodPlayer(podId: number, playerId: number): Promise<void>` — manager kick
-- `PatchPlayer(playerId: number, name: string): Promise<void>`
-- `PatchDeck(deckId: number, fields: DeckUpdateFields): Promise<void>`
-- `DeleteDeck(deckId: number): Promise<void>`
-- `PatchGame(gameId: number, description: string): Promise<void>`
-- `DeleteGame(gameId: number): Promise<void>`
-- `PostGameResult(result: NewGameResultWithGame): Promise<void>`
-- `PatchGameResult(resultId: number, fields: GameResultUpdateFields): Promise<void>`
-- `DeleteGameResult(resultId: number): Promise<void>`
-
-### Types updates (`app/src/types.ts`)
-
-Add:
 ```typescript
 interface Pod {
     id: number;
@@ -702,40 +670,212 @@ interface NewGameResultWithGame extends NewGameResult {
 }
 ```
 
-Also add `player_id` to `GameResult` interface (needed for deck links).
+Also add `player_id: number` to the existing `GameResult` interface (needed for deck links at `/player/:playerId/deck/:deckId`).
 
-### Route restructure (`app/src/index.tsx`)
+---
 
-Wrap entire router in `<AuthProvider>`. New route tree:
+### Sub-Phase 3B — HTTP Client
 
+**File:** `app/src/http.ts`. **Depends on 3A.**
+
+**Part 1 — Add `credentials: "include"` to all existing fetches.**
+There are 11 functions / 12 `fetch` calls. `PostGame` and `PostCommander` already have options objects; the rest are bare. Example:
+```typescript
+// Before
+const res = await fetch(`http://localhost:8080/api/players`);
+// After
+const res = await fetch(`http://localhost:8080/api/players`, { credentials: "include" });
 ```
-/ (Root layout)
-  /login                          — login page (no RequireAuth)
-  /join                           — join pod via invite code (no RequireAuth; redirects to pod after auth)
-  /pod/:podId          (RequireAuth)
-  /pod/:podId/new-game (RequireAuth)
-  /pod/:podId/game/:gameId (RequireAuth)
-  /player/:playerId    (RequireAuth)
-  /player/:playerId/deck/:deckId (RequireAuth)
-  /decks   → <Navigate to="/" replace />
-  /players → <Navigate to="/" replace />
-  /games   → <Navigate to="/" replace />
+The hardcoded `localhost:8080` base URL is **not** changed in this phase (pre-existing TODO).
+
+**Part 2 — Add `GetMe` and `Logout`** (consumed by `AuthProvider` in 3C):
+```typescript
+export async function GetMe(): Promise<AuthUser> {
+    const res = await fetch(`http://localhost:8080/api/auth/me`, { credentials: "include" });
+    if (!res.ok) throw new Error("Unauthenticated");
+    return res.json();
+}
+
+export async function Logout(): Promise<void> {
+    await fetch(`http://localhost:8080/api/auth/logout`, {
+        method: "POST",
+        credentials: "include",
+    });
+}
+```
+`AuthUser` is imported from `./auth`.
+
+**Part 3 — Add all remaining new functions** (all include `credentials: "include"`):
+- `GetPod(podId: number): Promise<Pod>` — `GET /api/pod?pod_id=X`
+- `GetPodsForPlayer(playerId: number): Promise<Array<Pod>>` — `GET /api/pod?player_id=X`
+- `GetPlayersForPod(podId: number): Promise<Array<PlayerWithRole>>` — `GET /api/players?pod_id=X`
+- `GetDecksForPod(podId: number, limit?: number, offset?: number): Promise<PaginatedResponse<Deck>>`
+- `GetGamesForPod(podId: number, limit?: number, offset?: number): Promise<PaginatedResponse<Game>>`
+- `GetGamesForPlayer(playerId: number): Promise<Array<Game>>` — `GET /api/games?player_id=X`
+- `PostPod(name: string): Promise<Pod>` — `POST /api/pod`
+- `PostPodInvite(podId: number): Promise<{invite_code: string}>` — `POST /api/pod/invite`
+- `PostPodJoin(inviteCode: string): Promise<Pod>` — `POST /api/pod/join`
+- `PostPodLeave(podId: number): Promise<void>` — `POST /api/pod/leave`
+- `PatchPod(podId: number, name: string): Promise<void>` — `PATCH /api/pod?pod_id=X`
+- `DeletePod(podId: number): Promise<void>` — `DELETE /api/pod?pod_id=X`
+- `PatchPodPlayerRole(podId: number, playerId: number): Promise<void>` — promote to manager
+- `DeletePodPlayer(podId: number, playerId: number): Promise<void>` — manager kick
+- `PatchPlayer(playerId: number, name: string): Promise<void>` — `PATCH /api/player?player_id=X`
+- `PatchDeck(deckId: number, fields: DeckUpdateFields): Promise<void>` — `PATCH /api/deck?deck_id=X`
+- `DeleteDeck(deckId: number): Promise<void>` — `DELETE /api/deck?deck_id=X`
+- `PatchGame(gameId: number, description: string): Promise<void>` — `PATCH /api/game?game_id=X`
+- `DeleteGame(gameId: number): Promise<void>` — `DELETE /api/game?game_id=X`
+- `PostGameResult(result: NewGameResultWithGame): Promise<void>` — `POST /api/game/result`
+- `PatchGameResult(resultId: number, fields: GameResultUpdateFields): Promise<void>` — `PATCH /api/game/result?result_id=X`
+- `DeleteGameResult(resultId: number): Promise<void>` — `DELETE /api/game/result?result_id=X`
+
+`PaginatedResponse` functions append `?limit=N&offset=M` when those params are provided.
+
+---
+
+### Sub-Phase 3C — AuthContext
+
+**File:** `app/src/auth.tsx` (new). **Depends on 3A, 3B (GetMe + Logout).**
+
+```typescript
+interface AuthUser {
+    id: number;
+    player_id: number;
+    display_name: string | null;   // *string in Go → null in JSON when unset
+    avatar_url: string | null;     // *string in Go → null in JSON when unset
+}
+
+interface AuthContextValue {
+    user: AuthUser | null;
+    loading: boolean;
+    logout: () => Promise<void>;
+}
+
+const AuthContext = createContext<AuthContextValue>({ user: null, loading: true, logout: async () => {} });
+
+export function AuthProvider({ children }: { children: ReactNode }): ReactElement {
+    const [user, setUser] = useState<AuthUser | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        GetMe()
+            .then(setUser)
+            .catch(() => setUser(null))
+            .finally(() => setLoading(false));
+    }, []);
+
+    const logout = async () => { await Logout(); setUser(null); };
+
+    return <AuthContext.Provider value={{ user, loading, logout }}>{children}</AuthContext.Provider>;
+}
+
+export function useAuth(): AuthContextValue { return useContext(AuthContext); }
 ```
 
-A minimal home route `/` (RequireAuth): fetches `GetPodsForPlayer(user.player_id)` and redirects to first pod, or shows "Create your first pod" CTA.
+> **Note:** `user.Entity` in `lib/business/user/entity.go` has `DisplayName *string` and `AvatarURL *string` — Go pointers serialize as JSON `null` when nil. Use `string | null`, not `string`.
 
-Old `/deck/:deckId` and `/game/:gameId` routes: remove (links in data will be updated to new format).
+---
 
-### Navigation revamp (`app/src/routes/root.tsx`)
+### Sub-Phase 3D — Login Page
 
-Replace placeholder login text with:
-- **Logged out**: "Sign in with Google" link
-- **Logged in**:
-  - User avatar + display name (link to `/player/:playerId`)
-  - Pod selector `<Select>` — fetches `GetPodsForPlayer(user.player_id)` on mount; navigates to `/pod/:podId` on change. Selected value: use `podId` from URL params if on a `/pod/*` route, otherwise read `lastPodId` from `localStorage`. On navigation, write `lastPodId` to `localStorage`. Shows a placeholder if `localStorage` is empty and not on a pod route.
-  - Logout button → `Logout()` → navigate to `/login`
+**File:** `app/src/routes/login.tsx` (new). **No dependencies — implement any time.**
 
-Remove nav links to `/decks`, `/players`, `/games`.
+Centered MUI page: "Sign in with Google" `<Button>` pointing to `/api/auth/google`. No loader.
+
+```typescript
+export default function LoginPage(): ReactElement {
+    return (
+        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", mt: 8 }}>
+            <Typography variant="h4" gutterBottom>EDH Tracker</Typography>
+            <Button variant="contained" href="/api/auth/google" size="large">
+                Sign in with Google
+            </Button>
+        </Box>
+    );
+}
+```
+
+---
+
+### Sub-Phase 3E — RequireAuth Wrapper
+
+**File:** `app/src/routes/RequireAuth.tsx` (new). **Depends on 3C.**
+
+```typescript
+export default function RequireAuth({ children }: { children: ReactNode }): ReactElement {
+    const { user, loading } = useAuth();
+    if (loading) return <CircularProgress />;
+    if (!user) return <Navigate to="/login" replace />;
+    return <>{children}</>;
+}
+```
+
+---
+
+### Sub-Phase 3F — Route Restructure
+
+**File:** `app/src/index.tsx`. **Depends on 3C (AuthProvider), 3D (LoginPage), 3E (RequireAuth).**
+
+**Phase 4 stub approach:** Routes for `/pod/:podId`, `/join`, etc. reference components that don't exist until Phase 4. Add minimal inline stub components (`function PodView() { return <Typography>Coming soon</Typography>; }`) so the route tree is complete and navigable.
+
+```typescript
+// index.tsx — top-level render
+createRoot(document.getElementById("root") as HTMLElement).render(
+    <StrictMode>
+        <CssBaseline enableColorScheme />
+        <AuthProvider>
+            <RouterProvider router={router} />
+        </AuthProvider>
+    </StrictMode>
+);
+
+const router = createBrowserRouter([
+    {
+        path: "/",
+        element: <Root />,
+        errorElement: <ErrorPage />,
+        children: [
+            { index: true,                   element: <RequireAuth><HomeView /></RequireAuth> },
+            { path: "login",                 element: <LoginPage /> },
+            { path: "join",                  element: <JoinView /> },           // stub → Phase 4A
+            { path: "pod/:podId",            element: <RequireAuth><PodView /></RequireAuth> },     // stub → Phase 4A
+            { path: "pod/:podId/new-game",   element: <RequireAuth><NewGameView /></RequireAuth> },
+            { path: "pod/:podId/game/:gameId", element: <RequireAuth><GameView /></RequireAuth> },
+            { path: "player/:playerId",      element: <RequireAuth><PlayerView /></RequireAuth>, loader: GetPlayer },
+            { path: "player/:playerId/deck/:deckId", element: <RequireAuth><DeckView /></RequireAuth>, loader: GetDeck },
+            { path: "decks",   element: <Navigate to="/" replace /> },
+            { path: "players", element: <Navigate to="/" replace /> },
+            { path: "games",   element: <Navigate to="/" replace /> },
+        ],
+    },
+]);
+```
+
+`HomeView` (inline stub): calls `GetPodsForPlayer(user.player_id)` → navigates to `/pod/:firstPodId`, or shows "Create your first pod" CTA if none exist.
+
+**Removed routes:** `/deck/:deckId`, `/game/:gameId`, `/new-game` (old top-level form).
+
+---
+
+### Sub-Phase 3G — Navigation Revamp
+
+**File:** `app/src/routes/root.tsx`. **Depends on 3C (useAuth), 3A (Pod type), 3B (GetPodsForPlayer). Parallel with 3E.**
+
+Remove hardcoded nav links (`/players`, `/decks`, `/games`, `/new-game`). Replace placeholder login text:
+
+**Logged out:**
+```typescript
+<Button href="/api/auth/google">Sign in with Google</Button>
+```
+
+**Logged in:**
+- Avatar + display name → link to `/player/:playerId`
+- Pod selector `<Select>`:
+  - Fetches `GetPodsForPlayer(user.player_id)` in `useEffect` on mount
+  - Selected value: `podId` from `useParams()` if on a `/pod/*` route, else reads `localStorage.getItem("lastPodId")`
+  - On change: write to `localStorage`; navigate to `/pod/:podId`
+  - Shows placeholder option if no pods
+- Logout button → `logout()` from `useAuth()` → navigate to `/login`
 
 ---
 
@@ -967,7 +1107,13 @@ If PodManager: add "Edit" icon column + "Remove" icon column
 | Phase 2B (Pod roles + invite) | Phase 1 | 2A, 2C, 2D |
 | Phase 2C (Edit/delete endpoints) | Phase 1 | 2A, 2B, 2D |
 | Phase 2D (Pagination backend) | Phase 1 | 2A, 2B, 2C |
-| Phase 3 (Frontend foundation) | Phase 2A | — |
+| Phase 3A (Types) | Phase 2A | 3D |
+| Phase 3B (HTTP client) | 3A | 3D |
+| Phase 3C (AuthContext) | 3B | — |
+| Phase 3D (Login page) | Phase 2A | 3A, 3B, 3C |
+| Phase 3E (RequireAuth) | 3C | 3G |
+| Phase 3F (Route restructure) | 3C, 3D, 3E | — |
+| Phase 3G (Navigation revamp) | 3C | 3E |
 | Phase 4A (Pod landing page) | Phase 3 | 4B, 4C, 4D |
 | Phase 4B (Player page) | Phase 3 | 4A, 4C, 4D |
 | Phase 4C (Deck page) | Phase 3 | 4A, 4B, 4D |
