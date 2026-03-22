@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"time"
@@ -20,6 +21,17 @@ const (
 	maxConnTTL   = time.Minute * 2
 	maxConnCount = 10
 )
+
+type quietLogger struct {
+	logger.Interface
+}
+
+func (q quietLogger) Trace(ctx context.Context, begin time.Time, fc func() (string, int64), err error) {
+	if err == gorm.ErrRecordNotFound {
+		return
+	}
+	q.Interface.Trace(ctx, begin, fc, err)
+}
 
 type DBClient struct {
 	log    *zap.Logger
@@ -73,7 +85,7 @@ func NewDBClient(cfg *Config, log *zap.Logger) (*DBClient, error) {
 	db.SetMaxIdleConns(maxConnCount)
 
 	gormDB, err := gorm.Open(gormmysql.New(gormmysql.Config{Conn: db}), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Warn),
+		Logger: quietLogger{logger.Default.LogMode(logger.Warn)},
 	})
 	if err != nil {
 		return nil, fmt.Errorf("error opening gorm connection: %w", err)
