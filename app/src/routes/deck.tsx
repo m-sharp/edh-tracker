@@ -113,7 +113,6 @@ function DeckGamesTab({ deck }: DeckTabProps): ReactElement {
     );
 }
 
-// TODO: Need to rebuild context on working with the frontend after all of this
 function DeckSettingsTab({ deck }: DeckTabProps): ReactElement {
     const navigate = useNavigate();
 
@@ -174,7 +173,6 @@ function DeckSettingsTab({ deck }: DeckTabProps): ReactElement {
     };
 
     // TODO: Check retirement behavior - discuss where retired decks should and should not show. E.g., should show on player->decks view, should not show on pod->decks
-    // TODO: Should be filterable if we're showing decks in a grid
     const handleRetire = async () => {
         setRetireConfirm(false);
         setActionError(null);

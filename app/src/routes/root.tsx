@@ -30,7 +30,6 @@ export default function Root(): ReactElement {
 
 // TODO: Add mobile menu icon and link menu
 // TODO: Mobile view for all tables
-// TODO: There is a bug where refreshing the browser on a route page results in a 404 - should refetch the current route
 function DrawerAppBar(): ReactElement {
     const { user, loading, logout } = useAuth();
     const navigate = useNavigate();

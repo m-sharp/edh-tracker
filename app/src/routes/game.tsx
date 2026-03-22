@@ -144,8 +144,8 @@ function EditResultModal({ result, decks, onClose }: EditResultModalProps): Reac
                         value={decks.find((d) => d.id === deckId) ?? null}
                         onChange={(_, d) => {
                             if (d) {
-                                setDeckId(d.id)
-                            };
+                                setDeckId(d.id);
+                            }
                         }}
                         renderInput={(params) => <TextField {...params} label="Deck" size="small" />}
                     />

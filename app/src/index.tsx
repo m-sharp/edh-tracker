@@ -22,7 +22,7 @@ import Root from "./routes/root";
 
 import "./styles.css";
 
-// TODO: Move these views into their own files?
+// TODO: Move HomeView into its own file
 function HomeView(): ReactElement {
     const { user } = useAuth();
     const navigate = useNavigate();
@@ -72,19 +72,6 @@ const router = createBrowserRouter([
                 element: <RequireAuth><NewGameView /></RequireAuth>,
                 loader: newGameLoader,
                 action: createGame,
-            },
-            // TODO: These redirects aren't needed
-            {
-                path: "decks",
-                element: <Navigate to="/" replace />,
-            },
-            {
-                path: "players",
-                element: <Navigate to="/" replace />,
-            },
-            {
-                path: "games",
-                element: <Navigate to="/" replace />,
             },
             {
                 path: "pod/:podId/game/:gameId",

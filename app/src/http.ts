@@ -295,18 +295,3 @@ export async function GetAllDecksForPod(podId: number): Promise<Array<Deck>> {
     return await res.json();
 }
 
-// Loaders
-// TODO: Need to revist this, probably changes a lot
-export async function GetNewDeckInfo(): Promise<NewGameData> {
-    const [decks, players, formats] = await Promise.all([
-        GetDecks(),
-        GetPlayers(),
-        GetFormats(),
-    ]);
-
-    return {
-        decks,
-        players,
-        formats,
-    }
-}
