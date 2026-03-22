@@ -11,13 +11,15 @@ lib/repositories/  Pure DB access: SQL queries, return Model types
 lib/migrations/    Numbered migration files, run automatically on startup
 ```
 
-`api.go` wires all routes via Gorilla Mux. `lib/http.go` contains CORS middleware. `lib/config.go` reads env vars into a `*lib.Config` map.
+`api.go` wires all routes via Gorilla Mux. `lib/trackerHttp/http.go` contains CORS middleware and shared HTTP helpers. `lib/trackerHttp/auth.go` contains JWT middleware. `lib/config.go` reads env vars into a `*lib.Config` map.
 
-**Required env vars**: `DBHOST`, `DBUSER`, `DBPASSWORD`, `DBPORT`
+**Required env vars**: `DBHOST`, `DBUSER`, `DBPASSWORD`, `DBPORT`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `OAUTH_REDIRECT_URL`, `JWT_SECRET`, `FRONTEND_URL`
+
+**Optional env vars**: `SEED` (triggers data seeder), `DEV` (development mode — disables secure cookies)
 
 ## Repositories (`lib/repositories/`)
 
-- One sub-package per domain: `player`, `deck`, `game`, `gameResult`, `pod`, `user`, `format`, `commander`, `deckCommander`
+- One sub-package per domain: `player`, `deck`, `game`, `gameResult`, `pod`, `playerPodRole`, `podInvite`, `user`, `format`, `commander`, `deckCommander`
 - Each has a `Repository` struct with a `*lib.DBClient` and methods that return `<domain>.Model` types
 - `repositories.go` — `Repositories` struct bundles all concrete `*Repository` types
 - `interfaces.go` — one interface per repository; used by the business layer for DI and testing
@@ -49,11 +51,11 @@ type Functions struct {
 Business functions receive peer domain functions as parameters (not repos), keeping the dependency graph acyclic:
 
 ```
-player, format, commander, pod, user  (no deps)
+player, format, commander, pod, user, gameResult  (no deps)
     ↓
   deck  (uses player.GetPlayerName, format.GetByID, commander.GetCommanderName)
     ↓
-  game  (uses deck.GetDeckName, deck.GetCommanderEntry, gameResult.GetByGameID)
+  game  (uses deck.GetDeckName, gameResult.EnrichModels)
 ```
 
 ## Routers (`lib/routers/`)
@@ -67,14 +69,24 @@ player, format, commander, pod, user  (no deps)
 ```
 main.go:
   client := lib.NewDBClient(...)
-  repos  := repositories.New(log, client)   // for seeder
-  repoLayer := repositories.New(log, client)
-  biz   := business.NewBusiness(log, repoLayer)
-  api   := NewApiRouter(cfg, log, biz)
+  repos  := repositories.New(log, client)
+  biz    := business.NewBusiness(log, repos)
+  api    := NewApiRouter(cfg, log, biz)
 
 api.go:
   NewApiRouter(cfg, log, biz *business.Business) — wires all routers
 ```
+
+## Authentication & Authorization (`lib/trackerHttp/`, `lib/routers/auth.go`)
+
+- **JWT middleware** (`lib/trackerHttp/auth.go`) — validates JWT cookie on each request; populates user info into request context
+- **OAuth 2.0 flow** (`lib/routers/auth.go`) — Google OAuth login/callback/logout/me routes
+- **Per-route flags** on `trackerHttp.Route`:
+  - `RequireAuth: true` — enforces authentication; returns 401 if not logged in
+  - `NoAuth: true` — skips JWT check for state-changing routes that don't need auth (e.g. logout)
+  - Neither flag — JWT is parsed if present but not required (public read routes)
+- **`trackerHttp.CallerPlayerID(w, r)`** — free function that extracts the authenticated player ID from context; writes 401 and returns false if missing
+- **Pod role enforcement** — game and pod handlers call `requirePodManager` inline; no framework-level role middleware
 
 ## Seeder (`lib/seeder/`)
 
@@ -85,7 +97,7 @@ api.go:
 
 ## Migrations (`lib/migrations/`)
 
-Numbered migration files run automatically on startup. Migrations always record themselves; there is no opt-out. Migration numbering is sequential — add a new file for any schema change.
+Numbered migration files run automatically on startup using **GORM**. Migrations always record themselves; there is no opt-out. Migration numbering is sequential — add a new file for any schema change. Currently 19 migrations are registered (1–19).
 
 ## Frontend (`app/src/`)
 

@@ -8,7 +8,8 @@ Player ──→ many Decks
        ──→ many PlayerPods ──→ Pod
 
 Pod ──→ many Games
-    ──→ many PlayerPods ──→ Player
+    ──→ many PlayerPodRoles ──→ Player (with manager/member role)
+    ──→ many PodInvites
 
 Format ──→ many Decks
        ──→ many Games
@@ -41,11 +42,15 @@ GameResult ──→ one Game
 | `commander` | id, name (unique card name) |
 | `deck_commander` | id, deck_id, commander_id, partner_commander_id (nullable) |
 | `pod` | id, name, deleted_at |
-| `player_pod` | id, pod_id, player_id (join table, unique constraint) |
+| `player_pod` | id, pod_id, player_id — legacy join table; superseded by `player_pod_role` |
+| `player_pod_role` | id, pod_id, player_id, role (ENUM: manager/member), deleted_at — UNIQUE(pod_id, player_id) |
+| `pod_invite` | id, pod_id, invite_code (unique), created_by_player_id, expires_at (nullable), used_count, deleted_at |
 | `user` | id, player_id, role_id, oauth_provider, oauth_subject, email, display_name, avatar_url |
 | `user_role` | id, name — seeded with `admin` and `player` |
 
-All tables use soft deletes (`deleted_at` nullable DATETIME) and track `created_at`/`updated_at`.
+All tables use soft deletes (`deleted_at` nullable DATETIME) and track `created_at`/`updated_at`, except `format`, `commander`, `user`, and `user_role` which do not have `deleted_at`.
+
+**Cascading deletes** (Migration 19): all foreign keys on `deck_commander`, `player_pod`, `player_pod_role`, `pod_invite`, and `user` use `ON DELETE CASCADE`, so deleting a parent record automatically removes dependent rows.
 
 ## Model/Entity Split
 
