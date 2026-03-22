@@ -123,7 +123,7 @@ Mark items `[x]` as they are completed during implementation.
 - [x] `app/src/routes/RequireAuth.tsx`
 
 #### 3F — Route Restructure (depends on 3C, 3D, 3E)
-- [ ] `app/src/index.tsx` — wrap with `AuthProvider`; new route tree with `RequireAuth`; stub components for Phase 4 routes; redirects for `/decks`, `/players`, `/games`
+- [x] `app/src/index.tsx` — wrap with `AuthProvider`; new route tree with `RequireAuth`; stub components for Phase 4 routes; redirects for `/decks`, `/players`, `/games`
 
 #### 3G — Navigation Revamp (depends on 3C; parallel with 3E)
 - [ ] `app/src/routes/root.tsx` — remove old nav links; logged-out/in states (avatar, pod selector with `localStorage`, logout) (pod selector + auth UI)
