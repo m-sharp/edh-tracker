@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Box, CircularProgress, Typography } from "@mui/material";
 
 import { useAuth } from "../auth";
-import { PostPodJoin } from "../http";
+import {API_BASE_URL, PostPodJoin} from "../http";
 
 export default function JoinView(): ReactElement {
     const [searchParams] = useSearchParams();
@@ -21,8 +21,7 @@ export default function JoinView(): ReactElement {
 
         if (!user) {
             const redirectUrl = `/join${code ? `?code=${code}` : ""}`;
-            // TODO: Hardcode host url will need to change
-            window.location.href = `http://localhost:8080/api/auth/google?redirect=${encodeURIComponent(redirectUrl)}`;
+            window.location.href = `${API_BASE_URL}/api/auth/google?redirect=${encodeURIComponent(redirectUrl)}`;
             return;
         }
 

@@ -40,6 +40,8 @@ function HomeView(): ReactElement {
         });
     }, [user]);
 
+    // TODO: Will need to link to where you can actually add one
+    // TODO: Loading blip always shows this before data comes in
     return <Typography>No pods yet. Create your first pod to get started.</Typography>;
 }
 

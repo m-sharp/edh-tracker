@@ -57,6 +57,7 @@ export default function PodView(): ReactElement {
     const { pod, players, decks, games } = useLoaderData() as PodLoaderData;
     const { user } = useAuth();
     // TODO: General helper component for rendering tabs - takes in a prop that maps tab name -> component to show when tab selected
+    // TODO: Need to be able to persist the current tab state via query string as well so that forward and back work as expected
     const [tab, setTab] = useState(0);
 
     // TODO: This is ugly, helper function that just returns an isManager bool

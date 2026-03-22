@@ -37,7 +37,7 @@ COPY lib/ lib/
 # Build go webserver
 RUN go build -o build/web-server .
 
-FROM golang:1.20.0-alpine3.17 AS app
+FROM golang:1.26.0-alpine3.23 AS app
 
 WORKDIR /edh-tracker
 
