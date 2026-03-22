@@ -118,6 +118,7 @@ type FormatRepository interface {
 }
 
 type CommanderRepository interface {
+	GetAll(ctx context.Context) ([]commander.Model, error)
 	GetById(ctx context.Context, id int) (*commander.Model, error)
 	GetByName(ctx context.Context, name string) (*commander.Model, error)
 	GetByNames(ctx context.Context, names []string) ([]commander.Model, error)

@@ -180,6 +180,11 @@ export async function GetFormats(): Promise<Array<Format>> {
 }
 
 // Commander Methods
+export async function GetCommanders(): Promise<Array<Commander>> {
+    const res = await fetch(`${API_BASE_URL}/api/commanders`, { credentials: "include" });
+    return await res.json();
+}
+
 export async function GetCommander(id: number): Promise<Commander> {
     const res = await fetch(`${API_BASE_URL}/api/commander?commander_id=${id}`, { credentials: "include" });
     return await res.json();

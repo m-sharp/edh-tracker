@@ -7,6 +7,20 @@ import (
 	repos "github.com/m-sharp/edh-tracker/lib/repositories"
 )
 
+func GetAll(commanderRepo repos.CommanderRepository) GetAllFunc {
+	return func(ctx context.Context) ([]Entity, error) {
+		models, err := commanderRepo.GetAll(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get all commanders: %w", err)
+		}
+		entities := make([]Entity, len(models))
+		for i, m := range models {
+			entities[i] = ToEntity(m)
+		}
+		return entities, nil
+	}
+}
+
 func GetByID(commanderRepo repos.CommanderRepository) GetByIDFunc {
 	return func(ctx context.Context, id int) (*Entity, error) {
 		m, err := commanderRepo.GetById(ctx, id)

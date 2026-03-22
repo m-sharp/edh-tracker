@@ -138,9 +138,9 @@ Mark items `[x]` as they are completed during implementation.
 - [x] `PlayerSettingsTab` (edit name, pod list with leave button, create pod)
 
 ### Phase 4C — Deck Page Revamp
-- [ ] `app/src/routes/deck.tsx` — new route + tabs (Overview, Games, Settings)
-- [ ] Update deck links in `app/src/stats.tsx` (`CommanderColumn`)
-- [ ] Update deck links in `app/src/routes/game.tsx` (results grid)
+- [x] `app/src/routes/deck.tsx` — new route + tabs (Overview, Games, Settings)
+- [x] Update deck links in `app/src/stats.tsx` (`CommanderColumn`)
+- [x] Update deck links in `app/src/routes/game.tsx` (results grid)
 
 ### Phase 4D — Game Page Revamp
 - [x] `app/src/routes/game.tsx` — new route + inline editing + result CRUD

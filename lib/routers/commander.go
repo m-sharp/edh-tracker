@@ -27,6 +27,11 @@ func NewCommanderRouter(log *zap.Logger, biz *business.Business) *CommanderRoute
 func (c *CommanderRouter) GetRoutes() []*trackerHttp.Route {
 	return []*trackerHttp.Route{
 		{
+			Path:    "/api/commanders",
+			Method:  http.MethodGet,
+			Handler: c.GetAllCommanders,
+		},
+		{
 			Path:    "/api/commander",
 			Method:  http.MethodGet,
 			Handler: c.GetCommanderById,
@@ -37,6 +42,25 @@ func (c *CommanderRouter) GetRoutes() []*trackerHttp.Route {
 			Handler: c.CommanderCreate,
 		},
 	}
+}
+
+func (c *CommanderRouter) GetAllCommanders(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	errMsg := "Failed to get Commander records"
+
+	commanders, err := c.commanders.GetAll(ctx)
+	if err != nil {
+		trackerHttp.WriteError(c.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
+		return
+	}
+
+	marshalled, err := json.Marshal(commanders)
+	if err != nil {
+		trackerHttp.WriteError(c.log, w, http.StatusInternalServerError, err, "Failed to marshal records as JSON", errMsg)
+		return
+	}
+
+	trackerHttp.WriteJson(c.log, w, marshalled)
 }
 
 func (c *CommanderRouter) GetCommanderById(w http.ResponseWriter, r *http.Request) {

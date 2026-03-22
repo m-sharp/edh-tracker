@@ -80,6 +80,7 @@ func NewBusiness(log *zap.Logger, r *repositories.Repositories) *Business {
 			GetByID: getFormat,
 		},
 		Commanders: commander.Functions{
+			GetAll:           commander.GetAll(r.Commanders),
 			GetByID:          commander.GetByID(r.Commanders),
 			Create:           commander.Create(r.Commanders),
 			GetCommanderName: getCommanderName,
