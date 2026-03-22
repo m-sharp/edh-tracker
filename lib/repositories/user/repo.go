@@ -99,7 +99,7 @@ func (r *Repository) AddWithOAuth(
 }
 
 type playerRow struct {
-	ID   int    `gorm:"primaryKey"`
+	ID   int `gorm:"primaryKey"`
 	Name string
 }
 

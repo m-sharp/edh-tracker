@@ -93,15 +93,17 @@ func (m *MockGameResultRepo) SoftDelete(ctx context.Context, id int) error {
 // MockDeckRepo implements repos.DeckRepository.
 // GetByIdCalled is set to true whenever GetById is invoked (exported tracking flag).
 type MockDeckRepo struct {
-	GetByIdFn            func(ctx context.Context, deckID int) (*deckRepo.Model, error)
-	AddFn                func(ctx context.Context, playerID int, name string, formatID int) (int, error)
-	UpdateFn             func(ctx context.Context, deckID int, fields deckRepo.UpdateFields) error
-	SoftDeleteFn         func(ctx context.Context, id int) error
-	GetAllFn             func(ctx context.Context) ([]deckRepo.Model, error)
-	GetAllForPlayerFn    func(ctx context.Context, playerID int) ([]deckRepo.Model, error)
-	GetAllByPlayerIDsFn  func(ctx context.Context, playerIDs []int) ([]deckRepo.Model, error)
-	GetByIDHydratedFn    func(ctx context.Context, deckID int) (*deckRepo.Model, error)
-	GetByIdCalled        bool
+	GetByIdFn                 func(ctx context.Context, deckID int) (*deckRepo.Model, error)
+	AddFn                     func(ctx context.Context, playerID int, name string, formatID int) (int, error)
+	UpdateFn                  func(ctx context.Context, deckID int, fields deckRepo.UpdateFields) error
+	SoftDeleteFn              func(ctx context.Context, id int) error
+	GetAllFn                  func(ctx context.Context) ([]deckRepo.Model, error)
+	GetAllForPlayerFn         func(ctx context.Context, playerID int) ([]deckRepo.Model, error)
+	GetAllByPlayerIDsFn       func(ctx context.Context, playerIDs []int) ([]deckRepo.Model, error)
+	GetAllByPodPaginatedFn    func(ctx context.Context, podID, limit, offset int) ([]deckRepo.Model, int, error)
+	GetAllByPlayerPaginatedFn func(ctx context.Context, playerID, limit, offset int) ([]deckRepo.Model, int, error)
+	GetByIDHydratedFn         func(ctx context.Context, deckID int) (*deckRepo.Model, error)
+	GetByIdCalled             bool
 }
 
 func (m *MockDeckRepo) GetAll(ctx context.Context) ([]deckRepo.Model, error) {
@@ -121,6 +123,18 @@ func (m *MockDeckRepo) GetAllByPlayerIDs(ctx context.Context, playerIDs []int) (
 		return m.GetAllByPlayerIDsFn(ctx, playerIDs)
 	}
 	panic("unexpected call to GetAllByPlayerIDs")
+}
+func (m *MockDeckRepo) GetAllByPodPaginated(ctx context.Context, podID, limit, offset int) ([]deckRepo.Model, int, error) {
+	if m.GetAllByPodPaginatedFn != nil {
+		return m.GetAllByPodPaginatedFn(ctx, podID, limit, offset)
+	}
+	panic("unexpected call to GetAllByPodPaginated")
+}
+func (m *MockDeckRepo) GetAllByPlayerPaginated(ctx context.Context, playerID, limit, offset int) ([]deckRepo.Model, int, error) {
+	if m.GetAllByPlayerPaginatedFn != nil {
+		return m.GetAllByPlayerPaginatedFn(ctx, playerID, limit, offset)
+	}
+	panic("unexpected call to GetAllByPlayerPaginated")
 }
 func (m *MockDeckRepo) GetById(ctx context.Context, deckID int) (*deckRepo.Model, error) {
 	m.GetByIdCalled = true
@@ -374,13 +388,16 @@ func (m *MockPodInviteRepo) IncrementUsedCount(ctx context.Context, code string)
 
 // MockGameRepo implements repos.GameRepository.
 type MockGameRepo struct {
-	GetAllByPodFn      func(ctx context.Context, podID int) ([]gameRepo.Model, error)
-	GetAllByDeckFn     func(ctx context.Context, deckID int) ([]gameRepo.Model, error)
-	GetAllByPlayerIDFn func(ctx context.Context, playerID int) ([]gameRepo.Model, error)
-	GetByIDFn          func(ctx context.Context, gameID int) (*gameRepo.Model, error)
-	AddFn              func(ctx context.Context, description string, podID, formatID int) (int, error)
-	UpdateFn           func(ctx context.Context, gameID int, description string) error
-	SoftDeleteFn       func(ctx context.Context, id int) error
+	GetAllByPodFn               func(ctx context.Context, podID int) ([]gameRepo.Model, error)
+	GetAllByDeckFn              func(ctx context.Context, deckID int) ([]gameRepo.Model, error)
+	GetAllByPlayerIDFn          func(ctx context.Context, playerID int) ([]gameRepo.Model, error)
+	GetAllByPodPaginatedFn      func(ctx context.Context, podID, limit, offset int) ([]gameRepo.Model, int, error)
+	GetAllByDeckPaginatedFn     func(ctx context.Context, deckID, limit, offset int) ([]gameRepo.Model, int, error)
+	GetAllByPlayerIDPaginatedFn func(ctx context.Context, playerID, limit, offset int) ([]gameRepo.Model, int, error)
+	GetByIDFn                   func(ctx context.Context, gameID int) (*gameRepo.Model, error)
+	AddFn                       func(ctx context.Context, description string, podID, formatID int) (int, error)
+	UpdateFn                    func(ctx context.Context, gameID int, description string) error
+	SoftDeleteFn                func(ctx context.Context, id int) error
 }
 
 func (m *MockGameRepo) GetAllByPod(ctx context.Context, podID int) ([]gameRepo.Model, error) {
@@ -400,6 +417,24 @@ func (m *MockGameRepo) GetAllByPlayerID(ctx context.Context, playerID int) ([]ga
 		return m.GetAllByPlayerIDFn(ctx, playerID)
 	}
 	panic("unexpected call to GetAllByPlayerID")
+}
+func (m *MockGameRepo) GetAllByPodPaginated(ctx context.Context, podID, limit, offset int) ([]gameRepo.Model, int, error) {
+	if m.GetAllByPodPaginatedFn != nil {
+		return m.GetAllByPodPaginatedFn(ctx, podID, limit, offset)
+	}
+	panic("unexpected call to GetAllByPodPaginated")
+}
+func (m *MockGameRepo) GetAllByDeckPaginated(ctx context.Context, deckID, limit, offset int) ([]gameRepo.Model, int, error) {
+	if m.GetAllByDeckPaginatedFn != nil {
+		return m.GetAllByDeckPaginatedFn(ctx, deckID, limit, offset)
+	}
+	panic("unexpected call to GetAllByDeckPaginated")
+}
+func (m *MockGameRepo) GetAllByPlayerIDPaginated(ctx context.Context, playerID, limit, offset int) ([]gameRepo.Model, int, error) {
+	if m.GetAllByPlayerIDPaginatedFn != nil {
+		return m.GetAllByPlayerIDPaginatedFn(ctx, playerID, limit, offset)
+	}
+	panic("unexpected call to GetAllByPlayerIDPaginated")
 }
 func (m *MockGameRepo) GetByID(ctx context.Context, gameID int) (*gameRepo.Model, error) {
 	if m.GetByIDFn != nil {

@@ -57,6 +57,15 @@ func (r *Repository) GetByNames(ctx context.Context, names []string) ([]Model, e
 	return commanders, nil
 }
 
+// TODO: Should have tests
+func (r *Repository) GetAll(ctx context.Context) ([]Model, error) {
+	var models []Model
+	if err := r.db.WithContext(ctx).Find(&models).Error; err != nil {
+		return nil, fmt.Errorf("failed to get all Commander records: %w", err)
+	}
+	return models, nil
+}
+
 func (r *Repository) Add(ctx context.Context, name string) (int, error) {
 	m := Model{Name: name}
 	if err := r.db.WithContext(ctx).Create(&m).Error; err != nil {

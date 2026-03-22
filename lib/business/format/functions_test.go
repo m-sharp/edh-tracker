@@ -31,8 +31,8 @@ func TestGetAll_Success(t *testing.T) {
 	for _, e := range got {
 		names[e.Name] = true
 	}
-	assert.True(t, names["commander"])
-	assert.True(t, names["other"])
+	assert.True(t, names["Commander"])
+	assert.True(t, names["Other"])
 }
 
 func TestGetAll_CachePreventsSecondCall(t *testing.T) {
@@ -80,7 +80,7 @@ func TestGetByID_Found(t *testing.T) {
 	got, err := fn(context.Background(), 1)
 	require.NoError(t, err)
 	require.NotNil(t, got)
-	assert.Equal(t, "commander", got.Name)
+	assert.Equal(t, "Commander", got.Name)
 }
 
 func TestGetByID_NotFound(t *testing.T) {

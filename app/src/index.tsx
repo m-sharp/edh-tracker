@@ -1,25 +1,48 @@
-import { StrictMode } from "react";
+import { ReactElement, StrictMode, useEffect } from "react";
 import { createRoot } from "react-dom/client";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { CssBaseline } from "@mui/material";
+import { createBrowserRouter, Navigate, RouterProvider, useNavigate } from "react-router-dom";
+import { CssBaseline, Typography } from "@mui/material";
 
+import { AuthProvider, useAuth } from "./auth";
 import {
-    GetDeck, GetDecks,
-    GetGame, GetGames,
-    GetNewDeckInfo,
-    GetPlayer, GetPlayers,
+    GetDeck,
+    GetPlayer,
+    GetPodsForPlayer,
 } from "./http";
 import ErrorPage from "./routes/error"
 import DeckView from "./routes/deck";
-import DecksView from "./routes/decks";
-import GameView from "./routes/game";
-import GamesView from "./routes/games";
-import NewGameView, { createGame } from "./routes/new";
+import GameView, { gameLoader } from "./routes/game";
+import JoinView from "./routes/join";
+import LoginPage from "./routes/login";
+import NewGameView, { newGameLoader, createGame } from "./routes/new";
 import PlayerView from "./routes/player";
-import PlayersView from "./routes/players";
+import PodView, { podLoader } from "./routes/pod";
+import RequireAuth from "./routes/RequireAuth";
 import Root from "./routes/root";
 
 import "./styles.css";
+
+// TODO: Move HomeView into its own file
+function HomeView(): ReactElement {
+    const { user } = useAuth();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (!user) {
+            return;
+        }
+
+        GetPodsForPlayer(user.player_id).then((pods) => {
+            if (pods.length > 0) {
+                navigate(`/pod/${pods[0].id}`, {replace: true});
+            }
+        });
+    }, [user]);
+
+    // TODO: Will need to link to where you can actually add one
+    // TODO: Loading blip always shows this before data comes in
+    return <Typography>No pods yet. Create your first pod to get started.</Typography>;
+}
 
 const router = createBrowserRouter([
     {
@@ -28,41 +51,43 @@ const router = createBrowserRouter([
         errorElement: <ErrorPage />,
         children: [
             {
-                path: "decks",
-                element: <DecksView />,
-                loader: GetDecks,
+                index: true,
+                element: <RequireAuth><HomeView /></RequireAuth>,
             },
             {
-                path: "deck/:deckId",
-                element: <DeckView />,
-                loader: GetDeck,
+                path: "login",
+                element: <LoginPage />,
             },
             {
-                path: "games",
-                element: <GamesView />,
-                loader: GetGames,
+                path: "join",
+                element: <JoinView />,
             },
             {
-                path: "game/:gameId",
-                element: <GameView />,
-                loader: GetGame,
+                path: "pod/:podId",
+                element: <RequireAuth><PodView /></RequireAuth>,
+                loader: podLoader,
             },
             {
-                path: "players",
-                element: <PlayersView />,
-                loader: GetPlayers,
+                path: "pod/:podId/new-game",
+                element: <RequireAuth><NewGameView /></RequireAuth>,
+                loader: newGameLoader,
+                action: createGame,
+            },
+            {
+                path: "pod/:podId/game/:gameId",
+                element: <RequireAuth><GameView /></RequireAuth>,
+                loader: gameLoader,
             },
             {
                 path: "player/:playerId",
-                element: <PlayerView />,
+                element: <RequireAuth><PlayerView /></RequireAuth>,
                 loader: GetPlayer,
             },
             {
-                path: "new-game",
-                element: <NewGameView />,
-                loader: GetNewDeckInfo,
-                action: createGame,
-            }
+                path: "player/:playerId/deck/:deckId",
+                element: <RequireAuth><DeckView /></RequireAuth>,
+                loader: GetDeck,
+            },
         ],
     },
 ]);
@@ -70,6 +95,8 @@ const router = createBrowserRouter([
 createRoot(document.getElementById("root") as HTMLElement).render(
     <StrictMode>
         <CssBaseline enableColorScheme />
-        <RouterProvider router={router} />
+        <AuthProvider>
+            <RouterProvider router={router} />
+        </AuthProvider>
     </StrictMode>
 );

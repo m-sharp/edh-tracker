@@ -47,20 +47,7 @@ func GetAll(
 		if err != nil {
 			return nil, fmt.Errorf("failed to get decks: %w", err)
 		}
-
-		result := make([]EntityWithStats, 0, len(decks))
-		for _, d := range decks {
-			entity := ToEntity(d, d.Player.Name, d.Format.Name, commanderInfoFromModel(d))
-
-			agg, err := gameResultRepo.GetStatsForDeck(ctx, d.ID)
-			if err != nil {
-				return nil, fmt.Errorf("failed to get stats for deck %d: %w", d.ID, err)
-			}
-
-			result = append(result, ToEntityWithStats(entity, agg))
-		}
-
-		return result, nil
+		return buildEntitiesWithStats(ctx, decks, gameResultRepo)
 	}
 }
 
@@ -73,20 +60,21 @@ func GetAllForPlayer(
 		if err != nil {
 			return nil, fmt.Errorf("failed to get decks for player %d: %w", playerID, err)
 		}
+		return buildEntitiesWithStats(ctx, decks, gameResultRepo)
+	}
+}
 
-		result := make([]EntityWithStats, 0, len(decks))
-		for _, d := range decks {
-			entity := ToEntity(d, d.Player.Name, d.Format.Name, commanderInfoFromModel(d))
-
-			agg, err := gameResultRepo.GetStatsForDeck(ctx, d.ID)
-			if err != nil {
-				return nil, fmt.Errorf("failed to get stats for deck %d: %w", d.ID, err)
-			}
-
-			result = append(result, ToEntityWithStats(entity, agg))
+func GetAllByPlayerPaginated(
+	deckRepo repos.DeckRepository,
+	gameResultRepo repos.GameResultRepository,
+) GetAllByPlayerPaginatedFunc {
+	return func(ctx context.Context, playerID, limit, offset int) ([]EntityWithStats, int, error) {
+		decks, total, err := deckRepo.GetAllByPlayerPaginated(ctx, playerID, limit, offset)
+		if err != nil {
+			return nil, 0, fmt.Errorf("failed to get decks for player %d: %w", playerID, err)
 		}
-
-		return result, nil
+		result, err := buildEntitiesWithStats(ctx, decks, gameResultRepo)
+		return result, total, err
 	}
 }
 
@@ -167,20 +155,41 @@ func GetAllByPod(
 			return nil, fmt.Errorf("failed to get decks for pod %d: %w", podID, err)
 		}
 
-		result := make([]EntityWithStats, 0, len(decks))
-		for _, d := range decks {
-			entity := ToEntity(d, d.Player.Name, d.Format.Name, commanderInfoFromModel(d))
-
-			agg, err := gameResultRepo.GetStatsForDeck(ctx, d.ID)
-			if err != nil {
-				return nil, fmt.Errorf("failed to get stats for deck %d: %w", d.ID, err)
-			}
-
-			result = append(result, ToEntityWithStats(entity, agg))
-		}
-
-		return result, nil
+		return buildEntitiesWithStats(ctx, decks, gameResultRepo)
 	}
+}
+
+func GetAllByPodPaginated(
+	deckRepo repos.DeckRepository,
+	gameResultRepo repos.GameResultRepository,
+) GetAllByPodPaginatedFunc {
+	return func(ctx context.Context, podID, limit, offset int) ([]EntityWithStats, int, error) {
+		decks, total, err := deckRepo.GetAllByPodPaginated(ctx, podID, limit, offset)
+		if err != nil {
+			return nil, 0, fmt.Errorf("failed to get decks for pod %d: %w", podID, err)
+		}
+		result, err := buildEntitiesWithStats(ctx, decks, gameResultRepo)
+		return result, total, err
+	}
+}
+
+// buildEntitiesWithStats converts []deckRepository.Model → []EntityWithStats,
+// fetching game result stats for each deck.
+func buildEntitiesWithStats(
+	ctx context.Context,
+	decks []deckRepository.Model,
+	gameResultRepo repos.GameResultRepository,
+) ([]EntityWithStats, error) {
+	result := make([]EntityWithStats, 0, len(decks))
+	for _, d := range decks {
+		entity := ToEntity(d, d.Player.Name, d.Format.Name, commanderInfoFromModel(d))
+		agg, err := gameResultRepo.GetStatsForDeck(ctx, d.ID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get stats for deck %d: %w", d.ID, err)
+		}
+		result = append(result, ToEntityWithStats(entity, agg))
+	}
+	return result, nil
 }
 
 func assertCallerOwnsDeck(ctx context.Context, deckRepo repos.DeckRepository, deckID, callerPlayerID int) error {

@@ -15,7 +15,7 @@ export function MatchesDisplay({ games, targetCommander }: MatchesDisplayProps):
             field: "id",
             headerName: "Game #",
             renderCell: (params) => (
-                <Link to={`/game/${params.row.id}`}>#{params.row.id}</Link>
+                <Link to={`/pod/${params.row.pod_id}/game/${params.row.id}`}>#{params.row.id}</Link>
             ),
             minWidth: 100,
         },

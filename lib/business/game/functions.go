@@ -23,19 +23,21 @@ func GetAllByPod(
 		if err != nil {
 			return nil, fmt.Errorf("failed to get games for pod %d: %w", podID, err)
 		}
+		return enrichGameModels(ctx, log, games, enrichGameResults), nil
+	}
+}
 
-		result := make([]Entity, 0, len(games))
-		for _, g := range games {
-			results, err := enrichGameResults(ctx, g.Results)
-			if err != nil {
-				log.Warn("Failed to get results for game, dropping from results",
-					zap.Int("game_id", g.ID), zap.Error(err))
-				continue
-			}
-			result = append(result, buildGameEntity(g, results))
+func GetAllByPodPaginated(
+	log *zap.Logger,
+	gameRepo repos.GameRepository,
+	enrichGameResults gameResult.EnrichModelsFunc,
+) GetAllByPodPaginatedFunc {
+	return func(ctx context.Context, podID, limit, offset int) ([]Entity, int, error) {
+		games, total, err := gameRepo.GetAllByPodPaginated(ctx, podID, limit, offset)
+		if err != nil {
+			return nil, 0, fmt.Errorf("failed to get games for pod %d: %w", podID, err)
 		}
-
-		return result, nil
+		return enrichGameModels(ctx, log, games, enrichGameResults), total, nil
 	}
 }
 
@@ -49,19 +51,21 @@ func GetAllByDeck(
 		if err != nil {
 			return nil, fmt.Errorf("failed to get games for deck %d: %w", deckID, err)
 		}
+		return enrichGameModels(ctx, log, games, enrichGameResults), nil
+	}
+}
 
-		result := make([]Entity, 0, len(games))
-		for _, g := range games {
-			results, err := enrichGameResults(ctx, g.Results)
-			if err != nil {
-				log.Warn("Failed to get results for game, dropping from results",
-					zap.Int("game_id", g.ID), zap.Error(err))
-				continue
-			}
-			result = append(result, buildGameEntity(g, results))
+func GetAllByDeckPaginated(
+	log *zap.Logger,
+	gameRepo repos.GameRepository,
+	enrichGameResults gameResult.EnrichModelsFunc,
+) GetAllByDeckPaginatedFunc {
+	return func(ctx context.Context, deckID, limit, offset int) ([]Entity, int, error) {
+		games, total, err := gameRepo.GetAllByDeckPaginated(ctx, deckID, limit, offset)
+		if err != nil {
+			return nil, 0, fmt.Errorf("failed to get games for deck %d: %w", deckID, err)
 		}
-
-		return result, nil
+		return enrichGameModels(ctx, log, games, enrichGameResults), total, nil
 	}
 }
 
@@ -158,19 +162,21 @@ func GetAllByPlayer(
 		if err != nil {
 			return nil, fmt.Errorf("failed to get games for player %d: %w", playerID, err)
 		}
+		return enrichGameModels(ctx, log, games, enrichGameResults), nil
+	}
+}
 
-		result := make([]Entity, 0, len(games))
-		for _, g := range games {
-			results, err := enrichGameResults(ctx, g.Results)
-			if err != nil {
-				log.Warn("Failed to get results for game, dropping from results",
-					zap.Int("game_id", g.ID), zap.Error(err))
-				continue
-			}
-			result = append(result, buildGameEntity(g, results))
+func GetAllByPlayerIDPaginated(
+	log *zap.Logger,
+	gameRepo repos.GameRepository,
+	enrichGameResults gameResult.EnrichModelsFunc,
+) GetAllByPlayerIDPaginatedFunc {
+	return func(ctx context.Context, playerID, limit, offset int) ([]Entity, int, error) {
+		games, total, err := gameRepo.GetAllByPlayerIDPaginated(ctx, playerID, limit, offset)
+		if err != nil {
+			return nil, 0, fmt.Errorf("failed to get games for player %d: %w", playerID, err)
 		}
-
-		return result, nil
+		return enrichGameModels(ctx, log, games, enrichGameResults), total, nil
 	}
 }
 
@@ -209,6 +215,27 @@ func DeleteResult(gameResultRepo repos.GameResultRepository) DeleteResultFunc {
 	return func(ctx context.Context, resultID int) error {
 		return gameResultRepo.SoftDelete(ctx, resultID)
 	}
+}
+
+// enrichGameModels converts []gameRepository.Model → []Entity.
+// Games whose result enrichment fails are silently dropped (warning logged).
+func enrichGameModels(
+	ctx context.Context,
+	log *zap.Logger,
+	games []gameRepository.Model,
+	enrich gameResult.EnrichModelsFunc,
+) []Entity {
+	result := make([]Entity, 0, len(games))
+	for _, g := range games {
+		results, err := enrich(ctx, g.Results)
+		if err != nil {
+			log.Warn("Failed to get results for game, dropping from results",
+				zap.Int("game_id", g.ID), zap.Error(err))
+			continue
+		}
+		result = append(result, buildGameEntity(g, results))
+	}
+	return result
 }
 
 func buildGameEntity(g gameRepository.Model, results []gameResult.Entity) Entity {
