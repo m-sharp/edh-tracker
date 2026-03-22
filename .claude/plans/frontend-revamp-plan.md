@@ -117,10 +117,10 @@ Mark items `[x]` as they are completed during implementation.
 - [x] `app/src/auth.tsx` — `AuthUser`, `AuthContextValue`, `AuthProvider`, `useAuth`
 
 #### 3D — Login Page (no deps; parallel with 3B)
-- [ ] `app/src/routes/login.tsx`
+- [x] `app/src/routes/login.tsx`
 
 #### 3E — RequireAuth (depends on 3C)
-- [ ] `app/src/routes/RequireAuth.tsx`
+- [x] `app/src/routes/RequireAuth.tsx`
 
 #### 3F — Route Restructure (depends on 3C, 3D, 3E)
 - [ ] `app/src/index.tsx` — wrap with `AuthProvider`; new route tree with `RequireAuth`; stub components for Phase 4 routes; redirects for `/decks`, `/players`, `/games`
@@ -147,6 +147,8 @@ Mark items `[x]` as they are completed during implementation.
 - [ ] `app/src/routes/game.tsx` — new route + inline editing + result CRUD
 - [ ] Update game links in `app/src/matches.tsx` (include `pod_id`)
 
+### Phase 5 - Unsorted Work
+- [ ] Handle user oath token expiration mid session
 ---
 
 ## Phase 0 — Google Cloud Console Setup
@@ -1095,6 +1097,22 @@ If PodManager: add "Edit" icon column + "Remove" icon column
 **"Delete Game" button (PodManager):**
 - `<Dialog>` confirmation
 - `DeleteGame(game.id)` → navigate to `/pod/${podId}`
+
+## Phase 5 - Unsorted work
+
+A btw session responded with this when asked out handling a user's oauth token expiring mid session:
+```
+ - Mid-session expiry: If the token expires while the user is actively using the app, useAuth() won't re-check. The
+    user state remains set from the initial load. The user will only get bounced to /login when they make an API call
+    that returns 401 — but that's in the individual fetch functions in http.ts, which currently just throw new
+    Error(...). Nothing catches that throw and redirects to /login.
+
+    So for now: graceful on load, silent failure mid-session. That's acceptable for Phase 3 — the mid-session case would
+     be addressed later by adding a 401 interceptor in http.ts (e.g., call logout() from context on any 401 response).
+    Not a gap in 3E itself.
+```
+
+Sounds like we need to account for this.
 
 ---
 
