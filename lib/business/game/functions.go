@@ -5,7 +5,9 @@ import (
 	"fmt"
 
 	"go.uber.org/zap"
+	"gorm.io/gorm"
 
+	"github.com/m-sharp/edh-tracker/lib"
 	"github.com/m-sharp/edh-tracker/lib/business/format"
 	"github.com/m-sharp/edh-tracker/lib/business/gameResult"
 	repos "github.com/m-sharp/edh-tracker/lib/repositories"
@@ -98,6 +100,7 @@ func Create(
 	gameResultRepo repos.GameResultRepository,
 	deckRepo repos.DeckRepository,
 	getFormat format.GetByIDFunc,
+	client *lib.DBClient,
 ) CreateFunc {
 	return func(ctx context.Context, description string, podID, formatID int, inputs []gameResult.InputEntity) error {
 		for _, input := range inputs {
@@ -129,26 +132,32 @@ func Create(
 			}
 		}
 
-		gameID, err := gameRepo.Add(ctx, description, podID, formatID)
-		if err != nil {
-			return fmt.Errorf("failed to create game: %w", err)
-		}
+		err = client.GormDb.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+			txGameRepo := gameRepository.NewRepository(&lib.DBClient{GormDb: tx})
+			txGameResultRepo := gameResultRepository.NewRepository(&lib.DBClient{GormDb: tx})
 
-		results := make([]gameResultRepository.Model, 0, len(inputs))
-		for _, input := range inputs {
-			results = append(results, gameResultRepository.Model{
-				GameID:    gameID,
-				DeckID:    input.DeckID,
-				Place:     input.Place,
-				KillCount: input.Kills,
-			})
-		}
+			gameID, err := txGameRepo.Add(ctx, description, podID, formatID)
+			if err != nil {
+				return fmt.Errorf("failed to create game: %w", err)
+			}
 
-		if err := gameResultRepo.BulkAdd(ctx, results); err != nil {
-			return fmt.Errorf("failed to create game results: %w", err)
-		}
+			results := make([]gameResultRepository.Model, 0, len(inputs))
+			for _, input := range inputs {
+				results = append(results, gameResultRepository.Model{
+					GameID:    gameID,
+					DeckID:    input.DeckID,
+					Place:     input.Place,
+					KillCount: input.Kills,
+				})
+			}
 
-		return nil
+			if err := txGameResultRepo.BulkAdd(ctx, results); err != nil {
+				return fmt.Errorf("failed to create game results: %w", err)
+			}
+
+			return nil
+		})
+		return err
 	}
 }
 

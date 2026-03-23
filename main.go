@@ -63,7 +63,7 @@ func main() {
 			logger.Fatal("Seeder failed", zap.Error(err))
 		}
 	}
-	biz := business.NewBusiness(logger, repoLayer)
+	biz := business.NewBusiness(logger, repoLayer, client)
 
 	apiRouter := NewApiRouter(cfg, logger, biz)
 	server := lib.NewWebServer(cfg, logger, func(router *mux.Router) {
