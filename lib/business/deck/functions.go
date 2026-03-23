@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/m-sharp/edh-tracker/lib/business/format"
-	"github.com/m-sharp/edh-tracker/lib/errs"
 	repos "github.com/m-sharp/edh-tracker/lib/repositories"
 	deckRepository "github.com/m-sharp/edh-tracker/lib/repositories/deck"
 )
@@ -190,29 +189,12 @@ func buildEntitiesWithStats(
 	return result, nil
 }
 
-func assertCallerOwnsDeck(ctx context.Context, deckRepo repos.DeckRepository, deckID, callerPlayerID int) error {
-	d, err := deckRepo.GetById(ctx, deckID)
-	if err != nil {
-		return fmt.Errorf("failed to fetch deck %d: %w", deckID, err)
-	}
-	if d == nil {
-		return fmt.Errorf("deck %d not found", deckID)
-	}
-	if d.PlayerID != callerPlayerID {
-		return fmt.Errorf("forbidden: deck %d does not belong to caller: %w", deckID, errs.ErrForbidden)
-	}
-	return nil
-}
-
 func Update(
 	deckRepo repos.DeckRepository,
 	deckCmdrRepo repos.DeckCommanderRepository,
 ) UpdateFunc {
-	return func(ctx context.Context, deckID int, callerPlayerID int, fields UpdateFields) error {
-		if err := assertCallerOwnsDeck(ctx, deckRepo, deckID, callerPlayerID); err != nil {
-			return err
-		}
-
+	return func(ctx context.Context, deckID int, fields UpdateFields) error {
+		// Ownership check moved to router layer per D-05.
 		repoFields := deckRepository.UpdateFields{
 			Name:     fields.Name,
 			FormatID: fields.FormatID,
@@ -236,19 +218,13 @@ func Update(
 }
 
 func SoftDelete(deckRepo repos.DeckRepository) SoftDeleteFunc {
-	return func(ctx context.Context, deckID int, callerPlayerID int) error {
-		if err := assertCallerOwnsDeck(ctx, deckRepo, deckID, callerPlayerID); err != nil {
-			return err
-		}
+	return func(ctx context.Context, deckID int) error {
 		return deckRepo.SoftDelete(ctx, deckID)
 	}
 }
 
 func Retire(deckRepo repos.DeckRepository) RetireFunc {
-	return func(ctx context.Context, deckID int, callerPlayerID int) error {
-		if err := assertCallerOwnsDeck(ctx, deckRepo, deckID, callerPlayerID); err != nil {
-			return err
-		}
+	return func(ctx context.Context, deckID int) error {
 		return deckRepo.Retire(ctx, deckID)
 	}
 }

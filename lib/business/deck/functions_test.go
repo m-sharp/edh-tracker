@@ -112,9 +112,6 @@ func TestGetDeckName_NotFound(t *testing.T) {
 
 func TestDeckUpdate_Success_NoCommander(t *testing.T) {
 	dr := &testHelpers.MockDeckRepo{
-		GetByIdFn: func(ctx context.Context, deckID int) (*deckRepo.Model, error) {
-			return &deckRepo.Model{GormModelBase: base.GormModelBase{ID: deckID}, PlayerID: 42}, nil
-		},
 		UpdateFn: func(ctx context.Context, deckID int, fields deckRepo.UpdateFields) error {
 			return nil
 		},
@@ -123,7 +120,7 @@ func TestDeckUpdate_Success_NoCommander(t *testing.T) {
 
 	fn := Update(dr, deckCmdrRepo)
 	name := "New Name"
-	err := fn(context.Background(), 1, 42, UpdateFields{Name: &name})
+	err := fn(context.Background(), 1, UpdateFields{Name: &name})
 	require.NoError(t, err)
 }
 
@@ -151,68 +148,21 @@ func TestDeckUpdate_WithCommander(t *testing.T) {
 
 	commanderID := 5
 	fn := Update(dr, deckCmdrRepo)
-	err := fn(context.Background(), 1, 10, UpdateFields{CommanderID: &commanderID})
+	err := fn(context.Background(), 1, UpdateFields{CommanderID: &commanderID})
 	require.NoError(t, err)
 	assert.True(t, deleteCalled, "DeleteByDeckID should be called when CommanderID is set")
 	assert.True(t, addCalled, "Add should be called to set the new commander")
 }
 
-func TestDeckUpdate_NotFound(t *testing.T) {
-	dr := &testHelpers.MockDeckRepo{
-		GetByIdFn: func(ctx context.Context, deckID int) (*deckRepo.Model, error) {
-			return nil, nil
-		},
-	}
-	fn := Update(dr, &testHelpers.MockDeckCommanderRepo{})
-	err := fn(context.Background(), 99, 42, UpdateFields{})
-	assert.ErrorContains(t, err, "not found")
-}
-
-func TestDeckUpdate_Forbidden(t *testing.T) {
-	dr := &testHelpers.MockDeckRepo{
-		GetByIdFn: func(ctx context.Context, deckID int) (*deckRepo.Model, error) {
-			return &deckRepo.Model{GormModelBase: base.GormModelBase{ID: deckID}, PlayerID: 10}, nil
-		},
-	}
-	fn := Update(dr, &testHelpers.MockDeckCommanderRepo{})
-	err := fn(context.Background(), 1, 99, UpdateFields{}) // callerPlayerID=99 != deck.PlayerID=10
-	assert.ErrorContains(t, err, "forbidden")
-}
-
 func TestDeckSoftDelete_Success(t *testing.T) {
 	dr := &testHelpers.MockDeckRepo{
-		GetByIdFn: func(ctx context.Context, deckID int) (*deckRepo.Model, error) {
-			return &deckRepo.Model{GormModelBase: base.GormModelBase{ID: deckID}, PlayerID: 7}, nil
-		},
 		SoftDeleteFn: func(ctx context.Context, id int) error {
 			return nil
 		},
 	}
 	fn := SoftDelete(dr)
-	err := fn(context.Background(), 1, 7)
+	err := fn(context.Background(), 1)
 	require.NoError(t, err)
-}
-
-func TestDeckSoftDelete_NotFound(t *testing.T) {
-	dr := &testHelpers.MockDeckRepo{
-		GetByIdFn: func(ctx context.Context, deckID int) (*deckRepo.Model, error) {
-			return nil, nil
-		},
-	}
-	fn := SoftDelete(dr)
-	err := fn(context.Background(), 99, 7)
-	assert.ErrorContains(t, err, "not found")
-}
-
-func TestDeckSoftDelete_Forbidden(t *testing.T) {
-	dr := &testHelpers.MockDeckRepo{
-		GetByIdFn: func(ctx context.Context, deckID int) (*deckRepo.Model, error) {
-			return &deckRepo.Model{GormModelBase: base.GormModelBase{ID: deckID}, PlayerID: 10}, nil
-		},
-	}
-	fn := SoftDelete(dr)
-	err := fn(context.Background(), 1, 99) // caller=99, owner=10
-	assert.ErrorContains(t, err, "forbidden")
 }
 
 func TestDeckGetAllByPod_Success(t *testing.T) {
