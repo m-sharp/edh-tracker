@@ -288,7 +288,7 @@ type googleUserInfo struct {
 }
 
 func fetchGoogleUserInfo(client *http.Client) (*googleUserInfo, error) {
-	resp, err := client.Get("https://www.googleapis.com/oauth2/v2/userinfo")
+	resp, err := client.Get("https://www.googleapis.com/oauth2/v3/userinfo")
 	if err != nil {
 		return nil, fmt.Errorf("failed to request Google userinfo: %w", err)
 	}

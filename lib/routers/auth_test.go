@@ -56,8 +56,11 @@ var fixedGoogleUser = &googleUserInfo{
 func TestCallback_ExistingOAuthUser(t *testing.T) {
 	existingUser := &user.Entity{ID: 1, PlayerID: 10}
 
+	var gotProvider, gotSubject string
 	biz := user.Functions{
-		GetByOAuth: func(_ context.Context, _, _ string) (*user.Entity, error) {
+		GetByOAuth: func(_ context.Context, provider, subject string) (*user.Entity, error) {
+			gotProvider = provider
+			gotSubject = subject
 			return existingUser, nil
 		},
 	}
@@ -68,6 +71,8 @@ func TestCallback_ExistingOAuthUser(t *testing.T) {
 
 	// Should redirect (no error) and set a session cookie
 	assert.Equal(t, http.StatusFound, rr.Code)
+	assert.Equal(t, providerGoogle, gotProvider)
+	assert.Equal(t, fixedGoogleUser.Sub, gotSubject, "GetByOAuth must be called with the sub from Google")
 	require.NotEmpty(t, rr.Result().Cookies())
 	var sessionCookie *http.Cookie
 	for _, c := range rr.Result().Cookies() {
@@ -82,7 +87,7 @@ func TestCallback_EmailFallback_LinksExistingUser(t *testing.T) {
 	seededUser := &user.Entity{ID: 5, PlayerID: 20}
 	linkedUser := &user.Entity{ID: 5, PlayerID: 20}
 
-	linkOAuthCalled := false
+	var linkOAuthSubject string
 	biz := user.Functions{
 		GetByOAuth: func(_ context.Context, _, _ string) (*user.Entity, error) {
 			return nil, nil
@@ -90,8 +95,8 @@ func TestCallback_EmailFallback_LinksExistingUser(t *testing.T) {
 		GetByEmail: func(_ context.Context, _ string) (*user.Entity, error) {
 			return seededUser, nil
 		},
-		LinkOAuth: func(_ context.Context, _ int, _, _, _, _, _ string) (*user.Entity, error) {
-			linkOAuthCalled = true
+		LinkOAuth: func(_ context.Context, _ int, _, subject, _, _, _ string) (*user.Entity, error) {
+			linkOAuthSubject = subject
 			return linkedUser, nil
 		},
 	}
@@ -101,7 +106,7 @@ func TestCallback_EmailFallback_LinksExistingUser(t *testing.T) {
 	router.Callback(rr, callbackRequest("test-nonce-2"))
 
 	assert.Equal(t, http.StatusFound, rr.Code)
-	assert.True(t, linkOAuthCalled, "LinkOAuth should have been called")
+	assert.Equal(t, fixedGoogleUser.Sub, linkOAuthSubject, "LinkOAuth must be called with the sub from Google")
 	var sessionCookie *http.Cookie
 	for _, c := range rr.Result().Cookies() {
 		if c.Name == trackerHttp.SessionCookieName {
@@ -114,7 +119,7 @@ func TestCallback_EmailFallback_LinksExistingUser(t *testing.T) {
 func TestCallback_NewUser_CreateWithOAuth(t *testing.T) {
 	newUser := &user.Entity{ID: 99, PlayerID: 77}
 
-	createCalled := false
+	var createWithOAuthSubject string
 	biz := user.Functions{
 		GetByOAuth: func(_ context.Context, _, _ string) (*user.Entity, error) {
 			return nil, nil
@@ -122,8 +127,8 @@ func TestCallback_NewUser_CreateWithOAuth(t *testing.T) {
 		GetByEmail: func(_ context.Context, _ string) (*user.Entity, error) {
 			return nil, nil
 		},
-		CreateWithOAuth: func(_ context.Context, _, _, _, _, _, _ string) (*user.Entity, error) {
-			createCalled = true
+		CreateWithOAuth: func(_ context.Context, _, _, subject, _, _, _ string) (*user.Entity, error) {
+			createWithOAuthSubject = subject
 			return newUser, nil
 		},
 	}
@@ -133,7 +138,7 @@ func TestCallback_NewUser_CreateWithOAuth(t *testing.T) {
 	router.Callback(rr, callbackRequest("test-nonce-3"))
 
 	assert.Equal(t, http.StatusFound, rr.Code)
-	assert.True(t, createCalled, "CreateWithOAuth should have been called")
+	assert.Equal(t, fixedGoogleUser.Sub, createWithOAuthSubject, "CreateWithOAuth must be called with the sub from Google")
 	var sessionCookie *http.Cookie
 	for _, c := range rr.Result().Cookies() {
 		if c.Name == trackerHttp.SessionCookieName {
