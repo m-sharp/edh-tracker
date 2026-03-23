@@ -67,7 +67,7 @@
 ### Production Readiness
 
 - [ ] **INFRA-01**: CORS / cookie behavior verified in deployed environment; nginx reverse proxy added if needed
-- [ ] **INFRA-02**: `PromotePlayer` and `KickPlayer` return correct HTTP codes — 403 for authorization failures, 500 for infrastructure errors
+- [x] **INFRA-02**: `PromotePlayer` and `KickPlayer` return correct HTTP codes — 403 for authorization failures, 500 for infrastructure errors
 - [ ] **INFRA-03**: `API_BASE_URL` in `app/src/http.ts` works correctly in production — either relative URLs (if nginx proxy) or configurable via build-time env var (`REACT_APP_API_BASE_URL`)
 
 ## v2 Requirements
@@ -136,7 +136,7 @@
 | TEST-03 | Phase 6 | Pending |
 | TEST-04 | Phase 6 | Pending |
 | INFRA-01 | Phase 7 | Pending |
-| INFRA-02 | Phase 1 | Pending |
+| INFRA-02 | Phase 1 | Complete |
 | INFRA-03 | Phase 7 | Pending |
 
 **Coverage:**
