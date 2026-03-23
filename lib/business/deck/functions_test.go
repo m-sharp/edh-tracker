@@ -243,8 +243,12 @@ func TestDeckGetAllByPod_Success(t *testing.T) {
 		},
 	}
 	grRepo := &testHelpers.MockGameResultRepo{
-		GetStatsForDeckFn: func(ctx context.Context, deckID int) (*gameResultRepo.Aggregate, error) {
-			return nil, nil
+		GetStatsForDecksFn: func(ctx context.Context, deckIDs []int) (map[int]*gameResultRepo.Aggregate, error) {
+			result := map[int]*gameResultRepo.Aggregate{}
+			for _, id := range deckIDs {
+				result[id] = nil
+			}
+			return result, nil
 		},
 	}
 
@@ -300,8 +304,12 @@ func TestGetAllByPodPaginated_Success(t *testing.T) {
 		},
 	}
 	grRepo := &testHelpers.MockGameResultRepo{
-		GetStatsForDeckFn: func(ctx context.Context, deckID int) (*gameResultRepo.Aggregate, error) {
-			return nil, nil
+		GetStatsForDecksFn: func(ctx context.Context, deckIDs []int) (map[int]*gameResultRepo.Aggregate, error) {
+			result := map[int]*gameResultRepo.Aggregate{}
+			for _, id := range deckIDs {
+				result[id] = nil
+			}
+			return result, nil
 		},
 	}
 
@@ -341,8 +349,12 @@ func TestGetAllByPlayerPaginated_Success(t *testing.T) {
 		},
 	}
 	grRepo := &testHelpers.MockGameResultRepo{
-		GetStatsForDeckFn: func(ctx context.Context, deckID int) (*gameResultRepo.Aggregate, error) {
-			return nil, nil
+		GetStatsForDecksFn: func(ctx context.Context, deckIDs []int) (map[int]*gameResultRepo.Aggregate, error) {
+			result := map[int]*gameResultRepo.Aggregate{}
+			for _, id := range deckIDs {
+				result[id] = nil
+			}
+			return result, nil
 		},
 	}
 
