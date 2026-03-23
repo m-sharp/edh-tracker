@@ -39,6 +39,11 @@ func main() {
 		log.Fatalf("Error creating Config: %s", err.Error())
 	}
 
+	jwtSecret, _ := cfg.Get(lib.JWTSecret)
+	if len(jwtSecret) < 32 {
+		log.Fatalf("JWT_SECRET must be at least 32 bytes; got %d", len(jwtSecret))
+	}
+
 	logger := lib.GetLogger(cfg)
 
 	client, err := lib.NewDBClient(cfg, logger)
