@@ -133,8 +133,8 @@ func Create(
 		}
 
 		err = client.GormDb.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-			txGameRepo := gameRepository.NewRepository(&lib.DBClient{GormDb: tx})
-			txGameResultRepo := gameResultRepository.NewRepository(&lib.DBClient{GormDb: tx})
+			txGameRepo := gameRepository.NewRepositoryFromDB(tx)
+			txGameResultRepo := gameResultRepository.NewRepositoryFromDB(tx)
 
 			gameID, err := txGameRepo.Add(ctx, description, podID, formatID)
 			if err != nil {
