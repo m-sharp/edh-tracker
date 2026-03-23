@@ -274,17 +274,29 @@ interface PodSettingsTabProps {
 function PodSettingsTab({ pod }: PodSettingsTabProps): ReactElement {
     const navigate = useNavigate();
     const [name, setName] = useState(pod.name);
+    const [nameError, setNameError] = useState<string | null>(null);
     const [inviteLink, setInviteLink] = useState<string | null>(null);
+    const [inviteError, setInviteError] = useState<string | null>(null);
     const [deleteOpen, setDeleteOpen] = useState(false);
 
     const handleSaveName = async () => {
-        await PatchPod(pod.id, name);
-        window.location.reload();
+        setNameError(null);
+        try {
+            await PatchPod(pod.id, name);
+            window.location.reload();
+        } catch {
+            setNameError("Failed to update name.");
+        }
     };
 
     const handleGenerateInvite = async () => {
-        const { invite_code } = await PostPodInvite(pod.id);
-        setInviteLink(`${window.location.origin}/join?code=${invite_code}`);
+        setInviteError(null);
+        try {
+            const { invite_code } = await PostPodInvite(pod.id);
+            setInviteLink(`${window.location.origin}/join?code=${invite_code}`);
+        } catch {
+            setInviteError("Failed to generate invite link.");
+        }
     };
 
     const handleDelete = async () => {
@@ -295,19 +307,23 @@ function PodSettingsTab({ pod }: PodSettingsTabProps): ReactElement {
     // TODO: Icon w/ tooltip for Save & Copy
     return (
         <Box sx={{ display: "flex", flexDirection: "column", gap: 3, maxWidth: 500 }}>
-            <Box sx={{ display: "flex", gap: 1 }}>
-                <TextField
-                    label="Pod Name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    size="small"
-                />
-                <Button variant="contained" onClick={handleSaveName}>Save</Button>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                <Box sx={{ display: "flex", gap: 1 }}>
+                    <TextField
+                        label="Pod Name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        size="small"
+                    />
+                    <Button variant="contained" onClick={handleSaveName}>Save</Button>
+                </Box>
+                {nameError && <Typography color="error" variant="body2">{nameError}</Typography>}
             </Box>
             <Box>
                 <Button variant="outlined" onClick={handleGenerateInvite}>
                     Generate Invite Link
                 </Button>
+                {inviteError && <Typography color="error" variant="body2">{inviteError}</Typography>}
                 {inviteLink && (
                     <Box sx={{ mt: 1, display: "flex", gap: 1, alignItems: "center" }}>
                         <Typography variant="body2" sx={{ wordBreak: "break-all" }}>
