@@ -52,7 +52,7 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — Create MUI dark theme + wire ThemeProvider globally (DSNG-01, DSNG-03)
+- [x] 02-01-PLAN.md — Create MUI dark theme + wire ThemeProvider globally (DSNG-01, DSNG-03)
 - [ ] 02-02-PLAN.md — Pod view mobile polish + visual verification (DSNG-02)
 
 ### Phase 3: Frontend Structure

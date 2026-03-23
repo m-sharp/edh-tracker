@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Ready to execute
-stopped_at: Phase 02 planned (2 plans, 2 waves)
-last_updated: "2026-03-23T22:45:00.000Z"
+stopped_at: Completed 02-design-language/02-01-PLAN.md
+last_updated: "2026-03-23T22:58:20.018Z"
 progress:
   total_phases: 7
   completed_phases: 1
-  total_plans: 6
-  completed_plans: 6
+  total_plans: 8
+  completed_plans: 7
 ---
 
 # Project State
@@ -23,8 +23,8 @@ See: .planning/PROJECT.md (updated 2026-03-22)
 
 ## Current Position
 
-Phase: 02 (design-language) — PLANNED → READY TO EXECUTE
-Plan: 0 of 2
+Phase: 02 (design-language) — EXECUTING
+Plan: 2 of 2
 
 ## Performance Metrics
 
@@ -52,6 +52,7 @@ Plan: 0 of 2
 | Phase 01-backend-hardening P03 | 15 | 1 tasks | 5 files |
 | Phase 01-backend-hardening P02 | 14min | 2 tasks | 6 files |
 | Phase 01-backend-hardening P06 | 4min | 2 tasks | 3 files |
+| Phase 02-design-language P01 | 8min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -71,6 +72,8 @@ Recent decisions affecting current work:
 - [Phase 01-backend-hardening]: assertCallerOwnsDeck placed on DeckRouter (router layer owns auth) — business layer Update/SoftDelete/Retire no longer take callerPlayerID
 - [Phase 01-backend-hardening]: DeckCreate ignores body player_id, uses JWT callerPlayerID exclusively (SEC-02)
 - [Phase 01-backend-hardening]: Integration tests used for Create success path — transaction wrapper bypasses interface mocks; nil client safe for error-path unit tests
+- [Phase 02-design-language]: CssBaseline placed inside ThemeProvider — required for dark body background to apply globally
+- [Phase 02-design-language]: ThemeProvider/createTheme imported from @mui/material/styles (not @mui/material) — canonical sub-path per MUI v5 conventions
 
 ### Pending Todos
 
@@ -83,6 +86,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-23T22:45:00.000Z
-Stopped at: Phase 02 planned — 2 plans (02-01 theme+wiring, 02-02 mobile polish)
-Resume file: .planning/phases/02-design-language/02-01-PLAN.md
+Last session: 2026-03-23T22:58:19.946Z
+Stopped at: Completed 02-design-language/02-01-PLAN.md
+Resume file: None
