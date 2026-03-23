@@ -1,4 +1,3 @@
-- Need to handle hooking up seeded users
 - Handle user oath token expiration mid-session:
     - A btw session responded with this when asked out handling a user's oauth token expiring mid session:
       ```
