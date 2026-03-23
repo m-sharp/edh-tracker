@@ -109,6 +109,9 @@ type UserRepository interface {
 	CreatePlayerAndUser(ctx context.Context, playerName string, roleID int, provider, subject, email, displayName, avatarURL string) (*user.Model, error)
 	BulkAdd(ctx context.Context, playerIDs []int, roleID int) error
 	SoftDelete(ctx context.Context, id int) error
+	GetByEmail(ctx context.Context, email string) (*user.Model, error)
+	UpdateOAuth(ctx context.Context, userID int, provider, subject, email, displayName, avatarURL string) error
+	SetEmail(ctx context.Context, playerID int, email string) error
 }
 
 type FormatRepository interface {

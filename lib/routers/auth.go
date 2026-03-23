@@ -1,6 +1,7 @@
 package routers
 
 import (
+	"context"
 	"crypto/rand"
 	"encoding/hex"
 	"encoding/json"
@@ -31,6 +32,9 @@ type AuthRouter struct {
 	jwtSecret   string
 	secure      bool
 	frontendURL string
+
+	googleUserFetcher func(*http.Client) (*googleUserInfo, error)
+	tokenExchanger    func(ctx context.Context, code string) (*oauth2.Token, error)
 }
 
 func NewAuthRouter(log *zap.Logger, cfg *lib.Config, biz *business.Business) *AuthRouter {
@@ -61,24 +65,32 @@ func NewAuthRouter(log *zap.Logger, cfg *lib.Config, biz *business.Business) *Au
 
 	devMode, _ := cfg.Get(lib.Development)
 
-	return &AuthRouter{
-		log: log.Named("AuthRouter"),
-		oauthCfg: &oauth2.Config{
-			ClientID:     clientID,
-			ClientSecret: clientSecret,
-			RedirectURL:  redirectURL,
-			Scopes: []string{
-				"openid",
-				"https://www.googleapis.com/auth/userinfo.email",
-				"https://www.googleapis.com/auth/userinfo.profile",
-			},
-			Endpoint: google.Endpoint,
+	oauthCfg := &oauth2.Config{
+		ClientID:     clientID,
+		ClientSecret: clientSecret,
+		RedirectURL:  redirectURL,
+		Scopes: []string{
+			"openid",
+			"https://www.googleapis.com/auth/userinfo.email",
+			"https://www.googleapis.com/auth/userinfo.profile",
 		},
+		Endpoint: google.Endpoint,
+	}
+	ar := &AuthRouter{
+		log:         log.Named("AuthRouter"),
+		oauthCfg:    oauthCfg,
 		usersBiz:    biz.Users,
 		jwtSecret:   jwtSecret,
 		secure:      devMode != "true",
 		frontendURL: frontendURL,
+
+		googleUserFetcher: fetchGoogleUserInfo,
+		tokenExchanger: func(ctx context.Context, code string) (*oauth2.Token, error) {
+			return oauthCfg.Exchange(ctx, code)
+		},
 	}
+
+	return ar
 }
 
 func (a *AuthRouter) GetRoutes() []*trackerHttp.Route {
@@ -163,14 +175,14 @@ func (a *AuthRouter) Callback(w http.ResponseWriter, r *http.Request) {
 
 	// Exchange code for token
 	code := r.URL.Query().Get("code")
-	token, err := a.oauthCfg.Exchange(ctx, code)
+	token, err := a.tokenExchanger(ctx, code)
 	if err != nil {
 		trackerHttp.WriteError(a.log, w, http.StatusInternalServerError, err, "Failed to exchange OAuth code", "authentication failed")
 		return
 	}
 
 	// Fetch Google user profile
-	googleUser, err := fetchGoogleUserInfo(a.oauthCfg.Client(ctx, token))
+	googleUser, err := a.googleUserFetcher(a.oauthCfg.Client(ctx, token))
 	if err != nil {
 		trackerHttp.WriteError(a.log, w, http.StatusInternalServerError, err, "Failed to fetch Google user info", "authentication failed")
 		return
@@ -182,18 +194,39 @@ func (a *AuthRouter) Callback(w http.ResponseWriter, r *http.Request) {
 		trackerHttp.WriteError(a.log, w, http.StatusInternalServerError, err, "Failed to look up user by OAuth", "authentication failed")
 		return
 	}
+
 	if u == nil {
-		u, err = a.usersBiz.CreateWithOAuth(
-			ctx,
-			googleUser.Name,
-			providerGoogle,
-			googleUser.Sub,
-			googleUser.Email,
-			googleUser.Name,
-			googleUser.Picture,
-		)
+		// Check whether a seeded user row exists for this email (no OAuth sub yet)
+		u, err = a.usersBiz.GetByEmail(ctx, googleUser.Email)
 		if err != nil {
-			trackerHttp.WriteError(a.log, w, http.StatusInternalServerError, err, "Failed to create user via OAuth", "authentication failed")
+			trackerHttp.WriteError(a.log, w, http.StatusInternalServerError, err, "Failed to look up user by email", "authentication failed")
+			return
+		}
+		if u != nil {
+			// Link OAuth credentials to the existing seeded player
+			u, err = a.usersBiz.LinkOAuth(
+				ctx,
+				u.ID,
+				providerGoogle,
+				googleUser.Sub,
+				googleUser.Email,
+				googleUser.Name,
+				googleUser.Picture,
+			)
+		} else {
+			// Truly new user — create player + user atomically
+			u, err = a.usersBiz.CreateWithOAuth(
+				ctx,
+				googleUser.Name,
+				providerGoogle,
+				googleUser.Sub,
+				googleUser.Email,
+				googleUser.Name,
+				googleUser.Picture,
+			)
+		}
+		if err != nil {
+			trackerHttp.WriteError(a.log, w, http.StatusInternalServerError, err, "Failed to create/link user via OAuth", "authentication failed")
 			return
 		}
 	}
@@ -255,7 +288,7 @@ type googleUserInfo struct {
 }
 
 func fetchGoogleUserInfo(client *http.Client) (*googleUserInfo, error) {
-	resp, err := client.Get("https://www.googleapis.com/oauth2/v2/userinfo")
+	resp, err := client.Get("https://www.googleapis.com/oauth2/v3/userinfo")
 	if err != nil {
 		return nil, fmt.Errorf("failed to request Google userinfo: %w", err)
 	}

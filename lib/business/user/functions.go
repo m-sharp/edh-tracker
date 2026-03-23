@@ -56,6 +56,34 @@ func GetByOAuth(userRepo repos.UserRepository) GetByOAuthFunc {
 	}
 }
 
+func GetByEmail(userRepo repos.UserRepository) GetByEmailFunc {
+	return func(ctx context.Context, email string) (*Entity, error) {
+		m, err := userRepo.GetByEmail(ctx, email)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get user by email: %w", err)
+		}
+		if m == nil {
+			return nil, nil
+		}
+		e := ToEntity(*m)
+		return &e, nil
+	}
+}
+
+func LinkOAuth(userRepo repos.UserRepository) LinkOAuthFunc {
+	return func(ctx context.Context, userID int, provider, subject, email, displayName, avatarURL string) (*Entity, error) {
+		if err := userRepo.UpdateOAuth(ctx, userID, provider, subject, email, displayName, avatarURL); err != nil {
+			return nil, fmt.Errorf("failed to link OAuth for user %d: %w", userID, err)
+		}
+		m, err := userRepo.GetByID(ctx, userID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to fetch user after OAuth link: %w", err)
+		}
+		e := ToEntity(*m)
+		return &e, nil
+	}
+}
+
 func CreateWithOAuth(userRepo repos.UserRepository) CreateWithOAuthFunc {
 	return func(ctx context.Context, playerName, provider, subject, email, displayName, avatarURL string) (*Entity, error) {
 		role, err := userRepo.GetRoleByName(ctx, userrepo.RolePlayer)

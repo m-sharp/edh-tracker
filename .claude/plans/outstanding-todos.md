@@ -17,7 +17,6 @@
 - Pod -> Players view should show player records and points within the pod
 - Current pagination is great for performance, but it makes operations like seeing all the decks for a pod sorted by record difficult.
     - E.g., decks on the second page of results won't be sorted properly.
-- Possible 403 error trying to retire a deck - `forbidden: deck 3 does not belong to caller`
 - Frontend file restructure:
     - The following view files have gotten very large with multiple components:
         - @app/src/routes/pod.tsx

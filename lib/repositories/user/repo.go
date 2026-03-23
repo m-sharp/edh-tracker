@@ -151,6 +151,40 @@ func (r *Repository) BulkAdd(ctx context.Context, playerIDs []int, roleID int) e
 	return nil
 }
 
+func (r *Repository) GetByEmail(ctx context.Context, email string) (*Model, error) {
+	var m Model
+	err := r.db.WithContext(ctx).Where("email = ?", email).First(&m).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to get User by email: %w", err)
+	}
+	return &m, nil
+}
+
+func (r *Repository) UpdateOAuth(ctx context.Context, userID int, provider, subject, email, displayName, avatarURL string) error {
+	err := r.db.WithContext(ctx).Model(&Model{}).Where("id = ?", userID).Updates(map[string]any{
+		"oauth_provider": provider,
+		"oauth_subject":  subject,
+		"email":          email,
+		"display_name":   displayName,
+		"avatar_url":     avatarURL,
+	}).Error
+	if err != nil {
+		return fmt.Errorf("failed to update OAuth on user %d: %w", userID, err)
+	}
+	return nil
+}
+
+func (r *Repository) SetEmail(ctx context.Context, playerID int, email string) error {
+	err := r.db.WithContext(ctx).Model(&Model{}).Where("player_id = ?", playerID).Update("email", email).Error
+	if err != nil {
+		return fmt.Errorf("failed to set email for player %d: %w", playerID, err)
+	}
+	return nil
+}
+
 func (r *Repository) SoftDelete(ctx context.Context, id int) error {
 	if err := r.db.WithContext(ctx).Delete(&Model{}, id).Error; err != nil {
 		return fmt.Errorf("failed to soft-delete User record: %w", err)

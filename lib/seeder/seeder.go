@@ -3,6 +3,7 @@ package seeder
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 
@@ -243,6 +244,27 @@ func (s *Seeder) seedPlayersAndUsers(ctx context.Context, playerInfos []PlayerIn
 
 	if err = s.repos.PlayerPodRoles.BulkAdd(ctx, podID, podManagerPlayerIDs, playerPodRole.RoleManager); err != nil {
 		return nil, fmt.Errorf("failed to bulk add player pod manager roles: %w", err)
+	}
+
+	// Set emails on seeded users where known
+	emailData, err := os.ReadFile("./data/playerEmails.json")
+	if err != nil && !errors.Is(err, os.ErrNotExist) {
+		return nil, fmt.Errorf("failed to read playerEmails.json: %w", err)
+	}
+
+	var emailMap map[string]string
+	if err = json.Unmarshal(emailData, &emailMap); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal playerEmails.json: %w", err)
+	}
+	for name, email := range emailMap {
+		pid, ok := playerIDs[name]
+		if !ok {
+			s.log.Warn("playerEmails.json name not found in seeded players, skipping", zap.String("name", name))
+			continue
+		}
+		if err = s.repos.Users.SetEmail(ctx, pid, email); err != nil {
+			return nil, fmt.Errorf("failed to set email for player %q: %w", name, err)
+		}
 	}
 
 	return playerIDs, nil

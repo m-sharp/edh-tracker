@@ -14,6 +14,7 @@ import (
 	playerPodRoleRepo "github.com/m-sharp/edh-tracker/lib/repositories/playerPodRole"
 	podRepo "github.com/m-sharp/edh-tracker/lib/repositories/pod"
 	podInviteRepo "github.com/m-sharp/edh-tracker/lib/repositories/podInvite"
+	userRepo "github.com/m-sharp/edh-tracker/lib/repositories/user"
 )
 
 // Compile-time interface checks.
@@ -27,6 +28,7 @@ var (
 	_ repos.PodInviteRepository     = (*MockPodInviteRepo)(nil)
 	_ repos.GameRepository          = (*MockGameRepo)(nil)
 	_ repos.FormatRepository        = (*MockFormatRepo)(nil)
+	_ repos.UserRepository          = (*MockUserRepo)(nil)
 )
 
 // MockGameResultRepo implements repos.GameResultRepository.
@@ -488,4 +490,93 @@ func (m *MockFormatRepo) GetByName(ctx context.Context, name string) (*formatRep
 		return m.GetByNameFn(ctx, name)
 	}
 	panic("unexpected call to GetByName")
+}
+
+// MockUserRepo implements repos.UserRepository.
+type MockUserRepo struct {
+	GetByIDFn              func(ctx context.Context, id int) (*userRepo.Model, error)
+	GetByPlayerIDFn        func(ctx context.Context, playerID int) (*userRepo.Model, error)
+	GetByOAuthFn           func(ctx context.Context, provider, subject string) (*userRepo.Model, error)
+	GetRoleByNameFn        func(ctx context.Context, name string) (*userRepo.RoleModel, error)
+	AddFn                  func(ctx context.Context, playerID, roleID int) (int, error)
+	AddWithOAuthFn         func(ctx context.Context, playerID, roleID int, provider, subject, email, displayName, avatarURL string) (int, error)
+	CreatePlayerAndUserFn  func(ctx context.Context, playerName string, roleID int, provider, subject, email, displayName, avatarURL string) (*userRepo.Model, error)
+	BulkAddFn              func(ctx context.Context, playerIDs []int, roleID int) error
+	SoftDeleteFn           func(ctx context.Context, id int) error
+	GetByEmailFn           func(ctx context.Context, email string) (*userRepo.Model, error)
+	UpdateOAuthFn          func(ctx context.Context, userID int, provider, subject, email, displayName, avatarURL string) error
+	SetEmailFn             func(ctx context.Context, playerID int, email string) error
+}
+
+func (m *MockUserRepo) GetByID(ctx context.Context, id int) (*userRepo.Model, error) {
+	if m.GetByIDFn != nil {
+		return m.GetByIDFn(ctx, id)
+	}
+	panic("unexpected call to GetByID")
+}
+func (m *MockUserRepo) GetByPlayerID(ctx context.Context, playerID int) (*userRepo.Model, error) {
+	if m.GetByPlayerIDFn != nil {
+		return m.GetByPlayerIDFn(ctx, playerID)
+	}
+	panic("unexpected call to GetByPlayerID")
+}
+func (m *MockUserRepo) GetByOAuth(ctx context.Context, provider, subject string) (*userRepo.Model, error) {
+	if m.GetByOAuthFn != nil {
+		return m.GetByOAuthFn(ctx, provider, subject)
+	}
+	panic("unexpected call to GetByOAuth")
+}
+func (m *MockUserRepo) GetRoleByName(ctx context.Context, name string) (*userRepo.RoleModel, error) {
+	if m.GetRoleByNameFn != nil {
+		return m.GetRoleByNameFn(ctx, name)
+	}
+	panic("unexpected call to GetRoleByName")
+}
+func (m *MockUserRepo) Add(ctx context.Context, playerID, roleID int) (int, error) {
+	if m.AddFn != nil {
+		return m.AddFn(ctx, playerID, roleID)
+	}
+	panic("unexpected call to Add")
+}
+func (m *MockUserRepo) AddWithOAuth(ctx context.Context, playerID, roleID int, provider, subject, email, displayName, avatarURL string) (int, error) {
+	if m.AddWithOAuthFn != nil {
+		return m.AddWithOAuthFn(ctx, playerID, roleID, provider, subject, email, displayName, avatarURL)
+	}
+	panic("unexpected call to AddWithOAuth")
+}
+func (m *MockUserRepo) CreatePlayerAndUser(ctx context.Context, playerName string, roleID int, provider, subject, email, displayName, avatarURL string) (*userRepo.Model, error) {
+	if m.CreatePlayerAndUserFn != nil {
+		return m.CreatePlayerAndUserFn(ctx, playerName, roleID, provider, subject, email, displayName, avatarURL)
+	}
+	panic("unexpected call to CreatePlayerAndUser")
+}
+func (m *MockUserRepo) BulkAdd(ctx context.Context, playerIDs []int, roleID int) error {
+	if m.BulkAddFn != nil {
+		return m.BulkAddFn(ctx, playerIDs, roleID)
+	}
+	panic("unexpected call to BulkAdd")
+}
+func (m *MockUserRepo) SoftDelete(ctx context.Context, id int) error {
+	if m.SoftDeleteFn != nil {
+		return m.SoftDeleteFn(ctx, id)
+	}
+	panic("unexpected call to SoftDelete")
+}
+func (m *MockUserRepo) GetByEmail(ctx context.Context, email string) (*userRepo.Model, error) {
+	if m.GetByEmailFn != nil {
+		return m.GetByEmailFn(ctx, email)
+	}
+	panic("unexpected call to GetByEmail")
+}
+func (m *MockUserRepo) UpdateOAuth(ctx context.Context, userID int, provider, subject, email, displayName, avatarURL string) error {
+	if m.UpdateOAuthFn != nil {
+		return m.UpdateOAuthFn(ctx, userID, provider, subject, email, displayName, avatarURL)
+	}
+	panic("unexpected call to UpdateOAuth")
+}
+func (m *MockUserRepo) SetEmail(ctx context.Context, playerID int, email string) error {
+	if m.SetEmailFn != nil {
+		return m.SetEmailFn(ctx, playerID, email)
+	}
+	panic("unexpected call to SetEmail")
 }

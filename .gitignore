@@ -47,6 +47,9 @@ yarn-error.log*
 # local env files
 .env*.local
 
+# PII seed data
+data/playerEmails.json
+
 # vercel
 .vercel
 
