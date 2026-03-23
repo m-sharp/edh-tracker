@@ -21,7 +21,7 @@ export default function Root(): ReactElement {
     return (
         <Box sx={{ display: "flex", width: "auto" }}>
             <DrawerAppBar />
-            <Container id="detail" component="main" sx={{ p: 3, width: "90%", bgcolor: "#f0f5fa", mt: 12, mb: 5 }} maxWidth="xl">
+            <Container id="detail" component="main" sx={{ p: 3, width: "90%", bgcolor: "background.default", mt: 12, mb: 5 }} maxWidth="xl">
                 <Outlet />
             </Container>
         </Box>
