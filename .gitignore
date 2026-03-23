@@ -56,3 +56,6 @@ data/playerEmails.json
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Claude
+.claude/worktrees/
