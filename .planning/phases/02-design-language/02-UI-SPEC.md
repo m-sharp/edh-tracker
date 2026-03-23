@@ -56,16 +56,19 @@ All heading roles use Josefin Sans. Body and label roles use Roboto (MUI default
 | Role | Size | Weight | Line Height | MUI variant | Usage |
 |------|------|--------|-------------|-------------|-------|
 | Display | 28px | 700 (bold) | 1.2 | h4 | Pod names, page-level headings |
-| Heading | 20px | 600 (semibold) | 1.2 | h6 | Section headings, tab content titles |
+| Heading | 20px | 700 (bold) | 1.2 | h6 | Section headings, tab content titles |
 | Body | 16px | 400 (regular) | 1.5 | body1 | Primary readable content, list item text |
 | Label | 14px | 400 (regular) | 1.4 | body2 | Secondary info, DataGrid cell text, chip labels |
 
+Two weights only: 400 (regular) and 700 (bold). No intermediate weight.
+
 Typography theme overrides in `createTheme`:
 - `typography.fontFamily`: `'"Josefin Sans", "Roboto", sans-serif'` for display variants; body variants remain Roboto
-- Override `h1`–`h4` to use Josefin Sans explicitly via `typography.h4.fontFamily`, etc.
+- Override `h1`–`h4` and `h6` to use Josefin Sans explicitly via `typography.h4.fontFamily`, `typography.h6.fontFamily`, etc.
+- `typography.h6.fontWeight`: `700`
 - `typography.body1` and `typography.body2`: no font change (Roboto default)
 
-**Source:** CONTEXT.md D-08, D-09 (fonts); sizes/weights are Claude's discretion — chosen to fit dark/gold MTG aesthetic and 3-4 size constraint.
+**Source:** CONTEXT.md D-08, D-09 (fonts); sizes/weights are Claude's discretion — chosen to fit dark/gold MTG aesthetic and 3-4 size constraint. Weight reduced to 2 (400, 700) per design system constraint.
 
 ---
 
@@ -84,7 +87,7 @@ Dark theme throughout. All values are for MUI `palette` configuration in `create
 | Destructive | MUI `error.main` (default `#f44336`) | `palette.error.main` | Destructive actions only |
 
 **Accent reserved for:**
-1. Primary `variant="contained"` buttons (e.g., "New Game", "Save")
+1. Primary `variant="contained"` buttons (e.g., "New Game", "Save Pod Name")
 2. Active Tab indicator underline
 3. Focused TextField outline
 4. Chip `color="primary"` when used for role/status indicators that need emphasis
@@ -96,6 +99,19 @@ Accent is NOT used for: secondary buttons, general links, DataGrid header backgr
 **gradientBackground CSS class:** Retire in favor of flat `#0f1117` background. The existing `.gradientBackground` class in `app/src/styles.css` should be removed or commented out; do not apply it anywhere in Phase 2 or later. Source: CONTEXT.md Specifics.
 
 **Source:** CONTEXT.md D-01 through D-07; hover value and accent reserved list are Claude's discretion.
+
+---
+
+## Visual Hierarchy
+
+**Primary focal point — Pod view:** Pod name rendered as Display/h4 (Josefin Sans, 28px, weight 700) at the top of the content area, below the AppBar. This is the dominant visual anchor on screen entry. The active tab's DataGrid or content block is the secondary focal point, receiving the user's attention after the pod name establishes context.
+
+**Focal point sequence:**
+1. Pod name (Display/h4) — establishes which pod the user is in
+2. Tab row — shows available sections; active tab underlined in accent gold
+3. Active tab content (DataGrid or Settings form) — primary work area
+
+No decorative imagery or illustration is used; hierarchy is established entirely through typography scale and spacing.
 
 ---
 
@@ -123,7 +139,7 @@ This phase introduces the MUI theme and validates it on the Pod view. The Pod vi
 | Element | Copy |
 |---------|------|
 | Primary CTA (Games tab) | "New Game" |
-| Primary CTA (Settings tab - name) | "Save" |
+| Primary CTA (Settings tab - name) | "Save Pod Name" |
 | Primary CTA (Settings tab - invite) | "Generate Invite Link" |
 | Invite copy action | "Copy" |
 | Empty state — no pods (HomeView) | Heading: "No pods yet." Body: "Create your first pod or ask a manager for an invite link." |
@@ -177,9 +193,10 @@ Tasks the executor must complete to satisfy this contract:
 
 - [ ] Create `app/src/theme.ts` — exports `createTheme(...)` with palette, typography, and component overrides defined above
 - [ ] Update `app/src/index.tsx` — wrap app in `<ThemeProvider theme={theme}>` alongside existing `CssBaseline`
-- [ ] Update `app/public/index.html` — add `<link>` for Josefin Sans (weights 400, 600, 700) from Google Fonts CDN
+- [ ] Update `app/public/index.html` — add `<link>` for Josefin Sans (weights 400, 700) from Google Fonts CDN
 - [ ] Update `app/src/routes/root.tsx` — replace hardcoded `bgcolor: "#f0f5fa"` on Container with `bgcolor: "background.default"` (or remove; CssBaseline handles body background)
 - [ ] Update `app/src/routes/pod.tsx` — add `variant="scrollable" scrollButtons="auto"` to Tabs for mobile
+- [ ] Update `app/src/routes/pod.tsx` — change Settings tab name-save button label from "Save" to "Save Pod Name"
 - [ ] Verify Pod view at 375px viewport — AppBar, Tabs, DataGrid, Buttons, Dialogs all pass mobile contract above
 - [ ] Retire `gradientBackground` CSS class — remove from `app/src/styles.css` (or remove the class; do not apply it)
 
