@@ -2,14 +2,16 @@ package routers
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"io"
 	"net/http"
-	"strings"
 
 	"go.uber.org/zap"
 
 	"github.com/m-sharp/edh-tracker/lib/business"
 	"github.com/m-sharp/edh-tracker/lib/business/deck"
+	"github.com/m-sharp/edh-tracker/lib/errs"
 	"github.com/m-sharp/edh-tracker/lib/trackerHttp"
 )
 
@@ -78,8 +80,8 @@ func (d *DeckRouter) GetAll(w http.ResponseWriter, r *http.Request) {
 	case playerID != 0:
 		decks, err = d.decks.GetAllForPlayer(ctx, playerID)
 	default:
-		// TODO: Should probably not exist. Also, it's slowwwww
-		decks, err = d.decks.GetAll(ctx)
+		trackerHttp.WriteError(d.log, w, http.StatusBadRequest, fmt.Errorf("missing required filter"), "Missing required filter", "pod_id or player_id query param is required")
+		return
 	}
 	if err != nil {
 		trackerHttp.WriteError(d.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
@@ -110,14 +112,8 @@ func (d *DeckRouter) getAllPaginated(w http.ResponseWriter, r *http.Request, pod
 	case playerID != 0:
 		entities, total, err = d.decks.GetAllByPlayerPaginated(ctx, playerID, limit, offset)
 	default:
-		// TODO: Should probably not exist. Also, it's slowwwww
-		decks, decksErr := d.decks.GetAll(ctx)
-		if decksErr != nil {
-			trackerHttp.WriteError(d.log, w, http.StatusInternalServerError, decksErr, errMsg, errMsg)
-			return
-		}
-		entities = decks
-		total = len(decks)
+		trackerHttp.WriteError(d.log, w, http.StatusBadRequest, fmt.Errorf("missing required filter"), "Missing required filter", "pod_id or player_id query param is required")
+		return
 	}
 	if err != nil {
 		trackerHttp.WriteError(d.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
@@ -164,7 +160,6 @@ func (d *DeckRouter) GetDeckById(w http.ResponseWriter, r *http.Request) {
 }
 
 type newDeckRequest struct {
-	PlayerID           int    `json:"player_id"`
 	Name               string `json:"name"`
 	FormatID           int    `json:"format_id"`
 	CommanderID        *int   `json:"commander_id"`
@@ -174,6 +169,11 @@ type newDeckRequest struct {
 func (d *DeckRouter) DeckCreate(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	errMsg := "Failed to create new Deck"
+
+	callerPlayerID, ok := trackerHttp.CallerPlayerID(w, r)
+	if !ok {
+		return
+	}
 
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -187,15 +187,15 @@ func (d *DeckRouter) DeckCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log := d.log.With(zap.Int("PlayerID", req.PlayerID), zap.String("Name", req.Name), zap.Int("FormatID", req.FormatID))
+	log := d.log.With(zap.Int("PlayerID", callerPlayerID), zap.String("Name", req.Name), zap.Int("FormatID", req.FormatID))
 
-	if err = deck.ValidateCreate(req.PlayerID, req.Name, req.FormatID); err != nil {
+	if err = deck.ValidateCreate(callerPlayerID, req.Name, req.FormatID); err != nil {
 		trackerHttp.WriteError(log, w, http.StatusBadRequest, err, "Deck create request failed validation", err.Error())
 		return
 	}
 
 	log.Info("Saving new Deck record")
-	if _, err = d.decks.Create(ctx, req.PlayerID, req.Name, req.FormatID, req.CommanderID, req.PartnerCommanderID); err != nil {
+	if _, err = d.decks.Create(ctx, callerPlayerID, req.Name, req.FormatID, req.CommanderID, req.PartnerCommanderID); err != nil {
 		trackerHttp.WriteError(log, w, http.StatusInternalServerError, err, "Failed to create Deck record", errMsg)
 		return
 	}
@@ -238,6 +238,10 @@ func (d *DeckRouter) UpdateDeck(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if !d.assertCallerOwnsDeck(w, r, deckID, callerPlayerID) {
+		return
+	}
+
 	fields := deck.UpdateFields{
 		Name:               req.Name,
 		FormatID:           req.FormatID,
@@ -246,8 +250,8 @@ func (d *DeckRouter) UpdateDeck(w http.ResponseWriter, r *http.Request) {
 		Retired:            req.Retired,
 	}
 
-	if err = d.decks.Update(ctx, deckID, callerPlayerID, fields); err != nil {
-		if strings.HasPrefix(err.Error(), "forbidden:") {
+	if err = d.decks.Update(ctx, deckID, fields); err != nil {
+		if errors.Is(err, errs.ErrForbidden) {
 			http.Error(w, err.Error(), http.StatusForbidden)
 			return
 		}
@@ -273,8 +277,12 @@ func (d *DeckRouter) DeleteDeck(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err = d.decks.SoftDelete(ctx, deckID, callerPlayerID); err != nil {
-		if strings.HasPrefix(err.Error(), "forbidden:") {
+	if !d.assertCallerOwnsDeck(w, r, deckID, callerPlayerID) {
+		return
+	}
+
+	if err = d.decks.SoftDelete(ctx, deckID); err != nil {
+		if errors.Is(err, errs.ErrForbidden) {
 			http.Error(w, err.Error(), http.StatusForbidden)
 			return
 		}
@@ -283,4 +291,22 @@ func (d *DeckRouter) DeleteDeck(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
+}
+
+// assertCallerOwnsDeck checks that the caller owns the deck. Returns false and writes the error response if not.
+func (d *DeckRouter) assertCallerOwnsDeck(w http.ResponseWriter, r *http.Request, deckID, callerPlayerID int) bool {
+	deckEntity, err := d.decks.GetByID(r.Context(), deckID)
+	if err != nil {
+		trackerHttp.WriteError(d.log, w, http.StatusInternalServerError, err, "Failed to look up deck", "internal error")
+		return false
+	}
+	if deckEntity == nil {
+		http.Error(w, "deck not found", http.StatusNotFound)
+		return false
+	}
+	if deckEntity.PlayerID != callerPlayerID {
+		http.Error(w, "Forbidden: deck does not belong to caller", http.StatusForbidden)
+		return false
+	}
+	return true
 }

@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -14,6 +15,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/m-sharp/edh-tracker/lib/business/pod"
+	"github.com/m-sharp/edh-tracker/lib/errs"
 	"github.com/m-sharp/edh-tracker/lib/utils"
 )
 
@@ -342,10 +344,10 @@ func TestPodRouter_PromotePlayer_Unauthenticated(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, rr.Code)
 }
 
-func TestPodRouter_PromotePlayer_PromoteError(t *testing.T) {
+func TestPodRouter_PromotePlayer_PromoteError_Forbidden(t *testing.T) {
 	router := newTestPodRouter(pod.Functions{
 		PromoteToManager: func(ctx context.Context, podID, callerPlayerID, targetPlayerID int) error {
-			return errors.New("forbidden: caller is not a manager")
+			return fmt.Errorf("forbidden: caller is not a manager: %w", errs.ErrForbidden)
 		},
 	})
 
@@ -356,6 +358,22 @@ func TestPodRouter_PromotePlayer_PromoteError(t *testing.T) {
 	router.PromotePlayer(rr, req)
 
 	assert.Equal(t, http.StatusForbidden, rr.Code)
+}
+
+func TestPodRouter_PromotePlayer_PromoteError_DBError(t *testing.T) {
+	router := newTestPodRouter(pod.Functions{
+		PromoteToManager: func(ctx context.Context, podID, callerPlayerID, targetPlayerID int) error {
+			return errors.New("db connection error")
+		},
+	})
+
+	body, _ := json.Marshal(pod.PlayerPodInputEntity{PodID: 1, PlayerID: 2})
+	req := httptest.NewRequest(http.MethodPatch, "/api/pod/player", bytes.NewReader(body))
+	req = withAuth(req, 10)
+	rr := httptest.NewRecorder()
+	router.PromotePlayer(rr, req)
+
+	assert.Equal(t, http.StatusInternalServerError, rr.Code)
 }
 
 // --- KickPlayer ---
@@ -385,10 +403,10 @@ func TestPodRouter_KickPlayer_Unauthenticated(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, rr.Code)
 }
 
-func TestPodRouter_KickPlayer_RemoveError(t *testing.T) {
+func TestPodRouter_KickPlayer_RemoveError_Forbidden(t *testing.T) {
 	router := newTestPodRouter(pod.Functions{
 		RemovePlayer: func(ctx context.Context, podID, callerPlayerID, targetPlayerID int) error {
-			return errors.New("forbidden: caller is not a manager")
+			return fmt.Errorf("forbidden: caller is not a manager: %w", errs.ErrForbidden)
 		},
 	})
 
@@ -399,6 +417,22 @@ func TestPodRouter_KickPlayer_RemoveError(t *testing.T) {
 	router.KickPlayer(rr, req)
 
 	assert.Equal(t, http.StatusForbidden, rr.Code)
+}
+
+func TestPodRouter_KickPlayer_RemoveError_DBError(t *testing.T) {
+	router := newTestPodRouter(pod.Functions{
+		RemovePlayer: func(ctx context.Context, podID, callerPlayerID, targetPlayerID int) error {
+			return errors.New("db connection error")
+		},
+	})
+
+	body, _ := json.Marshal(pod.PlayerPodInputEntity{PodID: 1, PlayerID: 2})
+	req := httptest.NewRequest(http.MethodDelete, "/api/pod/player", bytes.NewReader(body))
+	req = withAuth(req, 10)
+	rr := httptest.NewRecorder()
+	router.KickPlayer(rr, req)
+
+	assert.Equal(t, http.StatusInternalServerError, rr.Code)
 }
 
 // --- GenerateInvite ---
@@ -550,10 +584,10 @@ func TestPodRouter_LeavePod_ValidationFailure(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, rr.Code)
 }
 
-func TestPodRouter_LeavePod_LeaveError(t *testing.T) {
+func TestPodRouter_LeavePod_LeaveError_Forbidden(t *testing.T) {
 	router := newTestPodRouter(pod.Functions{
 		Leave: func(ctx context.Context, podID, playerID int) error {
-			return errors.New("forbidden: cannot leave as sole manager")
+			return fmt.Errorf("forbidden: cannot leave as sole manager: %w", errs.ErrForbidden)
 		},
 	})
 
@@ -564,4 +598,20 @@ func TestPodRouter_LeavePod_LeaveError(t *testing.T) {
 	router.LeavePod(rr, req)
 
 	assert.Equal(t, http.StatusForbidden, rr.Code)
+}
+
+func TestPodRouter_LeavePod_LeaveError_DBError(t *testing.T) {
+	router := newTestPodRouter(pod.Functions{
+		Leave: func(ctx context.Context, podID, playerID int) error {
+			return errors.New("db connection error")
+		},
+	})
+
+	body, _ := json.Marshal(pod.LeaveInputEntity{PodID: 1})
+	req := httptest.NewRequest(http.MethodPost, "/api/pod/leave", bytes.NewReader(body))
+	req = withAuth(req, 10)
+	rr := httptest.NewRecorder()
+	router.LeavePod(rr, req)
+
+	assert.Equal(t, http.StatusInternalServerError, rr.Code)
 }

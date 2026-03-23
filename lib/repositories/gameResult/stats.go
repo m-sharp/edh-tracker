@@ -17,6 +17,14 @@ type gameStat struct {
 	PlayerCount int
 }
 
+type gameStatWithDeck struct {
+	DeckID      int
+	GameID      int
+	Place       int
+	KillCount   int
+	PlayerCount int
+}
+
 type gameStats []gameStat
 
 func (g gameStats) toAggregate() Aggregate {

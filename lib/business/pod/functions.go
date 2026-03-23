@@ -7,9 +7,14 @@ import (
 
 	"github.com/google/uuid"
 
+	"github.com/m-sharp/edh-tracker/lib/errs"
 	repos "github.com/m-sharp/edh-tracker/lib/repositories"
 	"github.com/m-sharp/edh-tracker/lib/repositories/playerPodRole"
 )
+
+// maxInviteUses is the maximum number of times an invite code can be used.
+// The pod_invite table has no max_used_count column, so this is a hardcoded limit.
+const maxInviteUses = 25
 
 func GetByID(podRepo repos.PodRepository) GetByIDFunc {
 	return func(ctx context.Context, podID int) (*Entity, error) {
@@ -85,7 +90,7 @@ func PromoteToManager(roleRepo repos.PlayerPodRoleRepository) PromoteToManagerFu
 			return fmt.Errorf("failed to check caller role: %w", err)
 		}
 		if callerRole == nil || callerRole.Role != playerPodRole.RoleManager {
-			return fmt.Errorf("forbidden: caller is not a manager of pod %d", podID)
+			return fmt.Errorf("forbidden: caller is not a manager of pod %d: %w", podID, errs.ErrForbidden)
 		}
 
 		return roleRepo.SetRole(ctx, podID, targetPlayerID, playerPodRole.RoleManager)
@@ -116,6 +121,9 @@ func JoinByInvite(inviteRepo repos.PodInviteRepository, podRepo repos.PodReposit
 		}
 		if invite.ExpiresAt != nil && invite.ExpiresAt.Before(time.Now()) {
 			return nil, fmt.Errorf("invite code has expired")
+		}
+		if invite.UsedCount >= maxInviteUses {
+			return nil, fmt.Errorf("invite code has reached its maximum number of uses")
 		}
 
 		if err = podRepo.AddPlayerToPod(ctx, invite.PodID, playerID); err != nil {
@@ -158,7 +166,7 @@ func Leave(podRepo repos.PodRepository, roleRepo repos.PlayerPodRoleRepository) 
 				}
 			}
 			if managerCount <= 1 {
-				return fmt.Errorf("forbidden: cannot leave pod as the only manager; promote another member first")
+				return fmt.Errorf("forbidden: cannot leave pod as the only manager; promote another member first: %w", errs.ErrForbidden)
 			}
 		}
 
@@ -206,7 +214,7 @@ func RemovePlayer(podRepo repos.PodRepository, roleRepo repos.PlayerPodRoleRepos
 			return fmt.Errorf("failed to check caller role: %w", err)
 		}
 		if callerRole == nil || callerRole.Role != playerPodRole.RoleManager {
-			return fmt.Errorf("forbidden: caller is not a manager of pod %d", podID)
+			return fmt.Errorf("forbidden: caller is not a manager of pod %d: %w", podID, errs.ErrForbidden)
 		}
 
 		return podRepo.RemovePlayer(ctx, podID, targetPlayerID)

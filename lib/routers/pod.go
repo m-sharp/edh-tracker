@@ -2,6 +2,7 @@ package routers
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 
@@ -9,6 +10,7 @@ import (
 
 	"github.com/m-sharp/edh-tracker/lib/business"
 	"github.com/m-sharp/edh-tracker/lib/business/pod"
+	"github.com/m-sharp/edh-tracker/lib/errs"
 	"github.com/m-sharp/edh-tracker/lib/trackerHttp"
 )
 
@@ -313,7 +315,11 @@ func (p *PodRouter) PromotePlayer(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err = p.pods.PromoteToManager(ctx, input.PodID, callerID, input.PlayerID); err != nil {
-		trackerHttp.WriteError(p.log, w, http.StatusForbidden, err, "Failed to promote player to manager", err.Error())
+		if errors.Is(err, errs.ErrForbidden) {
+			trackerHttp.WriteError(p.log, w, http.StatusForbidden, err, "Failed to promote player to manager", err.Error())
+		} else {
+			trackerHttp.WriteError(p.log, w, http.StatusInternalServerError, err, "Failed to promote player to manager", "Failed to promote player")
+		}
 		return
 	}
 
@@ -346,7 +352,11 @@ func (p *PodRouter) KickPlayer(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err = p.pods.RemovePlayer(ctx, input.PodID, callerID, input.PlayerID); err != nil {
-		trackerHttp.WriteError(p.log, w, http.StatusForbidden, err, "Failed to remove player", err.Error())
+		if errors.Is(err, errs.ErrForbidden) {
+			trackerHttp.WriteError(p.log, w, http.StatusForbidden, err, "Failed to remove player", err.Error())
+		} else {
+			trackerHttp.WriteError(p.log, w, http.StatusInternalServerError, err, "Failed to remove player", "Failed to remove player from pod")
+		}
 		return
 	}
 
@@ -461,7 +471,11 @@ func (p *PodRouter) LeavePod(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err = p.pods.Leave(ctx, input.PodID, callerID); err != nil {
-		trackerHttp.WriteError(p.log, w, http.StatusForbidden, err, "Failed to leave pod", err.Error())
+		if errors.Is(err, errs.ErrForbidden) {
+			trackerHttp.WriteError(p.log, w, http.StatusForbidden, err, "Failed to leave pod", err.Error())
+		} else {
+			trackerHttp.WriteError(p.log, w, http.StatusInternalServerError, err, "Failed to leave pod", "Failed to leave pod")
+		}
 		return
 	}
 

@@ -27,6 +27,15 @@ const (
 						          AND gr2.deleted_at IS NULL) AS player_count
 						 FROM game_result INNER JOIN deck ON game_result.deck_id = deck.id
 						WHERE deck.id = ? AND game_result.deleted_at IS NULL;`
+
+	getStatsForDecks = `SELECT deck.id AS deck_id, game_result.game_id, game_result.place, game_result.kill_count,
+						       (SELECT COUNT(*) FROM game_result gr2
+						         WHERE gr2.game_id = game_result.game_id
+						           AND gr2.deleted_at IS NULL) AS player_count
+						  FROM game_result
+						  INNER JOIN deck ON game_result.deck_id = deck.id
+						 WHERE deck.id IN ?
+						   AND game_result.deleted_at IS NULL`
 )
 
 type Repository struct {
@@ -122,4 +131,40 @@ func (r *Repository) GetStatsForDeck(ctx context.Context, deckID int) (*Aggregat
 	}
 	agg := stats.toAggregate()
 	return &agg, nil
+}
+
+func (r *Repository) GetStatsForDecks(ctx context.Context, deckIDs []int) (map[int]*Aggregate, error) {
+	result := make(map[int]*Aggregate, len(deckIDs))
+	if len(deckIDs) == 0 {
+		return result, nil
+	}
+
+	var rows []gameStatWithDeck
+	if err := r.db.WithContext(ctx).Raw(getStatsForDecks, deckIDs).Scan(&rows).Error; err != nil {
+		return nil, fmt.Errorf("failed to get batch stats for decks: %w", err)
+	}
+
+	// Group by deck ID
+	grouped := make(map[int]gameStats)
+	for _, row := range rows {
+		grouped[row.DeckID] = append(grouped[row.DeckID], gameStat{
+			GameID:      row.GameID,
+			Place:       row.Place,
+			KillCount:   row.KillCount,
+			PlayerCount: row.PlayerCount,
+		})
+	}
+
+	// Convert each group to Aggregate
+	for _, deckID := range deckIDs {
+		if stats, ok := grouped[deckID]; ok {
+			agg := stats.toAggregate()
+			result[deckID] = &agg
+		} else {
+			// No games for this deck — return zero aggregate
+			result[deckID] = &Aggregate{Record: map[int]int{}}
+		}
+	}
+
+	return result, nil
 }

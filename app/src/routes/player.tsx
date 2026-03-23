@@ -141,6 +141,7 @@ function PlayerSettingsTab({ player }: PlayerTabProps): ReactElement {
     const [name, setName] = useState(player.name);
     const [nameError, setNameError] = useState<string | null>(null);
     const [newPodName, setNewPodName] = useState("");
+    const [createPodError, setCreatePodError] = useState<string | null>(null);
     const [leaveConfirmPodId, setLeaveConfirmPodId] = useState<number | null>(null);
     const [leaveError, setLeaveError] = useState<string | null>(null);
     const { data: pods, loading: podsLoading, error: podsError } = AsyncComponentHelper(GetPodsForPlayer(player.id));
@@ -174,8 +175,13 @@ function PlayerSettingsTab({ player }: PlayerTabProps): ReactElement {
 
     // TODO: This doesn't make sense hinden behind player settings - should live in a tab within the pod page
     const handleCreatePod = async () => {
-        const pod = await PostPod(newPodName);
-        navigate(`/pod/${pod.id}`);
+        setCreatePodError(null);
+        try {
+            const pod = await PostPod(newPodName);
+            navigate(`/pod/${pod.id}`);
+        } catch {
+            setCreatePodError("Failed to create pod.");
+        }
     };
 
     return (
@@ -229,6 +235,7 @@ function PlayerSettingsTab({ player }: PlayerTabProps): ReactElement {
                         Create
                     </Button>
                 </Box>
+                {createPodError && <Typography color="error" variant="body2">{createPodError}</Typography>}
             </Box>
 
             <Dialog open={leaveConfirmPodId !== null} onClose={() => setLeaveConfirmPodId(null)}>

@@ -22,6 +22,9 @@ func (e Entity) Validate() error {
 	if e.Name == "" {
 		return fmt.Errorf("name is required")
 	}
+	if len(e.Name) > 256 {
+		return fmt.Errorf("name must be 256 characters or fewer")
+	}
 	return nil
 }
 

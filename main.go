@@ -39,6 +39,11 @@ func main() {
 		log.Fatalf("Error creating Config: %s", err.Error())
 	}
 
+	jwtSecret, _ := cfg.Get(lib.JWTSecret)
+	if len(jwtSecret) < 32 {
+		log.Fatalf("JWT_SECRET must be at least 32 bytes; got %d", len(jwtSecret))
+	}
+
 	logger := lib.GetLogger(cfg)
 
 	client, err := lib.NewDBClient(cfg, logger)
@@ -58,7 +63,7 @@ func main() {
 			logger.Fatal("Seeder failed", zap.Error(err))
 		}
 	}
-	biz := business.NewBusiness(logger, repoLayer)
+	biz := business.NewBusiness(logger, repoLayer, client)
 
 	apiRouter := NewApiRouter(cfg, logger, biz)
 	server := lib.NewWebServer(cfg, logger, func(router *mux.Router) {

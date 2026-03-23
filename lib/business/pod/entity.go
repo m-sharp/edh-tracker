@@ -18,6 +18,9 @@ func (e Entity) Validate() error {
 	if e.Name == "" {
 		return fmt.Errorf("name is required")
 	}
+	if len(e.Name) > 255 {
+		return fmt.Errorf("name must be 255 characters or fewer")
+	}
 	return nil
 }
 
@@ -84,6 +87,9 @@ func (u UpdatePodInputEntity) Validate() error {
 	}
 	if u.Name == "" {
 		return fmt.Errorf("name is required")
+	}
+	if len(u.Name) > 255 {
+		return fmt.Errorf("name must be 255 characters or fewer")
 	}
 	return nil
 }

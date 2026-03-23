@@ -6,10 +6,12 @@ import (
 	"testing"
 
 	"go.uber.org/zap"
+	"gorm.io/gorm"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/m-sharp/edh-tracker/lib"
 	"github.com/m-sharp/edh-tracker/lib/business/format"
 	"github.com/m-sharp/edh-tracker/lib/business/gameResult"
 	"github.com/m-sharp/edh-tracker/lib/business/testHelpers"
@@ -17,6 +19,7 @@ import (
 	deckrepo "github.com/m-sharp/edh-tracker/lib/repositories/deck"
 	gamerepo "github.com/m-sharp/edh-tracker/lib/repositories/game"
 	gameresultrepo "github.com/m-sharp/edh-tracker/lib/repositories/gameResult"
+	repoTestHelpers "github.com/m-sharp/edh-tracker/lib/repositories/testHelpers"
 )
 
 func validInputs() []gameResult.InputEntity {
@@ -26,59 +29,62 @@ func validInputs() []gameResult.InputEntity {
 	}
 }
 
+// newTestClient creates a lib.DBClient from the integration test DB.
+func newTestClient(t *testing.T) (*lib.DBClient, *gorm.DB) {
+	t.Helper()
+	db := repoTestHelpers.NewTestDB(t)
+	return &lib.DBClient{GormDb: db}, db
+}
+
+// TestCreate_OtherFormat_SkipsDeckFormatCheck verifies that when format is "other",
+// no deck format validation is performed, and the game + results are created atomically.
 func TestCreate_OtherFormat_SkipsDeckFormatCheck(t *testing.T) {
-	gameRepo := &testHelpers.MockGameRepo{
-		AddFn: func(ctx context.Context, description string, podID, formatID int) (int, error) {
-			return 1, nil
-		},
-	}
-	gameResultRepo := &testHelpers.MockGameResultRepo{
-		BulkAddFn: func(ctx context.Context, results []gameresultrepo.Model) error {
-			return nil
-		},
-	}
+	client, db := newTestClient(t)
+
+	// Create a real deck and pod to satisfy FK constraints.
+	testDeck := repoTestHelpers.CreateTestDeck(t, db)
+	podID := repoTestHelpers.CreateTestPod(t, db)
+	otherFormatID := repoTestHelpers.GetCommanderFormatID(t, db) // use commander format but name "other" via mock
+
 	deckRepo := &testHelpers.MockDeckRepo{}
 	getFormat := func(ctx context.Context, id int) (*format.Entity, error) {
-		return &format.Entity{ID: 2, Name: "other"}, nil
+		return &format.Entity{ID: otherFormatID, Name: "other"}, nil
 	}
 
-	// DeckID=10 has FormatID=99 which would mismatch format 2, but "other" skips the check
 	inputs := []gameResult.InputEntity{
-		{DeckID: 10, Place: 1, Kills: 0},
+		{DeckID: testDeck.ID, Place: 1, Kills: 0},
 	}
 
-	fn := Create(zap.NewNop(), gameRepo, gameResultRepo, deckRepo, getFormat)
-	err := fn(context.Background(), "Game", 1, 2, inputs)
+	fn := Create(zap.NewNop(), nil, nil, deckRepo, getFormat, client)
+	err := fn(context.Background(), "Game", podID, otherFormatID, inputs)
 	require.NoError(t, err)
 	assert.False(t, deckRepo.GetByIdCalled, "deck repo should not be called for other format")
 }
 
+// TestCreate_MatchingFormat_Success verifies that when deck format matches game format,
+// the game and results are created successfully.
 func TestCreate_MatchingFormat_Success(t *testing.T) {
-	gameRepo := &testHelpers.MockGameRepo{
-		AddFn: func(ctx context.Context, description string, podID, formatID int) (int, error) {
-			return 1, nil
-		},
-	}
-	gameResultRepo := &testHelpers.MockGameResultRepo{
-		BulkAddFn: func(ctx context.Context, results []gameresultrepo.Model) error {
-			return nil
-		},
-	}
+	client, db := newTestClient(t)
+
+	testDeck := repoTestHelpers.CreateTestDeck(t, db)
+	podID := repoTestHelpers.CreateTestPod(t, db)
+	formatID := repoTestHelpers.GetCommanderFormatID(t, db)
+
 	deckRepo := &testHelpers.MockDeckRepo{
 		GetByIdFn: func(ctx context.Context, deckID int) (*deckrepo.Model, error) {
-			return &deckrepo.Model{GormModelBase: base.GormModelBase{ID: deckID}, FormatID: 1}, nil
+			return &deckrepo.Model{GormModelBase: base.GormModelBase{ID: deckID}, FormatID: formatID}, nil
 		},
 	}
 	getFormat := func(ctx context.Context, id int) (*format.Entity, error) {
-		return &format.Entity{ID: 1, Name: "commander"}, nil
+		return &format.Entity{ID: formatID, Name: "commander"}, nil
 	}
 
 	inputs := []gameResult.InputEntity{
-		{DeckID: 10, Place: 1, Kills: 2},
+		{DeckID: testDeck.ID, Place: 1, Kills: 2},
 	}
 
-	fn := Create(zap.NewNop(), gameRepo, gameResultRepo, deckRepo, getFormat)
-	err := fn(context.Background(), "Game", 1, 1, inputs)
+	fn := Create(zap.NewNop(), nil, nil, deckRepo, getFormat, client)
+	err := fn(context.Background(), "Game", podID, formatID, inputs)
 	require.NoError(t, err)
 }
 
@@ -99,7 +105,8 @@ func TestCreate_FormatMismatch_Error(t *testing.T) {
 		{DeckID: 10, Place: 1, Kills: 0},
 	}
 
-	fn := Create(zap.NewNop(), gameRepo, gameResultRepo, deckRepo, getFormat)
+	// nil client is safe here because the function returns before reaching the transaction.
+	fn := Create(zap.NewNop(), gameRepo, gameResultRepo, deckRepo, getFormat, nil)
 	err := fn(context.Background(), "Game", 1, 1, inputs)
 	assert.ErrorContains(t, err, "format does not match")
 }
@@ -116,7 +123,8 @@ func TestCreate_FormatNotFound_Error(t *testing.T) {
 		{DeckID: 10, Place: 1, Kills: 0},
 	}
 
-	fn := Create(zap.NewNop(), gameRepo, gameResultRepo, deckRepo, getFormat)
+	// nil client is safe here because the function returns before reaching the transaction.
+	fn := Create(zap.NewNop(), gameRepo, gameResultRepo, deckRepo, getFormat, nil)
 	err := fn(context.Background(), "Game", 1, 99, inputs)
 	assert.Error(t, err)
 }
@@ -134,7 +142,8 @@ func TestCreate_InvalidInput_Error(t *testing.T) {
 		{DeckID: 0, Place: 1, Kills: 0},
 	}
 
-	fn := Create(zap.NewNop(), gameRepo, gameResultRepo, deckRepo, getFormat)
+	// nil client is safe here because the function returns before reaching the transaction.
+	fn := Create(zap.NewNop(), gameRepo, gameResultRepo, deckRepo, getFormat, nil)
 	err := fn(context.Background(), "Game", 1, 1, inputs)
 	assert.ErrorContains(t, err, "deck_id is required")
 }

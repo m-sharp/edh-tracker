@@ -42,20 +42,20 @@
 ### Authentication & Session
 
 - [ ] **AUTH-01**: 401 responses from the API call `logout()` from auth context and redirect to `/login`
-- [ ] **AUTH-02**: Server rejects startup if JWT secret is shorter than 32 bytes
+- [x] **AUTH-02**: Server rejects startup if JWT secret is shorter than 32 bytes
 
 ### Security
 
-- [ ] **SEC-01**: `POST /api/game` verifies the caller is a member of the target pod before creating the game
-- [ ] **SEC-02**: `POST /api/deck` uses the caller's player ID from the JWT context — ignores any `player_id` in the request body
-- [ ] **SEC-03**: Game creation (game row + result rows) is wrapped in a single DB transaction
-- [ ] **SEC-04**: Pod invite join validates max use count in addition to expiry
-- [ ] **SEC-05**: String field inputs (player name, pod name, deck name, etc.) validated for max length — returns 400 not 500 on overflow
+- [x] **SEC-01**: `POST /api/game` verifies the caller is a member of the target pod before creating the game
+- [x] **SEC-02**: `POST /api/deck` uses the caller's player ID from the JWT context — ignores any `player_id` in the request body
+- [x] **SEC-03**: Game creation (game row + result rows) is wrapped in a single DB transaction
+- [x] **SEC-04**: Pod invite join validates max use count in addition to expiry
+- [x] **SEC-05**: String field inputs (player name, pod name, deck name, etc.) validated for max length — returns 400 not 500 on overflow
 
 ### Performance
 
-- [ ] **PERF-01**: Deck stats are fetched in a single batch query, not one-per-deck in a loop
-- [ ] **PERF-02**: `GET /api/decks` requires at least one filter (`pod_id` or `player_id`) — unfiltered path removed or returns 400
+- [x] **PERF-01**: Deck stats are fetched in a single batch query, not one-per-deck in a loop
+- [x] **PERF-02**: `GET /api/decks` requires at least one filter (`pod_id` or `player_id`) — unfiltered path removed or returns 400
 
 ### Test Coverage
 
@@ -67,7 +67,7 @@
 ### Production Readiness
 
 - [ ] **INFRA-01**: CORS / cookie behavior verified in deployed environment; nginx reverse proxy added if needed
-- [ ] **INFRA-02**: `PromotePlayer` and `KickPlayer` return correct HTTP codes — 403 for authorization failures, 500 for infrastructure errors
+- [x] **INFRA-02**: `PromotePlayer` and `KickPlayer` return correct HTTP codes — 403 for authorization failures, 500 for infrastructure errors
 - [ ] **INFRA-03**: `API_BASE_URL` in `app/src/http.ts` works correctly in production — either relative URLs (if nginx proxy) or configurable via build-time env var (`REACT_APP_API_BASE_URL`)
 
 ## v2 Requirements
@@ -123,20 +123,20 @@
 | DECK-02 | Phase 5 | Pending |
 | DECK-03 | Phase 5 | Pending |
 | AUTH-01 | Phase 6 | Pending |
-| AUTH-02 | Phase 1 | Pending |
-| SEC-01 | Phase 1 | Pending |
-| SEC-02 | Phase 1 | Pending |
-| SEC-03 | Phase 1 | Pending |
-| SEC-04 | Phase 1 | Pending |
-| SEC-05 | Phase 1 | Pending |
-| PERF-01 | Phase 1 | Pending |
-| PERF-02 | Phase 1 | Pending |
+| AUTH-02 | Phase 1 | Complete |
+| SEC-01 | Phase 1 | Complete |
+| SEC-02 | Phase 1 | Complete |
+| SEC-03 | Phase 1 | Complete |
+| SEC-04 | Phase 1 | Complete |
+| SEC-05 | Phase 1 | Complete |
+| PERF-01 | Phase 1 | Complete |
+| PERF-02 | Phase 1 | Complete |
 | TEST-01 | Phase 6 | Pending |
 | TEST-02 | Phase 6 | Pending |
 | TEST-03 | Phase 6 | Pending |
 | TEST-04 | Phase 6 | Pending |
 | INFRA-01 | Phase 7 | Pending |
-| INFRA-02 | Phase 1 | Pending |
+| INFRA-02 | Phase 1 | Complete |
 | INFRA-03 | Phase 7 | Pending |
 
 **Coverage:**

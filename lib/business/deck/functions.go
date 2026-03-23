@@ -38,19 +38,6 @@ func commanderInfoFromModel(d deckRepository.Model) *CommanderInfo {
 	return info
 }
 
-func GetAll(
-	deckRepo repos.DeckRepository,
-	gameResultRepo repos.GameResultRepository,
-) GetAllFunc {
-	return func(ctx context.Context) ([]EntityWithStats, error) {
-		decks, err := deckRepo.GetAll(ctx)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get decks: %w", err)
-		}
-		return buildEntitiesWithStats(ctx, decks, gameResultRepo)
-	}
-}
-
 func GetAllForPlayer(
 	deckRepo repos.DeckRepository,
 	gameResultRepo repos.GameResultRepository,
@@ -174,47 +161,40 @@ func GetAllByPodPaginated(
 }
 
 // buildEntitiesWithStats converts []deckRepository.Model → []EntityWithStats,
-// fetching game result stats for each deck.
+// fetching game result stats for all decks in a single batch query.
 func buildEntitiesWithStats(
 	ctx context.Context,
 	decks []deckRepository.Model,
 	gameResultRepo repos.GameResultRepository,
 ) ([]EntityWithStats, error) {
+	if len(decks) == 0 {
+		return []EntityWithStats{}, nil
+	}
+
+	deckIDs := make([]int, len(decks))
+	for i, d := range decks {
+		deckIDs[i] = d.ID
+	}
+
+	statsMap, err := gameResultRepo.GetStatsForDecks(ctx, deckIDs)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get batch stats: %w", err)
+	}
+
 	result := make([]EntityWithStats, 0, len(decks))
 	for _, d := range decks {
 		entity := ToEntity(d, d.Player.Name, d.Format.Name, commanderInfoFromModel(d))
-		agg, err := gameResultRepo.GetStatsForDeck(ctx, d.ID)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get stats for deck %d: %w", d.ID, err)
-		}
-		result = append(result, ToEntityWithStats(entity, agg))
+		result = append(result, ToEntityWithStats(entity, statsMap[d.ID]))
 	}
 	return result, nil
-}
-
-func assertCallerOwnsDeck(ctx context.Context, deckRepo repos.DeckRepository, deckID, callerPlayerID int) error {
-	d, err := deckRepo.GetById(ctx, deckID)
-	if err != nil {
-		return fmt.Errorf("failed to fetch deck %d: %w", deckID, err)
-	}
-	if d == nil {
-		return fmt.Errorf("deck %d not found", deckID)
-	}
-	if d.PlayerID != callerPlayerID {
-		return fmt.Errorf("forbidden: deck %d does not belong to caller", deckID)
-	}
-	return nil
 }
 
 func Update(
 	deckRepo repos.DeckRepository,
 	deckCmdrRepo repos.DeckCommanderRepository,
 ) UpdateFunc {
-	return func(ctx context.Context, deckID int, callerPlayerID int, fields UpdateFields) error {
-		if err := assertCallerOwnsDeck(ctx, deckRepo, deckID, callerPlayerID); err != nil {
-			return err
-		}
-
+	return func(ctx context.Context, deckID int, fields UpdateFields) error {
+		// Ownership check moved to router layer per D-05.
 		repoFields := deckRepository.UpdateFields{
 			Name:     fields.Name,
 			FormatID: fields.FormatID,
@@ -238,19 +218,13 @@ func Update(
 }
 
 func SoftDelete(deckRepo repos.DeckRepository) SoftDeleteFunc {
-	return func(ctx context.Context, deckID int, callerPlayerID int) error {
-		if err := assertCallerOwnsDeck(ctx, deckRepo, deckID, callerPlayerID); err != nil {
-			return err
-		}
+	return func(ctx context.Context, deckID int) error {
 		return deckRepo.SoftDelete(ctx, deckID)
 	}
 }
 
 func Retire(deckRepo repos.DeckRepository) RetireFunc {
-	return func(ctx context.Context, deckID int, callerPlayerID int) error {
-		if err := assertCallerOwnsDeck(ctx, deckRepo, deckID, callerPlayerID); err != nil {
-			return err
-		}
+	return func(ctx context.Context, deckID int) error {
 		return deckRepo.Retire(ctx, deckID)
 	}
 }

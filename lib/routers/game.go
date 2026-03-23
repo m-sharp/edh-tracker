@@ -237,6 +237,11 @@ func (g *GameRouter) GameCreate(w http.ResponseWriter, r *http.Request) {
 		zap.Any("GameResults", req.Results),
 	)
 
+	if len(req.Description) > 256 {
+		trackerHttp.WriteError(log, w, http.StatusBadRequest, fmt.Errorf("description too long"), "Game description too long", "description must be 256 characters or fewer")
+		return
+	}
+
 	if len(req.Results) == 0 {
 		trackerHttp.WriteError(log, w, http.StatusBadRequest, nil, "No game results provided", "at least one game result is required")
 		return
@@ -251,6 +256,21 @@ func (g *GameRouter) GameCreate(w http.ResponseWriter, r *http.Request) {
 			)
 			return
 		}
+	}
+
+	callerPlayerID, ok := trackerHttp.CallerPlayerID(w, r)
+	if !ok {
+		return
+	}
+
+	role, err := g.getPodRole(ctx, req.PodID, callerPlayerID)
+	if err != nil {
+		trackerHttp.WriteError(log, w, http.StatusInternalServerError, err, "Failed to check pod membership", "internal error")
+		return
+	}
+	if role == "" {
+		http.Error(w, "Forbidden: must be a member of the pod", http.StatusForbidden)
+		return
 	}
 
 	log.Info("Saving new Game record")

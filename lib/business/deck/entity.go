@@ -44,6 +44,9 @@ func ValidateCreate(playerID int, name string, formatID int) error {
 	if name == "" {
 		return fmt.Errorf("name is required")
 	}
+	if len(name) > 255 {
+		return fmt.Errorf("name must be 255 characters or fewer")
+	}
 	if formatID == 0 {
 		return fmt.Errorf("format_id is required")
 	}

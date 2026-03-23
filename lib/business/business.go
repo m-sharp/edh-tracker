@@ -3,6 +3,7 @@ package business
 import (
 	"go.uber.org/zap"
 
+	"github.com/m-sharp/edh-tracker/lib"
 	"github.com/m-sharp/edh-tracker/lib/business/commander"
 	"github.com/m-sharp/edh-tracker/lib/business/deck"
 	"github.com/m-sharp/edh-tracker/lib/business/format"
@@ -25,7 +26,7 @@ type Business struct {
 	Users       user.Functions
 }
 
-func NewBusiness(log *zap.Logger, r *repositories.Repositories) *Business {
+func NewBusiness(log *zap.Logger, r *repositories.Repositories, client *lib.DBClient) *Business {
 	// Build leaf functions first (no cross-domain deps).
 	getFormat := format.GetByID(r.Formats)
 	getCommanderName := commander.GetCommanderName(r.Commanders)
@@ -43,7 +44,6 @@ func NewBusiness(log *zap.Logger, r *repositories.Repositories) *Business {
 			GetPlayerName: player.GetPlayerName(r.Players),
 		},
 		Decks: deck.Functions{
-			GetAll:                  deck.GetAll(r.Decks, r.GameResults),
 			GetAllForPlayer:         deck.GetAllForPlayer(r.Decks, r.GameResults),
 			GetAllByPod:             deck.GetAllByPod(r.Decks, r.Pods, r.GameResults),
 			GetAllByPodPaginated:    deck.GetAllByPodPaginated(r.Decks, r.GameResults),
@@ -63,7 +63,7 @@ func NewBusiness(log *zap.Logger, r *repositories.Repositories) *Business {
 			GetAllByDeckPaginated:     game.GetAllByDeckPaginated(log, r.Games, enrichGameResults),
 			GetAllByPlayerIDPaginated: game.GetAllByPlayerIDPaginated(log, r.Games, enrichGameResults),
 			GetByID:                   game.GetByID(log, r.Games, enrichGameResults),
-			Create:                    game.Create(log, r.Games, r.GameResults, r.Decks, getFormat),
+			Create:                    game.Create(log, r.Games, r.GameResults, r.Decks, getFormat, client),
 			Update:                    game.Update(r.Games),
 			SoftDelete:                game.SoftDelete(r.Games),
 			AddResult:                 game.AddResult(r.GameResults),
