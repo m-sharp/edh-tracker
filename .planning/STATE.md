@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Ready to execute
-stopped_at: Completed 01-03-PLAN.md
-last_updated: "2026-03-23T03:18:40.518Z"
+status: Phase complete — ready for verification
+stopped_at: Completed 01-02-PLAN.md
+last_updated: "2026-03-23T03:25:02.132Z"
 progress:
   total_phases: 7
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 5
-  completed_plans: 4
+  completed_plans: 5
 ---
 
 # Project State
@@ -50,6 +50,7 @@ Plan: 5 of 5
 | Phase 01 P04 | 8 | 2 tasks | 10 files |
 | Phase 01-backend-hardening P01 | 9min | 2 tasks | 5 files |
 | Phase 01-backend-hardening P03 | 15 | 1 tasks | 5 files |
+| Phase 01-backend-hardening P02 | 14min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -68,6 +69,7 @@ Recent decisions affecting current work:
 - [Phase 01-backend-hardening]: errors.Is used at router layer to discriminate 403 (forbidden) vs 500 (DB error) — plain errors without ErrForbidden wrapper now correctly return 500
 - [Phase 01-backend-hardening]: assertCallerOwnsDeck placed on DeckRouter (router layer owns auth) — business layer Update/SoftDelete/Retire no longer take callerPlayerID
 - [Phase 01-backend-hardening]: DeckCreate ignores body player_id, uses JWT callerPlayerID exclusively (SEC-02)
+- [Phase 01-backend-hardening]: Integration tests used for Create success path — transaction wrapper bypasses interface mocks; nil client safe for error-path unit tests
 
 ### Pending Todos
 
@@ -80,6 +82,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-23T03:18:40.471Z
-Stopped at: Completed 01-03-PLAN.md
+Last session: 2026-03-23T03:25:02.033Z
+Stopped at: Completed 01-02-PLAN.md
 Resume file: None

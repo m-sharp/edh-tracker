@@ -46,9 +46,9 @@
 
 ### Security
 
-- [ ] **SEC-01**: `POST /api/game` verifies the caller is a member of the target pod before creating the game
+- [x] **SEC-01**: `POST /api/game` verifies the caller is a member of the target pod before creating the game
 - [x] **SEC-02**: `POST /api/deck` uses the caller's player ID from the JWT context — ignores any `player_id` in the request body
-- [ ] **SEC-03**: Game creation (game row + result rows) is wrapped in a single DB transaction
+- [x] **SEC-03**: Game creation (game row + result rows) is wrapped in a single DB transaction
 - [x] **SEC-04**: Pod invite join validates max use count in addition to expiry
 - [x] **SEC-05**: String field inputs (player name, pod name, deck name, etc.) validated for max length — returns 400 not 500 on overflow
 
@@ -124,9 +124,9 @@
 | DECK-03 | Phase 5 | Pending |
 | AUTH-01 | Phase 6 | Pending |
 | AUTH-02 | Phase 1 | Complete |
-| SEC-01 | Phase 1 | Pending |
+| SEC-01 | Phase 1 | Complete |
 | SEC-02 | Phase 1 | Complete |
-| SEC-03 | Phase 1 | Pending |
+| SEC-03 | Phase 1 | Complete |
 | SEC-04 | Phase 1 | Complete |
 | SEC-05 | Phase 1 | Complete |
 | PERF-01 | Phase 1 | Complete |

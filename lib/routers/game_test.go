@@ -128,13 +128,17 @@ func TestGameRouter_GetGame_Error(t *testing.T) {
 }
 
 func TestGameRouter_Add_Success(t *testing.T) {
-	router := newTestGameRouter(game.Functions{
-		Create: func(ctx context.Context, description string, podID, formatID int, results []gameResult.InputEntity) error {
-			return nil
+	router := newFullGameRouter(
+		game.Functions{
+			Create: func(ctx context.Context, description string, podID, formatID int, results []gameResult.InputEntity) error {
+				return nil
+			},
 		},
-	})
+		gameResult.Functions{},
+		func(ctx context.Context, podID, playerID int) (string, error) { return "member", nil },
+	)
 
-	req := httptest.NewRequest(http.MethodPost, "/api/game", gameCreateBody(t, 1, 10))
+	req := withAuth(httptest.NewRequest(http.MethodPost, "/api/game", gameCreateBody(t, 1, 10)), 42)
 	rr := httptest.NewRecorder()
 	router.GameCreate(rr, req)
 
@@ -142,17 +146,35 @@ func TestGameRouter_Add_Success(t *testing.T) {
 }
 
 func TestGameRouter_Add_CreateError(t *testing.T) {
-	router := newTestGameRouter(game.Functions{
-		Create: func(ctx context.Context, description string, podID, formatID int, results []gameResult.InputEntity) error {
-			return errors.New("format not found")
+	router := newFullGameRouter(
+		game.Functions{
+			Create: func(ctx context.Context, description string, podID, formatID int, results []gameResult.InputEntity) error {
+				return errors.New("format not found")
+			},
 		},
-	})
+		gameResult.Functions{},
+		func(ctx context.Context, podID, playerID int) (string, error) { return "member", nil },
+	)
 
-	req := httptest.NewRequest(http.MethodPost, "/api/game", gameCreateBody(t, 99, 10))
+	req := withAuth(httptest.NewRequest(http.MethodPost, "/api/game", gameCreateBody(t, 99, 10)), 42)
 	rr := httptest.NewRecorder()
 	router.GameCreate(rr, req)
 
 	assert.Equal(t, http.StatusInternalServerError, rr.Code)
+}
+
+func TestGameRouter_Add_NonMember_Forbidden(t *testing.T) {
+	router := newFullGameRouter(
+		game.Functions{},
+		gameResult.Functions{},
+		func(ctx context.Context, podID, playerID int) (string, error) { return "", nil },
+	)
+
+	req := withAuth(httptest.NewRequest(http.MethodPost, "/api/game", gameCreateBody(t, 1, 10)), 42)
+	rr := httptest.NewRecorder()
+	router.GameCreate(rr, req)
+
+	assert.Equal(t, http.StatusForbidden, rr.Code)
 }
 
 func TestGameRouter_Add_EmptyResults(t *testing.T) {
