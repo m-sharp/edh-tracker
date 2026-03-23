@@ -54,8 +54,8 @@
 
 ### Performance
 
-- [ ] **PERF-01**: Deck stats are fetched in a single batch query, not one-per-deck in a loop
-- [ ] **PERF-02**: `GET /api/decks` requires at least one filter (`pod_id` or `player_id`) — unfiltered path removed or returns 400
+- [x] **PERF-01**: Deck stats are fetched in a single batch query, not one-per-deck in a loop
+- [x] **PERF-02**: `GET /api/decks` requires at least one filter (`pod_id` or `player_id`) — unfiltered path removed or returns 400
 
 ### Test Coverage
 
@@ -129,8 +129,8 @@
 | SEC-03 | Phase 1 | Pending |
 | SEC-04 | Phase 1 | Complete |
 | SEC-05 | Phase 1 | Complete |
-| PERF-01 | Phase 1 | Pending |
-| PERF-02 | Phase 1 | Pending |
+| PERF-01 | Phase 1 | Complete |
+| PERF-02 | Phase 1 | Complete |
 | TEST-01 | Phase 6 | Pending |
 | TEST-02 | Phase 6 | Pending |
 | TEST-03 | Phase 6 | Pending |

@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Ready to execute
-stopped_at: Completed 01-05-PLAN.md
-last_updated: "2026-03-23T02:31:16.825Z"
+stopped_at: Completed 01-01-PLAN.md
+last_updated: "2026-03-23T02:37:11.968Z"
 progress:
   total_phases: 7
   completed_phases: 0
   total_plans: 5
-  completed_plans: 1
+  completed_plans: 3
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-22)
 ## Current Position
 
 Phase: 01 (backend-hardening) — EXECUTING
-Plan: 2 of 5
+Plan: 4 of 5
 
 ## Performance Metrics
 
@@ -47,6 +47,8 @@ Plan: 2 of 5
 
 *Updated after each plan completion*
 | Phase 01 P05 | 3 | 3 tasks | 6 files |
+| Phase 01 P04 | 8 | 2 tasks | 10 files |
+| Phase 01-backend-hardening P01 | 9min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -59,6 +61,10 @@ Recent decisions affecting current work:
 - [Pre-roadmap]: Frontend design language to be defined before UI implementation begins
 - [Pre-roadmap]: Soft launch to small friend group before broader rollout
 - [Phase 01]: maxInviteUses hardcoded to 25 — pod_invite table has no max_used_count column; constant placed in functions.go
+- [Phase 01]: Removed deck.GetAll entirely — no other callers existed once router default path was removed (plan 04)
+- [Phase 01]: GetStatsForDecks added to GameResultRepository interface to maintain functional DI pattern (plan 04)
+- [Phase 01-backend-hardening]: ErrForbidden placed in lib/errs (not lib/business) to avoid circular import — sub-packages cannot import their parent package in Go
+- [Phase 01-backend-hardening]: errors.Is used at router layer to discriminate 403 (forbidden) vs 500 (DB error) — plain errors without ErrForbidden wrapper now correctly return 500
 
 ### Pending Todos
 
@@ -71,6 +77,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-23T02:31:16.781Z
-Stopped at: Completed 01-05-PLAN.md
+Last session: 2026-03-23T02:37:11.872Z
+Stopped at: Completed 01-01-PLAN.md
 Resume file: None
