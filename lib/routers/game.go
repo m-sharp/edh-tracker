@@ -237,6 +237,11 @@ func (g *GameRouter) GameCreate(w http.ResponseWriter, r *http.Request) {
 		zap.Any("GameResults", req.Results),
 	)
 
+	if len(req.Description) > 256 {
+		trackerHttp.WriteError(log, w, http.StatusBadRequest, fmt.Errorf("description too long"), "Game description too long", "description must be 256 characters or fewer")
+		return
+	}
+
 	if len(req.Results) == 0 {
 		trackerHttp.WriteError(log, w, http.StatusBadRequest, nil, "No game results provided", "at least one game result is required")
 		return
