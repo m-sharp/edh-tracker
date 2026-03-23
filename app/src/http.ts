@@ -17,6 +17,7 @@ import {
     Pod,
 } from "./types";
 
+// TODO: How does this look in production?
 export const API_BASE_URL = "http://localhost:8080";
 
 // Auth Methods
