@@ -39,19 +39,6 @@ func commanderInfoFromModel(d deckRepository.Model) *CommanderInfo {
 	return info
 }
 
-func GetAll(
-	deckRepo repos.DeckRepository,
-	gameResultRepo repos.GameResultRepository,
-) GetAllFunc {
-	return func(ctx context.Context) ([]EntityWithStats, error) {
-		decks, err := deckRepo.GetAll(ctx)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get decks: %w", err)
-		}
-		return buildEntitiesWithStats(ctx, decks, gameResultRepo)
-	}
-}
-
 func GetAllForPlayer(
 	deckRepo repos.DeckRepository,
 	gameResultRepo repos.GameResultRepository,

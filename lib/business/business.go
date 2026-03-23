@@ -43,7 +43,6 @@ func NewBusiness(log *zap.Logger, r *repositories.Repositories) *Business {
 			GetPlayerName: player.GetPlayerName(r.Players),
 		},
 		Decks: deck.Functions{
-			GetAll:                  deck.GetAll(r.Decks, r.GameResults),
 			GetAllForPlayer:         deck.GetAllForPlayer(r.Decks, r.GameResults),
 			GetAllByPod:             deck.GetAllByPod(r.Decks, r.Pods, r.GameResults),
 			GetAllByPodPaginated:    deck.GetAllByPodPaginated(r.Decks, r.GameResults),

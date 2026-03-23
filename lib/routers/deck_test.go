@@ -24,36 +24,26 @@ func newTestDeckRouter(decks deck.Functions) *DeckRouter {
 	}
 }
 
-func TestDeckRouter_GetAll_Success(t *testing.T) {
-	decks := []deck.EntityWithStats{
-		{Entity: deck.Entity{Name: "Deck1"}},
-	}
-	router := newTestDeckRouter(deck.Functions{
-		GetAll: func(ctx context.Context) ([]deck.EntityWithStats, error) { return decks, nil },
-	})
+func TestDeckRouter_GetAll_NoFilter_Returns400(t *testing.T) {
+	router := newTestDeckRouter(deck.Functions{})
 
 	req := httptest.NewRequest(http.MethodGet, "/api/decks", nil)
 	rr := httptest.NewRecorder()
 	router.GetAll(rr, req)
 
-	assert.Equal(t, http.StatusOK, rr.Code)
-	var got []deck.EntityWithStats
-	require.NoError(t, json.Unmarshal(rr.Body.Bytes(), &got))
-	assert.Len(t, got, 1)
+	assert.Equal(t, http.StatusBadRequest, rr.Code)
+	assert.Contains(t, rr.Body.String(), "pod_id or player_id query param is required")
 }
 
-func TestDeckRouter_GetAll_Error(t *testing.T) {
-	router := newTestDeckRouter(deck.Functions{
-		GetAll: func(ctx context.Context) ([]deck.EntityWithStats, error) {
-			return nil, errors.New("db error")
-		},
-	})
+func TestDeckRouter_GetAll_Paginated_NoFilter_Returns400(t *testing.T) {
+	router := newTestDeckRouter(deck.Functions{})
 
-	req := httptest.NewRequest(http.MethodGet, "/api/decks", nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/decks?limit=10", nil)
 	rr := httptest.NewRecorder()
 	router.GetAll(rr, req)
 
-	assert.Equal(t, http.StatusInternalServerError, rr.Code)
+	assert.Equal(t, http.StatusBadRequest, rr.Code)
+	assert.Contains(t, rr.Body.String(), "pod_id or player_id query param is required")
 }
 
 func TestDeckRouter_Add_Success(t *testing.T) {

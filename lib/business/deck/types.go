@@ -12,7 +12,6 @@ type UpdateFields struct {
 	Retired            *bool
 }
 
-type GetAllFunc func(ctx context.Context) ([]EntityWithStats, error)
 type GetAllForPlayerFunc func(ctx context.Context, playerID int) ([]EntityWithStats, error)
 type GetAllByPodFunc func(ctx context.Context, podID int) ([]EntityWithStats, error)
 type GetAllByPodPaginatedFunc func(ctx context.Context, podID, limit, offset int) ([]EntityWithStats, int, error)
@@ -25,7 +24,6 @@ type RetireFunc func(ctx context.Context, deckID int, callerPlayerID int) error
 type GetDeckNameFunc func(ctx context.Context, deckID int) (string, error)
 
 type Functions struct {
-	GetAll                  GetAllFunc
 	GetAllForPlayer         GetAllForPlayerFunc
 	GetAllByPod             GetAllByPodFunc
 	GetAllByPodPaginated    GetAllByPodPaginatedFunc

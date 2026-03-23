@@ -2,6 +2,7 @@ package routers
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"strings"
@@ -78,8 +79,8 @@ func (d *DeckRouter) GetAll(w http.ResponseWriter, r *http.Request) {
 	case playerID != 0:
 		decks, err = d.decks.GetAllForPlayer(ctx, playerID)
 	default:
-		// TODO: Should probably not exist. Also, it's slowwwww
-		decks, err = d.decks.GetAll(ctx)
+		trackerHttp.WriteError(d.log, w, http.StatusBadRequest, fmt.Errorf("missing required filter"), "Missing required filter", "pod_id or player_id query param is required")
+		return
 	}
 	if err != nil {
 		trackerHttp.WriteError(d.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
@@ -110,14 +111,8 @@ func (d *DeckRouter) getAllPaginated(w http.ResponseWriter, r *http.Request, pod
 	case playerID != 0:
 		entities, total, err = d.decks.GetAllByPlayerPaginated(ctx, playerID, limit, offset)
 	default:
-		// TODO: Should probably not exist. Also, it's slowwwww
-		decks, decksErr := d.decks.GetAll(ctx)
-		if decksErr != nil {
-			trackerHttp.WriteError(d.log, w, http.StatusInternalServerError, decksErr, errMsg, errMsg)
-			return
-		}
-		entities = decks
-		total = len(decks)
+		trackerHttp.WriteError(d.log, w, http.StatusBadRequest, fmt.Errorf("missing required filter"), "Missing required filter", "pod_id or player_id query param is required")
+		return
 	}
 	if err != nil {
 		trackerHttp.WriteError(d.log, w, http.StatusInternalServerError, err, errMsg, errMsg)
