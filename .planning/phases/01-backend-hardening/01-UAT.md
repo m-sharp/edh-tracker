@@ -1,5 +1,5 @@
 ---
-status: complete
+status: diagnosed
 phase: 01-backend-hardening
 source: 01-01-SUMMARY.md, 01-02-SUMMARY.md, 01-03-SUMMARY.md, 01-04-SUMMARY.md, 01-05-SUMMARY.md
 started: 2026-03-22T04:00:00Z
@@ -64,7 +64,21 @@ blocked: 0
   reason: "User reported: Server raises an error as expected - trying to send a name that is too long via the frontend edit results in a white screen and a console error of `Uncaught SyntaxError: Unexpected token '<'`. This will need to be captured in some later phase - appropriate error handling of requests within the frontend."
   severity: major
   test: 7
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
+  root_cause: "Backend WriteError returns text/plain bodies; http.ts calls .json() unconditionally on responses without checking res.ok first, causing SyntaxError on non-2xx responses. Additionally, all fire-and-forget mutation functions (PatchPlayer, PatchDeck, PatchPod, etc.) never check res.ok or throw, making their call sites' try/catch blocks dead code."
+  artifacts:
+    - path: "app/src/http.ts"
+      issue: "PostPod, PostPodJoin, PostPodInvite call res.json() with no res.ok guard; all PATCH/DELETE functions discard the Response entirely without status checks"
+    - path: "app/src/routes/player.tsx"
+      issue: "handleCreatePod has no try/catch; handleSaveName catch block is dead code because PatchPlayer never throws"
+    - path: "app/src/routes/pod.tsx"
+      issue: "handleSaveName and handleGenerateInvite propagate errors uncaught to React error boundary"
+    - path: "app/src/routes/deck.tsx"
+      issue: "All mutation handlers (save name/format/commanders, retire, delete) have dead catch blocks because PatchDeck/DeleteDeck never throw"
+    - path: "lib/trackerHttp/http.go"
+      issue: "WriteError uses http.Error() which sets Content-Type: text/plain — inconsistent with frontend expecting JSON"
+  missing:
+    - "app/src/http.ts: add res.ok guards throwing before .json() calls in PostPod, PostPodJoin, PostPodInvite"
+    - "app/src/http.ts: all fire-and-forget mutations must check res.ok and throw on non-2xx"
+    - "app/src/routes/player.tsx: wrap handleCreatePod in try/catch"
+    - "app/src/routes/pod.tsx: wrap handleSaveName and handleGenerateInvite in try/catch"
+    - "Optional: make WriteError return JSON body for consistent frontend parsing"
