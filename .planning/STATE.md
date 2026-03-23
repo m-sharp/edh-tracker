@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Ready to execute
-stopped_at: Completed 01-01-PLAN.md
-last_updated: "2026-03-23T02:37:11.968Z"
+stopped_at: Completed 01-03-PLAN.md
+last_updated: "2026-03-23T03:18:40.518Z"
 progress:
   total_phases: 7
   completed_phases: 0
   total_plans: 5
-  completed_plans: 3
+  completed_plans: 4
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-22)
 ## Current Position
 
 Phase: 01 (backend-hardening) — EXECUTING
-Plan: 4 of 5
+Plan: 5 of 5
 
 ## Performance Metrics
 
@@ -49,6 +49,7 @@ Plan: 4 of 5
 | Phase 01 P05 | 3 | 3 tasks | 6 files |
 | Phase 01 P04 | 8 | 2 tasks | 10 files |
 | Phase 01-backend-hardening P01 | 9min | 2 tasks | 5 files |
+| Phase 01-backend-hardening P03 | 15 | 1 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -65,6 +66,8 @@ Recent decisions affecting current work:
 - [Phase 01]: GetStatsForDecks added to GameResultRepository interface to maintain functional DI pattern (plan 04)
 - [Phase 01-backend-hardening]: ErrForbidden placed in lib/errs (not lib/business) to avoid circular import — sub-packages cannot import their parent package in Go
 - [Phase 01-backend-hardening]: errors.Is used at router layer to discriminate 403 (forbidden) vs 500 (DB error) — plain errors without ErrForbidden wrapper now correctly return 500
+- [Phase 01-backend-hardening]: assertCallerOwnsDeck placed on DeckRouter (router layer owns auth) — business layer Update/SoftDelete/Retire no longer take callerPlayerID
+- [Phase 01-backend-hardening]: DeckCreate ignores body player_id, uses JWT callerPlayerID exclusively (SEC-02)
 
 ### Pending Todos
 
@@ -77,6 +80,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-23T02:37:11.872Z
-Stopped at: Completed 01-01-PLAN.md
+Last session: 2026-03-23T03:18:40.471Z
+Stopped at: Completed 01-03-PLAN.md
 Resume file: None

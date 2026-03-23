@@ -37,7 +37,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 Plans:
 - [x] 01-01-PLAN.md — ErrForbidden sentinel + pod router error discrimination (INFRA-02)
 - [ ] 01-02-PLAN.md — Game auth + transaction (SEC-01, SEC-03)
-- [ ] 01-03-PLAN.md — Deck auth migration to router layer (SEC-02)
+- [x] 01-03-PLAN.md — Deck auth migration to router layer (SEC-02)
 - [x] 01-04-PLAN.md — Batch deck stats + unfiltered endpoint block (PERF-01, PERF-02)
 - [x] 01-05-PLAN.md — Validation guards: JWT secret, string lengths, invite limit (AUTH-02, SEC-04, SEC-05)
 
