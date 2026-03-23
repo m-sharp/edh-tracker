@@ -74,7 +74,7 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-None yet.
+- [Phase 3 UI-SPEC]: DSNG-04 requires the UI-SPEC researcher to audit Login, Home, Player, Deck, and Game views individually and identify what each needs beyond ThemeProvider inheritance — layout fixes, spacing corrections, typography adjustments, component usage issues. The UI-SPEC must not just describe the global design system; it must include a per-view breakdown of concrete improvements needed in each view.
 
 ### Blockers/Concerns
 
