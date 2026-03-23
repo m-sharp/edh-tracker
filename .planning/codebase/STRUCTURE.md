@@ -189,7 +189,7 @@ The following domains exist as parallel subdirectories under both `lib/repositor
 **`vendor/`:**
 - Purpose: Vendored Go dependencies
 - Generated: Yes (via `go mod vendor`)
-- Committed: Yes
+- Committed: No (should not be committed)
 
 **`app/build/`:**
 - Purpose: Production React build output (served by frontend Docker image)
