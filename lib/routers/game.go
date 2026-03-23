@@ -258,6 +258,21 @@ func (g *GameRouter) GameCreate(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	callerPlayerID, ok := trackerHttp.CallerPlayerID(w, r)
+	if !ok {
+		return
+	}
+
+	role, err := g.getPodRole(ctx, req.PodID, callerPlayerID)
+	if err != nil {
+		trackerHttp.WriteError(log, w, http.StatusInternalServerError, err, "Failed to check pod membership", "internal error")
+		return
+	}
+	if role == "" {
+		http.Error(w, "Forbidden: must be a member of the pod", http.StatusForbidden)
+		return
+	}
+
 	log.Info("Saving new Game record")
 	if err = g.games.Create(ctx, req.Description, req.PodID, req.FormatID, req.Results); err != nil {
 		trackerHttp.WriteError(log, w, http.StatusInternalServerError, err, "Failed to create Game record", errMsg)
