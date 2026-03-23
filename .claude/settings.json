@@ -1,4 +1,33 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(date:*)",
+      "Bash(echo:*)",
+      "Bash(cat:*)",
+      "Bash(ls:*)",
+      "Bash(mkdir:*)",
+      "Bash(wc:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(sort:*)",
+      "Bash(grep:*)",
+      "Bash(tr:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git status:*)",
+      "Bash(git log:*)",
+      "Bash(git diff:*)",
+      "Bash(git tag:*)",
+      "Bash(go build:*)",
+      "Bash(go vet:*)",
+      "Bash(npx tsc:*)",
+      "Bash(go:*)",
+      "Bash(docker build:*)",
+      "Bash(docker:*)",
+      "Bash(curl:*)",
+      "Bash(npm run:*)"
+    ]
+  },
   "hooks": {
     "PostToolUse": [
       {
