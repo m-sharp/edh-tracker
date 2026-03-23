@@ -103,47 +103,47 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DSNG-01 | TBD | Pending |
-| DSNG-02 | TBD | Pending |
-| DSNG-03 | TBD | Pending |
-| FEND-01 | TBD | Pending |
-| FEND-02 | TBD | Pending |
-| FEND-03 | TBD | Pending |
-| FEND-04 | TBD | Pending |
-| FEND-05 | TBD | Pending |
-| POD-01 | TBD | Pending |
-| POD-02 | TBD | Pending |
-| POD-03 | TBD | Pending |
-| POD-04 | TBD | Pending |
-| GAME-01 | TBD | Pending |
-| GAME-02 | TBD | Pending |
-| GAME-03 | TBD | Pending |
-| GAME-04 | TBD | Pending |
-| DECK-01 | TBD | Pending |
-| DECK-02 | TBD | Pending |
-| DECK-03 | TBD | Pending |
-| AUTH-01 | TBD | Pending |
-| AUTH-02 | TBD | Pending |
-| SEC-01 | TBD | Pending |
-| SEC-02 | TBD | Pending |
-| SEC-03 | TBD | Pending |
-| SEC-04 | TBD | Pending |
-| SEC-05 | TBD | Pending |
-| PERF-01 | TBD | Pending |
-| PERF-02 | TBD | Pending |
-| TEST-01 | TBD | Pending |
-| TEST-02 | TBD | Pending |
-| TEST-03 | TBD | Pending |
-| TEST-04 | TBD | Pending |
-| INFRA-01 | TBD | Pending |
-| INFRA-02 | TBD | Pending |
-| INFRA-03 | TBD | Pending |
+| DSNG-01 | Phase 2 | Pending |
+| DSNG-02 | Phase 2 | Pending |
+| DSNG-03 | Phase 2 | Pending |
+| FEND-01 | Phase 3 | Pending |
+| FEND-02 | Phase 3 | Pending |
+| FEND-03 | Phase 3 | Pending |
+| FEND-04 | Phase 3 | Pending |
+| FEND-05 | Phase 3 | Pending |
+| POD-01 | Phase 5 | Pending |
+| POD-02 | Phase 5 | Pending |
+| POD-03 | Phase 5 | Pending |
+| POD-04 | Phase 5 | Pending |
+| GAME-01 | Phase 4 | Pending |
+| GAME-02 | Phase 4 | Pending |
+| GAME-03 | Phase 4 | Pending |
+| GAME-04 | Phase 4 | Pending |
+| DECK-01 | Phase 5 | Pending |
+| DECK-02 | Phase 5 | Pending |
+| DECK-03 | Phase 5 | Pending |
+| AUTH-01 | Phase 6 | Pending |
+| AUTH-02 | Phase 1 | Pending |
+| SEC-01 | Phase 1 | Pending |
+| SEC-02 | Phase 1 | Pending |
+| SEC-03 | Phase 1 | Pending |
+| SEC-04 | Phase 1 | Pending |
+| SEC-05 | Phase 1 | Pending |
+| PERF-01 | Phase 1 | Pending |
+| PERF-02 | Phase 1 | Pending |
+| TEST-01 | Phase 6 | Pending |
+| TEST-02 | Phase 6 | Pending |
+| TEST-03 | Phase 6 | Pending |
+| TEST-04 | Phase 6 | Pending |
+| INFRA-01 | Phase 7 | Pending |
+| INFRA-02 | Phase 1 | Pending |
+| INFRA-03 | Phase 7 | Pending |
 
 **Coverage:**
 - v1 requirements: 35 total
-- Mapped to phases: 0 (roadmap not yet created)
-- Unmapped: 34 ⚠️
+- Mapped to phases: 35
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-22*
-*Last updated: 2026-03-22 after initial definition*
+*Last updated: 2026-03-22 after roadmap creation*
