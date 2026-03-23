@@ -1,12 +1,10 @@
 ---
-status: diagnosed
+status: complete
 phase: 01-backend-hardening
-source: 01-01-SUMMARY.md, 01-02-SUMMARY.md, 01-03-SUMMARY.md, 01-04-SUMMARY.md, 01-05-SUMMARY.md
+source: 01-01-SUMMARY.md, 01-02-SUMMARY.md, 01-03-SUMMARY.md, 01-04-SUMMARY.md, 01-05-SUMMARY.md, 01-06-SUMMARY.md
 started: 2026-03-22T04:00:00Z
-updated: 2026-03-22T04:30:00Z
+updated: 2026-03-23T05:00:00Z
 ---
-
-## Current Test
 
 ## Current Test
 
@@ -39,10 +37,9 @@ expected: GET /api/decks with no query parameters returns 400 Bad Request with a
 result: pass
 
 ### 7. String Field Max-Length Validation
-expected: Submitting a player name longer than 256 characters, a pod name longer than 255 characters, or a deck name longer than 255 characters returns 400 Bad Request. A game description longer than 256 chars also returns 400. Inputs at or under the limit succeed normally.
-result: issue
-reported: "Server raises an error as expected - trying to send a name that is too long via the frontend edit results in a white screen and a console error of `Uncaught SyntaxError: Unexpected token '<'`. This will need to be captured in some later phase - appropriate error handling of requests within the frontend."
-severity: major
+expected: Submitting a player name longer than 256 characters, a pod name longer than 255 characters, or a deck name longer than 255 characters returns 400 Bad Request. A game description longer than 256 chars also returns 400. Inputs at or under the limit succeed normally. Frontend displays inline error message without crashing or white-screening.
+result: pass
+note: "Initially failed (white screen). Fixed by Plan 01-06: res.ok guards in http.ts + try/catch in player.tsx and pod.tsx. Re-verified pass."
 
 ### 8. Pod Invite Use Limit
 expected: Attempting to join a pod using an invite code that has already been used 25 times returns an error (400 or 403) with a descriptive message. An invite used fewer than 25 times still works normally.
@@ -51,34 +48,12 @@ result: pass
 ## Summary
 
 total: 8
-passed: 7
-issues: 1
+passed: 8
+issues: 0
 pending: 0
 skipped: 0
 blocked: 0
 
 ## Gaps
 
-- truth: "Submitting a field value that exceeds max length (e.g. player/pod/deck name) returns 400 and the frontend handles it gracefully — no crash or white screen"
-  status: failed
-  reason: "User reported: Server raises an error as expected - trying to send a name that is too long via the frontend edit results in a white screen and a console error of `Uncaught SyntaxError: Unexpected token '<'`. This will need to be captured in some later phase - appropriate error handling of requests within the frontend."
-  severity: major
-  test: 7
-  root_cause: "Backend WriteError returns text/plain bodies; http.ts calls .json() unconditionally on responses without checking res.ok first, causing SyntaxError on non-2xx responses. Additionally, all fire-and-forget mutation functions (PatchPlayer, PatchDeck, PatchPod, etc.) never check res.ok or throw, making their call sites' try/catch blocks dead code."
-  artifacts:
-    - path: "app/src/http.ts"
-      issue: "PostPod, PostPodJoin, PostPodInvite call res.json() with no res.ok guard; all PATCH/DELETE functions discard the Response entirely without status checks"
-    - path: "app/src/routes/player.tsx"
-      issue: "handleCreatePod has no try/catch; handleSaveName catch block is dead code because PatchPlayer never throws"
-    - path: "app/src/routes/pod.tsx"
-      issue: "handleSaveName and handleGenerateInvite propagate errors uncaught to React error boundary"
-    - path: "app/src/routes/deck.tsx"
-      issue: "All mutation handlers (save name/format/commanders, retire, delete) have dead catch blocks because PatchDeck/DeleteDeck never throw"
-    - path: "lib/trackerHttp/http.go"
-      issue: "WriteError uses http.Error() which sets Content-Type: text/plain — inconsistent with frontend expecting JSON"
-  missing:
-    - "app/src/http.ts: add res.ok guards throwing before .json() calls in PostPod, PostPodJoin, PostPodInvite"
-    - "app/src/http.ts: all fire-and-forget mutations must check res.ok and throw on non-2xx"
-    - "app/src/routes/player.tsx: wrap handleCreatePod in try/catch"
-    - "app/src/routes/pod.tsx: wrap handleSaveName and handleGenerateInvite in try/catch"
-    - "Optional: make WriteError return JSON body for consistent frontend parsing"
+[all gaps closed]
