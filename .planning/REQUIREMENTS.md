@@ -42,15 +42,15 @@
 ### Authentication & Session
 
 - [ ] **AUTH-01**: 401 responses from the API call `logout()` from auth context and redirect to `/login`
-- [ ] **AUTH-02**: Server rejects startup if JWT secret is shorter than 32 bytes
+- [x] **AUTH-02**: Server rejects startup if JWT secret is shorter than 32 bytes
 
 ### Security
 
 - [ ] **SEC-01**: `POST /api/game` verifies the caller is a member of the target pod before creating the game
 - [ ] **SEC-02**: `POST /api/deck` uses the caller's player ID from the JWT context — ignores any `player_id` in the request body
 - [ ] **SEC-03**: Game creation (game row + result rows) is wrapped in a single DB transaction
-- [ ] **SEC-04**: Pod invite join validates max use count in addition to expiry
-- [ ] **SEC-05**: String field inputs (player name, pod name, deck name, etc.) validated for max length — returns 400 not 500 on overflow
+- [x] **SEC-04**: Pod invite join validates max use count in addition to expiry
+- [x] **SEC-05**: String field inputs (player name, pod name, deck name, etc.) validated for max length — returns 400 not 500 on overflow
 
 ### Performance
 
@@ -123,12 +123,12 @@
 | DECK-02 | Phase 5 | Pending |
 | DECK-03 | Phase 5 | Pending |
 | AUTH-01 | Phase 6 | Pending |
-| AUTH-02 | Phase 1 | Pending |
+| AUTH-02 | Phase 1 | Complete |
 | SEC-01 | Phase 1 | Pending |
 | SEC-02 | Phase 1 | Pending |
 | SEC-03 | Phase 1 | Pending |
-| SEC-04 | Phase 1 | Pending |
-| SEC-05 | Phase 1 | Pending |
+| SEC-04 | Phase 1 | Complete |
+| SEC-05 | Phase 1 | Complete |
 | PERF-01 | Phase 1 | Pending |
 | PERF-02 | Phase 1 | Pending |
 | TEST-01 | Phase 6 | Pending |

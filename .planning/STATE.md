@@ -2,16 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: planning
-stopped_at: Phase 1 context gathered
-last_updated: "2026-03-23T02:02:08.726Z"
-last_activity: 2026-03-22 — Roadmap created, phase structure established
+status: Ready to execute
+stopped_at: Completed 01-05-PLAN.md
+last_updated: "2026-03-23T02:31:16.825Z"
 progress:
   total_phases: 7
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  total_plans: 5
+  completed_plans: 1
 ---
 
 # Project State
@@ -21,16 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-22)
 
 **Core value:** A pod can sit down, record a game in under a minute, and immediately see accurate standings — on their phones.
-**Current focus:** Phase 1 — Backend Hardening
+**Current focus:** Phase 01 — backend-hardening
 
 ## Current Position
 
-Phase: 1 of 7 (Backend Hardening)
-Plan: 0 of ? in current phase
-Status: Ready to plan
-Last activity: 2026-03-22 — Roadmap created, phase structure established
-
-Progress: [░░░░░░░░░░] 0%
+Phase: 01 (backend-hardening) — EXECUTING
+Plan: 2 of 5
 
 ## Performance Metrics
 
@@ -52,6 +46,7 @@ Progress: [░░░░░░░░░░] 0%
 - Trend: -
 
 *Updated after each plan completion*
+| Phase 01 P05 | 3 | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -63,6 +58,7 @@ Recent decisions affecting current work:
 - [Pre-roadmap]: Games track decks only, not players — player is implicit via deck ownership
 - [Pre-roadmap]: Frontend design language to be defined before UI implementation begins
 - [Pre-roadmap]: Soft launch to small friend group before broader rollout
+- [Phase 01]: maxInviteUses hardcoded to 25 — pod_invite table has no max_used_count column; constant placed in functions.go
 
 ### Pending Todos
 
@@ -75,6 +71,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-23T02:02:08.673Z
-Stopped at: Phase 1 context gathered
+Last session: 2026-03-23T02:31:16.781Z
+Stopped at: Completed 01-05-PLAN.md
 Resume file: None
