@@ -56,15 +56,16 @@ Plans:
 - [ ] 02-02-PLAN.md — Pod view mobile polish + visual verification (DSNG-02)
 
 ### Phase 3: Frontend Structure
-**Goal**: The frontend codebase is organized into per-view subdirectories with shared components, and routing bugs are fixed
+**Goal**: The frontend codebase is organized into per-view subdirectories with shared components, routing bugs are fixed, and all views are individually polished against the Phase 2 design language
 **Depends on**: Phase 2
-**Requirements**: FEND-01, FEND-02, FEND-03, FEND-04, FEND-05
+**Requirements**: FEND-01, FEND-02, FEND-03, FEND-04, FEND-05, DSNG-04
 **Success Criteria** (what must be TRUE):
   1. Route files live in per-view subdirectories (pod/, player/, deck/, game/ under app/src/routes/) with no large monolithic route files remaining
   2. Pod, Player, and Deck views all use the shared tab component with active tab persisted in the query string
   3. Shared tooltip icon and tooltip icon button components exist and are used where applicable
   4. Refreshing any page in the app does not produce a blank white screen
   5. The HomeView does not flash "No pods yet" before pod data has loaded
+  6. Login, Home, Player, Deck, and Game views have each been individually audited and improved — layout, spacing, and typography are intentional and consistent with the Phase 2 design system, not just passively inherited via ThemeProvider
 **Plans**: TBD
 **UI hint**: yes
 
