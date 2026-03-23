@@ -12,6 +12,10 @@ import (
 	"github.com/m-sharp/edh-tracker/lib/repositories/playerPodRole"
 )
 
+// maxInviteUses is the maximum number of times an invite code can be used.
+// The pod_invite table has no max_used_count column, so this is a hardcoded limit.
+const maxInviteUses = 25
+
 func GetByID(podRepo repos.PodRepository) GetByIDFunc {
 	return func(ctx context.Context, podID int) (*Entity, error) {
 		m, err := podRepo.GetByID(ctx, podID)
@@ -117,6 +121,9 @@ func JoinByInvite(inviteRepo repos.PodInviteRepository, podRepo repos.PodReposit
 		}
 		if invite.ExpiresAt != nil && invite.ExpiresAt.Before(time.Now()) {
 			return nil, fmt.Errorf("invite code has expired")
+		}
+		if invite.UsedCount >= maxInviteUses {
+			return nil, fmt.Errorf("invite code has reached its maximum number of uses")
 		}
 
 		if err = podRepo.AddPlayerToPod(ctx, invite.PodID, playerID); err != nil {
