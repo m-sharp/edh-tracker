@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/m-sharp/edh-tracker/lib/business/format"
+	"github.com/m-sharp/edh-tracker/lib/errs"
 	repos "github.com/m-sharp/edh-tracker/lib/repositories"
 	deckRepository "github.com/m-sharp/edh-tracker/lib/repositories/deck"
 )
@@ -174,20 +175,30 @@ func GetAllByPodPaginated(
 }
 
 // buildEntitiesWithStats converts []deckRepository.Model → []EntityWithStats,
-// fetching game result stats for each deck.
+// fetching game result stats for all decks in a single batch query.
 func buildEntitiesWithStats(
 	ctx context.Context,
 	decks []deckRepository.Model,
 	gameResultRepo repos.GameResultRepository,
 ) ([]EntityWithStats, error) {
+	if len(decks) == 0 {
+		return []EntityWithStats{}, nil
+	}
+
+	deckIDs := make([]int, len(decks))
+	for i, d := range decks {
+		deckIDs[i] = d.ID
+	}
+
+	statsMap, err := gameResultRepo.GetStatsForDecks(ctx, deckIDs)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get batch stats: %w", err)
+	}
+
 	result := make([]EntityWithStats, 0, len(decks))
 	for _, d := range decks {
 		entity := ToEntity(d, d.Player.Name, d.Format.Name, commanderInfoFromModel(d))
-		agg, err := gameResultRepo.GetStatsForDeck(ctx, d.ID)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get stats for deck %d: %w", d.ID, err)
-		}
-		result = append(result, ToEntityWithStats(entity, agg))
+		result = append(result, ToEntityWithStats(entity, statsMap[d.ID]))
 	}
 	return result, nil
 }
@@ -201,7 +212,7 @@ func assertCallerOwnsDeck(ctx context.Context, deckRepo repos.DeckRepository, de
 		return fmt.Errorf("deck %d not found", deckID)
 	}
 	if d.PlayerID != callerPlayerID {
-		return fmt.Errorf("forbidden: deck %d does not belong to caller", deckID)
+		return fmt.Errorf("forbidden: deck %d does not belong to caller: %w", deckID, errs.ErrForbidden)
 	}
 	return nil
 }
