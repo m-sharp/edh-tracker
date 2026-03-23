@@ -49,19 +49,23 @@ Plans:
   1. A documented color palette, typography scale, and spacing tokens exist and are applied consistently across at least one representative view
   2. The chosen MUI component patterns are used consistently — no inline style overrides where MUI provides a pattern
   3. At least one view is verified usable on a phone-sized viewport (touch targets adequate, text readable without zooming)
-**Plans**: TBD
-**UI hint**: yes
+**Plans:** 2 plans
+
+Plans:
+- [ ] 02-01-PLAN.md — Create MUI dark theme + wire ThemeProvider globally (DSNG-01, DSNG-03)
+- [ ] 02-02-PLAN.md — Pod view mobile polish + visual verification (DSNG-02)
 
 ### Phase 3: Frontend Structure
-**Goal**: The frontend codebase is organized into per-view subdirectories with shared components, and routing bugs are fixed
+**Goal**: The frontend codebase is organized into per-view subdirectories with shared components, routing bugs are fixed, and all views are individually polished against the Phase 2 design language
 **Depends on**: Phase 2
-**Requirements**: FEND-01, FEND-02, FEND-03, FEND-04, FEND-05
+**Requirements**: FEND-01, FEND-02, FEND-03, FEND-04, FEND-05, DSNG-04
 **Success Criteria** (what must be TRUE):
   1. Route files live in per-view subdirectories (pod/, player/, deck/, game/ under app/src/routes/) with no large monolithic route files remaining
   2. Pod, Player, and Deck views all use the shared tab component with active tab persisted in the query string
   3. Shared tooltip icon and tooltip icon button components exist and are used where applicable
   4. Refreshing any page in the app does not produce a blank white screen
   5. The HomeView does not flash "No pods yet" before pod data has loaded
+  6. Login, Home, Player, Deck, and Game views have each been individually audited and improved — layout, spacing, and typography are intentional and consistent with the Phase 2 design system, not just passively inherited via ThemeProvider
 **Plans**: TBD
 **UI hint**: yes
 
@@ -119,7 +123,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Backend Hardening | 3/5 | In Progress|  |
-| 2. Design Language | 0/? | Not started | - |
+| 2. Design Language | 0/2 | Planned | - |
 | 3. Frontend Structure | 0/? | Not started | - |
 | 4. Game Model Change | 0/? | Not started | - |
 | 5. Pod & Deck UX | 0/? | Not started | - |
