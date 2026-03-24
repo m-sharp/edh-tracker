@@ -54,7 +54,7 @@ Plans:
 Plans:
 - [x] 02-01-PLAN.md — Create MUI dark theme + wire ThemeProvider globally (DSNG-01, DSNG-03)
 - [x] 02-02-PLAN.md — Pod view mobile polish + visual verification (DSNG-02)
-- [ ] 02-03-PLAN.md — Remove monospace fontFamily override from AppBar title (DSNG-03 gap closure)
+- [x] 02-03-PLAN.md — Remove monospace fontFamily override from AppBar title (DSNG-03 gap closure)
 
 ### Phase 3: Frontend Structure
 **Goal**: The frontend codebase is organized into per-view subdirectories with shared components, routing bugs are fixed, and all views are individually polished against the Phase 2 design language
