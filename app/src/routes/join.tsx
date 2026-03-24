@@ -1,9 +1,10 @@
 import { ReactElement, useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { Box, CircularProgress, Typography } from "@mui/material";
+import { Box, Button, CircularProgress, Typography } from "@mui/material";
 
 import { useAuth } from "../auth";
 import {API_BASE_URL, PostPodJoin} from "../http";
+import SvgIconPlayingCards from "../components/SvgIconPlayingCards";
 
 export default function JoinView(): ReactElement {
     const [searchParams] = useSearchParams();
@@ -49,8 +50,9 @@ export default function JoinView(): ReactElement {
     if (!code) {
         return (
             <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", pt: 8, gap: 2 }}>
+                <SvgIconPlayingCards fontSize={40} />
                 <Typography variant="h6">No invite code provided.</Typography>
-                <Link to="/">Go home</Link>
+                <Button component={Link} to="/" variant="outlined" size="medium">Go home</Button>
             </Box>
         );
     }
@@ -58,8 +60,10 @@ export default function JoinView(): ReactElement {
     if (error) {
         return (
             <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", pt: 8, gap: 2 }}>
-                <Typography variant="h6" color="error">{error}</Typography>
-                <Link to="/">Go home</Link>
+                <SvgIconPlayingCards fontSize={40} />
+                <Typography variant="h6">Something went wrong</Typography>
+                <Typography variant="body1" color="error">{error}</Typography>
+                <Button component={Link} to="/" variant="outlined" size="medium">Go home</Button>
             </Box>
         );
     }

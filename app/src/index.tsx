@@ -1,20 +1,19 @@
-import { ReactElement, StrictMode, useEffect } from "react";
+import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { createBrowserRouter, Navigate, RouterProvider, useNavigate } from "react-router-dom";
-import { Typography } from "@mui/material";
+import { createBrowserRouter, Navigate, RouterProvider } from "react-router-dom";
 import CssBaseline from "@mui/material/CssBaseline";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "./theme";
 
-import { AuthProvider, useAuth } from "./auth";
+import { AuthProvider } from "./auth";
 import {
     GetDeck,
     GetPlayer,
-    GetPodsForPlayer,
 } from "./http";
 import ErrorPage from "./routes/error"
 import DeckView from "./routes/deck";
 import GameView, { gameLoader } from "./routes/game";
+import HomeView from "./routes/home";
 import JoinView from "./routes/join";
 import LoginPage from "./routes/login";
 import NewGameView, { newGameLoader, createGame } from "./routes/new";
@@ -24,28 +23,6 @@ import RequireAuth from "./routes/RequireAuth";
 import Root from "./routes/root";
 
 import "./styles.css";
-
-// TODO: Move HomeView into its own file
-function HomeView(): ReactElement {
-    const { user } = useAuth();
-    const navigate = useNavigate();
-
-    useEffect(() => {
-        if (!user) {
-            return;
-        }
-
-        GetPodsForPlayer(user.player_id).then((pods) => {
-            if (pods.length > 0) {
-                navigate(`/pod/${pods[0].id}`, {replace: true});
-            }
-        });
-    }, [user]);
-
-    // TODO: Will need to link to where you can actually add one
-    // TODO: Loading blip always shows this before data comes in
-    return <Typography>No pods yet. Create your first pod to get started.</Typography>;
-}
 
 const router = createBrowserRouter([
     {

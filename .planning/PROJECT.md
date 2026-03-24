@@ -26,13 +26,13 @@ A pod can sit down, record a game in under a minute, and immediately see accurat
 **Frontend design overhaul (highest priority):**
 - [ ] Define and apply an overarching visual design language for the app (mobile-first, MUI conventions solidified)
 - [ ] Mobile-friendly layout and interaction patterns across all views — app must work at the table on a phone
-- [ ] Refactor large route files into per-view subdirectories (`pod/`, `player/`, `deck/`, `game/` under `app/src/routes/`)
-- [ ] Shared tab component with query-string-persisted active tab, shared loading/error handling
-- [ ] Shared tooltip icon and tooltip icon button components
+- [x] Refactor large route files into per-view subdirectories (`pod/`, `player/`, `deck/`, `game/` under `app/src/routes/`) — Validated in Phase 3: Frontend Structure
+- [x] Shared tab component with query-string-persisted active tab, shared loading/error handling — Validated in Phase 3: Frontend Structure
+- [x] Shared tooltip icon and tooltip icon button components — Validated in Phase 3: Frontend Structure
+- [x] Fix: page refresh causes blank white screen (React Router client-side routing issue) — Validated in Phase 3: Frontend Structure
+- [x] Fix: "No pods yet" flash before data loads on HomeView — Validated in Phase 3: Frontend Structure
 - [ ] Move pod creation out of player settings and into the pod page
 - [ ] New user onboarding: clear path and UX for a user with no pods yet
-- [ ] Fix: page refresh causes blank white screen (React Router client-side routing issue)
-- [ ] Fix: "No pods yet" flash before data loads on HomeView
 - [ ] Rebuild CLAUDE.md context section on frontend patterns (after refactor settles)
 
 **Game model change:**

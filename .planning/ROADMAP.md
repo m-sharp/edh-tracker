@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [ ] **Phase 1: Backend Hardening** - Close authorization, transaction, validation, and performance gaps in the API
 - [ ] **Phase 2: Design Language** - Define and apply the visual design system before any UI work begins
-- [ ] **Phase 3: Frontend Structure** - Refactor route files, build shared components, and fix routing bugs
+- [x] **Phase 3: Frontend Structure** - Refactor route files, build shared components, and fix routing bugs (completed 2026-03-24)
 - [ ] **Phase 4: Game Model Change** - Remove player field from game entry and redesign the game form
 - [ ] **Phase 5: Pod & Deck UX** - Complete pod and deck feature gaps and onboarding flow
 - [ ] **Phase 6: Auth, Session & Test Coverage** - 401 interceptor, JWT startup guard, and missing test suites
@@ -67,15 +67,15 @@ Plans:
   4. Refreshing any page in the app does not produce a blank white screen
   5. The HomeView does not flash "No pods yet" before pod data has loaded
   6. Login, Home, Player, Deck, and Game views have each been individually audited and improved — layout, spacing, and typography are intentional and consistent with the Phase 2 design system, not just passively inherited via ThemeProvider
-**Plans:** 6 plans
+**Plans:** 6/6 plans complete
 
 Plans:
-- [ ] 03-01-PLAN.md — Create shared components (TabbedLayout, TooltipIcon, SvgIconPlayingCards) + move utilities to components/ (FEND-02, FEND-03)
-- [ ] 03-02-PLAN.md — Extract HomeView + fix loading flash + FEND-04 blank screen + Login/Join UI polish (FEND-04, FEND-05, DSNG-04)
-- [ ] 03-03-PLAN.md — Split PodView into pod/ subdirectory + TabbedLayout migration + Pod UI-SPEC fixes + AppBar mobile fix (FEND-01, DSNG-04)
-- [ ] 03-04-PLAN.md — Split PlayerView into player/ subdirectory + TabbedLayout migration + Player UI-SPEC fixes (FEND-01, DSNG-04)
-- [ ] 03-05-PLAN.md — Split DeckView into deck/ subdirectory + TabbedLayout migration + Deck UI-SPEC fixes + TooltipIcon usage (FEND-01, DSNG-04)
-- [ ] 03-06-PLAN.md — Move GameView + NewGameView to subdirectories + Game UI-SPEC fixes + TooltipIconButton usage (FEND-01, DSNG-04)
+- [x] 03-01-PLAN.md — Create shared components (TabbedLayout, TooltipIcon, SvgIconPlayingCards) + move utilities to components/ (FEND-02, FEND-03)
+- [x] 03-02-PLAN.md — Extract HomeView + fix loading flash + FEND-04 blank screen + Login/Join UI polish (FEND-04, FEND-05, DSNG-04)
+- [x] 03-03-PLAN.md — Split PodView into pod/ subdirectory + TabbedLayout migration + Pod UI-SPEC fixes + AppBar mobile fix (FEND-01, DSNG-04)
+- [x] 03-04-PLAN.md — Split PlayerView into player/ subdirectory + TabbedLayout migration + Player UI-SPEC fixes (FEND-01, DSNG-04)
+- [x] 03-05-PLAN.md — Split DeckView into deck/ subdirectory + TabbedLayout migration + Deck UI-SPEC fixes + TooltipIcon usage (FEND-01, DSNG-04)
+- [x] 03-06-PLAN.md — Move GameView + NewGameView to subdirectories + Game UI-SPEC fixes + TooltipIconButton usage (FEND-01, DSNG-04)
 
 ### Phase 4: Game Model Change
 **Goal**: Games track decks only, the game form works cleanly on mobile, and the deck picker shows owner context
@@ -132,8 +132,18 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 |-------|----------------|--------|-----------|
 | 1. Backend Hardening | 5/5 | Complete | ✓ |
 | 2. Design Language | 3/3 | Complete | ✓ |
-| 3. Frontend Structure | 0/6 | Planned | - |
+| 3. Frontend Structure | 6/6 | Complete   | 2026-03-24 |
 | 4. Game Model Change | 0/? | Not started | - |
 | 5. Pod & Deck UX | 0/? | Not started | - |
 | 6. Auth, Session & Test Coverage | 0/? | Not started | - |
 | 7. Production Readiness | 0/? | Not started | - |
+
+### Phase 8: User testing and iterative feedback resolution
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 7
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 8 to break down)

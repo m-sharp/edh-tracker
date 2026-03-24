@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Phase 03 UI-SPEC approved — ready for /gsd:plan-phase 03
-stopped_at: Phase 03 UI-SPEC approved
-last_updated: "2026-03-24T02:12:09.328Z"
+status: Phase complete — ready for verification
+stopped_at: Completed 03-06-PLAN.md
+last_updated: "2026-03-24T04:16:20.492Z"
 progress:
   total_phases: 7
-  completed_phases: 2
-  total_plans: 9
-  completed_plans: 9
+  completed_phases: 3
+  total_plans: 15
+  completed_plans: 15
 ---
 
 # Project State
@@ -23,8 +23,8 @@ See: .planning/PROJECT.md (updated 2026-03-22)
 
 ## Current Position
 
-Phase: 03 (frontend-structure) — UI-SPEC approved, awaiting planning
-Plan: 0 of TBD
+Phase: 03 (frontend-structure) — EXECUTING
+Plan: 6 of 6
 
 ## Performance Metrics
 
@@ -53,6 +53,12 @@ Plan: 0 of TBD
 | Phase 01-backend-hardening P02 | 14min | 2 tasks | 6 files |
 | Phase 01-backend-hardening P06 | 4min | 2 tasks | 3 files |
 | Phase 02-design-language P01 | 8min | 2 tasks | 5 files |
+| Phase 03 P01 | 10min | 2 tasks | 10 files |
+| Phase 03 P02 | 4min | 2 tasks | 5 files |
+| Phase 03-frontend-structure P03 | 15min | 2 tasks | 7 files |
+| Phase 03 P04 | 7min | 2 tasks | 6 files |
+| Phase 03 P05 | 8min | 1 tasks | 5 files |
+| Phase 03 P06 | 7min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -75,6 +81,19 @@ Recent decisions affecting current work:
 - [Phase 02-design-language]: CssBaseline placed inside ThemeProvider — required for dark body background to apply globally
 - [Phase 02-design-language]: ThemeProvider/createTheme imported from @mui/material/styles (not @mui/material) — canonical sub-path per MUI v5 conventions
 - [Phase 02-design-language]: DSNG-02 partially met — dark theme verified on Pod view at 375px; 3 mobile usability issues deferred to Phase 3 gap closure (touch tab scroll, AppBar title clipping, DataGrid narrow viewport)
+- [Phase 03]: SvgIconPlayingCards extracted to components/ with optional fontSize prop; root.tsx wraps usage in Box for layout margin
+- [Phase 03]: app/src/components/ established as canonical shared frontend code location; original utilities deleted from app/src/
+- [Phase 03]: HomeView loading state initialized to true — CircularProgress renders before fetch starts; empty state only shown after fetch confirms zero pods (FEND-05)
+- [Phase 03]: RequireAuth spinner wrapped in centered Box — FEND-04 blank screen was caused by unpositioned invisible spinner during auth check on refresh
+- [Phase 03]: Button component=Link pattern used in JoinView for Go home — MUI styling on React Router navigation without anchor tag
+- [Phase 03]: PodView passes all data as props to tab components; data loading stays in index.tsx, tabs are pure display
+- [Phase 03]: AppBar title uses xs:none/sm:flex to prevent crowding with PodSelector + Avatar + Logout on 375px viewports (P-07)
+- [Phase 03]: PlayerDecksTab/PlayerGamesTab accept playerId not player object — minimal prop footprint for data-fetching tabs
+- [Phase 03]: NewGameView moved as straight file move only — Phase 4 redesigns it entirely (plan excluded from DSNG-04 audit per D-20)
+
+### Roadmap Evolution
+
+- Phase 8 added: User testing and iterative feedback resolution
 
 ### Pending Todos
 
@@ -87,6 +106,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-24T02:12:09.260Z
-Stopped at: Phase 03 UI-SPEC approved
-Resume file: .planning/phases/03-frontend-structure/03-UI-SPEC.md
+Last session: 2026-03-24T04:16:20.354Z
+Stopped at: Completed 03-06-PLAN.md
+Resume file: None

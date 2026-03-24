@@ -13,8 +13,8 @@ import {
 import AddIcon from '@mui/icons-material/Add';
 import PublishIcon from '@mui/icons-material/Publish';
 
-import { GetAllDecksForPod, GetFormats, GetPlayersForPod, PostGame } from "../http";
-import { Deck, Format, NewGame, NewGameData, NewGameResult, Player } from "../types";
+import { GetAllDecksForPod, GetFormats, GetPlayersForPod, PostGame } from "../../http";
+import { Deck, Format, NewGame, NewGameData, NewGameResult, Player } from "../../types";
 
 export async function newGameLoader({ params }: LoaderFunctionArgs): Promise<NewGameData> {
     const podId = Number(params.podId);
