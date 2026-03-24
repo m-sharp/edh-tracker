@@ -67,8 +67,15 @@ Plans:
   4. Refreshing any page in the app does not produce a blank white screen
   5. The HomeView does not flash "No pods yet" before pod data has loaded
   6. Login, Home, Player, Deck, and Game views have each been individually audited and improved — layout, spacing, and typography are intentional and consistent with the Phase 2 design system, not just passively inherited via ThemeProvider
-**Plans**: TBD
-**UI hint**: yes
+**Plans:** 6 plans
+
+Plans:
+- [ ] 03-01-PLAN.md — Create shared components (TabbedLayout, TooltipIcon, SvgIconPlayingCards) + move utilities to components/ (FEND-02, FEND-03)
+- [ ] 03-02-PLAN.md — Extract HomeView + fix loading flash + FEND-04 blank screen + Login/Join UI polish (FEND-04, FEND-05, DSNG-04)
+- [ ] 03-03-PLAN.md — Split PodView into pod/ subdirectory + TabbedLayout migration + Pod UI-SPEC fixes + AppBar mobile fix (FEND-01, DSNG-04)
+- [ ] 03-04-PLAN.md — Split PlayerView into player/ subdirectory + TabbedLayout migration + Player UI-SPEC fixes (FEND-01, DSNG-04)
+- [ ] 03-05-PLAN.md — Split DeckView into deck/ subdirectory + TabbedLayout migration + Deck UI-SPEC fixes + TooltipIcon usage (FEND-01, DSNG-04)
+- [ ] 03-06-PLAN.md — Move GameView + NewGameView to subdirectories + Game UI-SPEC fixes + TooltipIconButton usage (FEND-01, DSNG-04)
 
 ### Phase 4: Game Model Change
 **Goal**: Games track decks only, the game form works cleanly on mobile, and the deck picker shows owner context
@@ -125,7 +132,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 |-------|----------------|--------|-----------|
 | 1. Backend Hardening | 5/5 | Complete | ✓ |
 | 2. Design Language | 3/3 | Complete | ✓ |
-| 3. Frontend Structure | 0/? | UI-SPEC approved | - |
+| 3. Frontend Structure | 0/6 | Planned | - |
 | 4. Game Model Change | 0/? | Not started | - |
 | 5. Pod & Deck UX | 0/? | Not started | - |
 | 6. Auth, Session & Test Coverage | 0/? | Not started | - |
