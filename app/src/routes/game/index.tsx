@@ -9,7 +9,6 @@ import {
     DialogActions,
     DialogContent,
     DialogTitle,
-    IconButton,
     Stack,
     TextField,
     Typography,
@@ -18,7 +17,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 
-import { useAuth } from "../auth";
+import { useAuth } from "../../auth";
 import {
     DeleteGame,
     DeleteGameResult,
@@ -29,8 +28,9 @@ import {
     PatchGame,
     PatchGameResult,
     PostGameResult,
-} from "../http";
-import { Deck, Game, GameResult, PlayerWithRole, Pod } from "../types";
+} from "../../http";
+import { Deck, Game, GameResult, PlayerWithRole, Pod } from "../../types";
+import { TooltipIconButton } from "../../components/TooltipIcon";
 
 interface GameLoaderData {
     game: Game;
@@ -73,7 +73,7 @@ function GameDescription({ game, isManager }: GameDescriptionProps): ReactElemen
                     label="Description"
                     size="small"
                 />
-                <Button onClick={handleSave} variant="contained" size="small">Save</Button>
+                <Button onClick={handleSave} variant="contained" size="small">Save Description</Button>
                 <Button
                     onClick={() => {
                         setValue(game.description);
@@ -87,17 +87,18 @@ function GameDescription({ game, isManager }: GameDescriptionProps): ReactElemen
         );
     }
 
-    // TODO: Make sure icon button has a tooltip
     return (
         <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
             {game.description
                 ? <Typography>Description: {game.description}</Typography>
-                : <Typography color="text.secondary"><em>No description</em></Typography>
+                : <Typography color="text.secondary">No description</Typography>
             }
             {isManager && (
-                <IconButton size="small" onClick={() => setEditing(true)}>
-                    <EditIcon fontSize="small" />
-                </IconButton>
+                <TooltipIconButton
+                    title="Edit description"
+                    icon={<EditIcon fontSize="small" />}
+                    onClick={() => setEditing(true)}
+                />
             )}
         </Stack>
     );
@@ -204,7 +205,6 @@ function AddResultModal({ gameId, decks, players, onClose }: AddResultModalProps
         window.location.reload();
     }
 
-    // TODO: When adding a game result, does Player actually matter?
     return (
         <Dialog open onClose={onClose}>
             <DialogTitle>Add Result</DialogTitle>
@@ -302,9 +302,11 @@ function GameResultsGrid({ game, pod, isManager, decks, players }: GameResultsGr
             width: 60,
             sortable: false,
             renderCell: (params) => (
-                <IconButton size="small" onClick={() => setEditTarget(params.row as GameResult)}>
-                    <EditIcon fontSize="small" />
-                </IconButton>
+                <TooltipIconButton
+                    title="Edit result"
+                    icon={<EditIcon fontSize="small" />}
+                    onClick={() => setEditTarget(params.row as GameResult)}
+                />
             ),
         },
         {
@@ -313,9 +315,11 @@ function GameResultsGrid({ game, pod, isManager, decks, players }: GameResultsGr
             width: 60,
             sortable: false,
             renderCell: (params) => (
-                <IconButton size="small" color="error" onClick={() => setRemoveTarget(params.row as GameResult)}>
-                    <DeleteIcon fontSize="small" />
-                </IconButton>
+                <TooltipIconButton
+                    title="Remove result"
+                    icon={<DeleteIcon fontSize="small" />}
+                    onClick={() => setRemoveTarget(params.row as GameResult)}
+                />
             ),
         },
     ];
@@ -324,10 +328,11 @@ function GameResultsGrid({ game, pod, isManager, decks, players }: GameResultsGr
 
     return (
         <Box sx={{ width: "100%" }}>
-            <Box sx={{ height: 355, width: "100%" }}>
+            <Box sx={{ width: "100%" }}>
                 <DataGrid
                     rows={game.results}
                     columns={columns}
+                    autoHeight
                     initialState={{
                         sorting: {
                             sortModel: [{ field: "place", sort: "asc" }],
@@ -375,7 +380,7 @@ function DeleteGameButton({ gameId, podId }: DeleteGameButtonProps): ReactElemen
 
     return (
         <>
-            <Button color="error" variant="outlined" onClick={() => setOpen(true)} sx={{ mt: 2 }}>
+            <Button color="error" variant="outlined" onClick={() => setOpen(true)} sx={{ mt: 3 }}>
                 Delete Game
             </Button>
             <Dialog open={open} onClose={() => setOpen(false)}>
@@ -392,16 +397,15 @@ function DeleteGameButton({ gameId, podId }: DeleteGameButtonProps): ReactElemen
     );
 }
 
-// TODO: Restructure file system
 export default function GameView(): ReactElement {
     const { game, pod, players, decks } = useLoaderData() as GameLoaderData;
     const { user } = useAuth();
     const isManager = players.some((p) => p.id === user?.player_id && p.role === "manager");
 
     return (
-        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-            <h1>{pod.name} — Game #{game.id}</h1>
-            <em>{new Date(game.created_at).toLocaleString()}</em>
+        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+            <Typography variant="h4">{pod.name} — Game #{game.id}</Typography>
+            <Typography variant="body2" color="text.secondary">{new Date(game.created_at).toLocaleString()}</Typography>
             <GameDescription game={game} isManager={isManager} />
             <GameResultsGrid game={game} pod={pod} isManager={isManager} decks={decks} players={players} />
             {isManager && <DeleteGameButton gameId={game.id} podId={pod.id} />}
