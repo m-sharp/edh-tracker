@@ -32,7 +32,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. If result row insertion fails during game creation, no orphaned game row is left in the database
   4. Submitting a player name, pod name, or deck name exceeding max length returns 400, not 500
   5. Deck stats for a pod load via a single batch query, not one query per deck
-**Plans:** 3/5 plans executed
+**Plans:** 5/5 plans complete
 
 Plans:
 - [x] 01-01-PLAN.md — ErrForbidden sentinel + pod router error discrimination (INFRA-02)
@@ -123,9 +123,9 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Backend Hardening | 3/5 | In Progress|  |
-| 2. Design Language | 2/3 | In Progress | - |
-| 3. Frontend Structure | 0/? | Not started | - |
+| 1. Backend Hardening | 5/5 | Complete | ✓ |
+| 2. Design Language | 3/3 | Complete | ✓ |
+| 3. Frontend Structure | 0/? | UI-SPEC approved | - |
 | 4. Game Model Change | 0/? | Not started | - |
 | 5. Pod & Deck UX | 0/? | Not started | - |
 | 6. Auth, Session & Test Coverage | 0/? | Not started | - |
