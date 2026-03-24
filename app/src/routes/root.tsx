@@ -75,7 +75,7 @@ function DrawerAppBar(): ReactElement {
                         noWrap
                         sx={{
                             mr: 2,
-                            display: "flex",
+                            display: { xs: "none", sm: "flex" },
                             fontWeight: 700,
                             letterSpacing: ".3rem",
                         }}
