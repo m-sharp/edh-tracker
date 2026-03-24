@@ -14,7 +14,7 @@
 
 ### Frontend Structure
 
-- [ ] **FEND-01**: Large route files refactored into per-view subdirectories (`pod/`, `player/`, `deck/`, `game/` under `app/src/routes/`)
+- [x] **FEND-01**: Large route files refactored into per-view subdirectories (`pod/`, `player/`, `deck/`, `game/` under `app/src/routes/`)
 - [x] **FEND-02**: Shared tab component used across Pod, Player, and Deck views — active tab persisted via query string, shared loading/error state
 - [x] **FEND-03**: Shared tooltip icon and tooltip icon button components available and used where applicable
 - [x] **FEND-04**: Page refresh no longer causes blank white screen
@@ -108,7 +108,7 @@
 | DSNG-02 | Phase 2 | Pending |
 | DSNG-03 | Phase 2 | Complete |
 | DSNG-04 | Phase 3 | Complete |
-| FEND-01 | Phase 3 | Pending |
+| FEND-01 | Phase 3 | Complete |
 | FEND-02 | Phase 3 | Complete |
 | FEND-03 | Phase 3 | Complete |
 | FEND-04 | Phase 3 | Complete |

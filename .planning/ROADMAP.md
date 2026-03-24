@@ -72,7 +72,7 @@ Plans:
 Plans:
 - [x] 03-01-PLAN.md — Create shared components (TabbedLayout, TooltipIcon, SvgIconPlayingCards) + move utilities to components/ (FEND-02, FEND-03)
 - [x] 03-02-PLAN.md — Extract HomeView + fix loading flash + FEND-04 blank screen + Login/Join UI polish (FEND-04, FEND-05, DSNG-04)
-- [ ] 03-03-PLAN.md — Split PodView into pod/ subdirectory + TabbedLayout migration + Pod UI-SPEC fixes + AppBar mobile fix (FEND-01, DSNG-04)
+- [x] 03-03-PLAN.md — Split PodView into pod/ subdirectory + TabbedLayout migration + Pod UI-SPEC fixes + AppBar mobile fix (FEND-01, DSNG-04)
 - [ ] 03-04-PLAN.md — Split PlayerView into player/ subdirectory + TabbedLayout migration + Player UI-SPEC fixes (FEND-01, DSNG-04)
 - [ ] 03-05-PLAN.md — Split DeckView into deck/ subdirectory + TabbedLayout migration + Deck UI-SPEC fixes + TooltipIcon usage (FEND-01, DSNG-04)
 - [ ] 03-06-PLAN.md — Move GameView + NewGameView to subdirectories + Game UI-SPEC fixes + TooltipIconButton usage (FEND-01, DSNG-04)
