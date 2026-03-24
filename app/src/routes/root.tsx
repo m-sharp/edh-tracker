@@ -76,7 +76,6 @@ function DrawerAppBar(): ReactElement {
                         sx={{
                             mr: 2,
                             display: "flex",
-                            fontFamily: "monospace",
                             fontWeight: 700,
                             letterSpacing: ".3rem",
                         }}
