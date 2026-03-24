@@ -10,15 +10,15 @@
 - [x] **DSNG-01**: App has a defined visual design language (color palette, typography, spacing tokens) implemented consistently across all views
 - [ ] **DSNG-02**: All views are usable on mobile (phone-sized viewport) — layout adapts, touch targets are adequate, text is readable without zooming
 - [x] **DSNG-03**: MUI components used properly and consistently — no ad-hoc styling where MUI has a clear pattern
-- [ ] **DSNG-04**: All views (Login, Home, Player, Deck, Game) are individually audited against the Phase 2 design language and receive view-specific layout, spacing, and typography improvements beyond what the global ThemeProvider provides automatically — no view is left with structural layout issues, misaligned spacing, or typography that conflicts with the design system
+- [x] **DSNG-04**: All views (Login, Home, Player, Deck, Game) are individually audited against the Phase 2 design language and receive view-specific layout, spacing, and typography improvements beyond what the global ThemeProvider provides automatically — no view is left with structural layout issues, misaligned spacing, or typography that conflicts with the design system
 
 ### Frontend Structure
 
 - [ ] **FEND-01**: Large route files refactored into per-view subdirectories (`pod/`, `player/`, `deck/`, `game/` under `app/src/routes/`)
 - [x] **FEND-02**: Shared tab component used across Pod, Player, and Deck views — active tab persisted via query string, shared loading/error state
 - [x] **FEND-03**: Shared tooltip icon and tooltip icon button components available and used where applicable
-- [ ] **FEND-04**: Page refresh no longer causes blank white screen
-- [ ] **FEND-05**: HomeView no longer flashes "No pods yet" before data loads
+- [x] **FEND-04**: Page refresh no longer causes blank white screen
+- [x] **FEND-05**: HomeView no longer flashes "No pods yet" before data loads
 
 ### Pods
 
@@ -107,12 +107,12 @@
 | DSNG-01 | Phase 2 | Complete |
 | DSNG-02 | Phase 2 | Pending |
 | DSNG-03 | Phase 2 | Complete |
-| DSNG-04 | Phase 3 | Pending |
+| DSNG-04 | Phase 3 | Complete |
 | FEND-01 | Phase 3 | Pending |
 | FEND-02 | Phase 3 | Complete |
 | FEND-03 | Phase 3 | Complete |
-| FEND-04 | Phase 3 | Pending |
-| FEND-05 | Phase 3 | Pending |
+| FEND-04 | Phase 3 | Complete |
+| FEND-05 | Phase 3 | Complete |
 | POD-01 | Phase 5 | Pending |
 | POD-02 | Phase 5 | Pending |
 | POD-03 | Phase 5 | Pending |
