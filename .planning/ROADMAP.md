@@ -137,3 +137,13 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 5. Pod & Deck UX | 0/? | Not started | - |
 | 6. Auth, Session & Test Coverage | 0/? | Not started | - |
 | 7. Production Readiness | 0/? | Not started | - |
+
+### Phase 8: User testing and iterative feedback resolution
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 7
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 8 to break down)

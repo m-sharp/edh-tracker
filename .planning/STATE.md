@@ -91,6 +91,10 @@ Recent decisions affecting current work:
 - [Phase 03]: PlayerDecksTab/PlayerGamesTab accept playerId not player object — minimal prop footprint for data-fetching tabs
 - [Phase 03]: NewGameView moved as straight file move only — Phase 4 redesigns it entirely (plan excluded from DSNG-04 audit per D-20)
 
+### Roadmap Evolution
+
+- Phase 8 added: User testing and iterative feedback resolution
+
 ### Pending Todos
 
 - None currently
