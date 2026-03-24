@@ -151,7 +151,7 @@ Inheriting all established Phase 2 copy. Phase 3 adds the following:
 | Primary CTA — Deck Settings name save | "Save Name" (rename from bare "Save" for clarity) |
 | Primary CTA — Deck Settings format save | "Save Format" (rename from bare "Save" for clarity) |
 | Primary CTA — Deck Settings commanders save | "Save Commanders" (rename from bare "Save" for clarity) |
-| Primary CTA — Game description save | "Save" (keep — context is clear from surrounding UI) |
+| Primary CTA — Game description save | "Save Description" |
 | Empty state — HomeView (no pods) | "No pods yet. Create your first pod or ask a manager for an invite link." |
 | Empty state — HomeView (loading) | No text rendered — show `<CircularProgress>` only until data resolves |
 | Empty state — Player Overview pods | "No pods yet." (existing — retain) |
@@ -457,7 +457,7 @@ Tasks the executor must complete to satisfy this contract (UI portion — struct
 **GameView (G-01 through G-07):**
 - [ ] Game heading: replace `<h1>` with `<Typography variant="h4">`
 - [ ] Date: replace `<em>` with `<Typography variant="body2" color="text.secondary">`
-- [ ] Edit description button: replace `IconButton` with `TooltipIconButton title="Edit description"`
+- [ ] Edit description button: replace `IconButton` with `TooltipIconButton title="Edit description"`; save button label: "Save Description"
 - [ ] Edit/Remove result buttons: replace `IconButton` with `TooltipIconButton`
 - [ ] GameView outer Box: change `alignItems: "center"` to `alignItems: "flex-start"`
 - [ ] GameResultsGrid: use `autoHeight` on DataGrid + remove fixed height `355` wrapper
