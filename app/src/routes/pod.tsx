@@ -31,7 +31,7 @@ import {
     PatchPodPlayerRole,
     PostPodInvite,
 } from "../http";
-import { StatColumns } from "../stats";
+import { StatColumns } from "../components/stats";
 import { Deck, Game, PaginatedResponse, PlayerWithRole, Pod } from "../types";
 
 interface PodLoaderData {

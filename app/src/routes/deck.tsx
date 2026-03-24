@@ -20,7 +20,7 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 
 import { useAuth } from "../auth";
-import { AsyncComponentHelper } from "../common";
+import { AsyncComponentHelper } from "../components/common";
 import {
     DeleteDeck,
     GetCommanders,
@@ -28,8 +28,8 @@ import {
     GetGamesForDeck,
     PatchDeck,
 } from "../http";
-import { MatchesDisplay } from "../matches";
-import { Record } from "../stats";
+import { MatchesDisplay } from "../components/matches";
+import { Record } from "../components/stats";
 import { Commander, Deck, Format } from "../types";
 
 // TODO: File system restructuring

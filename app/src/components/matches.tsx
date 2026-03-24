@@ -2,7 +2,7 @@ import { ReactElement } from "react";
 import { Link } from "react-router-dom";
 import { DataGrid, GridColDef, GridToolbar } from "@mui/x-data-grid";
 
-import { Game, GameResult } from "./types";
+import { Game, GameResult } from "../types";
 
 interface MatchesDisplayProps {
     games: Array<Game>;

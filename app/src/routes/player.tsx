@@ -16,7 +16,7 @@ import {
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 
 import { useAuth } from "../auth";
-import { AsyncComponentHelper } from "../common";
+import { AsyncComponentHelper } from "../components/common";
 import {
     GetDecksForPlayer,
     GetGamesForPlayer,
@@ -25,8 +25,8 @@ import {
     PostPod,
     PostPodLeave,
 } from "../http";
-import { MatchesDisplay } from "../matches";
-import { CommanderColumn, Record, StatColumns } from "../stats";
+import { MatchesDisplay } from "../components/matches";
+import { CommanderColumn, Record, StatColumns } from "../components/stats";
 import { Game, Player, Pod } from "../types";
 
 export default function PlayerView(): ReactElement {
