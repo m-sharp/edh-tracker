@@ -1,7 +1,10 @@
 import { ReactElement, StrictMode, useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import { createBrowserRouter, Navigate, RouterProvider, useNavigate } from "react-router-dom";
-import { CssBaseline, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
+import CssBaseline from "@mui/material/CssBaseline";
+import { ThemeProvider } from "@mui/material/styles";
+import theme from "./theme";
 
 import { AuthProvider, useAuth } from "./auth";
 import {
@@ -94,9 +97,11 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById("root") as HTMLElement).render(
     <StrictMode>
-        <CssBaseline enableColorScheme />
-        <AuthProvider>
-            <RouterProvider router={router} />
-        </AuthProvider>
+        <ThemeProvider theme={theme}>
+            <CssBaseline enableColorScheme />
+            <AuthProvider>
+                <RouterProvider router={router} />
+            </AuthProvider>
+        </ThemeProvider>
     </StrictMode>
 );

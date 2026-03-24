@@ -7,9 +7,9 @@
 
 ### Design
 
-- [ ] **DSNG-01**: App has a defined visual design language (color palette, typography, spacing tokens) implemented consistently across all views
+- [x] **DSNG-01**: App has a defined visual design language (color palette, typography, spacing tokens) implemented consistently across all views
 - [ ] **DSNG-02**: All views are usable on mobile (phone-sized viewport) — layout adapts, touch targets are adequate, text is readable without zooming
-- [ ] **DSNG-03**: MUI components used properly and consistently — no ad-hoc styling where MUI has a clear pattern
+- [x] **DSNG-03**: MUI components used properly and consistently — no ad-hoc styling where MUI has a clear pattern
 - [ ] **DSNG-04**: All views (Login, Home, Player, Deck, Game) are individually audited against the Phase 2 design language and receive view-specific layout, spacing, and typography improvements beyond what the global ThemeProvider provides automatically — no view is left with structural layout issues, misaligned spacing, or typography that conflicts with the design system
 
 ### Frontend Structure
@@ -104,9 +104,9 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DSNG-01 | Phase 2 | Pending |
+| DSNG-01 | Phase 2 | Complete |
 | DSNG-02 | Phase 2 | Pending |
-| DSNG-03 | Phase 2 | Pending |
+| DSNG-03 | Phase 2 | Complete |
 | DSNG-04 | Phase 3 | Pending |
 | FEND-01 | Phase 3 | Pending |
 | FEND-02 | Phase 3 | Pending |

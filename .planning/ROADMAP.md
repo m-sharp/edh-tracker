@@ -49,11 +49,12 @@ Plans:
   1. A documented color palette, typography scale, and spacing tokens exist and are applied consistently across at least one representative view
   2. The chosen MUI component patterns are used consistently — no inline style overrides where MUI provides a pattern
   3. At least one view is verified usable on a phone-sized viewport (touch targets adequate, text readable without zooming)
-**Plans:** 2 plans
+**Plans:** 3 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — Create MUI dark theme + wire ThemeProvider globally (DSNG-01, DSNG-03)
-- [ ] 02-02-PLAN.md — Pod view mobile polish + visual verification (DSNG-02)
+- [x] 02-01-PLAN.md — Create MUI dark theme + wire ThemeProvider globally (DSNG-01, DSNG-03)
+- [x] 02-02-PLAN.md — Pod view mobile polish + visual verification (DSNG-02)
+- [x] 02-03-PLAN.md — Remove monospace fontFamily override from AppBar title (DSNG-03 gap closure)
 
 ### Phase 3: Frontend Structure
 **Goal**: The frontend codebase is organized into per-view subdirectories with shared components, routing bugs are fixed, and all views are individually polished against the Phase 2 design language
@@ -123,7 +124,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Backend Hardening | 3/5 | In Progress|  |
-| 2. Design Language | 0/2 | Planned | - |
+| 2. Design Language | 2/3 | In Progress | - |
 | 3. Frontend Structure | 0/? | Not started | - |
 | 4. Game Model Change | 0/? | Not started | - |
 | 5. Pod & Deck UX | 0/? | Not started | - |

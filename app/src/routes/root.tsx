@@ -21,7 +21,7 @@ export default function Root(): ReactElement {
     return (
         <Box sx={{ display: "flex", width: "auto" }}>
             <DrawerAppBar />
-            <Container id="detail" component="main" sx={{ p: 3, width: "90%", bgcolor: "#f0f5fa", mt: 12, mb: 5 }} maxWidth="xl">
+            <Container id="detail" component="main" sx={{ p: 3, width: "90%", bgcolor: "background.default", mt: 12, mb: 5 }} maxWidth="xl">
                 <Outlet />
             </Container>
         </Box>
@@ -76,7 +76,6 @@ function DrawerAppBar(): ReactElement {
                         sx={{
                             mr: 2,
                             display: "flex",
-                            fontFamily: "monospace",
                             fontWeight: 700,
                             letterSpacing: ".3rem",
                         }}

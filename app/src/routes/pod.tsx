@@ -69,7 +69,7 @@ export default function PodView(): ReactElement {
     return (
         <Box sx={{ display: "flex", flexDirection: "column", width: "100%" }}>
             <Typography variant="h4" sx={{ mb: 2 }}>{pod.name}</Typography>
-            <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 2 }}>
+            <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 2 }} variant="scrollable" scrollButtons="auto">
                 <Tab label="Decks" />
                 <Tab label="Players" />
                 <Tab label="Games" />
@@ -315,7 +315,7 @@ function PodSettingsTab({ pod }: PodSettingsTabProps): ReactElement {
                         onChange={(e) => setName(e.target.value)}
                         size="small"
                     />
-                    <Button variant="contained" onClick={handleSaveName}>Save</Button>
+                    <Button variant="contained" onClick={handleSaveName}>Save Pod Name</Button>
                 </Box>
                 {nameError && <Typography color="error" variant="body2">{nameError}</Typography>}
             </Box>
