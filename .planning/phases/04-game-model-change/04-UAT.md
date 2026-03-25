@@ -60,9 +60,13 @@ blocked: 0
   reason: "User reported: The Deck selector in the Add Result modal should show '<DeckName> - (<Player Name>)' like the new game form. Place and Kills should have min & max bounds like the new game form."
   severity: major
   test: 1
-  root_cause: ""
-  artifacts: []
-  missing: []
+  root_cause: "Two issues: (1) getOptionLabel in AddResultModal returns only d.name (game/index.tsx line 214); d.player_name is available on the Deck type and just needs to be included. Same issue exists in EditResultModal line 144. (2) Place/Kills TextFields in AddResultModal have no inputProps min/max. The bound equivalent is game.results.length + 1 (total players in the game), which is available at the GameResultsGrid call site but not passed into the modal — needs a new playerCount prop."
+  artifacts:
+    - path: "app/src/routes/game/index.tsx"
+      issue: "getOptionLabel returns d.name only (line 214); no inputProps on Place/Kills fields (lines 217-230); EditResultModal same label issue (line 144)"
+  missing:
+    - "Change getOptionLabel to `${d.name} (${d.player_name})` in AddResultModal and EditResultModal"
+    - "Add playerCount prop to AddResultModal; pass game.results.length + 1 from GameResultsGrid; add inputProps min/max to Place and Kills fields"
   debug_session: ""
 
 - truth: "New Game card layout: remove button (X) is inline with the input fields on the same row, not isolated above them. New Game entry point is prominently accessible from the Pod page, not buried in the Games tab."
@@ -70,7 +74,15 @@ blocked: 0
   reason: "User reported: The X to remove a card is in a top row all by itself, leaving dead space — should be right-aligned but on the same row as the input fields. Also: the New Game link should be front and center on the Pod page, not hidden in the Game tab that is not loaded first."
   severity: major
   test: 3
-  root_cause: ""
-  artifacts: []
-  missing: []
+  root_cause: "Two issues: (1) In new/index.tsx, the remove button is wrapped in its own full-width Box (justifyContent: flex-end, mb: 1) as a sibling to the Autocomplete and Place/Kills fields — it occupies an entire card row alone. Fix: put fields and button in a single row-flex container. (2) New Game button lives in GamesTab.tsx (lines 54-60) inside the Games tab (tab index 2, not the default). The button should be lifted to pod/index.tsx level — visible on the pod page regardless of active tab, e.g. in the page header beside the pod name."
+  artifacts:
+    - path: "app/src/routes/new/index.tsx"
+      issue: "Remove button in isolated Box row above fields (lines 146-189); needs inline row layout with fields"
+    - path: "app/src/routes/pod/GamesTab.tsx"
+      issue: "New Game button at lines 54-60 inside Games tab (tab index 2)"
+    - path: "app/src/routes/pod/index.tsx"
+      issue: "New Game button needs to move here — into page header (line 44 area), above tab strip"
+  missing:
+    - "Restructure card interior in new/index.tsx: row-flex container with fields column on left, X button on right"
+    - "Move New Game button from GamesTab.tsx to pod/index.tsx header area; remove it from GamesTab"
   debug_session: ""
