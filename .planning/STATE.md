@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Phase complete — ready for verification
-stopped_at: Completed 03-06-PLAN.md
-last_updated: "2026-03-24T04:16:20.492Z"
+status: Ready to execute
+stopped_at: Completed 03-07-PLAN.md
+last_updated: "2026-03-24T15:25:40.542Z"
 progress:
-  total_phases: 7
-  completed_phases: 3
-  total_plans: 15
-  completed_plans: 15
+  total_phases: 8
+  completed_phases: 2
+  total_plans: 17
+  completed_plans: 16
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-22)
 ## Current Position
 
 Phase: 03 (frontend-structure) — EXECUTING
-Plan: 6 of 6
+Plan: 2 of 8
 
 ## Performance Metrics
 
@@ -59,6 +59,7 @@ Plan: 6 of 6
 | Phase 03 P04 | 7min | 2 tasks | 6 files |
 | Phase 03 P05 | 8min | 1 tasks | 5 files |
 | Phase 03 P06 | 7min | 2 tasks | 4 files |
+| Phase 03 P07 | 1 | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -90,6 +91,7 @@ Recent decisions affecting current work:
 - [Phase 03]: AppBar title uses xs:none/sm:flex to prevent crowding with PodSelector + Avatar + Logout on 375px viewports (P-07)
 - [Phase 03]: PlayerDecksTab/PlayerGamesTab accept playerId not player object — minimal prop footprint for data-fetching tabs
 - [Phase 03]: NewGameView moved as straight file move only — Phase 4 redesigns it entirely (plan excluded from DSNG-04 audit per D-20)
+- [Phase 03]: homepage set to '/' not '.' in CRA config — absolute asset paths prevent sub-route refresh blank screen
 
 ### Roadmap Evolution
 
@@ -106,6 +108,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-24T04:16:20.354Z
-Stopped at: Completed 03-06-PLAN.md
+Last session: 2026-03-24T15:25:40.493Z
+Stopped at: Completed 03-07-PLAN.md
 Resume file: None
