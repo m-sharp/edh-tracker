@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Ready to execute
-stopped_at: Completed 04-04-PLAN.md
-last_updated: "2026-03-24T20:46:27.422Z"
+stopped_at: Completed 04-05-PLAN.md
+last_updated: "2026-03-24T20:48:48.569Z"
 progress:
   total_phases: 8
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 22
-  completed_plans: 21
+  completed_plans: 22
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-22)
 ## Current Position
 
 Phase: 04 (game-model-change) — EXECUTING
-Plan: 2 of 5
+Plan: 3 of 5
 
 ## Performance Metrics
 
@@ -64,6 +64,7 @@ Plan: 2 of 5
 | Phase 04 P01 | 5min | 2 tasks | 7 files |
 | Phase 04-game-model-change P02 | 5min | 2 tasks | 2 files |
 | Phase 04 P04 | 2 | 1 tasks | 1 files |
+| Phase 04 P05 | 4min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -105,6 +106,8 @@ Recent decisions affecting current work:
 - [Phase 04]: span wrapper around disabled IconButton ensures tooltip still renders on hover (MUI Tooltip requirement)
 - [Phase 04]: playerCount passed as game.results.length + 1 in AddResultModal — accounts for the result currently being added, so Place/Kills max matches total expected players
 - [Phase 04]: inputProps bounds not added to EditResultModal — editing existing result lacks natural player count context per UAT scope
+- [Phase 04]: New Game button uses component={Link} on MUI Button in pod header — MUI styling with React Router navigation, no useNavigate needed
+- [Phase 04]: Card fields column uses flex: 1 to fill available width; remove button pinned top-right via alignItems: flex-start on outer row
 
 ### Roadmap Evolution
 
@@ -121,6 +124,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-24T20:46:27.373Z
-Stopped at: Completed 04-04-PLAN.md
+Last session: 2026-03-24T20:48:48.498Z
+Stopped at: Completed 04-05-PLAN.md
 Resume file: None
