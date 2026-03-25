@@ -19,6 +19,7 @@ import { useAuth } from "../auth";
 import { GetPodsForPlayer } from "../http";
 import { Pod } from "../types";
 import SvgIconPlayingCards from "../components/SvgIconPlayingCards";
+import { TooltipIconButton } from "../components/TooltipIcon";
 
 export default function Root(): ReactElement {
     return (
@@ -57,14 +58,11 @@ function DrawerAppBar(): ReactElement {
                         />
                         <Typography variant="body2">{user.display_name}</Typography>
                     </Link>
-                    <Tooltip title="Logout">
-                        <IconButton
-                            color="inherit"
-                            onClick={() => logout().then(() => navigate("/login"))}
-                        >
-                            <LogoutIcon />
-                        </IconButton>
-                    </Tooltip>
+                    <TooltipIconButton
+                        title={"Logout"}
+                        onClick={() => logout().then(() => navigate("/login"))}
+                        icon={<LogoutIcon />}
+                    />
                 </Box>
             );
         }
