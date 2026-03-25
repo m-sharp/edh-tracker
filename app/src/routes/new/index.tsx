@@ -6,6 +6,8 @@ import {
     Box,
     Button,
     Card,
+    FormControl,
+    InputLabel,
     MenuItem,
     Select,
     SelectChangeEvent,
@@ -36,7 +38,8 @@ export async function createGame({ request, params }: { request: Request; params
         throw new Error("Failed to create new game record: received " + resp.status + " " + resp.statusText);
     }
 
-    return redirect(`/pod/${params.podId}`);
+    const { id } = await resp.json();
+    return redirect(`/pod/${params.podId}/game/${id}`);
 }
 
 interface CardState {
@@ -100,26 +103,25 @@ export default function View(): ReactElement {
     };
 
     return (
-        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%", px: 2, pb: 4 }}>
+        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%", pb: 4 }}>
             <Typography variant="h4">Add New Game</Typography>
             <Form>
                 <Box sx={{ display: "flex", flexDirection: "column", gap: 2, width: "100%", maxWidth: 600 }}>
-                    <Select
-                        fullWidth
-                        required
-                        label="Format"
-                        id="format-select"
-                        value={formatID === 0 ? "" : String(formatID)}
-                        displayEmpty
-                        onChange={(event: SelectChangeEvent) => {
-                            setFormatID(Number(event.target.value));
-                        }}
-                    >
-                        <MenuItem value="" disabled>Select a format</MenuItem>
-                        {data.formats.map((format: Format) => (
-                            <MenuItem key={format.id} value={format.id}>{format.name}</MenuItem>
-                        ))}
-                    </Select>
+                    <FormControl fullWidth required>
+                        <InputLabel id="format-label">Format</InputLabel>
+                        <Select
+                            labelId="format-label"
+                            label="Format"
+                            value={formatID === 0 ? "" : String(formatID)}
+                            onChange={(event: SelectChangeEvent) => {
+                                setFormatID(Number(event.target.value));
+                            }}
+                        >
+                            {data.formats.map((format: Format) => (
+                                <MenuItem key={format.id} value={format.id}>{format.name}</MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
 
                     <Button
                         variant="text"
@@ -140,10 +142,9 @@ export default function View(): ReactElement {
                         />
                     )}
 
-                    {cards.map((card, index) => (
+                    {cards.map((card) => (
                         <Card key={card.key} variant="outlined" sx={{ width: "100%", p: 2 }}>
-                            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1 }}>
-                                <Typography variant="body2">Deck {index + 1}</Typography>
+                            <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 1 }}>
                                 <TooltipIconButton
                                     title={cards.length <= 2 ? "Minimum 2 entries required" : "Remove"}
                                     icon={<CloseIcon />}
@@ -173,7 +174,7 @@ export default function View(): ReactElement {
                                     sx={{ flex: 1 }}
                                     value={card.place}
                                     onChange={(e) => updateCard(card.key, "place", e.target.value)}
-                                    inputProps={{ min: 1 }}
+                                    inputProps={{ min: 1, max: cards.length }}
                                 />
                                 <TextField
                                     type="number"
@@ -182,7 +183,7 @@ export default function View(): ReactElement {
                                     sx={{ flex: 1 }}
                                     value={card.kills}
                                     onChange={(e) => updateCard(card.key, "kills", e.target.value)}
-                                    inputProps={{ min: 0 }}
+                                    inputProps={{ min: 0, max: cards.length }}
                                 />
                             </Box>
                         </Card>

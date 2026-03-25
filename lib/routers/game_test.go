@@ -130,8 +130,8 @@ func TestGameRouter_GetGame_Error(t *testing.T) {
 func TestGameRouter_Add_Success(t *testing.T) {
 	router := newFullGameRouter(
 		game.Functions{
-			Create: func(ctx context.Context, description string, podID, formatID int, results []gameResult.InputEntity) error {
-				return nil
+			Create: func(ctx context.Context, description string, podID, formatID int, results []gameResult.InputEntity) (int, error) {
+				return 99, nil
 			},
 		},
 		gameResult.Functions{},
@@ -148,8 +148,8 @@ func TestGameRouter_Add_Success(t *testing.T) {
 func TestGameRouter_Add_CreateError(t *testing.T) {
 	router := newFullGameRouter(
 		game.Functions{
-			Create: func(ctx context.Context, description string, podID, formatID int, results []gameResult.InputEntity) error {
-				return errors.New("format not found")
+			Create: func(ctx context.Context, description string, podID, formatID int, results []gameResult.InputEntity) (int, error) {
+				return 0, errors.New("format not found")
 			},
 		},
 		gameResult.Functions{},

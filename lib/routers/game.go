@@ -274,12 +274,15 @@ func (g *GameRouter) GameCreate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Info("Saving new Game record")
-	if err = g.games.Create(ctx, req.Description, req.PodID, req.FormatID, req.Results); err != nil {
+	gameID, err := g.games.Create(ctx, req.Description, req.PodID, req.FormatID, req.Results)
+	if err != nil {
 		trackerHttp.WriteError(log, w, http.StatusInternalServerError, err, "Failed to create Game record", errMsg)
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(map[string]int{"id": gameID})
 }
 
 func (g *GameRouter) UpdateGame(w http.ResponseWriter, r *http.Request) {

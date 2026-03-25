@@ -102,36 +102,37 @@ func Create(
 	getFormat format.GetByIDFunc,
 	client *lib.DBClient,
 ) CreateFunc {
-	return func(ctx context.Context, description string, podID, formatID int, inputs []gameResult.InputEntity) error {
+	return func(ctx context.Context, description string, podID, formatID int, inputs []gameResult.InputEntity) (int, error) {
 		for _, input := range inputs {
 			if err := input.Validate(); err != nil {
-				return fmt.Errorf("invalid game result: %w", err)
+				return 0, fmt.Errorf("invalid game result: %w", err)
 			}
 		}
 
 		f, err := getFormat(ctx, formatID)
 		if err != nil {
-			return fmt.Errorf("failed to look up format %d: %w", formatID, err)
+			return 0, fmt.Errorf("failed to look up format %d: %w", formatID, err)
 		}
 		if f == nil {
-			return fmt.Errorf("format %d not found", formatID)
+			return 0, fmt.Errorf("format %d not found", formatID)
 		}
 
 		if f.Name != "other" {
 			for _, input := range inputs {
 				d, err := deckRepo.GetById(ctx, input.DeckID)
 				if err != nil {
-					return fmt.Errorf("failed to look up deck %d: %w", input.DeckID, err)
+					return 0, fmt.Errorf("failed to look up deck %d: %w", input.DeckID, err)
 				}
 				if d == nil {
-					return fmt.Errorf("deck %d not found", input.DeckID)
+					return 0, fmt.Errorf("deck %d not found", input.DeckID)
 				}
 				if d.FormatID != formatID {
-					return fmt.Errorf("deck %d format does not match game format", input.DeckID)
+					return 0, fmt.Errorf("deck %d format does not match game format", input.DeckID)
 				}
 			}
 		}
 
+		var createdGameID int
 		err = client.GormDb.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 			txGameRepo := gameRepository.NewRepositoryFromDB(tx)
 			txGameResultRepo := gameResultRepository.NewRepositoryFromDB(tx)
@@ -140,6 +141,7 @@ func Create(
 			if err != nil {
 				return fmt.Errorf("failed to create game: %w", err)
 			}
+			createdGameID = gameID
 
 			results := make([]gameResultRepository.Model, 0, len(inputs))
 			for _, input := range inputs {
@@ -157,7 +159,7 @@ func Create(
 
 			return nil
 		})
-		return err
+		return createdGameID, err
 	}
 }
 
