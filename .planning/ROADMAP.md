@@ -166,3 +166,12 @@ Plans:
 
 Plans:
 - [ ] TBD (promote with /gsd:review-backlog when ready)
+
+### Phase 999.2: Add Maybe support to Go code (BACKLOG)
+
+**Goal:** Extract pointer-based optional values into a generic `Maybe[T]` type that provides methods for checking presence (`IsPresent`, `IsNil`, `IsZero`) and safe value access — replacing ad-hoc nil pointer checks throughout the codebase.
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
