@@ -240,6 +240,20 @@ Plans:
 Plans:
 - [ ] TBD (promote with /gsd:review-backlog when ready)
 
+### Phase 999.9: Deck Tiering (BACKLOG)
+
+**Goal:** Automatically extract or infer deck power tiers from existing point and record statistics, so players can see how their decks rank in relative power level without manual input.
+**Requirements:** TBD
+**Plans:** 0 plans
+
+**Captured Context:**
+- Derive tiers from existing collected data (points, win rates, kill counts, placement records)
+- No manual tier tagging — tiers should emerge from the numbers
+- Surface tier assignments on deck listings, deck detail views, and player stats
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
+
 ### Phase 999.6: Fetch and Display Card Images (BACKLOG)
 
 **Goal:** Display card artwork for commanders and deck cards by building Scryfall image URLs from MTGJSON data, so players can visually identify cards throughout the app.
