@@ -88,10 +88,10 @@ Plans:
   2. The deck picker in the game form displays the owner's name alongside the commander name (e.g., "Rakdos, Lord of Riots (Mike)")
   3. The game form is visually clean and navigable on a phone-sized screen without horizontal scrolling or overlapping elements
   4. The record display renders correctly for games with any number of players, not just 4
-**Plans:** 3 plans
+**Plans:** 1/3 plans executed
 
 Plans:
-- [ ] 04-01-PLAN.md — Backend AddResult cleanup + frontend types + dynamic Record component (GAME-01, GAME-04)
+- [x] 04-01-PLAN.md — Backend AddResult cleanup + frontend types + dynamic Record component (GAME-01, GAME-04)
 - [ ] 04-02-PLAN.md — GameView AddResultModal player removal + TooltipIconButton enhancement (GAME-01, GAME-02)
 - [ ] 04-03-PLAN.md — NewGameView full redesign with stacked card layout (GAME-01, GAME-02, GAME-03)
 
@@ -139,7 +139,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 1. Backend Hardening | 5/5 | Complete | ✓ |
 | 2. Design Language | 3/3 | Complete | ✓ |
 | 3. Frontend Structure | 8/8 | Complete   | 2026-03-24 |
-| 4. Game Model Change | 0/3 | Planned | - |
+| 4. Game Model Change | 1/3 | In Progress|  |
 | 5. Pod & Deck UX | 0/? | Not started | - |
 | 6. Auth, Session & Test Coverage | 0/? | Not started | - |
 | 7. Production Readiness | 0/? | Not started | - |

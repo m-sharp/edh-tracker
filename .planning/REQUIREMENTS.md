@@ -29,10 +29,10 @@
 
 ### Games
 
-- [ ] **GAME-01**: Games do not require a player field — decks are the unit of game entry; player is implicit via deck ownership
+- [x] **GAME-01**: Games do not require a player field — decks are the unit of game entry; player is implicit via deck ownership
 - [ ] **GAME-02**: Deck picker in game form displays owner name alongside commander name (e.g., "Rakdos, Lord of Riots (Mike)")
 - [ ] **GAME-03**: New game form is visually clean and easy to use on mobile
-- [ ] **GAME-04**: Record renderer supports any number of places (not hardcoded to 4-player games)
+- [x] **GAME-04**: Record renderer supports any number of places (not hardcoded to 4-player games)
 
 ### Decks
 
@@ -117,10 +117,10 @@
 | POD-02 | Phase 5 | Pending |
 | POD-03 | Phase 5 | Pending |
 | POD-04 | Phase 5 | Pending |
-| GAME-01 | Phase 4 | Pending |
+| GAME-01 | Phase 4 | Complete |
 | GAME-02 | Phase 4 | Pending |
 | GAME-03 | Phase 4 | Pending |
-| GAME-04 | Phase 4 | Pending |
+| GAME-04 | Phase 4 | Complete |
 | DECK-01 | Phase 5 | Pending |
 | DECK-02 | Phase 5 | Pending |
 | DECK-03 | Phase 5 | Pending |
