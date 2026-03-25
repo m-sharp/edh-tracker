@@ -155,3 +155,14 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 
 Plans:
 - [ ] TBD (run /gsd:plan-phase 8 to break down)
+
+## Backlog
+
+### Phase 999.1: Full rename of "edh-tracker" to "pod-tracker" (BACKLOG)
+
+**Goal:** [Captured for future planning]
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
