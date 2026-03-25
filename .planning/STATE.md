@@ -19,11 +19,11 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-22)
 
 **Core value:** A pod can sit down, record a game in under a minute, and immediately see accurate standings — on their phones.
-**Current focus:** Phase 04 — game-model-change
+**Current focus:** Phase 05 — pod-&-deck-ux
 
 ## Current Position
 
-Phase: 08
+Phase: 05
 Plan: Not started
 
 ## Performance Metrics
