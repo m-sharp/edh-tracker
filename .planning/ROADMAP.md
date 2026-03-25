@@ -184,3 +184,25 @@ Plans:
 
 Plans:
 - [ ] TBD (promote with /gsd:review-backlog when ready)
+
+### Phase 999.4: Game Tracker Feature (BACKLOG)
+
+**Goal:** A live game tracker page that lets players track life totals, poison counters, and commander damage during a game, then convert the session into a saved game record on completion.
+**Requirements:** TBD
+**Plans:** 0 plans
+
+**Captured Context:**
+- Entry point: new CTA button to the left of "New Game" on the pod view — the primary way to record games
+- Deck selection screen before game starts
+- Life counters (start at 40): large tap targets on left/right of total for mobile; prompt to eliminate at 0
+- Poison counters (hidden by default, start at 0): prompt to eliminate at 10
+- Commander damage tracker (hidden by default): one counter per opponent, labeled by deck; prompt to eliminate at 21 from any single source
+- Context menu per deck with Eliminate button → red "lost" highlight state
+- Kill assignment modal: when a deck is eliminated, prompt which deck gets the kill point
+- End game triggered when all but one deck are eliminated
+- End game screen: CSS fireworks for the winner, game description field, confirm kills/places, save → persist game + results in DB and redirect to game page, or discard
+- Session state maintained via cookie; reset options: restart current game or restart with new decks
+- Button to end game immediately at any time
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
