@@ -221,3 +221,18 @@ Plans:
 
 Plans:
 - [ ] TBD (promote with /gsd:review-backlog when ready)
+
+### Phase 999.6: Fetch and Display Card Images (BACKLOG)
+
+**Goal:** Display card artwork for commanders and deck cards by building Scryfall image URLs from MTGJSON data, so players can visually identify cards throughout the app.
+**Requirements:** TBD
+**Plans:** 0 plans
+
+**Captured Context:**
+- Approach: use MTGJSON (https://mtgjson.com/getting-started/) to establish card name truth and build Scryfall image links per https://mtgjson.com/faq/#how-do-i-access-a-card-s-imagery
+- Borrow reddit cardfetcher bot's approach for constructing Scryfall URLs from card names
+- Once MTGJSON/Scryfall pipeline is established, use it to validate/confirm commander names at input time (autocomplete or validation against Scryfall data)
+- Display card images on commander entries, deck detail views, and anywhere a commander name is shown
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
