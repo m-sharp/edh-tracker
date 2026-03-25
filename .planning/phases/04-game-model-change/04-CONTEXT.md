@@ -32,12 +32,13 @@ Remove the player field from game entry (decks are the unit, player is implicit 
 
 - **D-03:** Layout: stacked card per player. Each player entry is a Box/Card:
   ```
-  ┌────────────────────────────┐
-  │  [ Deck Autocomplete    ❌ ] │
-  │  [ Place ]  [ Kills ]       │
-  └────────────────────────────┘
+  ┌────────────────────────────────┐
+  │                              ❌ │  ← remove this card
+  │  [ Deck Autocomplete         ] │
+  │  [ Place ]  [ Kills ]          │
+  └────────────────────────────────┘
   ```
-  The ❌ removes the card. Deck picker spans full width. Place and Kills side-by-side below.
+  The ❌ sits in the card header/top-right corner (outside and above the Autocomplete) to clearly indicate it removes the entire card, not just the deck field. Deck picker spans full width. Place and Kills side-by-side below.
 
 - **D-04:** Place field always starts blank (no auto-populate by card position). User sets every place explicitly.
 
