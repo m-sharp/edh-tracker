@@ -6,7 +6,7 @@ import SvgIconPlayingCards from "../components/SvgIconPlayingCards";
 
 export default function LoginPage(): ReactElement {
     return (
-        <Box sx={{ minHeight: "100vh", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
+        <Box sx={{ minHeight: "100vh", display: "flex", flexDirection: "column", justifyContent: "flex-start", alignItems: "center", pt: { xs: 4, sm: 8 } }}>
             <Box sx={{ mb: 2 }}>
                 <SvgIconPlayingCards fontSize={48} />
             </Box>

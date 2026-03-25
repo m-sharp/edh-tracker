@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Phase complete — ready for verification
-stopped_at: Completed 03-06-PLAN.md
-last_updated: "2026-03-24T04:16:20.492Z"
+status: Ready to plan
+stopped_at: Completed 03-08-PLAN.md
+last_updated: "2026-03-24T15:35:34.009Z"
 progress:
-  total_phases: 7
+  total_phases: 8
   completed_phases: 3
-  total_plans: 15
-  completed_plans: 15
+  total_plans: 17
+  completed_plans: 17
 ---
 
 # Project State
@@ -23,8 +23,8 @@ See: .planning/PROJECT.md (updated 2026-03-22)
 
 ## Current Position
 
-Phase: 03 (frontend-structure) — EXECUTING
-Plan: 6 of 6
+Phase: 08
+Plan: Not started
 
 ## Performance Metrics
 
@@ -59,6 +59,8 @@ Plan: 6 of 6
 | Phase 03 P04 | 7min | 2 tasks | 6 files |
 | Phase 03 P05 | 8min | 1 tasks | 5 files |
 | Phase 03 P06 | 7min | 2 tasks | 4 files |
+| Phase 03 P07 | 1 | 1 tasks | 1 files |
+| Phase 03 P08 | 3min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -90,6 +92,11 @@ Recent decisions affecting current work:
 - [Phase 03]: AppBar title uses xs:none/sm:flex to prevent crowding with PodSelector + Avatar + Logout on 375px viewports (P-07)
 - [Phase 03]: PlayerDecksTab/PlayerGamesTab accept playerId not player object — minimal prop footprint for data-fetching tabs
 - [Phase 03]: NewGameView moved as straight file move only — Phase 4 redesigns it entirely (plan excluded from DSNG-04 audit per D-20)
+- [Phase 03]: homepage set to '/' not '.' in CRA config — absolute asset paths prevent sub-route refresh blank screen
+- [Phase 03]: Login page uses flex-start + top padding (pt xs:4/sm:8) instead of center alignment — closes UAT gap #4
+- [Phase 03]: Logout replaced with LogoutIcon in IconButton wrapped in Tooltip — closes UAT gap #5
+- [Phase 03]: TooltipIcon/TooltipIconButton both default placement='top' via optional prop — closes UAT gap #6
+- [Phase 03]: Pod PlayersTab uses single confirmAction state to drive shared Dialog for Promote/Remove confirmation — closes UAT gap #8
 
 ### Roadmap Evolution
 
@@ -106,6 +113,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-24T04:16:20.354Z
-Stopped at: Completed 03-06-PLAN.md
+Last session: 2026-03-24T15:28:21.583Z
+Stopped at: Completed 03-08-PLAN.md
 Resume file: None
