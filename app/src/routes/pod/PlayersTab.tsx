@@ -1,6 +1,18 @@
 import { ReactElement, useState } from "react";
 import { Link } from "react-router-dom";
-import { Box, Button, Chip, List, ListItem, ListItemText } from "@mui/material";
+import {
+    Box,
+    Button,
+    Chip,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+    List,
+    ListItem,
+    ListItemText
+} from "@mui/material";
 
 import { useAuth } from "../../auth";
 import { DeletePodPlayer, GetPlayersForPod, PatchPodPlayerRole } from "../../http";
@@ -15,6 +27,7 @@ interface PodPlayersTabProps {
 export default function PodPlayersTab({ players: initialPlayers, podId, isManager }: PodPlayersTabProps): ReactElement {
     const { user } = useAuth();
     const [players, setPlayers] = useState(initialPlayers);
+    const [confirmAction, setConfirmAction] = useState<{ type: "promote" | "remove"; player: PlayerWithRole } | null>(null);
 
     const refetchPlayers = async () => {
         const updated = await GetPlayersForPod(podId);
@@ -31,40 +44,85 @@ export default function PodPlayersTab({ players: initialPlayers, podId, isManage
         await refetchPlayers();
     };
 
+    const handleConfirm = async () => {
+        if (!confirmAction) return;
+        if (confirmAction.type === "promote") {
+            await handlePromote(confirmAction.player.id);
+        } else {
+            await handleRemove(confirmAction.player.id);
+        }
+        setConfirmAction(null);
+    };
+
     // TODO: Use icons w/ tooltips for promote/remove buttons?
     // TODO: Title case Manager vs Member roles coming back from backend
     return (
-        <List>
-            {players.map((p) => (
-                <ListItem
-                    key={p.id}
-                    secondaryAction={
-                        isManager && user?.player_id !== p.id ? (
-                            <Box sx={{ display: "flex", gap: 1 }}>
-                                {p.role === "member" && (
-                                    <Button size="small" onClick={() => handlePromote(p.id)} sx={{ minHeight: 44 }}>
-                                        Promote
+        <>
+            <List>
+                {players.map((p) => (
+                    <ListItem
+                        key={p.id}
+                        secondaryAction={
+                            isManager && user?.player_id !== p.id ? (
+                                <Box sx={{ display: "flex", gap: 1 }}>
+                                    {p.role === "member" && (
+                                        <Button
+                                            variant="contained"
+                                            size="small"
+                                            onClick={() => setConfirmAction({ type: "promote", player: p })}
+                                            sx={{ minHeight: 44 }}
+                                        >
+                                            Promote
+                                        </Button>
+                                    )}
+                                    <Button
+                                        variant="contained"
+                                        size="small"
+                                        color="error"
+                                        onClick={() => setConfirmAction({ type: "remove", player: p })}
+                                        sx={{ minHeight: 44 }}
+                                    >
+                                        Remove
                                     </Button>
-                                )}
-                                <Button size="small" color="error" onClick={() => handleRemove(p.id)} sx={{ minHeight: 44 }}>
-                                    Remove
-                                </Button>
-                            </Box>
-                        ) : null
-                    }
-                >
-                    <ListItemText
-                        primary={<Link to={`/player/${p.id}`}>{p.name}</Link>}
-                        secondary={
-                            <Chip
-                                label={p.role === "manager" ? "Manager" : "Member"}
-                                size="small"
-                                sx={{ mt: 0.5 }}
-                            />
+                                </Box>
+                            ) : null
                         }
-                    />
-                </ListItem>
-            ))}
-        </List>
+                    >
+                        <ListItemText
+                            primary={<Link to={`/player/${p.id}`}>{p.name}</Link>}
+                            secondary={
+                                <Chip
+                                    label={p.role === "manager" ? "Manager" : "Member"}
+                                    size="small"
+                                    sx={{ mt: 0.5 }}
+                                />
+                            }
+                        />
+                    </ListItem>
+                ))}
+            </List>
+
+            <Dialog open={confirmAction !== null} onClose={() => setConfirmAction(null)}>
+                <DialogTitle>
+                    {confirmAction?.type === "promote" ? "Promote player?" : "Remove player?"}
+                </DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        {confirmAction?.type === "promote"
+                            ? `Promote ${confirmAction.player.name} to manager? Managers can edit pod settings and manage members.`
+                            : `Remove ${confirmAction?.player.name} from this pod? This action cannot be undone.`}
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setConfirmAction(null)}>Cancel</Button>
+                    <Button
+                        color={confirmAction?.type === "promote" ? "primary" : "error"}
+                        onClick={handleConfirm}
+                    >
+                        Confirm
+                    </Button>
+                </DialogActions>
+            </Dialog>
+        </>
     );
 }
