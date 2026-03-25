@@ -130,8 +130,8 @@ func TestGameRouter_GetGame_Error(t *testing.T) {
 func TestGameRouter_Add_Success(t *testing.T) {
 	router := newFullGameRouter(
 		game.Functions{
-			Create: func(ctx context.Context, description string, podID, formatID int, results []gameResult.InputEntity) error {
-				return nil
+			Create: func(ctx context.Context, description string, podID, formatID int, results []gameResult.InputEntity) (int, error) {
+				return 99, nil
 			},
 		},
 		gameResult.Functions{},
@@ -148,8 +148,8 @@ func TestGameRouter_Add_Success(t *testing.T) {
 func TestGameRouter_Add_CreateError(t *testing.T) {
 	router := newFullGameRouter(
 		game.Functions{
-			Create: func(ctx context.Context, description string, podID, formatID int, results []gameResult.InputEntity) error {
-				return errors.New("format not found")
+			Create: func(ctx context.Context, description string, podID, formatID int, results []gameResult.InputEntity) (int, error) {
+				return 0, errors.New("format not found")
 			},
 		},
 		gameResult.Functions{},
@@ -328,13 +328,13 @@ func TestGameRouter_AddGameResult_Success(t *testing.T) {
 	router := newFullGameRouter(
 		game.Functions{
 			GetByID:   func(ctx context.Context, gameID int) (*game.Entity, error) { return gameEntityForPod(1), nil },
-			AddResult: func(ctx context.Context, gameID, deckID, playerID, place, killCount int) (int, error) { return 1, nil },
+			AddResult: func(ctx context.Context, gameID, deckID, place, killCount int) (int, error) { return 1, nil },
 		},
 		gameResult.Functions{},
 		podManagerRole(),
 	)
 
-	body, _ := json.Marshal(addGameResultRequest{GameID: 1, DeckID: 10, PlayerID: 42, Place: 2, KillCount: 1})
+	body, _ := json.Marshal(addGameResultRequest{GameID: 1, DeckID: 10, Place: 2, KillCount: 1})
 	req := withAuth(httptest.NewRequest(http.MethodPost, "/api/game/result", bytes.NewReader(body)), 42)
 	rr := httptest.NewRecorder()
 	router.AddGameResult(rr, req)
@@ -345,7 +345,7 @@ func TestGameRouter_AddGameResult_Success(t *testing.T) {
 func TestGameRouter_AddGameResult_MissingGameID(t *testing.T) {
 	router := newFullGameRouter(game.Functions{}, gameResult.Functions{}, podManagerRole())
 
-	body, _ := json.Marshal(addGameResultRequest{GameID: 0, DeckID: 10, PlayerID: 42, Place: 2})
+	body, _ := json.Marshal(addGameResultRequest{GameID: 0, DeckID: 10, Place: 2})
 	req := withAuth(httptest.NewRequest(http.MethodPost, "/api/game/result", bytes.NewReader(body)), 42)
 	rr := httptest.NewRecorder()
 	router.AddGameResult(rr, req)

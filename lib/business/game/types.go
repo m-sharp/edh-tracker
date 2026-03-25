@@ -13,10 +13,10 @@ type GetAllByPodPaginatedFunc func(ctx context.Context, podID, limit, offset int
 type GetAllByDeckPaginatedFunc func(ctx context.Context, deckID, limit, offset int) ([]Entity, int, error)
 type GetAllByPlayerIDPaginatedFunc func(ctx context.Context, playerID, limit, offset int) ([]Entity, int, error)
 type GetByIDFunc func(ctx context.Context, gameID int) (*Entity, error)
-type CreateFunc func(ctx context.Context, description string, podID, formatID int, results []gameResult.InputEntity) error
+type CreateFunc func(ctx context.Context, description string, podID, formatID int, results []gameResult.InputEntity) (int, error)
 type UpdateFunc func(ctx context.Context, gameID int, description string) error
 type SoftDeleteFunc func(ctx context.Context, gameID int) error
-type AddResultFunc func(ctx context.Context, gameID, deckID, playerID, place, killCount int) (int, error)
+type AddResultFunc func(ctx context.Context, gameID, deckID, place, killCount int) (int, error)
 type UpdateResultFunc func(ctx context.Context, resultID, place, killCount, deckID int) error
 type DeleteResultFunc func(ctx context.Context, resultID int) error
 

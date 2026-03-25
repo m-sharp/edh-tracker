@@ -141,7 +141,7 @@ function EditResultModal({ result, decks, onClose }: EditResultModalProps): Reac
                     />
                     <Autocomplete
                         options={decks}
-                        getOptionLabel={(d) => d.name}
+                        getOptionLabel={(d) => `${d.name} (${d.player_name})`}
                         value={decks.find((d) => d.id === deckId) ?? null}
                         onChange={(_, d) => {
                             if (d) {
@@ -189,19 +189,18 @@ interface AddResultModalProps {
     gameId: number;
     podId: number;
     decks: Deck[];
-    players: PlayerWithRole[];
+    playerCount: number;
     onClose: () => void;
 }
 
-function AddResultModal({ gameId, decks, players, onClose }: AddResultModalProps): ReactElement {
-    const [playerId, setPlayerId] = useState<number | null>(null);
+function AddResultModal({ gameId, decks, playerCount, onClose }: AddResultModalProps): ReactElement {
     const [deckId, setDeckId] = useState<number | null>(null);
     const [place, setPlace] = useState(1);
     const [killCount, setKillCount] = useState(0);
 
     async function handleAdd() {
-        if (!playerId || !deckId) return;
-        await PostGameResult({ game_id: gameId, deck_id: deckId, player_id: playerId, place, kill_count: killCount });
+        if (!deckId) return;
+        await PostGameResult({ game_id: gameId, deck_id: deckId, place, kill_count: killCount });
         window.location.reload();
     }
 
@@ -211,14 +210,8 @@ function AddResultModal({ gameId, decks, players, onClose }: AddResultModalProps
             <DialogContent>
                 <Stack spacing={2} sx={{ mt: 1, minWidth: 300 }}>
                     <Autocomplete
-                        options={players}
-                        getOptionLabel={(p) => p.name}
-                        onChange={(_, p) => setPlayerId(p?.id ?? null)}
-                        renderInput={(params) => <TextField {...params} label="Player" size="small" />}
-                    />
-                    <Autocomplete
                         options={decks}
-                        getOptionLabel={(d) => d.name}
+                        getOptionLabel={(d) => `${d.name} (${d.player_name})`}
                         onChange={(_, d) => setDeckId(d?.id ?? null)}
                         renderInput={(params) => <TextField {...params} label="Deck" size="small" />}
                     />
@@ -228,6 +221,7 @@ function AddResultModal({ gameId, decks, players, onClose }: AddResultModalProps
                         value={place}
                         onChange={(e) => setPlace(Number(e.target.value))}
                         size="small"
+                        inputProps={{ min: 1, max: playerCount }}
                     />
                     <TextField
                         label="Kills"
@@ -235,12 +229,13 @@ function AddResultModal({ gameId, decks, players, onClose }: AddResultModalProps
                         value={killCount}
                         onChange={(e) => setKillCount(Number(e.target.value))}
                         size="small"
+                        inputProps={{ min: 0, max: playerCount }}
                     />
                 </Stack>
             </DialogContent>
             <DialogActions>
                 <Button onClick={onClose}>Cancel</Button>
-                <Button onClick={handleAdd} variant="contained" disabled={!playerId || !deckId}>Add</Button>
+                <Button onClick={handleAdd} variant="contained" disabled={!deckId}>Add</Button>
             </DialogActions>
         </Dialog>
     );
@@ -356,7 +351,7 @@ function GameResultsGrid({ game, pod, isManager, decks, players }: GameResultsGr
                     gameId={game.id}
                     podId={pod.id}
                     decks={decks}
-                    players={players}
+                    playerCount={game.results.length + 1}
                     onClose={() => setAddOpen(false)}
                 />
             )}

@@ -274,12 +274,15 @@ func (g *GameRouter) GameCreate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Info("Saving new Game record")
-	if err = g.games.Create(ctx, req.Description, req.PodID, req.FormatID, req.Results); err != nil {
+	gameID, err := g.games.Create(ctx, req.Description, req.PodID, req.FormatID, req.Results)
+	if err != nil {
 		trackerHttp.WriteError(log, w, http.StatusInternalServerError, err, "Failed to create Game record", errMsg)
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(map[string]int{"id": gameID})
 }
 
 func (g *GameRouter) UpdateGame(w http.ResponseWriter, r *http.Request) {
@@ -352,7 +355,6 @@ func (g *GameRouter) DeleteGame(w http.ResponseWriter, r *http.Request) {
 type addGameResultRequest struct {
 	GameID    int `json:"game_id"`
 	DeckID    int `json:"deck_id"`
-	PlayerID  int `json:"player_id"`
 	Place     int `json:"place"`
 	KillCount int `json:"kill_count"`
 }
@@ -387,7 +389,7 @@ func (g *GameRouter) AddGameResult(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if _, err = g.games.AddResult(ctx, req.GameID, req.DeckID, req.PlayerID, req.Place, req.KillCount); err != nil {
+	if _, err = g.games.AddResult(ctx, req.GameID, req.DeckID, req.Place, req.KillCount); err != nil {
 		trackerHttp.WriteError(g.log, w, http.StatusInternalServerError, err, "Failed to add Game Result record", errMsg)
 		return
 	}

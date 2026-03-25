@@ -8,42 +8,25 @@ interface RecordProps {
     record: RecordDict;
 }
 
-// TODO: Record will need to be dynamic for any number of players eventually
 // Record takes a Record dictionary like {1: 10, 2: 12, 3: 7, 4: 5}
 export function Record({ record }: RecordProps): ReactElement {
-    let first = getter(record, 1);
-    let second = getter(record, 2);
-    let third = getter(record, 3);
-    let fourth = getter(record, 4);
-
-    return (
-        <span className="record">{first} / {second} / {third} / {fourth}</span>
-    );
+    const maxPlace = Math.max(...Object.keys(record).map(Number), 1);
+    const parts = Array.from({ length: maxPlace }, (_, i) => record[i + 1] ?? 0);
+    return <span className="record">{parts.join(" / ")}</span>;
 }
 
-// RecordComparator is a custom DataGrid comparator for a Record to enable sorting. If firsts are equal, seconds are
-// compared. If seconds are equal, thirds are compared. Finally, if thirds are equal, fourths are compared.
+// RecordComparator is a custom DataGrid comparator for Record. Iterates from place 1 to max place in either dict, returns the first non-zero difference.
 export function RecordComparator(record1: RecordDict, record2: RecordDict): number {
-    const firsts = getter(record1, 1) - getter(record2, 1);
-    if (firsts !== 0) {
-        return firsts;
+    const maxPlace = Math.max(
+        ...Object.keys(record1).map(Number),
+        ...Object.keys(record2).map(Number),
+        1
+    );
+    for (let place = 1; place <= maxPlace; place++) {
+        const diff = (record1[place] ?? 0) - (record2[place] ?? 0);
+        if (diff !== 0) return diff;
     }
-
-    const seconds = getter(record1, 2) - getter(record2, 2);
-    if (seconds !== 0) {
-        return seconds;
-    }
-
-    const thirds = getter(record1, 3) - getter(record2, 3);
-    if (thirds !== 0) {
-        return thirds;
-    }
-
-    return getter(record1, 4) - getter(record2, 4);
-}
-
-function getter(m: RecordDict, target: number) {
-    return m[target] || 0;
+    return 0;
 }
 
 // StatColumns returns a list of DataGrid column definitions for the common game stats

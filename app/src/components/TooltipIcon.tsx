@@ -1,5 +1,5 @@
 import { ReactElement } from "react";
-import { IconButton, Tooltip } from "@mui/material";
+import { IconButton, SxProps, Theme, Tooltip } from "@mui/material";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 
 interface TooltipIconProps {
@@ -23,14 +23,29 @@ interface TooltipIconButtonProps {
     onClick: () => void;
     icon: ReactElement;
     placement?: "top" | "bottom" | "left" | "right";
+    color?: "default" | "inherit" | "primary" | "secondary" | "error" | "info" | "success" | "warning";
+    size?: "small" | "medium" | "large";
+    disabled?: boolean;
+    sx?: SxProps<Theme>;
 }
 
-export function TooltipIconButton({ title, onClick, icon, placement = "top" }: TooltipIconButtonProps): ReactElement {
+export function TooltipIconButton({
+    title,
+    onClick,
+    icon,
+    placement = "top",
+    color,
+    size = "medium",
+    disabled,
+    sx,
+}: TooltipIconButtonProps): ReactElement {
     return (
         <Tooltip title={title} placement={placement}>
-            <IconButton size="medium" onClick={onClick}>
-                {icon}
-            </IconButton>
+            <span>
+                <IconButton size={size} onClick={onClick} color={color} disabled={disabled} sx={sx}>
+                    {icon}
+                </IconButton>
+            </span>
         </Tooltip>
     );
 }

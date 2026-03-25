@@ -1,7 +1,7 @@
 import { ReactElement } from "react";
-import { useLoaderData } from "react-router-dom";
+import { Link, useLoaderData } from "react-router-dom";
 import { LoaderFunctionArgs } from "@remix-run/router/utils";
-import { Box, Typography } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 
 import { useAuth } from "../../auth";
 import { GetDecksForPod, GetGamesForPod, GetPod, GetPlayersForPod } from "../../http";
@@ -41,7 +41,12 @@ export default function PodView(): ReactElement {
 
     return (
         <Box sx={{ display: "flex", flexDirection: "column", width: "100%" }}>
-            <Typography variant="h4" sx={{ mb: 2 }}>{pod.name}</Typography>
+            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", wrap: "true", mb: 2 }}>
+                <Typography variant="h4">{pod.name}</Typography>
+                <Button variant="contained" component={Link} to={`/pod/${pod.id}/new-game`}>
+                    New Game
+                </Button>
+            </Box>
             <TabbedLayout
                 queryKey="podTab"
                 tabs={[

@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Ready to plan
-stopped_at: Completed 03-08-PLAN.md
-last_updated: "2026-03-24T15:35:34.009Z"
+stopped_at: Completed 04-05-PLAN.md
+last_updated: "2026-03-25T01:33:40.355Z"
 progress:
   total_phases: 8
-  completed_phases: 3
-  total_plans: 17
-  completed_plans: 17
+  completed_phases: 4
+  total_plans: 22
+  completed_plans: 22
 ---
 
 # Project State
@@ -19,7 +19,7 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-22)
 
 **Core value:** A pod can sit down, record a game in under a minute, and immediately see accurate standings — on their phones.
-**Current focus:** Phase 03 — frontend-structure
+**Current focus:** Phase 04 — game-model-change
 
 ## Current Position
 
@@ -61,6 +61,10 @@ Plan: Not started
 | Phase 03 P06 | 7min | 2 tasks | 4 files |
 | Phase 03 P07 | 1 | 1 tasks | 1 files |
 | Phase 03 P08 | 3min | 2 tasks | 4 files |
+| Phase 04 P01 | 5min | 2 tasks | 7 files |
+| Phase 04-game-model-change P02 | 5min | 2 tasks | 2 files |
+| Phase 04 P04 | 2 | 1 tasks | 1 files |
+| Phase 04 P05 | 4min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -97,6 +101,13 @@ Recent decisions affecting current work:
 - [Phase 03]: Logout replaced with LogoutIcon in IconButton wrapped in Tooltip — closes UAT gap #5
 - [Phase 03]: TooltipIcon/TooltipIconButton both default placement='top' via optional prop — closes UAT gap #6
 - [Phase 03]: Pod PlayersTab uses single confirmAction state to drive shared Dialog for Promote/Remove confirmation — closes UAT gap #8
+- [Phase 04]: playerID removed from AddResult chain — player implicit via deck ownership (GAME-01)
+- [Phase 04]: Record/RecordComparator use Math.max over keys to handle variable pod sizes dynamically (GAME-04)
+- [Phase 04]: span wrapper around disabled IconButton ensures tooltip still renders on hover (MUI Tooltip requirement)
+- [Phase 04]: playerCount passed as game.results.length + 1 in AddResultModal — accounts for the result currently being added, so Place/Kills max matches total expected players
+- [Phase 04]: inputProps bounds not added to EditResultModal — editing existing result lacks natural player count context per UAT scope
+- [Phase 04]: New Game button uses component={Link} on MUI Button in pod header — MUI styling with React Router navigation, no useNavigate needed
+- [Phase 04]: Card fields column uses flex: 1 to fill available width; remove button pinned top-right via alignItems: flex-start on outer row
 
 ### Roadmap Evolution
 
@@ -104,7 +115,9 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-- None currently
+- Security review all API and frontend route authorization (api)
+- Make playing cards icon clickable to go home on mobile (ui)
+- Fix record display to default to four places (ui)
 
 ### Blockers/Concerns
 
@@ -113,6 +126,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-24T15:28:21.583Z
-Stopped at: Completed 03-08-PLAN.md
+Last session: 2026-03-24T20:48:48.498Z
+Stopped at: Completed 04-05-PLAN.md
 Resume file: None

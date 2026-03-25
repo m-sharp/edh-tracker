@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 1: Backend Hardening** - Close authorization, transaction, validation, and performance gaps in the API
 - [ ] **Phase 2: Design Language** - Define and apply the visual design system before any UI work begins
 - [x] **Phase 3: Frontend Structure** - Refactor route files, build shared components, and fix routing bugs (completed 2026-03-24)
-- [ ] **Phase 4: Game Model Change** - Remove player field from game entry and redesign the game form
+- [x] **Phase 4: Game Model Change** - Remove player field from game entry and redesign the game form (completed 2026-03-24)
 - [ ] **Phase 5: Pod & Deck UX** - Complete pod and deck feature gaps and onboarding flow
 - [ ] **Phase 6: Auth, Session & Test Coverage** - 401 interceptor, JWT startup guard, and missing test suites
 - [ ] **Phase 7: Production Readiness** - Verify CORS, cookies, and API base URL in the deployed environment
@@ -88,8 +88,14 @@ Plans:
   2. The deck picker in the game form displays the owner's name alongside the commander name (e.g., "Rakdos, Lord of Riots (Mike)")
   3. The game form is visually clean and navigable on a phone-sized screen without horizontal scrolling or overlapping elements
   4. The record display renders correctly for games with any number of players, not just 4
-**Plans**: TBD
-**UI hint**: yes
+**Plans:** 5/5 plans complete
+
+Plans:
+- [x] 04-01-PLAN.md — Backend AddResult cleanup + frontend types + dynamic Record component (GAME-01, GAME-04)
+- [x] 04-02-PLAN.md — GameView AddResultModal player removal + TooltipIconButton enhancement (GAME-01, GAME-02)
+- [x] 04-03-PLAN.md — NewGameView full redesign with stacked card layout (GAME-01, GAME-02, GAME-03)
+- [x] 04-04-PLAN.md — AddResultModal/EditResultModal deck label + Place/Kills bounds (GAME-01, GAME-02) [gap closure]
+- [x] 04-05-PLAN.md — New Game card inline remove button + button moved to pod header (GAME-03) [gap closure]
 
 ### Phase 5: Pod & Deck UX
 **Goal**: Pod and deck workflows are complete, onboarding is clear, and views show meaningful stats
@@ -135,7 +141,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 1. Backend Hardening | 5/5 | Complete | ✓ |
 | 2. Design Language | 3/3 | Complete | ✓ |
 | 3. Frontend Structure | 8/8 | Complete   | 2026-03-24 |
-| 4. Game Model Change | 0/? | Not started | - |
+| 4. Game Model Change | 5/5 | Complete   | 2026-03-24 |
 | 5. Pod & Deck UX | 0/? | Not started | - |
 | 6. Auth, Session & Test Coverage | 0/? | Not started | - |
 | 7. Production Readiness | 0/? | Not started | - |
