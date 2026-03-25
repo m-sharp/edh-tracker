@@ -6,12 +6,15 @@ import {
     Box,
     Button,
     Container,
+    IconButton,
     MenuItem,
     Select,
     SelectChangeEvent,
     Toolbar,
+    Tooltip,
     Typography
 } from "@mui/material";
+import LogoutIcon from "@mui/icons-material/Logout";
 import { useAuth } from "../auth";
 import { GetPodsForPlayer } from "../http";
 import { Pod } from "../types";
@@ -54,12 +57,14 @@ function DrawerAppBar(): ReactElement {
                         />
                         <Typography variant="body2">{user.display_name}</Typography>
                     </Link>
-                    <Button
-                        color="inherit"
-                        onClick={() => logout().then(() => navigate("/login"))}
-                    >
-                        Logout
-                    </Button>
+                    <Tooltip title="Logout">
+                        <IconButton
+                            color="inherit"
+                            onClick={() => logout().then(() => navigate("/login"))}
+                        >
+                            <LogoutIcon />
+                        </IconButton>
+                    </Tooltip>
                 </Box>
             );
         }
