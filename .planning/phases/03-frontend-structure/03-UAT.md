@@ -69,10 +69,10 @@ skipped: 0
 - truth: "Refreshing any page in the app does not produce a blank white screen — a centered loading spinner appears, then the page renders"
   status: failed
   reason: "User reported: SPA handler in app/main.go falls back to index.html for ALL non-existent paths, including JS/CSS static asset requests. Browser gets HTML when expecting JS, causing Uncaught SyntaxError: Unexpected token '<'. App does not boot at all after refresh."
-  root_cause: "spaHandler in app/main.go unconditionally serves index.html for any path not found on disk. CRA builds hashed filenames like /static/js/main.abc123.js that are real static assets — not SPA routes — but the handler can't distinguish them. Fix: check filepath.Base(rel) for a dot; if it has an extension, return 404 instead of index.html."
+  root_cause: "app/package.json has 'homepage': '.' which makes CRA build assets with relative paths (./static/js/main.abc.js). When the browser is at a sub-route like /pod/123, relative paths resolve to /pod/static/js/main.abc.js — not /static/js/main.abc.js. The spaHandler correctly falls back to index.html for these missing paths. Browser receives HTML, tries to parse as JS, SyntaxError. Fix: change homepage to '/' so CRA emits absolute paths. app/main.go is correct and unchanged."
   severity: blocker
   test: 2
-  artifacts: [app/main.go]
+  artifacts: [app/package.json]
   missing: []
 
 - truth: "Login page content is positioned with adequate top spacing on desktop — not too low on screen"
