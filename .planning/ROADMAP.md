@@ -254,6 +254,21 @@ Plans:
 Plans:
 - [ ] TBD (promote with /gsd:review-backlog when ready)
 
+### Phase 999.13: Custom Scoring Schemas (BACKLOG)
+
+**Goal:** Allow pods to create and select custom scoring schemas as alternatives to the default points system, so groups with different playstyles can tailor how wins and kills are rewarded.
+**Requirements:** TBD
+**Plans:** 0 plans
+
+**Captured Context:**
+- Default system (kills + placement bonuses) remains the out-of-the-box schema
+- Pods should be able to define their own schema (e.g. different point weights, no kill points, winner-takes-all)
+- Schema selection scoped to the pod level (different pods can use different schemas)
+- High complexity — requires schema storage model, formula evaluation, and retroactive recalculation concerns
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
+
 ### Phase 999.12: ChangedByUserID Audit Tracking (BACKLOG)
 
 **Goal:** Add a `changed_by_user_id` column to Pod, Game, GameResult, and any other models that can be mutated by multiple users, so every write is attributed to the user who made it.
