@@ -222,6 +222,15 @@ Plans:
 Plans:
 - [ ] TBD (promote with /gsd:review-backlog when ready)
 
+### Phase 999.7: Saltiness Tracking for Winning Decks (BACKLOG)
+
+**Goal:** Capture how "salty" (bitter/mad/annoyed) players are with a winning deck at the end of a game, and surface that data in deck and player stats.
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
+
 ### Phase 999.6: Fetch and Display Card Images (BACKLOG)
 
 **Goal:** Display card artwork for commanders and deck cards by building Scryfall image URLs from MTGJSON data, so players can visually identify cards throughout the app.
