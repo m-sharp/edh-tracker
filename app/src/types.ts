@@ -109,13 +109,11 @@ export interface GameResultUpdateFields {
 export interface NewGameResultWithGame {
     game_id: number;
     deck_id: number;
-    player_id: number;
     place: number;
     kill_count: number;
 }
 
 export interface NewGameData {
-    players: Array<Player>;
     decks: Array<Deck>;
     formats: Array<Format>;
 }
@@ -129,7 +127,6 @@ export interface NewGame {
 
 export interface NewGameResult {
     deck_id: number;
-    player_id: number;
     place: number;
     kill_count: number;
 }
