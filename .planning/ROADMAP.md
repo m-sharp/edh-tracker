@@ -231,6 +231,15 @@ Plans:
 Plans:
 - [ ] TBD (promote with /gsd:review-backlog when ready)
 
+### Phase 999.8: Ability to Capture Kudos for Winning Decks (BACKLOG)
+
+**Goal:** Allow players to give "Kudos" (virtual thumbs-ups / pats on the back) to winning decks at the end of a game, and surface Kudos counts in deck and player stats.
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
+
 ### Phase 999.6: Fetch and Display Card Images (BACKLOG)
 
 **Goal:** Display card artwork for commanders and deck cards by building Scryfall image URLs from MTGJSON data, so players can visually identify cards throughout the app.
