@@ -204,7 +204,7 @@ func SoftDelete(gameRepo repos.GameRepository) SoftDeleteFunc {
 func AddResult(
 	gameResultRepo repos.GameResultRepository,
 ) AddResultFunc {
-	return func(ctx context.Context, gameID, deckID, playerID, place, killCount int) (int, error) {
+	return func(ctx context.Context, gameID, deckID, place, killCount int) (int, error) {
 		return gameResultRepo.Add(ctx, gameResultRepository.Model{
 			GameID:    gameID,
 			DeckID:    deckID,

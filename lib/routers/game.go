@@ -352,7 +352,6 @@ func (g *GameRouter) DeleteGame(w http.ResponseWriter, r *http.Request) {
 type addGameResultRequest struct {
 	GameID    int `json:"game_id"`
 	DeckID    int `json:"deck_id"`
-	PlayerID  int `json:"player_id"`
 	Place     int `json:"place"`
 	KillCount int `json:"kill_count"`
 }
@@ -387,7 +386,7 @@ func (g *GameRouter) AddGameResult(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if _, err = g.games.AddResult(ctx, req.GameID, req.DeckID, req.PlayerID, req.Place, req.KillCount); err != nil {
+	if _, err = g.games.AddResult(ctx, req.GameID, req.DeckID, req.Place, req.KillCount); err != nil {
 		trackerHttp.WriteError(g.log, w, http.StatusInternalServerError, err, "Failed to add Game Result record", errMsg)
 		return
 	}

@@ -262,7 +262,7 @@ func TestAddResult_Success(t *testing.T) {
 		},
 	}
 	fn := AddResult(gameResultRepo)
-	id, err := fn(context.Background(), 1, 10, 42, 2, 1)
+	id, err := fn(context.Background(), 1, 10, 2, 1)
 	require.NoError(t, err)
 	assert.Equal(t, 99, id)
 }
