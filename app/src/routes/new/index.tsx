@@ -144,7 +144,41 @@ export default function View(): ReactElement {
 
                     {cards.map((card) => (
                         <Card key={card.key} variant="outlined" sx={{ width: "100%", p: 2 }}>
-                            <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 1 }}>
+                            <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
+                                {/* Left: fields column */}
+                                <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 1.5 }}>
+                                    <Autocomplete
+                                        fullWidth
+                                        options={filteredDecks}
+                                        getOptionLabel={(deck: Deck) => `${deck.name} (${deck.player_name})`}
+                                        getOptionKey={(deck: Deck) => deck.id}
+                                        value={filteredDecks.find((d) => d.id === card.deckId) ?? null}
+                                        onChange={(_, value) => updateCard(card.key, "deckId", value?.id ?? null)}
+                                        noOptionsText="No decks available for this format."
+                                        renderInput={(params) => <TextField {...params} label="Deck" required />}
+                                    />
+                                    <Box sx={{ display: "flex", gap: 2 }}>
+                                        <TextField
+                                            type="number"
+                                            label="Place"
+                                            required
+                                            sx={{ flex: 1 }}
+                                            value={card.place}
+                                            onChange={(e) => updateCard(card.key, "place", e.target.value)}
+                                            inputProps={{ min: 1, max: cards.length }}
+                                        />
+                                        <TextField
+                                            type="number"
+                                            label="Kills"
+                                            required
+                                            sx={{ flex: 1 }}
+                                            value={card.kills}
+                                            onChange={(e) => updateCard(card.key, "kills", e.target.value)}
+                                            inputProps={{ min: 0, max: cards.length }}
+                                        />
+                                    </Box>
+                                </Box>
+                                {/* Right: remove button */}
                                 <TooltipIconButton
                                     title={cards.length <= 2 ? "Minimum 2 entries required" : "Remove"}
                                     icon={<CloseIcon />}
@@ -153,37 +187,6 @@ export default function View(): ReactElement {
                                     size="small"
                                     disabled={cards.length <= 2}
                                     sx={{ minHeight: 44, minWidth: 44 }}
-                                />
-                            </Box>
-                            <Autocomplete
-                                fullWidth
-                                options={filteredDecks}
-                                getOptionLabel={(deck: Deck) => `${deck.name} (${deck.player_name})`}
-                                getOptionKey={(deck: Deck) => deck.id}
-                                value={filteredDecks.find((d) => d.id === card.deckId) ?? null}
-                                onChange={(_, value) => updateCard(card.key, "deckId", value?.id ?? null)}
-                                noOptionsText="No decks available for this format."
-                                renderInput={(params) => <TextField {...params} label="Deck" required />}
-                                sx={{ mb: 1.5 }}
-                            />
-                            <Box sx={{ display: "flex", gap: 2 }}>
-                                <TextField
-                                    type="number"
-                                    label="Place"
-                                    required
-                                    sx={{ flex: 1 }}
-                                    value={card.place}
-                                    onChange={(e) => updateCard(card.key, "place", e.target.value)}
-                                    inputProps={{ min: 1, max: cards.length }}
-                                />
-                                <TextField
-                                    type="number"
-                                    label="Kills"
-                                    required
-                                    sx={{ flex: 1 }}
-                                    value={card.kills}
-                                    onChange={(e) => updateCard(card.key, "kills", e.target.value)}
-                                    inputProps={{ min: 0, max: cards.length }}
                                 />
                             </Box>
                         </Card>
