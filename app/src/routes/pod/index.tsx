@@ -41,7 +41,7 @@ export default function PodView(): ReactElement {
 
     return (
         <Box sx={{ display: "flex", flexDirection: "column", width: "100%" }}>
-            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2 }}>
+            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", wrap: "true", mb: 2 }}>
                 <Typography variant="h4">{pod.name}</Typography>
                 <Button variant="contained" component={Link} to={`/pod/${pod.id}/new-game`}>
                     New Game

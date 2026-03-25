@@ -104,7 +104,9 @@ export default function View(): ReactElement {
 
     return (
         <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%", pb: 4 }}>
-            <Typography variant="h4">Add New Game</Typography>
+            <Box sx={{ display: "flex", mb: 2}}>
+                <Typography variant="h4">Add New Game</Typography>
+            </Box>
             <Form>
                 <Box sx={{ display: "flex", flexDirection: "column", gap: 2, width: "100%", maxWidth: 600 }}>
                     <FormControl fullWidth required>
