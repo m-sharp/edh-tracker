@@ -254,6 +254,20 @@ Plans:
 Plans:
 - [ ] TBD (promote with /gsd:review-backlog when ready)
 
+### Phase 999.10: Sweeps Feature (BACKLOG)
+
+**Goal:** Show "Sweep" statistics for decks and games. A Sweep is defined as a deck winning a game and receiving all kill points as well (e.g. in a 4-player game, 1st place && >= 3 kills).
+**Requirements:** TBD
+**Plans:** 0 plans
+
+**Captured Context:**
+- A Sweep = 1st place finish AND all kills in the game (e.g. ≥ 3 kills in a 4-player game)
+- Surface sweep counts on deck stat grids, player stat views, and game result listings
+- Indicate sweeps with a broom icon in data grids
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
+
 ### Phase 999.6: Fetch and Display Card Images (BACKLOG)
 
 **Goal:** Display card artwork for commanders and deck cards by building Scryfall image URLs from MTGJSON data, so players can visually identify cards throughout the app.
