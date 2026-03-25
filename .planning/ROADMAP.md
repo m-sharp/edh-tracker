@@ -254,6 +254,21 @@ Plans:
 Plans:
 - [ ] TBD (promote with /gsd:review-backlog when ready)
 
+### Phase 999.12: ChangedByUserID Audit Tracking (BACKLOG)
+
+**Goal:** Add a `changed_by_user_id` column to Pod, Game, GameResult, and any other models that can be mutated by multiple users, so every write is attributed to the user who made it.
+**Requirements:** TBD
+**Plans:** 0 plans
+
+**Captured Context:**
+- Applies to models writable by more than one user (Pod, Game, GameResult at minimum)
+- Column records the user_id of whoever performed the last mutation
+- Useful for audit trails, debugging disputes, and future moderation features
+- Schema migration required per affected table; GORM models and business layer need updating
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
+
 ### Phase 999.11: Info/About Page — Scoring System (BACKLOG)
 
 **Goal:** Add an info/about page that explains the scoring system and its philosophy, so new players understand how points are calculated and why.
