@@ -1,6 +1,6 @@
 import { ReactElement, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Box, Button } from "@mui/material";
+import { Link } from "react-router-dom";
+import { Box } from "@mui/material";
 import { DataGrid, GridColDef, GridPaginationModel, GridToolbar } from "@mui/x-data-grid";
 
 import { GetGamesForPod } from "../../http";
@@ -12,7 +12,6 @@ interface PodGamesTabProps {
 }
 
 export default function PodGamesTab({ games: initialData, podId }: PodGamesTabProps): ReactElement {
-    const navigate = useNavigate();
     const [rows, setRows] = useState<Game[]>(initialData.items);
     const [rowCount, setRowCount] = useState(initialData.total);
     const [loading, setLoading] = useState(false);
@@ -53,11 +52,6 @@ export default function PodGamesTab({ games: initialData, podId }: PodGamesTabPr
 
     return (
         <Box>
-            <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
-                <Button variant="contained" onClick={() => navigate(`/pod/${podId}/new-game`)}>
-                    New Game
-                </Button>
-            </Box>
             <Box sx={{ height: { xs: 400, sm: 600 }, width: "100%" }}>
                 <DataGrid
                     rows={rows}
