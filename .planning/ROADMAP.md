@@ -254,6 +254,20 @@ Plans:
 Plans:
 - [ ] TBD (promote with /gsd:review-backlog when ready)
 
+### Phase 999.11: Info/About Page — Scoring System (BACKLOG)
+
+**Goal:** Add an info/about page that explains the scoring system and its philosophy, so new players understand how points are calculated and why.
+**Requirements:** TBD
+**Plans:** 0 plans
+
+**Captured Context:**
+- Explain the points formula (kills + placement bonuses)
+- Communicate the philosophy behind the scoring design
+- Accessible to unauthenticated users (no login required to read)
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
+
 ### Phase 999.10: Sweeps Feature (BACKLOG)
 
 **Goal:** Show "Sweep" statistics for decks and games. A Sweep is defined as a deck winning a game and receiving all kill points as well (e.g. in a 4-player game, 1st place && >= 3 kills).
