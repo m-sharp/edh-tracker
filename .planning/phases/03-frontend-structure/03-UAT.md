@@ -69,6 +69,7 @@ skipped: 0
 - truth: "Refreshing any page in the app does not produce a blank white screen — a centered loading spinner appears, then the page renders"
   status: failed
   reason: "User reported: SPA handler in app/main.go falls back to index.html for ALL non-existent paths, including JS/CSS static asset requests. Browser gets HTML when expecting JS, causing Uncaught SyntaxError: Unexpected token '<'. App does not boot at all after refresh."
+  root_cause: "spaHandler in app/main.go unconditionally serves index.html for any path not found on disk. CRA builds hashed filenames like /static/js/main.abc123.js that are real static assets — not SPA routes — but the handler can't distinguish them. Fix: check filepath.Base(rel) for a dot; if it has an extension, return 404 instead of index.html."
   severity: blocker
   test: 2
   artifacts: [app/main.go]
@@ -77,6 +78,7 @@ skipped: 0
 - truth: "Login page content is positioned with adequate top spacing on desktop — not too low on screen"
   status: failed
   reason: "User reported: content starts too low. Fix: change justifyContent from center to flex-start and add top padding/margin on desktop viewports."
+  root_cause: "Outer Box in login.tsx uses justifyContent: 'center' with minHeight: '100vh', centering content in the full viewport height. Fix: change to justifyContent: 'flex-start' and add pt: { xs: 4, sm: 8 }."
   severity: cosmetic
   test: 4
   artifacts: [app/src/routes/login.tsx]
@@ -85,6 +87,7 @@ skipped: 0
 - truth: "The AppBar logout control does not clip or crowd on small screens"
   status: failed
   reason: "User reported: LOGOUT text clips/crowds on right side of AppBar on small screens. Fix: replace text Button with an icon button (e.g., LogoutIcon)."
+  root_cause: "Logout is a text Button with the word 'Logout' — no icon, no responsive hiding. On narrow screens it competes with PodSelector and Avatar for horizontal space. Fix: replace with IconButton + LogoutIcon from @mui/icons-material."
   severity: minor
   test: 5
   artifacts: [app/src/routes/root.tsx]
@@ -93,6 +96,7 @@ skipped: 0
 - truth: "TooltipIcon tooltips open above the icon, not below"
   status: failed
   reason: "User reported: tooltip pops up below the icon. Fix: add placement='top' to the Tooltip in TooltipIcon component (or at the call site in DeckView SettingsTab)."
+  root_cause: "TooltipIcon.tsx passes no placement prop to MUI Tooltip, which defaults to 'bottom'. Fix: add placement prop with default 'top' to TooltipIcon interface and Tooltip usage."
   severity: cosmetic
   test: 6
   artifacts: [app/src/components/TooltipIcon.tsx, app/src/routes/deck/SettingsTab.tsx]
@@ -101,6 +105,7 @@ skipped: 0
 - truth: "Promote and Remove buttons in Pod Players tab are visually distinct (contained style) and require confirmation before executing"
   status: failed
   reason: "User reported: buttons appear as colored text on black background (not contained). Promote and Remove execute immediately with no confirmation dialog — dangerous for irreversible actions."
+  root_cause: "PlayersTab.tsx Promote/Remove buttons have no variant prop (defaults to 'text'). No confirmation state or Dialog exists — actions fire directly on click. Fix: add variant='contained', add confirmAction state, wrap actions in MUI Dialog (pattern already used in SettingsTab.tsx)."
   severity: major
   test: 8
   artifacts: [app/src/routes/pod/PlayersTab.tsx]
