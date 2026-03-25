@@ -2,7 +2,7 @@
   "name": "edh-tracker",
   "version": "0.1.0",
   "main": "/src/index.js",
-  "homepage": ".",
+  "homepage": "/",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
