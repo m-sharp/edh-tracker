@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Ready to execute
-stopped_at: Completed 03-07-PLAN.md
-last_updated: "2026-03-24T15:25:40.542Z"
+stopped_at: Completed 03-08-PLAN.md
+last_updated: "2026-03-24T15:28:21.642Z"
 progress:
   total_phases: 8
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 17
-  completed_plans: 16
+  completed_plans: 17
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-22)
 ## Current Position
 
 Phase: 03 (frontend-structure) — EXECUTING
-Plan: 2 of 8
+Plan: 3 of 8
 
 ## Performance Metrics
 
@@ -60,6 +60,7 @@ Plan: 2 of 8
 | Phase 03 P05 | 8min | 1 tasks | 5 files |
 | Phase 03 P06 | 7min | 2 tasks | 4 files |
 | Phase 03 P07 | 1 | 1 tasks | 1 files |
+| Phase 03 P08 | 3min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -92,6 +93,10 @@ Recent decisions affecting current work:
 - [Phase 03]: PlayerDecksTab/PlayerGamesTab accept playerId not player object — minimal prop footprint for data-fetching tabs
 - [Phase 03]: NewGameView moved as straight file move only — Phase 4 redesigns it entirely (plan excluded from DSNG-04 audit per D-20)
 - [Phase 03]: homepage set to '/' not '.' in CRA config — absolute asset paths prevent sub-route refresh blank screen
+- [Phase 03]: Login page uses flex-start + top padding (pt xs:4/sm:8) instead of center alignment — closes UAT gap #4
+- [Phase 03]: Logout replaced with LogoutIcon in IconButton wrapped in Tooltip — closes UAT gap #5
+- [Phase 03]: TooltipIcon/TooltipIconButton both default placement='top' via optional prop — closes UAT gap #6
+- [Phase 03]: Pod PlayersTab uses single confirmAction state to drive shared Dialog for Promote/Remove confirmation — closes UAT gap #8
 
 ### Roadmap Evolution
 
@@ -108,6 +113,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-24T15:25:40.493Z
-Stopped at: Completed 03-07-PLAN.md
+Last session: 2026-03-24T15:28:21.583Z
+Stopped at: Completed 03-08-PLAN.md
 Resume file: None
