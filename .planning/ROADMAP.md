@@ -206,3 +206,18 @@ Plans:
 
 Plans:
 - [ ] TBD (promote with /gsd:review-backlog when ready)
+
+### Phase 999.5: Ability to Tag Decks (BACKLOG)
+
+**Goal:** Add the ability to tag a deck with strings describing Magic: The Gathering archetypes (e.g. "Voltron", "Aggro", "Control", "Stax"). Tags are stored in a new table with a Deck ↔ Tag relation. Show tags on Deck data grids and Deck Details view (sortable where applicable). Tag input uses autocomplete over existing tags with the ability to add new ones.
+**Requirements:** TBD
+**Plans:** 0 plans
+
+**Captured Context:**
+- New `tags` table and `deck_tag` join table (Deck ↔ Tag many-to-many)
+- Tag input: autocomplete over existing tag strings; allows creating new tags inline
+- Display tags on Deck data grid (sortable column) and Deck Details view
+- Tags persist as reusable strings shared across decks
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
