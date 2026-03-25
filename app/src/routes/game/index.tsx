@@ -141,7 +141,7 @@ function EditResultModal({ result, decks, onClose }: EditResultModalProps): Reac
                     />
                     <Autocomplete
                         options={decks}
-                        getOptionLabel={(d) => d.name}
+                        getOptionLabel={(d) => `${d.name} (${d.player_name})`}
                         value={decks.find((d) => d.id === deckId) ?? null}
                         onChange={(_, d) => {
                             if (d) {
@@ -189,10 +189,11 @@ interface AddResultModalProps {
     gameId: number;
     podId: number;
     decks: Deck[];
+    playerCount: number;
     onClose: () => void;
 }
 
-function AddResultModal({ gameId, decks, onClose }: AddResultModalProps): ReactElement {
+function AddResultModal({ gameId, decks, playerCount, onClose }: AddResultModalProps): ReactElement {
     const [deckId, setDeckId] = useState<number | null>(null);
     const [place, setPlace] = useState(1);
     const [killCount, setKillCount] = useState(0);
@@ -210,7 +211,7 @@ function AddResultModal({ gameId, decks, onClose }: AddResultModalProps): ReactE
                 <Stack spacing={2} sx={{ mt: 1, minWidth: 300 }}>
                     <Autocomplete
                         options={decks}
-                        getOptionLabel={(d) => d.name}
+                        getOptionLabel={(d) => `${d.name} (${d.player_name})`}
                         onChange={(_, d) => setDeckId(d?.id ?? null)}
                         renderInput={(params) => <TextField {...params} label="Deck" size="small" />}
                     />
@@ -220,6 +221,7 @@ function AddResultModal({ gameId, decks, onClose }: AddResultModalProps): ReactE
                         value={place}
                         onChange={(e) => setPlace(Number(e.target.value))}
                         size="small"
+                        inputProps={{ min: 1, max: playerCount }}
                     />
                     <TextField
                         label="Kills"
@@ -227,6 +229,7 @@ function AddResultModal({ gameId, decks, onClose }: AddResultModalProps): ReactE
                         value={killCount}
                         onChange={(e) => setKillCount(Number(e.target.value))}
                         size="small"
+                        inputProps={{ min: 0, max: playerCount }}
                     />
                 </Stack>
             </DialogContent>
@@ -348,6 +351,7 @@ function GameResultsGrid({ game, pod, isManager, decks, players }: GameResultsGr
                     gameId={game.id}
                     podId={pod.id}
                     decks={decks}
+                    playerCount={game.results.length + 1}
                     onClose={() => setAddOpen(false)}
                 />
             )}
