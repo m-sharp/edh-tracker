@@ -159,8 +159,12 @@ func TestGetAllByPod_Success(t *testing.T) {
 		},
 	}
 	gameResultRepo := &testHelpers.MockGameResultRepo{
-		GetStatsForPlayerFn: func(ctx context.Context, playerID int) (*gameresultrepo.Aggregate, error) {
-			return &gameresultrepo.Aggregate{Record: map[int]int{}}, nil
+		GetStatsForPlayersInPodFn: func(ctx context.Context, podID int, playerIDs []int) (map[int]*gameresultrepo.Aggregate, error) {
+			result := make(map[int]*gameresultrepo.Aggregate, len(playerIDs))
+			for _, id := range playerIDs {
+				result[id] = &gameresultrepo.Aggregate{Record: map[int]int{}}
+			}
+			return result, nil
 		},
 	}
 	podRepo := &testHelpers.MockPodRepo{
@@ -190,7 +194,16 @@ func TestGetAllByPod_PlayerNotFound_Skipped(t *testing.T) {
 			return nil, nil // not found → skip
 		},
 	}
-	fn := GetAllByPod(playerRepo, nil, nil, roleRepo)
+	gameResultRepo := &testHelpers.MockGameResultRepo{
+		GetStatsForPlayersInPodFn: func(ctx context.Context, podID int, playerIDs []int) (map[int]*gameresultrepo.Aggregate, error) {
+			result := make(map[int]*gameresultrepo.Aggregate, len(playerIDs))
+			for _, id := range playerIDs {
+				result[id] = &gameresultrepo.Aggregate{Record: map[int]int{}}
+			}
+			return result, nil
+		},
+	}
+	fn := GetAllByPod(playerRepo, gameResultRepo, nil, roleRepo)
 	got, err := fn(context.Background(), 10)
 	require.NoError(t, err)
 	assert.Len(t, got, 0)
