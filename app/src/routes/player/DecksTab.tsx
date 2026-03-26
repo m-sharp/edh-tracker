@@ -24,7 +24,9 @@ export default function PlayerDecksTab({ playerId }: PlayerDecksTabProps): React
         );
     }
 
-    if (data && data.length === 0) {
+    const visibleRows = (data ?? []).filter((d) => !d.retired);
+
+    if (data && visibleRows.length === 0) {
         return (
             <Box sx={{ p: 2 }}>
                 <Typography variant="body2" color="text.secondary">No decks yet.</Typography>
@@ -35,13 +37,12 @@ export default function PlayerDecksTab({ playerId }: PlayerDecksTabProps): React
     const columns = [
         CommanderColumn,
         ...StatColumns,
-        { field: "retired", headerName: "Is Retired", type: "boolean", width: 100 },
     ];
 
     return (
         <Box style={{ height: 750, width: "100%" }}>
             <DataGrid
-                rows={data}
+                rows={visibleRows}
                 columns={columns}
                 slots={{ toolbar: GridToolbar }}
                 initialState={{ sorting: { sortModel: [{ field: "name", sort: "asc" }] } }}
