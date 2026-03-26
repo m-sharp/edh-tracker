@@ -123,7 +123,6 @@ Recent decisions affecting current work:
 ### Blockers/Concerns
 
 - [Phase 7 risk]: CORS / cookie behavior in deployed environment is unverified — must be confirmed before launch
-- [Phase 4 risk]: Game model change (remove player field) requires both API and UI changes — coordinate carefully
 
 ## Session Continuity
 
