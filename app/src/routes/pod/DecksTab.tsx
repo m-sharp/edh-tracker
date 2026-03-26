@@ -55,6 +55,11 @@ export default function PodDecksTab({ decks: initialData, podId }: PodDecksTabPr
                 paginationModel={paginationModel}
                 onPaginationModelChange={handlePaginationChange}
                 slots={{ toolbar: GridToolbar }}
+                initialState={{
+                    sorting: {
+                        sortModel: [{ field: "record", sort: "desc" }],
+                    },
+                }}
             />
         </Box>
     );

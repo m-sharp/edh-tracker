@@ -68,7 +68,11 @@ function DrawerAppBar(): ReactElement {
         <AppBar position="fixed">
             <Container maxWidth="xl">
                 <Toolbar disableGutters>
-                    <Box sx={{ display: "flex", mr: 2 }}><SvgIconPlayingCards /></Box>
+                    <Box sx={{ display: "flex", mr: 2 }}>
+                        <Link to="/" style={{ display: "flex" }}>
+                            <SvgIconPlayingCards />
+                        </Link>
+                    </Box>
                     <Typography
                         variant="h6"
                         noWrap

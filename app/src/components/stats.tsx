@@ -10,7 +10,7 @@ interface RecordProps {
 
 // Record takes a Record dictionary like {1: 10, 2: 12, 3: 7, 4: 5}
 export function Record({ record }: RecordProps): ReactElement {
-    const maxPlace = Math.max(...Object.keys(record).map(Number), 1);
+    const maxPlace = Math.max(...Object.keys(record).map(Number), 4);
     const parts = Array.from({ length: maxPlace }, (_, i) => record[i + 1] ?? 0);
     return <span className="record">{parts.join(" / ")}</span>;
 }
