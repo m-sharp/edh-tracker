@@ -37,8 +37,9 @@ type MockGameResultRepo struct {
 	GetByIDFn            func(ctx context.Context, resultID int) (*gameResultRepo.Model, error)
 	GetStatsForPlayerFn  func(ctx context.Context, playerID int) (*gameResultRepo.Aggregate, error)
 	GetStatsForDeckFn    func(ctx context.Context, deckID int) (*gameResultRepo.Aggregate, error)
-	GetStatsForDecksFn   func(ctx context.Context, deckIDs []int) (map[int]*gameResultRepo.Aggregate, error)
-	BulkAddFn            func(ctx context.Context, results []gameResultRepo.Model) error
+	GetStatsForDecksFn          func(ctx context.Context, deckIDs []int) (map[int]*gameResultRepo.Aggregate, error)
+	GetStatsForPlayersInPodFn   func(ctx context.Context, podID int, playerIDs []int) (map[int]*gameResultRepo.Aggregate, error)
+	BulkAddFn                   func(ctx context.Context, results []gameResultRepo.Model) error
 	AddFn                func(ctx context.Context, model gameResultRepo.Model) (int, error)
 	UpdateFn             func(ctx context.Context, resultID, place, killCount, deckID int) error
 	SoftDeleteFn         func(ctx context.Context, id int) error
@@ -73,6 +74,12 @@ func (m *MockGameResultRepo) GetStatsForDecks(ctx context.Context, deckIDs []int
 		return m.GetStatsForDecksFn(ctx, deckIDs)
 	}
 	panic("unexpected call to GetStatsForDecks")
+}
+func (m *MockGameResultRepo) GetStatsForPlayersInPod(ctx context.Context, podID int, playerIDs []int) (map[int]*gameResultRepo.Aggregate, error) {
+	if m.GetStatsForPlayersInPodFn != nil {
+		return m.GetStatsForPlayersInPodFn(ctx, podID, playerIDs)
+	}
+	panic("unexpected call to GetStatsForPlayersInPod")
 }
 func (m *MockGameResultRepo) Add(ctx context.Context, model gameResultRepo.Model) (int, error) {
 	if m.AddFn != nil {

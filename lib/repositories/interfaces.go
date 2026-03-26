@@ -63,6 +63,7 @@ type GameResultRepository interface {
 	GetStatsForPlayer(ctx context.Context, playerID int) (*gameResult.Aggregate, error)
 	GetStatsForDeck(ctx context.Context, deckID int) (*gameResult.Aggregate, error)
 	GetStatsForDecks(ctx context.Context, deckIDs []int) (map[int]*gameResult.Aggregate, error)
+	GetStatsForPlayersInPod(ctx context.Context, podID int, playerIDs []int) (map[int]*gameResult.Aggregate, error)
 	Add(ctx context.Context, m gameResult.Model) (int, error)
 	BulkAdd(ctx context.Context, results []gameResult.Model) error
 	Update(ctx context.Context, resultID, place, killCount, deckID int) error

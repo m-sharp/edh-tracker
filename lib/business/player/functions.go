@@ -77,8 +77,15 @@ func GetAllByPod(
 		}
 
 		roleByPlayerID := make(map[int]string, len(members))
+		playerIDs := make([]int, 0, len(members))
 		for _, m := range members {
 			roleByPlayerID[m.PlayerID] = m.Role
+			playerIDs = append(playerIDs, m.PlayerID)
+		}
+
+		statsMap, err := gameResultRepo.GetStatsForPlayersInPod(ctx, podID, playerIDs)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get pod-scoped stats for pod %d: %w", podID, err)
 		}
 
 		result := make([]PlayerWithRoleEntity, 0, len(members))
@@ -91,16 +98,12 @@ func GetAllByPod(
 				continue
 			}
 
-			agg, err := gameResultRepo.GetStatsForPlayer(ctx, m.PlayerID)
-			if err != nil {
-				return nil, fmt.Errorf("failed to get stats for player %d: %w", m.PlayerID, err)
-			}
-
 			podIDs, err := podRepo.GetIDsByPlayerID(ctx, m.PlayerID)
 			if err != nil {
 				return nil, fmt.Errorf("failed to get pod IDs for player %d: %w", m.PlayerID, err)
 			}
 
+			agg := statsMap[m.PlayerID]
 			result = append(result, PlayerWithRoleEntity{
 				Entity: ToEntity(*p, agg, podIDs),
 				Role:   roleByPlayerID[m.PlayerID],

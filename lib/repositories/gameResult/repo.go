@@ -36,6 +36,19 @@ const (
 						  INNER JOIN deck ON game_result.deck_id = deck.id
 						 WHERE deck.id IN ?
 						   AND game_result.deleted_at IS NULL`
+
+	getStatsForPlayersInPod = `SELECT deck.player_id, game_result.game_id, game_result.place, game_result.kill_count,
+					            (SELECT COUNT(*) FROM game_result gr2
+					              WHERE gr2.game_id = game_result.game_id
+					                AND gr2.deleted_at IS NULL) AS player_count
+					       FROM game_result
+					       INNER JOIN deck ON game_result.deck_id = deck.id
+					       INNER JOIN game ON game_result.game_id = game.id
+					      WHERE game.pod_id = ?
+					        AND deck.player_id IN ?
+					        AND game.deleted_at IS NULL
+					        AND deck.deleted_at IS NULL
+					        AND game_result.deleted_at IS NULL`
 )
 
 type Repository struct {
@@ -163,6 +176,40 @@ func (r *Repository) GetStatsForDecks(ctx context.Context, deckIDs []int) (map[i
 		} else {
 			// No games for this deck — return zero aggregate
 			result[deckID] = &Aggregate{Record: map[int]int{}}
+		}
+	}
+
+	return result, nil
+}
+func (r *Repository) GetStatsForPlayersInPod(ctx context.Context, podID int, playerIDs []int) (map[int]*Aggregate, error) {
+	result := make(map[int]*Aggregate, len(playerIDs))
+	if len(playerIDs) == 0 {
+		return result, nil
+	}
+
+	var rows []gameStatWithPlayer
+	if err := r.db.WithContext(ctx).Raw(getStatsForPlayersInPod, podID, playerIDs).Scan(&rows).Error; err != nil {
+		return nil, fmt.Errorf("failed to get batch stats for players in pod %d: %w", podID, err)
+	}
+
+	// Group by player ID
+	grouped := make(map[int]gameStats)
+	for _, row := range rows {
+		grouped[row.PlayerID] = append(grouped[row.PlayerID], gameStat{
+			GameID:      row.GameID,
+			Place:       row.Place,
+			KillCount:   row.KillCount,
+			PlayerCount: row.PlayerCount,
+		})
+	}
+
+	// Convert each group to Aggregate
+	for _, playerID := range playerIDs {
+		if stats, ok := grouped[playerID]; ok {
+			agg := stats.toAggregate()
+			result[playerID] = &agg
+		} else {
+			result[playerID] = &Aggregate{Record: map[int]int{}}
 		}
 	}
 
