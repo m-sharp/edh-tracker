@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Ready to plan
-stopped_at: Phase 5 UI-SPEC approved
-last_updated: "2026-03-26T02:03:22.015Z"
+status: Ready to execute
+stopped_at: Completed 05-02-PLAN.md
+last_updated: "2026-03-26T02:43:05.983Z"
 progress:
   total_phases: 21
   completed_phases: 4
-  total_plans: 22
-  completed_plans: 22
+  total_plans: 27
+  completed_plans: 23
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-22)
 
 **Core value:** A pod can sit down, record a game in under a minute, and immediately see accurate standings — on their phones.
-**Current focus:** Phase 05 — pod-&-deck-ux
+**Current focus:** Phase 05 — pod-deck-ux
 
 ## Current Position
 
-Phase: 05
-Plan: Not started
+Phase: 05 (pod-deck-ux) — EXECUTING
+Plan: 2 of 5
 
 ## Performance Metrics
 
@@ -65,6 +65,7 @@ Plan: Not started
 | Phase 04-game-model-change P02 | 5min | 2 tasks | 2 files |
 | Phase 04 P04 | 2 | 1 tasks | 1 files |
 | Phase 04 P05 | 4min | 2 tasks | 3 files |
+| Phase 05-pod-deck-ux P02 | 7min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -108,6 +109,8 @@ Recent decisions affecting current work:
 - [Phase 04]: inputProps bounds not added to EditResultModal — editing existing result lacks natural player count context per UAT scope
 - [Phase 04]: New Game button uses component={Link} on MUI Button in pod header — MUI styling with React Router navigation, no useNavigate needed
 - [Phase 04]: Card fields column uses flex: 1 to fill available width; remove button pinned top-right via alignItems: flex-start on outer row
+- [Phase 05]: Discard button uses component=Link pattern (established project convention) rather than useNavigate
+- [Phase 05]: Retired decks filtered client-side in PlayerDecksTab visibleRows — Is Retired column removed since hidden decks make it meaningless
 
 ### Roadmap Evolution
 
@@ -126,6 +129,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-26T02:03:21.786Z
-Stopped at: Phase 5 UI-SPEC approved
-Resume file: .planning/phases/05-pod-deck-ux/05-UI-SPEC.md
+Last session: 2026-03-26T02:43:05.594Z
+Stopped at: Completed 05-02-PLAN.md
+Resume file: None
