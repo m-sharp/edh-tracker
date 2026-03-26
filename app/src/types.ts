@@ -130,3 +130,15 @@ export interface NewGameResult {
     place: number;
     kill_count: number;
 }
+
+export interface NewDeckRequest {
+    name: string;
+    format_id: number;
+    commander_id?: number;
+    partner_commander_id?: number;
+}
+
+export interface NewDeckData {
+    formats: Format[];
+    commanders: Commander[];
+}

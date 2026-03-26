@@ -8,6 +8,7 @@ import {
     Format,
     Game,
     GameResultUpdateFields,
+    NewDeckRequest,
     NewGame,
     NewGameData,
     NewGameResultWithGame,
@@ -269,6 +270,19 @@ export async function PostCommander(name: string): Promise<Response> {
         credentials: "include",
         body: JSON.stringify({ name }),
     });
+}
+
+export async function PostDeck(body: NewDeckRequest): Promise<{ id: number }> {
+    const res = await fetch(`${API_BASE_URL}/api/deck`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+        throw new Error(`Request failed: ${res.status}`);
+    }
+    return await res.json();
 }
 
 // Pod Methods
