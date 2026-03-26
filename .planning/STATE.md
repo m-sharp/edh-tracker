@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Ready to plan
-stopped_at: Completed 04-05-PLAN.md
-last_updated: "2026-03-25T04:03:12.963Z"
+stopped_at: Phase 5 UI-SPEC approved
+last_updated: "2026-03-26T02:03:22.015Z"
 progress:
-  total_phases: 11
+  total_phases: 21
   completed_phases: 4
   total_plans: 22
   completed_plans: 22
@@ -118,6 +118,7 @@ Recent decisions affecting current work:
 - Security review all API and frontend route authorization (api)
 - Make playing cards icon clickable to go home on mobile (ui)
 - Fix record display to default to four places (ui)
+- Handle API_BASE_URL for production in http.ts (api)
 
 ### Blockers/Concerns
 
@@ -126,6 +127,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-25T04:03:12.849Z
-Stopped at: Completed 04-05-PLAN.md
-Resume file: None
+Last session: 2026-03-26T02:03:21.786Z
+Stopped at: Phase 5 UI-SPEC approved
+Resume file: .planning/phases/05-pod-deck-ux/05-UI-SPEC.md
