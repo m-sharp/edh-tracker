@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/m-sharp/edh-tracker/lib/utils"
 
 	"github.com/m-sharp/edh-tracker/lib/errs"
 	repos "github.com/m-sharp/edh-tracker/lib/repositories"
@@ -200,7 +201,7 @@ func GetMembersWithRoles(roleRepo repos.PlayerPodRoleRepository) GetMembersWithR
 		for _, m := range models {
 			result = append(result, PlayerWithRole{
 				PlayerID: m.PlayerID,
-				Role:     m.Role,
+				Role:     utils.TitleCase(m.Role),
 			})
 		}
 		return result, nil

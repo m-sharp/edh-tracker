@@ -55,7 +55,6 @@ export default function PodPlayersTab({ players: initialPlayers, podId, isManage
     };
 
     // TODO: Use icons w/ tooltips for promote/remove buttons?
-    // TODO: Title case Manager vs Member roles coming back from backend
     return (
         <>
             <List>
@@ -92,7 +91,7 @@ export default function PodPlayersTab({ players: initialPlayers, podId, isManage
                             primary={<Link to={`/player/${p.id}`}>{p.name}</Link>}
                             secondary={
                                 <Chip
-                                    label={p.role === "manager" ? "Manager" : "Member"}
+                                    label={p.role}
                                     size="small"
                                     sx={{ mt: 0.5 }}
                                 />
