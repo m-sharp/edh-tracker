@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Ready to execute
-stopped_at: Completed 05-02-PLAN.md
-last_updated: "2026-03-26T02:43:05.983Z"
+stopped_at: Completed 05-pod-deck-ux plan 01 (05-01-PLAN.md)
+last_updated: "2026-03-26T02:50:47.682Z"
 progress:
   total_phases: 21
   completed_phases: 4
   total_plans: 27
-  completed_plans: 23
+  completed_plans: 24
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-22)
 ## Current Position
 
 Phase: 05 (pod-deck-ux) — EXECUTING
-Plan: 2 of 5
+Plan: 3 of 5
 
 ## Performance Metrics
 
@@ -66,6 +66,7 @@ Plan: 2 of 5
 | Phase 04 P04 | 2 | 1 tasks | 1 files |
 | Phase 04 P05 | 4min | 2 tasks | 3 files |
 | Phase 05-pod-deck-ux P02 | 7min | 2 tasks | 6 files |
+| Phase 05-pod-deck-ux P01 | 15min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -111,6 +112,8 @@ Recent decisions affecting current work:
 - [Phase 04]: Card fields column uses flex: 1 to fill available width; remove button pinned top-right via alignItems: flex-start on outer row
 - [Phase 05]: Discard button uses component=Link pattern (established project convention) rather than useNavigate
 - [Phase 05]: Retired decks filtered client-side in PlayerDecksTab visibleRows — Is Retired column removed since hidden decks make it meaningless
+- [Phase 05-pod-deck-ux]: GetStatsForPlayersInPod batch query replaces N+1 per-player calls in GetAllByPod — single SQL with game.pod_id filter returns pod-scoped stats
+- [Phase 05-pod-deck-ux]: Pod/deck create endpoints return {id: N} JSON body with 201 — frontend can navigate to new resource without extra GET
 
 ### Roadmap Evolution
 
@@ -129,6 +132,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-26T02:43:05.594Z
-Stopped at: Completed 05-02-PLAN.md
+Last session: 2026-03-26T02:50:47.258Z
+Stopped at: Completed 05-pod-deck-ux plan 01 (05-01-PLAN.md)
 Resume file: None

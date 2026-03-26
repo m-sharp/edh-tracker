@@ -24,8 +24,8 @@
 
 - [ ] **POD-01**: Pod creation is accessible from the pod page — not buried in player settings
 - [ ] **POD-02**: New users with no pods are guided to create or join one (no confusing empty state)
-- [ ] **POD-03**: Pod → Decks tab is sorted by record (win rate or points) by default
-- [ ] **POD-04**: Pod → Players tab shows each player's record and points within that pod
+- [x] **POD-03**: Pod → Decks tab is sorted by record (win rate or points) by default
+- [x] **POD-04**: Pod → Players tab shows each player's record and points within that pod
 
 ### Games
 
@@ -37,8 +37,8 @@
 ### Decks
 
 - [ ] **DECK-01**: Player can create a new deck from the UI (not just via data import)
-- [ ] **DECK-02**: Commander update field has tooltip: "This is for changing an existing deck's commander. To add a new deck, use the Add Deck button instead."
-- [ ] **DECK-03**: Retired deck visibility is defined and consistent across pod, player, and game views
+- [x] **DECK-02**: Commander update field has tooltip: "This is for changing an existing deck's commander. To add a new deck, use the Add Deck button instead."
+- [x] **DECK-03**: Retired deck visibility is defined and consistent across pod, player, and game views
 
 ### Authentication & Session
 
@@ -115,15 +115,15 @@
 | FEND-05 | Phase 3 | Complete |
 | POD-01 | Phase 5 | Pending |
 | POD-02 | Phase 5 | Pending |
-| POD-03 | Phase 5 | Pending |
-| POD-04 | Phase 5 | Pending |
+| POD-03 | Phase 5 | Complete |
+| POD-04 | Phase 5 | Complete |
 | GAME-01 | Phase 4 | Complete |
 | GAME-02 | Phase 4 | Complete |
 | GAME-03 | Phase 4 | Complete |
 | GAME-04 | Phase 4 | Complete |
 | DECK-01 | Phase 5 | Pending |
-| DECK-02 | Phase 5 | Pending |
-| DECK-03 | Phase 5 | Pending |
+| DECK-02 | Phase 5 | Complete |
+| DECK-03 | Phase 5 | Complete |
 | AUTH-01 | Phase 6 | Pending |
 | AUTH-02 | Phase 1 | Complete |
 | SEC-01 | Phase 1 | Complete |

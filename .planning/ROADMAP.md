@@ -107,10 +107,10 @@ Plans:
   3. The Pod Decks tab is sorted by record by default
   4. The Pod Players tab shows each player's record and points within that pod
   5. A player can create a new deck directly from the UI, and the deck commander update field shows the disambiguation tooltip
-**Plans:** 1/5 plans executed
+**Plans:** 2/5 plans executed
 
 Plans:
-- [ ] 05-01-PLAN.md — Backend: API contract fix (pod/deck create return IDs) + pod-scoped player stats (POD-04)
+- [x] 05-01-PLAN.md — Backend: API contract fix (pod/deck create return IDs) + pod-scoped player stats (POD-04)
 - [x] 05-02-PLAN.md — Frontend quick fixes: Record min 4 places, icon link, DecksTab sort, retired filter, cancel button (POD-03, DECK-02, DECK-03)
 - [ ] 05-03-PLAN.md — Pod creation flow: HomeView onboarding + AppBar pod switcher + CreatePodDialog (POD-01, POD-02)
 - [ ] 05-04-PLAN.md — Pod Players tab redesign with card layout and pod-scoped stats (POD-04)
@@ -148,7 +148,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 2. Design Language | 3/3 | Complete | ✓ |
 | 3. Frontend Structure | 8/8 | Complete   | 2026-03-24 |
 | 4. Game Model Change | 5/5 | Complete   | 2026-03-24 |
-| 5. Pod & Deck UX | 1/5 | In Progress|  |
+| 5. Pod & Deck UX | 2/5 | In Progress|  |
 | 6. Auth, Session & Test Coverage | 0/? | Not started | - |
 | 7. Production Readiness | 0/? | Not started | - |
 
