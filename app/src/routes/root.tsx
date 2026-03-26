@@ -6,12 +6,10 @@ import {
     Box,
     Button,
     Container,
-    IconButton,
     MenuItem,
     Select,
     SelectChangeEvent,
     Toolbar,
-    Tooltip,
     Typography
 } from "@mui/material";
 import LogoutIcon from "@mui/icons-material/Logout";
@@ -32,8 +30,6 @@ export default function Root(): ReactElement {
     );
 }
 
-// TODO: Add mobile menu icon and link menu
-// TODO: Mobile view for all tables
 function DrawerAppBar(): ReactElement {
     const { user, loading, logout } = useAuth();
     const navigate = useNavigate();
