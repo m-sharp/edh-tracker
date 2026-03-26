@@ -94,7 +94,7 @@ Unchanged from Phase 2 dark theme palette.
 | Destructive | MUI `error.main` (`#f44336`) | `palette.error.main` | Remove Player action only |
 
 **Accent reserved for (this phase):**
-1. Primary `variant="contained"` buttons — "Create Pod" submit, "Save" on /deck/new
+1. Primary `variant="contained"` buttons — "Create Pod" submit, "Create Deck" on /deck/new
 2. Active Tab indicator underline (existing, unchanged)
 3. Focused TextField outline on /deck/new and Create Pod modal
 4. AppBar pod-switcher dropdown "Create new pod" MenuItem text label — accent color to distinguish it from pod list items
@@ -161,8 +161,8 @@ Form fields in order:
 Commander/Partner fields use `freeSolo={true}` with a "Create {input}" option rendered as the last item when no match is found in the list. Typing a name not in the list and pressing Enter (or clicking "Create X") triggers `PostCommander(name)` and uses the returned ID for the deck create request.
 
 Action buttons row below form (right-aligned on desktop, stacked on mobile xs):
-- "Cancel" — `variant="outlined"` — navigates to `/player/{callerId}`
-- "Save" — `variant="contained"` (accent gold) — submits form
+- "Discard" — `variant="outlined"` — navigates to `/player/{callerId}`
+- "Create Deck" — `variant="contained"` (accent gold) — submits form
 
 **Source:** D-09 through D-19 (CONTEXT.md). Form layout pattern from Phase 4 NewGameView (stacked card, Container maxWidth="sm").
 
@@ -185,7 +185,7 @@ Components used or modified in this phase. All are already installed.
 | `TooltipIconButton` | `app/src/components/TooltipIcon.tsx` | Promote (PersonAdd) and Remove (PersonOff) in PlayersTab |
 | `PersonAddIcon` | @mui/icons-material | Promote action icon |
 | `PersonOffIcon` | @mui/icons-material | Remove action icon |
-| `ArrowBackIcon` | @mui/icons-material | Cancel/back navigation on /deck/new |
+| `ArrowBackIcon` | @mui/icons-material | Discard/back navigation on /deck/new |
 | `RecordComparator` | `app/src/components/stats.tsx` | DataGrid sort comparator for Pod Decks Tab |
 | `Record` | `app/src/components/stats.tsx` | Updated: pads to minimum 4 places |
 | `SvgIconPlayingCards` | `app/src/components/SvgIconPlayingCards.tsx` | Wrapped in `component={Link}` to navigate home |
@@ -201,12 +201,12 @@ Components used or modified in this phase. All are already installed.
 | HomeView primary CTA | "Create a Pod" |
 | Create Pod modal title | "Create a New Pod" |
 | Create Pod modal field label | "Pod Name" |
-| Create Pod modal submit | "Create" |
-| Create Pod modal cancel | "Cancel" |
+| Create Pod modal submit | "Create Pod" |
+| Create Pod modal cancel | "Discard" |
 | AppBar dropdown — create action | "Create new pod" |
 | /deck/new page heading | "New Deck" |
-| /deck/new primary CTA | "Save" |
-| /deck/new cancel | "Cancel" |
+| /deck/new primary CTA | "Create Deck" |
+| /deck/new cancel | "Discard" |
 | /deck/new commander field label | "Commander" |
 | /deck/new partner field label | "Partner Commander (optional)" |
 | /deck/new freeSolo create option | "Create "{input}"" |
@@ -217,13 +217,13 @@ Components used or modified in this phase. All are already installed.
 | Remove tooltip | "Remove from pod" |
 | Promote confirm dialog title | "Promote {name}?" |
 | Promote confirm dialog body | "Promote {name} to manager? Managers can edit pod settings and manage members." |
-| Promote confirm action | "Confirm" |
+| Promote confirm action | "Make Manager" |
 | Remove confirm dialog title | "Remove {name}?" |
 | Remove confirm dialog body | "Remove {name} from this pod? This action cannot be undone." |
 | Remove confirm action | "Remove" (color="error") |
-| Confirm/both dialogs cancel | "Cancel" |
+| Confirm/both dialogs cancel | "Never mind" |
 | Error — pod creation failed | "Failed to create pod. Try again." (inline below submit button, `color="error"`, `variant="body2"`) |
-| Error — deck creation failed | "Failed to create deck. Try again." (inline below Save button) |
+| Error — deck creation failed | "Failed to create deck. Try again." (inline below Create Deck button) |
 | Error — commander creation failed | "Failed to create commander. Try again." (inline near commander field) |
 | Empty state — Player Decks tab (no decks, is owner) | "No decks yet. Add a deck to get started." |
 | Empty state — Player Decks tab (no decks, not owner) | "No decks yet." |
@@ -233,7 +233,7 @@ Components used or modified in this phase. All are already installed.
 
 | Action | Confirmation approach |
 |--------|-----------------------|
-| Remove player from pod | MUI Dialog (existing pattern from Phase 3 PlayersTab) — "Remove {name}?" with "Remove" (error color) + "Cancel" |
+| Remove player from pod | MUI Dialog (existing pattern from Phase 3 PlayersTab) — "Remove {name}?" with "Remove" (error color) + "Never mind" |
 
 Promote is not destructive but still uses confirmation dialog because it grants elevated access. Deck creation has no destructive actions. Pod creation has no destructive actions.
 
@@ -247,9 +247,9 @@ Promote is not destructive but still uses confirmation dialog because it grants 
 
 | State | Behavior |
 |-------|----------|
-| Pod name empty | "Save" button disabled |
-| Pod name filled | "Save" button enabled (accent gold) |
-| Submitting | "Save" button shows `CircularProgress size={20}` inside button; input disabled |
+| Pod name empty | "Create Pod" button disabled |
+| Pod name filled | "Create Pod" button enabled (accent gold) |
+| Submitting | "Create Pod" button shows `CircularProgress size={20}` inside button; input disabled |
 | Success | Modal closes; auto-navigate to `/pod/{newPodId}` |
 | Error | Error copy shown inline below button; modal stays open; input re-enabled |
 
@@ -262,9 +262,9 @@ Promote is not destructive but still uses confirmation dialog because it grants 
 | Format != "Commander" | Commander/Partner fields hidden |
 | Commander field — typing known value | Autocomplete dropdown shows matching options |
 | Commander field — typing unknown value | "Create {input}" appears as last option in dropdown |
-| All required fields filled | "Save" enabled |
-| Missing required field | "Save" disabled |
-| Submitting | "Save" shows `CircularProgress`; all fields disabled |
+| All required fields filled | "Create Deck" enabled |
+| Missing required field | "Create Deck" disabled |
+| Submitting | "Create Deck" shows `CircularProgress`; all fields disabled |
 | Success | Navigate to `/player/{callerId}/deck/{newDeckId}` |
 | Error | Error copy shown inline; form re-enabled |
 
@@ -296,7 +296,7 @@ All new surfaces must satisfy the DSNG-02 mobile contract (375px viewport):
 | Create Pod modal | TextField full-width; Dialog `maxWidth="xs"` to prevent overflow |
 | AppBar pod-switcher Select | Existing at 375px — no regression; "Create new pod" MenuItem must be reachable by scrolling within the dropdown |
 | PlayersTab card layout | Cards stack vertically; full width at xs; icon buttons (Promote/Remove) render at minimum 44px touch target |
-| /deck/new form | Container `maxWidth="sm"` centers on desktop; full-width at xs; all TextFields full-width; action buttons stack vertically at xs (Cancel above Save or below) |
+| /deck/new form | Container `maxWidth="sm"` centers on desktop; full-width at xs; all TextFields full-width; action buttons stack vertically at xs (Discard above Create Deck or below) |
 | Player card stat row | Single line preferred; allow wrapping to two lines at 375px if stat values are long — body2 (14px) minimum |
 
 **Source:** DSNG-02 requirement (ongoing — not yet fully resolved); Phase 2 mobile contract extended to new surfaces.
@@ -348,7 +348,7 @@ Tasks the executor must complete to satisfy this contract:
 - [ ] `app/src/routes/player/DecksTab.tsx` — filter DataGrid rows client-side: exclude `row.retired === true` from displayed rows (keep the `retired` column hidden by default; it may be used for filtering)
 
 ### Deck Creation (DECK-01)
-- [ ] Create `app/src/routes/deck/new/index.tsx` — full-page form: Name, Format (required), Commander (Commander format only, required), Partner (Commander format only, optional); freeSolo Autocomplete for commanders; "Save" (contained) + "Cancel" (outlined) actions
+- [ ] Create `app/src/routes/deck/new/index.tsx` — full-page form: Name, Format (required), Commander (Commander format only, required), Partner (Commander format only, optional); freeSolo Autocomplete for commanders; "Create Deck" (contained) + "Discard" (outlined) actions
 - [ ] `app/src/index.tsx` — add `/deck/new` route with loader that fetches formats + commanders
 - [ ] `app/src/routes/player/DecksTab.tsx` — add "Add Deck" Button (outlined, right-aligned) visible only when `isOwner === true`; `component={Link}` to `/deck/new`
 - [ ] `app/src/http.ts` — add `PostDeck(body)` function if missing; verify `PostCommander(name)` exists
@@ -357,7 +357,7 @@ Tasks the executor must complete to satisfy this contract:
 - [ ] `app/src/routes/deck/SettingsTab.tsx` — update existing commander Autocomplete to support `freeSolo` + "Create {input}" inline option; consistent with /deck/new behavior
 
 ### New Game Form Cancel Button (D-34)
-- [ ] `app/src/routes/new/index.tsx` — add "Cancel" Button (outlined) that navigates to `/pod/:podId`; place adjacent to submit action
+- [ ] `app/src/routes/new/index.tsx` — add "Discard" Button (outlined) that navigates to `/pod/:podId`; place adjacent to submit action
 
 ---
 
