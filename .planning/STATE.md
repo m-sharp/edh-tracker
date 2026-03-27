@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Ready to plan
-stopped_at: Completed 05-pod-deck-ux plan 04 (05-04-PLAN.md)
-last_updated: "2026-03-27T01:18:36.182Z"
+status: Ready to execute
+stopped_at: Completed 05-pod-deck-ux plan 06 (05-06-PLAN.md)
+last_updated: "2026-03-27T02:33:58.006Z"
 progress:
   total_phases: 21
-  completed_phases: 5
-  total_plans: 27
-  completed_plans: 27
+  completed_phases: 4
+  total_plans: 30
+  completed_plans: 29
 ---
 
 # Project State
@@ -23,8 +23,8 @@ See: .planning/PROJECT.md (updated 2026-03-22)
 
 ## Current Position
 
-Phase: 08
-Plan: Not started
+Phase: 05 (pod-deck-ux) — EXECUTING
+Plan: 3 of 8
 
 ## Performance Metrics
 
@@ -68,6 +68,7 @@ Plan: Not started
 | Phase 05-pod-deck-ux P02 | 7min | 2 tasks | 6 files |
 | Phase 05-pod-deck-ux P01 | 15min | 2 tasks | 8 files |
 | Phase 05-pod-deck-ux P04 | 7min | 1 tasks | 1 files |
+| Phase 05-pod-deck-ux P06 | 8min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -115,6 +116,7 @@ Recent decisions affecting current work:
 - [Phase 05]: Retired decks filtered client-side in PlayerDecksTab visibleRows — Is Retired column removed since hidden decks make it meaningless
 - [Phase 05-pod-deck-ux]: GetStatsForPlayersInPod batch query replaces N+1 per-player calls in GetAllByPod — single SQL with game.pod_id filter returns pod-scoped stats
 - [Phase 05-pod-deck-ux]: Pod/deck create endpoints return {id: N} JSON body with 201 — frontend can navigate to new resource without extra GET
+- [Phase 05-pod-deck-ux]: pod.Create writes all three rows (pod, player_pod, player_pod_role) directly against tx using inline structs — repo methods cannot participate in GORM transactions
 
 ### Roadmap Evolution
 
@@ -135,6 +137,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-26T03:01:17.877Z
-Stopped at: Completed 05-pod-deck-ux plan 04 (05-04-PLAN.md)
+Last session: 2026-03-27T02:33:47.814Z
+Stopped at: Completed 05-pod-deck-ux plan 06 (05-06-PLAN.md)
 Resume file: None
