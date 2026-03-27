@@ -112,9 +112,9 @@ Plans:
 Plans:
 - [x] 05-01-PLAN.md — Backend: API contract fix (pod/deck create return IDs) + pod-scoped player stats (POD-04)
 - [x] 05-02-PLAN.md — Frontend quick fixes: Record min 4 places, icon link, DecksTab sort, retired filter, cancel button (POD-03, DECK-02, DECK-03)
-- [ ] 05-03-PLAN.md — Pod creation flow: HomeView onboarding + AppBar pod switcher + CreatePodDialog (POD-01, POD-02)
+- [x] 05-03-PLAN.md — Pod creation flow: HomeView onboarding + AppBar pod switcher + CreatePodDialog (POD-01, POD-02)
 - [x] 05-04-PLAN.md — Pod Players tab redesign with card layout and pod-scoped stats (POD-04)
-- [ ] 05-05-PLAN.md — Deck creation route /deck/new + DeckSettingsTab freeSolo + Add Deck button (DECK-01)
+- [x] 05-05-PLAN.md — Deck creation route /deck/new + DeckSettingsTab freeSolo + Add Deck button (DECK-01)
 
 ### Phase 6: Auth, Session & Test Coverage
 **Goal**: Session expiry is handled gracefully in the UI, the JWT secret has a startup guard, and missing test coverage is in place
