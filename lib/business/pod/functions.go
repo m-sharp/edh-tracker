@@ -12,6 +12,7 @@ import (
 	"github.com/m-sharp/edh-tracker/lib/errs"
 	repos "github.com/m-sharp/edh-tracker/lib/repositories"
 	"github.com/m-sharp/edh-tracker/lib/repositories/playerPodRole"
+	"github.com/m-sharp/edh-tracker/lib/repositories/pod"
 	"github.com/m-sharp/edh-tracker/lib/utils"
 )
 
@@ -53,35 +54,23 @@ func Create(podRepo repos.PodRepository, roleRepo repos.PlayerPodRoleRepository,
 	return func(ctx context.Context, name string, creatorPlayerID int) (int, error) {
 		var podID int
 		err := client.GormDb.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+			txPodRepo := pod.NewRepositoryFromDB(tx)
+			txPodRoleRepo := playerPodRole.NewRepositoryFromDB(tx)
+
 			// Step 1: insert pod
-			type podRow struct {
-				ID   int    `gorm:"primaryKey;autoIncrement"`
-				Name string
-			}
-			pr := podRow{Name: name}
-			if err := tx.Table("pod").Create(&pr).Error; err != nil {
+			id, err := txPodRepo.Add(ctx, name)
+			if err != nil {
 				return fmt.Errorf("failed to insert pod in Create: %w", err)
 			}
-			podID = pr.ID
+			podID = id
 
 			// Step 2: insert player_pod
-			type playerPodRow struct {
-				PodID    int `gorm:"column:pod_id"`
-				PlayerID int `gorm:"column:player_id"`
-			}
-			pp := playerPodRow{PodID: podID, PlayerID: creatorPlayerID}
-			if err := tx.Table("player_pod").Create(&pp).Error; err != nil {
+			if err = txPodRepo.AddPlayerToPod(ctx, id, creatorPlayerID); err != nil {
 				return fmt.Errorf("failed to insert player_pod in Create: %w", err)
 			}
 
 			// Step 3: insert player_pod_role
-			type podRoleRow struct {
-				PodID    int    `gorm:"column:pod_id"`
-				PlayerID int    `gorm:"column:player_id"`
-				Role     string `gorm:"column:role"`
-			}
-			pr2 := podRoleRow{PodID: podID, PlayerID: creatorPlayerID, Role: playerPodRole.RoleManager}
-			if err := tx.Table("player_pod_role").Create(&pr2).Error; err != nil {
+			if err = txPodRoleRepo.SetRole(ctx, id, creatorPlayerID, playerPodRole.RoleManager); err != nil {
 				return fmt.Errorf("failed to insert player_pod_role in Create: %w", err)
 			}
 
@@ -90,6 +79,7 @@ func Create(podRepo repos.PodRepository, roleRepo repos.PlayerPodRoleRepository,
 		if err != nil {
 			return 0, fmt.Errorf("failed to create pod: %w", err)
 		}
+
 		return podID, nil
 	}
 }
