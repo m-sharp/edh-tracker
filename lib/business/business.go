@@ -88,7 +88,7 @@ func NewBusiness(log *zap.Logger, r *repositories.Repositories, client *lib.DBCl
 		Pods: pod.Functions{
 			GetByID:             pod.GetByID(r.Pods),
 			GetByPlayerID:       pod.GetByPlayerID(r.Pods),
-			Create:              pod.Create(r.Pods, r.PlayerPodRoles),
+			Create:              pod.Create(r.Pods, r.PlayerPodRoles, client),
 			AddPlayer:           pod.AddPlayer(r.Pods, r.PlayerPodRoles),
 			GetRole:             pod.GetRole(r.PlayerPodRoles),
 			PromoteToManager:    pod.PromoteToManager(r.PlayerPodRoles),
