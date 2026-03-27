@@ -25,3 +25,7 @@
     - @app/src/routes/error.tsx line 9 - make hard error page match base styling of everywhere else
 - The new Commander GetAll repository method needs tests - see TODO at line 175 in @lib/repositories/commander/repo.go
 - Rebuild CLAUDE context on frontend patterns
+- Deck settings tab needs restyling - everything is cramped on left side
+- Player settings tab needs restyling - spacing help at the least
+- Pod settings tab needs restyling - Generated invite link is very ugly and just plain text
+- Switching a Deck's format from Commander to some other format should remove the Deck's associated Commander(s)
