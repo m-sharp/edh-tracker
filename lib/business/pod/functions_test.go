@@ -398,7 +398,7 @@ func TestGetMembersWithRoles_Success(t *testing.T) {
 	result, err := fn(context.Background(), 1)
 	require.NoError(t, err)
 	assert.Len(t, result, 2)
-	assert.Equal(t, "manager", result[0].Role)
+	assert.Equal(t, "Manager", result[0].Role)
 }
 
 func TestGetMembersWithRoles_Error(t *testing.T) {
