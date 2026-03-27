@@ -31,8 +31,8 @@ A pod can sit down, record a game in under a minute, and immediately see accurat
 - [x] Shared tooltip icon and tooltip icon button components — Validated in Phase 3: Frontend Structure
 - [x] Fix: page refresh causes blank white screen (React Router client-side routing issue) — Validated in Phase 3: Frontend Structure
 - [x] Fix: "No pods yet" flash before data loads on HomeView — Validated in Phase 3: Frontend Structure
-- [ ] Move pod creation out of player settings and into the pod page
-- [ ] New user onboarding: clear path and UX for a user with no pods yet
+- [x] Move pod creation out of player settings and into the pod page — Validated in Phase 5: pod-deck-ux
+- [x] New user onboarding: clear path and UX for a user with no pods yet — Validated in Phase 5: pod-deck-ux
 - [ ] Rebuild CLAUDE.md context section on frontend patterns (after refactor settles)
 
 **Game model change:**
@@ -41,11 +41,11 @@ A pod can sit down, record a game in under a minute, and immediately see accurat
 - [ ] Remove/hide player field from game creation and result forms
 
 **Functional gaps:**
-- [ ] Player can create new decks via the UI
-- [ ] Pod → Decks tab sorted by record by default
-- [ ] Pod → Players view shows player records and points within the pod
+- [x] Player can create new decks via the UI — Validated in Phase 5: pod-deck-ux
+- [x] Pod → Decks tab sorted by record by default — Validated in Phase 5: pod-deck-ux
+- [x] Pod → Players view shows player records and points within the pod — Validated in Phase 5: pod-deck-ux
 - [ ] New game form complete redesign (currently "looks terrible")
-- [ ] Record renderer supports any number of places (currently hardcoded to 4)
+- [x] Record renderer supports any number of places (currently hardcoded to 4) — Validated in Phase 5: pod-deck-ux
 - [ ] Tooltip on deck commander update: "This is for changing an existing deck's commander. To add a new deck, use the Add Deck button instead."
 - [ ] Investigate and define retired deck behavior across all views (pod, player, game)
 
