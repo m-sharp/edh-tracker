@@ -5,16 +5,23 @@ import {
     Avatar,
     Box,
     Button,
+    CircularProgress,
     Container,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Divider,
     MenuItem,
     Select,
     SelectChangeEvent,
+    TextField,
     Toolbar,
     Typography
 } from "@mui/material";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { useAuth } from "../auth";
-import { GetPodsForPlayer } from "../http";
+import { GetPodsForPlayer, PostPod } from "../http";
 import { Pod } from "../types";
 import SvgIconPlayingCards from "../components/SvgIconPlayingCards";
 import { TooltipIconButton } from "../components/TooltipIcon";
@@ -97,6 +104,10 @@ function PodSelector({ playerId }: { playerId: number }): ReactElement {
     const [pods, setPods] = useState<Pod[]>([]);
     const { podId } = useParams<{ podId?: string }>();
     const navigate = useNavigate();
+    const [createPodOpen, setCreatePodOpen] = useState(false);
+    const [podName, setPodName] = useState("");
+    const [submitting, setSubmitting] = useState(false);
+    const [createError, setCreateError] = useState<string | null>(null);
 
     const selectedPodId = podId ?? localStorage.getItem("lastPodId") ?? "";
 
@@ -106,23 +117,70 @@ function PodSelector({ playerId }: { playerId: number }): ReactElement {
 
     const handleChange = (e: SelectChangeEvent) => {
         const id = e.target.value;
+        if (id === "create-new") {
+            setCreatePodOpen(true);
+            return;
+        }
         localStorage.setItem("lastPodId", id);
         navigate(`/pod/${id}`);
     };
 
+    const handleCreatePod = async () => {
+        setCreateError(null);
+        setSubmitting(true);
+        try {
+            const { id } = await PostPod(podName);
+            setCreatePodOpen(false);
+            setPodName("");
+            setSubmitting(false);
+            navigate(`/pod/${id}`);
+        } catch {
+            setCreateError("Failed to create pod. Try again.");
+            setSubmitting(false);
+        }
+    };
+
     return (
-        <Select
-            value={selectedPodId}
-            onChange={handleChange}
-            displayEmpty
-            size="small"
-            sx={{ color: "white", mr: 1 }}
-        >
-            {pods.length === 0
-                ? <MenuItem value="" disabled>No pods</MenuItem>
-                : pods.map(p => <MenuItem key={p.id} value={String(p.id)}>{p.name}</MenuItem>)
-            }
-        </Select>
+        <>
+            <Select
+                value={selectedPodId}
+                onChange={handleChange}
+                displayEmpty
+                size="small"
+                sx={{ color: "white", mr: 1 }}
+            >
+                {pods.length === 0
+                    ? <MenuItem value="" disabled>No pods</MenuItem>
+                    : pods.map(p => <MenuItem key={p.id} value={String(p.id)}>{p.name}</MenuItem>)
+                }
+                <Divider />
+                <MenuItem value="create-new" sx={{ color: "primary.main" }}>Create new pod</MenuItem>
+            </Select>
+            <Dialog open={createPodOpen} onClose={() => setCreatePodOpen(false)} maxWidth="xs" fullWidth>
+                <DialogTitle>Create a New Pod</DialogTitle>
+                <DialogContent>
+                    <TextField
+                        label="Pod Name"
+                        value={podName}
+                        onChange={(e) => setPodName(e.target.value)}
+                        fullWidth
+                        autoFocus
+                        sx={{ mt: 1 }}
+                        disabled={submitting}
+                    />
+                    {createError && <Typography color="error" variant="body2" sx={{ mt: 1 }}>{createError}</Typography>}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setCreatePodOpen(false)} disabled={submitting}>Discard</Button>
+                    <Button
+                        variant="contained"
+                        disabled={!podName.trim() || submitting}
+                        onClick={handleCreatePod}
+                    >
+                        {submitting ? <CircularProgress size={20} /> : "Create Pod"}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+        </>
     );
 }
-

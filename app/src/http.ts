@@ -302,7 +302,7 @@ export async function GetPodsForPlayer(playerId: number): Promise<Array<Pod>> {
     return await res.json();
 }
 
-export async function PostPod(name: string): Promise<Pod> {
+export async function PostPod(name: string): Promise<{ id: number }> {
     const res = await fetch(`${API_BASE_URL}/api/pod`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
