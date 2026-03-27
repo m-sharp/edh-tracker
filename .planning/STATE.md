@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Ready to execute
-stopped_at: Completed 05-pod-deck-ux plan 07 (05-07-PLAN.md)
-last_updated: "2026-03-27T02:34:14.300Z"
+stopped_at: Completed 05-pod-deck-ux plan 08 (05-08-PLAN.md)
+last_updated: "2026-03-27T02:35:21.378Z"
 progress:
   total_phases: 21
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 30
-  completed_plans: 29
+  completed_plans: 30
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-22)
 ## Current Position
 
 Phase: 05 (pod-deck-ux) — EXECUTING
-Plan: 3 of 8
+Plan: 4 of 8
 
 ## Performance Metrics
 
@@ -70,6 +70,7 @@ Plan: 3 of 8
 | Phase 05-pod-deck-ux P04 | 7min | 1 tasks | 1 files |
 | Phase 05-pod-deck-ux P06 | 8min | 2 tasks | 3 files |
 | Phase 05 P07 | 2min | 2 tasks | 4 files |
+| Phase 05-pod-deck-ux P08 | 4min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -120,6 +121,7 @@ Recent decisions affecting current work:
 - [Phase 05-pod-deck-ux]: pod.Create writes all three rows (pod, player_pod, player_pod_role) directly against tx using inline structs — repo methods cannot participate in GORM transactions
 - [Phase 05]: CommanderCreate mirrors DeckCreate pattern: capture ID, set Content-Type, WriteHeader 201, encode JSON body
 - [Phase 05]: PostCommander mirrors PostDeck/PostPod: typed return, throw on non-ok, caller sites simplified to direct destructuring
+- [Phase 05-pod-deck-ux]: PlayerDecksTab retired filter via DataGrid initialState.filter instead of hard visibleRows filter — retired decks hidden by default but accessible via filter removal
 
 ### Roadmap Evolution
 
@@ -140,6 +142,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-27T02:34:14.194Z
-Stopped at: Completed 05-pod-deck-ux plan 07 (05-07-PLAN.md)
+Last session: 2026-03-27T02:35:21.245Z
+Stopped at: Completed 05-pod-deck-ux plan 08 (05-08-PLAN.md)
 Resume file: None

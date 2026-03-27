@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 2: Design Language** - Define and apply the visual design system before any UI work begins
 - [x] **Phase 3: Frontend Structure** - Refactor route files, build shared components, and fix routing bugs (completed 2026-03-24)
 - [x] **Phase 4: Game Model Change** - Remove player field from game entry and redesign the game form (completed 2026-03-24)
-- [ ] **Phase 5: Pod & Deck UX** - Complete pod and deck feature gaps and onboarding flow
+- [x] **Phase 5: Pod & Deck UX** - Complete pod and deck feature gaps and onboarding flow (completed 2026-03-27)
 - [ ] **Phase 6: Auth, Session & Test Coverage** - 401 interceptor, JWT startup guard, and missing test suites
 - [ ] **Phase 7: Production Readiness** - Verify CORS, cookies, and API base URL in the deployed environment
 
@@ -107,7 +107,7 @@ Plans:
   3. The Pod Decks tab is sorted by record by default
   4. The Pod Players tab shows each player's record and points within that pod
   5. A player can create a new deck directly from the UI, and the deck commander update field shows the disambiguation tooltip
-**Plans:** 7/8 plans executed
+**Plans:** 8/8 plans complete
 
 Plans:
 - [x] 05-01-PLAN.md — Backend: API contract fix (pod/deck create return IDs) + pod-scoped player stats (POD-04)
@@ -117,7 +117,7 @@ Plans:
 - [x] 05-05-PLAN.md — Deck creation route /deck/new + DeckSettingsTab freeSolo + Add Deck button (DECK-01)
 - [x] 05-06-PLAN.md — pod.Create transaction: AddPlayerToPod + atomic 3-write tx (POD-01, POD-02) [gap closure]
 - [x] 05-07-PLAN.md — Commander POST returns {id: N} body + PostCommander http.ts fix (DECK-01) [gap closure]
-- [ ] 05-08-PLAN.md — Pod Decks client-side sort + retired filter via DataGrid + Cancel copy (POD-03, DECK-02, DECK-03) [gap closure]
+- [x] 05-08-PLAN.md — Pod Decks client-side sort + retired filter via DataGrid + Cancel copy (POD-03, DECK-02, DECK-03) [gap closure]
 
 ### Phase 6: Auth, Session & Test Coverage
 **Goal**: Session expiry is handled gracefully in the UI, the JWT secret has a startup guard, and missing test coverage is in place
@@ -151,7 +151,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 2. Design Language | 3/3 | Complete | ✓ |
 | 3. Frontend Structure | 8/8 | Complete   | 2026-03-24 |
 | 4. Game Model Change | 5/5 | Complete   | 2026-03-24 |
-| 5. Pod & Deck UX | 7/8 | In Progress|  |
+| 5. Pod & Deck UX | 8/8 | Complete   | 2026-03-27 |
 | 6. Auth, Session & Test Coverage | 0/? | Not started | - |
 | 7. Production Readiness | 0/? | Not started | - |
 
