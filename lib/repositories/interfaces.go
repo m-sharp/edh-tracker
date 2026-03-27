@@ -4,6 +4,8 @@ import (
 	"context"
 	"time"
 
+	"gorm.io/gorm"
+
 	"github.com/m-sharp/edh-tracker/lib/repositories/commander"
 	"github.com/m-sharp/edh-tracker/lib/repositories/deck"
 	"github.com/m-sharp/edh-tracker/lib/repositories/deckCommander"
@@ -16,6 +18,12 @@ import (
 	"github.com/m-sharp/edh-tracker/lib/repositories/podInvite"
 	"github.com/m-sharp/edh-tracker/lib/repositories/user"
 )
+
+type BaseRepository interface {
+	StartTX(tx *gorm.DB)
+	EndTX()
+	DB() *gorm.DB
+}
 
 type PlayerRepository interface {
 	GetAll(ctx context.Context) ([]player.Model, error)
@@ -71,6 +79,7 @@ type GameResultRepository interface {
 }
 
 type PodRepository interface {
+	BaseRepository
 	GetAll(ctx context.Context) ([]pod.Model, error)
 	GetByID(ctx context.Context, podID int) (*pod.Model, error)
 	GetByIDWithMembers(ctx context.Context, podID int) (*pod.Model, error)

@@ -103,6 +103,7 @@ type playerRow struct {
 	Name string
 }
 
+// TODO: This transaction two query call should really be orchestrated in a business function that starts a transaction, calls PlayerRepo.Add, and then UserRepo.AddWithOAuth
 func (r *Repository) CreatePlayerAndUser(
 	ctx context.Context,
 	playerName string,

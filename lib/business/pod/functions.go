@@ -12,7 +12,6 @@ import (
 	"github.com/m-sharp/edh-tracker/lib/errs"
 	repos "github.com/m-sharp/edh-tracker/lib/repositories"
 	"github.com/m-sharp/edh-tracker/lib/repositories/playerPodRole"
-	"github.com/m-sharp/edh-tracker/lib/repositories/pod"
 	"github.com/m-sharp/edh-tracker/lib/utils"
 )
 
@@ -54,18 +53,20 @@ func Create(podRepo repos.PodRepository, roleRepo repos.PlayerPodRoleRepository,
 	return func(ctx context.Context, name string, creatorPlayerID int) (int, error) {
 		var podID int
 		err := client.GormDb.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-			txPodRepo := pod.NewRepositoryFromDB(tx)
+			podRepo.StartTX(tx)
+			defer podRepo.EndTX()
+
 			txPodRoleRepo := playerPodRole.NewRepositoryFromDB(tx)
 
 			// Step 1: insert pod
-			id, err := txPodRepo.Add(ctx, name)
+			id, err := podRepo.Add(ctx, name)
 			if err != nil {
 				return fmt.Errorf("failed to insert pod in Create: %w", err)
 			}
 			podID = id
 
 			// Step 2: insert player_pod
-			if err = txPodRepo.AddPlayerToPod(ctx, id, creatorPlayerID); err != nil {
+			if err = podRepo.AddPlayerToPod(ctx, id, creatorPlayerID); err != nil {
 				return fmt.Errorf("failed to insert player_pod in Create: %w", err)
 			}
 

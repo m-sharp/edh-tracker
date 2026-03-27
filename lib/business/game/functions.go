@@ -94,6 +94,7 @@ func GetByID(
 	}
 }
 
+// TODO: Fix this transaction with new repo pattern
 func Create(
 	log *zap.Logger,
 	gameRepo repos.GameRepository,
