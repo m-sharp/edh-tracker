@@ -1,9 +1,9 @@
 ---
-status: diagnosed
+status: complete
 phase: 05-pod-deck-ux
 source: [05-01-SUMMARY.md, 05-02-SUMMARY.md, 05-03-SUMMARY.md, 05-04-SUMMARY.md, 05-05-SUMMARY.md]
 started: 2026-03-26T00:00:00Z
-updated: 2026-03-26T00:00:00Z
+updated: 2026-03-27T00:00:00Z
 ---
 
 ## Current Test
@@ -21,9 +21,8 @@ result: pass
 
 ### 2. Pod Decks tab default sort
 expected: Open a pod's Decks tab. The deck list is sorted by record descending by default, without needing to click any column header.
-result: issue
-reported: "Decks tab is sorted by record correctly. The issue around pagination limiting results remains - the truely best/greatest record deck does not appear at the top of the list as it is on a different page of results."
-severity: major
+result: pass
+notes: "Fixed by plan 05-08: switched to client-side pagination (GetAllDecksForPod loads all decks upfront); DataGrid sortModel now applies correctly."
 
 ### 3. Playing cards icon links home
 expected: Click the playing cards icon in the AppBar. You are taken to the home page (/).
@@ -31,9 +30,8 @@ result: pass
 
 ### 4. Player Decks tab hides retired decks
 expected: On a player's Decks tab, any retired decks are not shown in the list. There is also no "Is Retired" boolean column in the grid.
-result: issue
-reported: "This is the behavior, but it was not desired. The desired behavior was to have retired decks filtered out of the data grid by default - they should still be accessible via the data grid filtering options. As is, there is no way to ever find one's retired decks."
-severity: major
+result: pass
+notes: "Fixed by plan 05-08: DataGrid initialState.filter hides retired decks by default; 'Is Retired' column present so user can clear the filter to access retired decks."
 
 ### 5. Create Pod removed from Player Settings
 expected: Open your player's Settings tab. There is no "Create New Pod" form, text field, or button anywhere on the page.
@@ -49,9 +47,8 @@ result: pass
 
 ### 8. Create Pod from home screen
 expected: On the onboarding home screen, click "Create a Pod". A dialog opens with a Pod Name text field, a "Discard" button, and a "Create Pod" submit button. After creating a pod, you are automatically navigated to the new pod's page (/pod/{id}).
-result: issue
-reported: "Creating a new pod works and redirects to the new pod's page correctly. On redirect, the pod selector state in the nav bar still shows as empty with 'No pods' and 'Create new pod' as the options. Even on hard refresh, the pod does not show up for the player. A PodPlayer record was NOT created for the player - leaving this pod effectively orphaned."
-severity: blocker
+result: pass
+notes: "Fixed by plan 05-06 (pod.Create transaction) and quick task 260326-x0y (PodSelector re-fetches on navigation to unknown pod)."
 
 ### 9. AppBar "Create new pod" option
 expected: Open the pod selector dropdown in the AppBar. At the bottom, separated by a divider and styled in primary color, there is a "Create new pod" option. Selecting it opens the create pod dialog, and after creation you land on the new pod's page.
@@ -66,10 +63,9 @@ expected: On the Players tab, players who are pod managers have a "Manager" chip
 result: pass
 
 ### 12. Promote/remove dialog copy
-expected: Click promote (PersonAdd) on a player card. The dialog title includes the player's name, the cancel button says "Never mind", and the confirm button says "Make Manager". Similarly for remove: title includes name, cancel is "Never mind", confirm is "Remove".
-result: issue
-reported: "Copy is right, would rather have 'Cancel' over 'Never mind'"
-severity: cosmetic
+expected: Click promote (PersonAdd) on a player card. The dialog title includes the player's name, the cancel button says "Cancel", and the confirm button says "Make Manager". Similarly for remove: title includes name, cancel is "Cancel", confirm is "Remove".
+result: pass
+notes: "Fixed by plan 05-04: cancel button changed to 'Cancel'."
 
 ### 13. Add Deck button (owner only)
 expected: On your own player profile's Decks tab, an "Add Deck" button appears above the deck grid (and in the empty state). View another player's Decks tab — the "Add Deck" button is not visible.
@@ -81,9 +77,8 @@ result: pass
 
 ### 15. FreeSolo commander creation in new deck form
 expected: On the /deck/new form with Commander format selected, type a new commander name that doesn't exist yet. A "Create "{name}"" option appears in the dropdown. Selecting it creates the commander inline and fills the field — no separate page or form needed.
-result: issue
-reported: "On submitting the new commander name, the 'Failed to create commander. Try again.' error text is shown. On refresh, the new commander is in the autocomplete. The network tab shows that a POST to /api/commander succeeds with a 201 status response. No body is included with the response though - handling of the commander post probably expects an ID"
-severity: major
+result: pass
+notes: "Fixed by plan 05-07: CommanderCreate returns {id: N} JSON body; PostCommander in http.ts now returns Promise<{id: number}>."
 
 ### 16. After deck creation navigation
 expected: Complete the /deck/new form and submit. You are automatically navigated to the new deck's detail page (/player/{playerId}/deck/{newDeckId}).
@@ -97,8 +92,8 @@ notes: "Same POST /api/commander no-body bug applies (already logged under test 
 ## Summary
 
 total: 17
-passed: 12
-issues: 5
+passed: 17
+issues: 0
 pending: 0
 skipped: 0
 blocked: 0

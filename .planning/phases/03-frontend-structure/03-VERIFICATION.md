@@ -1,6 +1,7 @@
 ---
 phase: 03-frontend-structure
 verified: 2026-03-24T12:00:00Z
+human_verified: 2026-03-27
 status: passed
 score: 31/31 must-haves verified
 re_verification:
@@ -19,19 +20,24 @@ gaps: []
 human_verification:
   - test: "Refresh on a sub-route (e.g. /pod/1) in the Docker static server build"
     expected: "Page loads correctly — no blank screen, no SyntaxError in console, /static/js/*.js returns JavaScript not HTML"
-    why_human: "Requires Docker build and running container — cannot verify statically"
+    result: pass
+    verified: 2026-03-27
   - test: "Tab persistence across navigation"
     expected: "URL retains ?podTab=players after navigating away and back; tab re-selected on return"
-    why_human: "Requires browser interaction with running app"
+    result: pass
+    verified: 2026-03-27
   - test: "TooltipIcon on mobile — tap info icon next to Commanders in Deck Settings"
     expected: "Tooltip opens above the icon on first tap with no delay (enterTouchDelay=0, placement=top)"
-    why_human: "Touch interaction requires physical device or emulator"
+    result: pass
+    verified: 2026-03-27
   - test: "Login page top spacing on desktop"
     expected: "Content begins near the top with pt: { xs: 4, sm: 8 } — not vertically centered"
-    why_human: "Visual layout check requires browser"
+    result: pass
+    verified: 2026-03-27
   - test: "Pod PlayersTab Promote/Remove confirmation dialog"
     expected: "Clicking Promote or Remove opens dialog with contextual message; Cancel dismisses; Confirm executes"
-    why_human: "Interactive state behavior requires browser with authenticated session"
+    result: pass
+    verified: 2026-03-27
 ---
 
 # Phase 3: Frontend Structure Verification Report

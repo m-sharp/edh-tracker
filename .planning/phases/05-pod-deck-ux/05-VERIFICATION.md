@@ -132,49 +132,49 @@ No placeholder returns, hardcoded empty arrays feeding rendered output, or FIXME
 
 **Correction from previous VERIFICATION.md:** The prior report at "line 32" cited `visibleRows = (data ?? []).filter((d: Deck) => !d.retired)` as the retired-deck filter mechanism. This does not exist in the current file. Gap-closure Plan 08 replaced the manual filter with a DataGrid `initialState.filter.filterModel` approach. The behavioral outcome (retired decks hidden by default, clearable by user) is the same and correctly implemented.
 
-### Human Verification Required
+### Human Verification
 
 #### 1. Pod creation happy path — HomeView
 
 **Test:** Log in as a user with no pods. Verify the HomeView shows "Welcome to EDH Tracker" heading, body text "Create your first pod or ask a friend for an invite link.", and a "Create a Pod" button. Click the button, enter a pod name, click "Create Pod".
 **Expected:** Lands on `/pod/{newId}` immediately after creation; new pod appears in the AppBar pod selector.
-**Why human:** Real navigation and backend response required; post-creation pod-selector update requires live render.
+**Result:** PASS (verified 2026-03-27; AppBar selector update required quick task 260326-x0y fix)
 
 #### 2. AppBar "Create new pod" flow
 
 **Test:** Log in with any user. Open the pod selector dropdown in the AppBar. Verify a "Create new pod" menu item appears at the bottom below a divider. Click it. Verify the Create Pod dialog opens. Create a pod.
 **Expected:** Dropdown item present; dialog opens; successful creation navigates to new pod; pod appears in selector.
-**Why human:** Requires running browser session.
+**Result:** PASS (verified 2026-03-27; AppBar selector update required quick task 260326-x0y fix)
 
 #### 3. Pod Players tab shows pod-scoped (not global) stats
 
 **Test:** Navigate to a pod with players who have game history in other pods. Open the Players tab. Compare each player's stat card to what appears on their player profile (global stats). Stats should differ if the player has games outside this pod.
 **Expected:** Cards show only this pod's results.
-**Why human:** Requires real multi-pod game data to distinguish pod-scoped from global stats.
+**Result:** PASS (verified 2026-03-27)
 
 #### 4. /deck/new form — Commander conditional fields
 
 **Test:** Navigate to `/deck/new`. Select "Commander" format. Verify Commander (required) and "Partner Commander (optional)" fields appear. Select a non-Commander format. Verify those fields disappear.
 **Expected:** Conditional rendering works; submit disabled until commander selected for Commander format.
-**Why human:** Requires running React app with real format data loaded.
+**Result:** PASS (verified 2026-03-27)
 
 #### 5. freeSolo commander creation — deck/new and SettingsTab
 
 **Test:** On `/deck/new`, type a commander name that does not exist. Verify a "Create ..." option appears in the Autocomplete dropdown. Select it. Verify the commander is created inline (no error, no navigation away).
 **Expected:** POST /api/commander fires; field populates with the new commander; form remains on `/deck/new`.
-**Why human:** Requires live API and UI interaction to verify the freeSolo creation branch.
+**Result:** PASS (verified 2026-03-27)
 
 #### 6. Retired deck filter in Player Decks tab
 
 **Test:** Navigate to a player profile with at least one retired deck. Open the Decks tab. Verify the retired deck is hidden by default. Open the DataGrid filter panel via the toolbar and clear the "Is Retired is false" filter. Verify the retired deck appears.
 **Expected:** Retired decks hidden by default; clearable via toolbar filter.
-**Why human:** Requires UI interaction with DataGrid toolbar and filter panel.
+**Result:** PASS (verified 2026-03-27)
 
 ### Gaps Summary
 
-No gaps. All 14 must-have truths verified. All 7 Phase 5 requirement IDs (POD-01 through POD-04, DECK-01 through DECK-03) have implementation evidence. Go and TypeScript compile cleanly. Eight plans executed (01-05 original plus 06-08 gap-closure) — all artifacts are substantive, wired, and data-connected.
+No gaps. All 14 must-have truths verified. All 7 Phase 5 requirement IDs (POD-01 through POD-04, DECK-01 through DECK-03) have implementation evidence. Go and TypeScript compile cleanly. Eight plans executed (01-05 original plus 06-08 gap-closure) — all artifacts are substantive, wired, and data-connected. All 6 human verification items confirmed passing 2026-03-27.
 
 ---
 
-_Verified: 2026-03-26_
+_Verified: 2026-03-26 | Human UAT complete: 2026-03-27_
 _Verifier: Claude (gsd-verifier)_
