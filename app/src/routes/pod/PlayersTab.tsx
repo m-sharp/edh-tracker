@@ -110,7 +110,7 @@ export default function PodPlayersTab({ players: initialPlayers, podId, isManage
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => setConfirmAction(null)}>Never mind</Button>
+                    <Button onClick={() => setConfirmAction(null)}>Cancel</Button>
                     <Button
                         variant="contained"
                         color={confirmAction?.type === "promote" ? "primary" : "error"}

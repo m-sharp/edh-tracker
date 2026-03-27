@@ -6,7 +6,6 @@ import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import { useAuth } from "../../auth";
 import { AsyncComponentHelper } from "../../components/common";
 import { GetDecksForPlayer } from "../../http";
-import { Deck } from "../../types";
 import { CommanderColumn, StatColumns } from "../../components/stats";
 
 interface PlayerDecksTabProps {
@@ -29,9 +28,7 @@ export default function PlayerDecksTab({ playerId }: PlayerDecksTabProps): React
         );
     }
 
-    const visibleRows = (data ?? []).filter((d: Deck) => !d.retired);
-
-    if (data && visibleRows.length === 0) {
+    if (data && data.length === 0) {
         return (
             <Box sx={{ p: 2, display: "flex", flexDirection: "column", gap: 2 }}>
                 <Typography variant="body2" color="text.secondary">
@@ -49,6 +46,7 @@ export default function PlayerDecksTab({ playerId }: PlayerDecksTabProps): React
     const columns = [
         CommanderColumn,
         ...StatColumns,
+        { field: "retired", headerName: "Is Retired", type: "boolean", width: 100 },
     ];
 
     return (
@@ -62,10 +60,17 @@ export default function PlayerDecksTab({ playerId }: PlayerDecksTabProps): React
             )}
             <Box style={{ height: 750, width: "100%" }}>
                 <DataGrid
-                    rows={visibleRows}
+                    rows={data ?? []}
                     columns={columns}
                     slots={{ toolbar: GridToolbar }}
-                    initialState={{ sorting: { sortModel: [{ field: "name", sort: "asc" }] } }}
+                    initialState={{
+                        filter: {
+                            filterModel: {
+                                items: [{ field: "retired", operator: "is", value: "false" }],
+                            },
+                        },
+                        sorting: { sortModel: [{ field: "name", sort: "asc" }] },
+                    }}
                 />
             </Box>
         </Box>
