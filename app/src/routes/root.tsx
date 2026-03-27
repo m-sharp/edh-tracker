@@ -115,6 +115,12 @@ function PodSelector({ playerId }: { playerId: number }): ReactElement {
         GetPodsForPlayer(playerId).then(setPods).catch(() => setPods([]));
     }, [playerId]);
 
+    useEffect(() => {
+        if (podId && playerId && !pods.find(p => String(p.id) === podId)) {
+            GetPodsForPlayer(playerId).then(setPods).catch(() => {});
+        }
+    }, [podId, playerId]); // eslint-disable-line react-hooks/exhaustive-deps
+
     const handleChange = (e: SelectChangeEvent) => {
         const id = e.target.value;
         if (id === "create-new") {
@@ -130,6 +136,7 @@ function PodSelector({ playerId }: { playerId: number }): ReactElement {
         setSubmitting(true);
         try {
             const { id } = await PostPod(podName);
+            await GetPodsForPlayer(playerId).then(setPods);
             setCreatePodOpen(false);
             setPodName("");
             setSubmitting(false);
