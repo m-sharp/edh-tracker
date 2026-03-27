@@ -4,7 +4,7 @@ import { LoaderFunctionArgs } from "@remix-run/router/utils";
 import { Box, Button, Typography } from "@mui/material";
 
 import { useAuth } from "../../auth";
-import { GetDecksForPod, GetGamesForPod, GetPod, GetPlayersForPod } from "../../http";
+import { GetAllDecksForPod, GetGamesForPod, GetPod, GetPlayersForPod } from "../../http";
 import { Deck, Game, PaginatedResponse, PlayerWithRole, Pod } from "../../types";
 import TabbedLayout from "../../components/TabbedLayout";
 import PodDecksTab from "./DecksTab";
@@ -15,7 +15,7 @@ import PodSettingsTab from "./SettingsTab";
 interface PodLoaderData {
     pod: Pod;
     players: PlayerWithRole[];
-    decks: PaginatedResponse<Deck>;
+    decks: Deck[];
     games: PaginatedResponse<Game>;
 }
 
@@ -24,7 +24,7 @@ export async function podLoader({ params }: LoaderFunctionArgs): Promise<PodLoad
     const [pod, players, decks, games] = await Promise.all([
         GetPod(podId),
         GetPlayersForPod(podId),
-        GetDecksForPod(podId, 25, 0),
+        GetAllDecksForPod(podId),
         GetGamesForPod(podId, 25, 0),
     ]);
     return { pod, players, decks, games };
