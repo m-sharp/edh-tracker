@@ -34,8 +34,17 @@
   "mode": "interactive",
   "granularity": "standard",
   "agent_skills": {
-    "gsd-planner": ["skills/gorm", "skills/react-router"],
-    "gsd-researcher": ["skills/gorm", "skills/react-router"],
-    "gsd-verifier": ["skills/smoke-test", "skills/frontend-verify"]
+    "gsd-planner": [
+      "skills/gorm",
+      "skills/react-router"
+    ],
+    "gsd-researcher": [
+      "skills/gorm",
+      "skills/react-router"
+    ],
+    "gsd-verifier": [
+      "skills/smoke-test",
+      "skills/frontend-verify"
+    ]
   }
 }

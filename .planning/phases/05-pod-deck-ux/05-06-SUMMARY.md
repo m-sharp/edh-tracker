@@ -111,6 +111,14 @@ None - no external service configuration required.
 - `go vet ./lib/...` passes; existing tests pass
 - Smoke test should verify end-to-end: create pod → pod appears in pod selector for creator
 
+## Self-Check: PASSED
+
+- FOUND: lib/business/pod/functions.go
+- FOUND: lib/business/business.go
+- FOUND: .planning/phases/05-pod-deck-ux/05-06-SUMMARY.md
+- FOUND commit: 2e80641 (feat(05-06): add DBClient to pod.Create and wrap three writes in transaction)
+- FOUND commit: 4dd5360 (feat(05-06): wire pod.Create with client in business.go)
+
 ---
 *Phase: 05-pod-deck-ux*
 *Completed: 2026-03-26*
