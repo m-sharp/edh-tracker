@@ -1,5 +1,5 @@
 ---
-status: complete
+status: diagnosed
 phase: 05-pod-deck-ux
 source: [05-01-SUMMARY.md, 05-02-SUMMARY.md, 05-03-SUMMARY.md, 05-04-SUMMARY.md, 05-05-SUMMARY.md]
 started: 2026-03-26T00:00:00Z
@@ -110,9 +110,13 @@ blocked: 0
   reason: "User reported: Decks tab is sorted by record correctly. The issue around pagination limiting results remains - the truely best/greatest record deck does not appear at the top of the list as it is on a different page of results."
   severity: major
   test: 2
-  root_cause: ""
-  artifacts: []
-  missing: []
+  root_cause: "paginationMode='server' is set on the DataGrid. In server mode, initialState.sortModel is purely cosmetic — it renders the sort arrow but does not affect the API call. GetDecksForPod is called with only pageSize and offset; no sort_by or sort_dir params are ever passed. Server returns decks in insertion order. A deck with the best record may be outside the first 25 rows and never appear on page 1."
+  artifacts:
+    - path: "app/src/routes/pod/DecksTab.tsx"
+      issue: "paginationMode='server' makes initialState.sortModel visual-only; no onSortModelChange handler fetches sorted data; GetDecksForPod call passes no sort params"
+  missing:
+    - "Switch paginationMode to 'client' (or remove it) and load all decks upfront — lets DataGrid sort client-side, which is sufficient given typical pod deck counts (10–50)"
+    - "Alternatively: add onSortModelChange + sort params to GetDecksForPod and backend route (more complex)"
   debug_session: ""
 
 - truth: "Creating a pod via the home screen onboarding dialog adds the creator as a pod member, so the pod appears in their pod selector immediately"
@@ -120,10 +124,13 @@ blocked: 0
   reason: "User reported: pod creation navigates correctly but no PodPlayer record was created for the creator. Pod selector shows 'No pods' even after hard refresh. Pod is orphaned — creator cannot access it."
   severity: blocker
   test: 8
-  root_cause: "Backend POST /api/pod creates the pod record but does not add the calling player as a member. Fix: backend pod Create business function should create the pod AND add the caller as a pod member (Manager role) in a single transaction."
-  artifacts: []
+  root_cause: "pod.Create calls podRepo.Add and roleRepo.SetRole but never calls podRepo.AddPlayerToPod. GetByPlayerID queries player_pod (not player_pod_role), so no row means the pod never appears. AddPlayer business function shows the correct two-step pattern — Create only does the second half. Neither step is in a transaction."
+  artifacts:
+    - path: "lib/business/pod/functions.go"
+      issue: "Create function missing podRepo.AddPlayerToPod call; writes player_pod_role but not player_pod; no transaction wrapping the three writes"
   missing:
-    - "lib/business/pod/functions.go: Create function must wrap pod insert + player_pod_role insert in a transaction"
+    - "lib/business/pod/functions.go: wrap pod.Add + podRepo.AddPlayerToPod + roleRepo.SetRole(RoleManager) in a GORM transaction using the db.WithContext(ctx).Transaction pattern from lib/repositories/user/repo.go"
+    - "Pass *lib.DBClient into Create constructor so a transaction can span both repos"
   debug_session: ""
 
 - truth: "FreeSolo commander creation fills the autocomplete field inline after the POST succeeds"
@@ -131,15 +138,15 @@ blocked: 0
   reason: "User reported: POST /api/commander returns 201 with no body. Frontend shows 'Failed to create commander' error. Commander is actually created (visible after refresh). Frontend's PostCommander handler expects an ID in the response body to wire the new option."
   severity: major
   test: 15
-  root_cause: "POST /api/commander returns 201 with empty body — same pattern fixed for pod/deck in plan 05-01 but missed for commander. Backend lib/routers/commander.go needs to return {\"id\": N}. Frontend PostCommander in http.ts expects Promise<{id: number}> to set the selected commander."
+  root_cause: "CommanderCreate handler calls w.WriteHeader(http.StatusCreated) with no body — discards the returned ID. Frontend callers (new/index.tsx line 65, SettingsTab.tsx line 201) both call res.json() on the empty response; JSON.parse of empty string throws SyntaxError, landing in catch. PostCommander in http.ts returns raw Response unlike PostPod/PostDeck which fully encapsulate the response."
   artifacts:
     - path: "lib/routers/commander.go"
-      issue: "CommanderCreate handler returns 201 with no body; needs to return {\"id\": N}"
+      issue: "CommanderCreate discards Create return value (new ID) and writes no response body"
     - path: "app/src/http.ts"
-      issue: "PostCommander return type and error handling expects id from response body"
+      issue: "PostCommander returns Promise<Response> instead of Promise<{id: number}>; does not check res.ok or parse body"
   missing:
-    - "lib/routers/commander.go: capture LastInsertId from business layer and write JSON {\"id\": N} like pod/deck handlers"
-    - "app/src/http.ts: PostCommander return type should be Promise<{id: number}>"
+    - "lib/routers/commander.go: capture ID from c.commanders.Create, write Content-Type header, WriteHeader 201, encode {\"id\": N} — mirror pod/deck handler pattern"
+    - "app/src/http.ts: refactor PostCommander to match PostPod/PostDeck — check res.ok, return res.json() as Promise<{id: number}>"
   debug_session: ""
 
 - truth: "Cancel buttons in promote/remove dialogs say 'Cancel'"
@@ -160,7 +167,13 @@ blocked: 0
   reason: "User reported: retired decks are hard-filtered out in JS (visibleRows), removing them entirely from the grid with no way to access them. The Is Retired column was also removed. Desired behavior: use DataGrid initialState filterModel to hide retired by default, keeping the column available for the user to remove the filter."
   severity: major
   test: 4
-  root_cause: ""
-  artifacts: []
-  missing: []
+  root_cause: "Line 32 of player/DecksTab.tsx applies .filter((d) => !d.retired) to produce visibleRows; DataGrid rows prop receives visibleRows (not data). No 'Is Retired' column is defined. Empty-state guard also checks visibleRows.length, so a player with only retired decks sees 'no decks' message."
+  artifacts:
+    - path: "app/src/routes/player/DecksTab.tsx"
+      issue: "Hard JS filter at line 32 permanently excludes retired decks; no retired column defined; empty-state checks visibleRows not data"
+  missing:
+    - "Remove visibleRows filter; pass data ?? [] directly to DataGrid rows"
+    - "Add 'Is Retired' column definition (field: 'retired', type: 'boolean')"
+    - "Add initialState.filter.filterModel: { items: [{ field: 'retired', operator: 'is', value: 'false' }] } to hide retired by default"
+    - "Update empty-state guard to check data (not visibleRows) so players with only retired decks don't see the 'no decks' empty state"
   debug_session: ""
