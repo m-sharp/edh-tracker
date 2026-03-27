@@ -126,6 +126,7 @@ Recent decisions affecting current work:
 - Make playing cards icon clickable to go home on mobile (ui)
 - Fix record display to default to four places (ui)
 - Handle API_BASE_URL for production in http.ts (api)
+- Restyle deck settings tab layout (ui)
 
 ### Blockers/Concerns
 
