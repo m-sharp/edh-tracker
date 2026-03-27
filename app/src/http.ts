@@ -261,15 +261,17 @@ export async function GetCommander(id: number): Promise<Commander> {
     return await res.json();
 }
 
-export async function PostCommander(name: string): Promise<Response> {
-    return await fetch(`${API_BASE_URL}/api/commander`, {
+export async function PostCommander(name: string): Promise<{ id: number }> {
+    const res = await fetch(`${API_BASE_URL}/api/commander`, {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({ name }),
     });
+    if (!res.ok) {
+        throw new Error(`Request failed: ${res.status}`);
+    }
+    return await res.json();
 }
 
 export async function PostDeck(body: NewDeckRequest): Promise<{ id: number }> {

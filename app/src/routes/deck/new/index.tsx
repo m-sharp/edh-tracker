@@ -60,9 +60,7 @@ export default function NewDeckView(): ReactElement {
             // Create new commander
             const newName = typeof value === "string" ? value : inputValue.replace(/^Create "/, "").replace(/"$/, "");
             try {
-                const res = await PostCommander(newName);
-                if (!res.ok) throw new Error("Failed");
-                const { id } = await res.json();
+                const { id } = await PostCommander(newName);
                 setCommanders((prev) => [...prev, { id, name: newName }]);
                 setId(id);
             } catch {

@@ -196,10 +196,8 @@ export default function DeckSettingsTab({ deck }: DeckSettingsTabProps): ReactEl
                                 if (typeof value === "string" || (typeof value === "object" && value.id === -1)) {
                                     const newName = typeof value === "string" ? value : value.name.replace(/^Create "/, "").replace(/"$/, "");
                                     try {
-                                        const res = await PostCommander(newName);
-                                        if (!res.ok) throw new Error("Failed");
-                                        const data = await res.json();
-                                        setCommanderId(data.id);
+                                        const { id } = await PostCommander(newName);
+                                        setCommanderId(id);
                                     } catch {
                                         setCommanderCreateError("Failed to create commander. Try again.");
                                     }
@@ -234,10 +232,8 @@ export default function DeckSettingsTab({ deck }: DeckSettingsTabProps): ReactEl
                                 if (typeof value === "string" || (typeof value === "object" && value.id === -1)) {
                                     const newName = typeof value === "string" ? value : value.name.replace(/^Create "/, "").replace(/"$/, "");
                                     try {
-                                        const res = await PostCommander(newName);
-                                        if (!res.ok) throw new Error("Failed");
-                                        const data = await res.json();
-                                        setPartnerCommanderId(data.id);
+                                        const { id } = await PostCommander(newName);
+                                        setPartnerCommanderId(id);
                                     } catch {
                                         setCommanderCreateError("Failed to create commander. Try again.");
                                     }
