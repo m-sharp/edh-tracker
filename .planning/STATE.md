@@ -127,6 +127,7 @@ Recent decisions affecting current work:
 - Fix record display to default to four places (ui)
 - Handle API_BASE_URL for production in http.ts (api)
 - Restyle deck settings tab layout (ui)
+- Restyle player settings tab layout (ui)
 
 ### Blockers/Concerns
 
