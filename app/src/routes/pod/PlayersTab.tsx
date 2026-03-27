@@ -9,13 +9,16 @@ import {
     DialogContent,
     DialogContentText,
     DialogTitle,
-    List,
-    ListItem,
-    ListItemText
+    Paper,
+    Typography
 } from "@mui/material";
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import PersonOffIcon from "@mui/icons-material/PersonOff";
 
 import { useAuth } from "../../auth";
 import { DeletePodPlayer, GetPlayersForPod, PatchPodPlayerRole } from "../../http";
+import { Record } from "../../components/stats";
+import { TooltipIconButton } from "../../components/TooltipIcon";
 import { PlayerWithRole } from "../../types";
 
 interface PodPlayersTabProps {
@@ -54,56 +57,50 @@ export default function PodPlayersTab({ players: initialPlayers, podId, isManage
         setConfirmAction(null);
     };
 
-    // TODO: Use icons w/ tooltips for promote/remove buttons?
     return (
         <>
-            <List>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                 {players.map((p) => (
-                    <ListItem
-                        key={p.id}
-                        secondaryAction={
-                            isManager && user?.player_id !== p.id ? (
+                    <Paper key={p.id} elevation={2} sx={{ p: 2 }}>
+                        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                                <Typography variant="body1">
+                                    <Link to={`/player/${p.id}`}>{p.name}</Link>
+                                </Typography>
+                                {p.role === "manager" && (
+                                    <Chip label="Manager" size="small" />
+                                )}
+                            </Box>
+                            {isManager && user?.player_id !== p.id && (
                                 <Box sx={{ display: "flex", gap: 1 }}>
                                     {p.role === "member" && (
-                                        <Button
-                                            variant="contained"
-                                            size="small"
+                                        <TooltipIconButton
+                                            title="Promote to Manager"
                                             onClick={() => setConfirmAction({ type: "promote", player: p })}
-                                            sx={{ minHeight: 44 }}
-                                        >
-                                            Promote
-                                        </Button>
+                                            icon={<PersonAddIcon />}
+                                        />
                                     )}
-                                    <Button
-                                        variant="contained"
-                                        size="small"
-                                        color="error"
+                                    <TooltipIconButton
+                                        title="Remove from pod"
                                         onClick={() => setConfirmAction({ type: "remove", player: p })}
-                                        sx={{ minHeight: 44 }}
-                                    >
-                                        Remove
-                                    </Button>
+                                        icon={<PersonOffIcon />}
+                                        color="error"
+                                    />
                                 </Box>
-                            ) : null
-                        }
-                    >
-                        <ListItemText
-                            primary={<Link to={`/player/${p.id}`}>{p.name}</Link>}
-                            secondary={
-                                <Chip
-                                    label={p.role}
-                                    size="small"
-                                    sx={{ mt: 0.5 }}
-                                />
-                            }
-                        />
-                    </ListItem>
+                            )}
+                        </Box>
+                        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                            <Record record={p.stats.record} /> {"\u2022"} {p.stats.points} pts {"\u2022"} {p.stats.kills} kills
+                        </Typography>
+                    </Paper>
                 ))}
-            </List>
+            </Box>
 
             <Dialog open={confirmAction !== null} onClose={() => setConfirmAction(null)}>
                 <DialogTitle>
-                    {confirmAction?.type === "promote" ? "Promote player?" : "Remove player?"}
+                    {confirmAction?.type === "promote"
+                        ? `Promote ${confirmAction.player.name}?`
+                        : `Remove ${confirmAction?.player.name}?`}
                 </DialogTitle>
                 <DialogContent>
                     <DialogContentText>
@@ -113,12 +110,13 @@ export default function PodPlayersTab({ players: initialPlayers, podId, isManage
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => setConfirmAction(null)}>Cancel</Button>
+                    <Button onClick={() => setConfirmAction(null)}>Never mind</Button>
                     <Button
+                        variant="contained"
                         color={confirmAction?.type === "promote" ? "primary" : "error"}
                         onClick={handleConfirm}
                     >
-                        Confirm
+                        {confirmAction?.type === "promote" ? "Make Manager" : "Remove"}
                     </Button>
                 </DialogActions>
             </Dialog>
