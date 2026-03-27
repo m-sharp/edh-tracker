@@ -107,7 +107,7 @@ Plans:
   3. The Pod Decks tab is sorted by record by default
   4. The Pod Players tab shows each player's record and points within that pod
   5. A player can create a new deck directly from the UI, and the deck commander update field shows the disambiguation tooltip
-**Plans:** 3/5 plans executed
+**Plans:** 8 plans (5 executed + 3 gap closure)
 
 Plans:
 - [x] 05-01-PLAN.md — Backend: API contract fix (pod/deck create return IDs) + pod-scoped player stats (POD-04)
@@ -115,6 +115,9 @@ Plans:
 - [x] 05-03-PLAN.md — Pod creation flow: HomeView onboarding + AppBar pod switcher + CreatePodDialog (POD-01, POD-02)
 - [x] 05-04-PLAN.md — Pod Players tab redesign with card layout and pod-scoped stats (POD-04)
 - [x] 05-05-PLAN.md — Deck creation route /deck/new + DeckSettingsTab freeSolo + Add Deck button (DECK-01)
+- [ ] 05-06-PLAN.md — pod.Create transaction: AddPlayerToPod + atomic 3-write tx (POD-01, POD-02) [gap closure]
+- [ ] 05-07-PLAN.md — Commander POST returns {id: N} body + PostCommander http.ts fix (DECK-01) [gap closure]
+- [ ] 05-08-PLAN.md — Pod Decks client-side sort + retired filter via DataGrid + Cancel copy (POD-03, DECK-02, DECK-03) [gap closure]
 
 ### Phase 6: Auth, Session & Test Coverage
 **Goal**: Session expiry is handled gracefully in the UI, the JWT secret has a startup guard, and missing test coverage is in place
@@ -148,7 +151,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 2. Design Language | 3/3 | Complete | ✓ |
 | 3. Frontend Structure | 8/8 | Complete   | 2026-03-24 |
 | 4. Game Model Change | 5/5 | Complete   | 2026-03-24 |
-| 5. Pod & Deck UX | 3/5 | In Progress|  |
+| 5. Pod & Deck UX | 5/8 | In Progress|  |
 | 6. Auth, Session & Test Coverage | 0/? | Not started | - |
 | 7. Production Readiness | 0/? | Not started | - |
 
