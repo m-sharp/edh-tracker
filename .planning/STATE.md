@@ -140,8 +140,15 @@ Recent decisions affecting current work:
 
 - [Phase 7 risk]: CORS / cookie behavior in deployed environment is unverified — must be confirmed before launch
 
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260326-x0y | Fix AppBar pod selector not updating after pod creation | 2026-03-27 | 0b0420b | [260326-x0y-fix-appbar-pod-selector-not-updating-aft](./quick/260326-x0y-fix-appbar-pod-selector-not-updating-aft/) |
+
 ## Session Continuity
 
+Last activity: 2026-03-27 - Completed quick task 260326-x0y: Fix AppBar pod selector not updating after pod creation
 Last session: 2026-03-27T02:35:21.245Z
 Stopped at: Completed 05-pod-deck-ux plan 08 (05-08-PLAN.md)
 Resume file: None
