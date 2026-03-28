@@ -118,10 +118,15 @@ func (c *CommanderRouter) CommanderCreate(w http.ResponseWriter, r *http.Request
 	log := c.log.With(zap.String("Name", req.Name))
 	log.Info("Saving new Commander record")
 
-	if _, err = c.commanders.Create(ctx, req.Name); err != nil {
+	id, err := c.commanders.Create(ctx, req.Name)
+	if err != nil {
 		trackerHttp.WriteError(log, w, http.StatusInternalServerError, err, "Failed to add Commander record", errMsg)
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(struct {
+		ID int `json:"id"`
+	}{ID: id})
 }

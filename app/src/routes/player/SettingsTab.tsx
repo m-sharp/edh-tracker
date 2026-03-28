@@ -1,6 +1,5 @@
 import { ReactElement, useState } from "react";
 import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
 import {
     Box,
     Button,
@@ -8,7 +7,6 @@ import {
     DialogActions,
     DialogContent,
     DialogTitle,
-    Divider,
     Skeleton,
     TextField,
     Typography,
@@ -18,7 +16,6 @@ import { AsyncComponentHelper } from "../../components/common";
 import {
     GetPodsForPlayer,
     PatchPlayer,
-    PostPod,
     PostPodLeave,
 } from "../../http";
 import { Player, Pod } from "../../types";
@@ -28,11 +25,8 @@ interface PlayerSettingsTabProps {
 }
 
 export default function PlayerSettingsTab({ player }: PlayerSettingsTabProps): ReactElement {
-    const navigate = useNavigate();
     const [name, setName] = useState(player.name);
     const [nameError, setNameError] = useState<string | null>(null);
-    const [newPodName, setNewPodName] = useState("");
-    const [createPodError, setCreatePodError] = useState<string | null>(null);
     const [leaveConfirmPodId, setLeaveConfirmPodId] = useState<number | null>(null);
     const [leaveError, setLeaveError] = useState<string | null>(null);
     const { data: pods, loading: podsLoading, error: podsError } = AsyncComponentHelper(GetPodsForPlayer(player.id));
@@ -61,16 +55,6 @@ export default function PlayerSettingsTab({ player }: PlayerSettingsTabProps): R
             } else {
                 setLeaveError("Failed to leave pod. Try again.");
             }
-        }
-    };
-
-    const handleCreatePod = async () => {
-        setCreatePodError(null);
-        try {
-            const pod = await PostPod(newPodName);
-            navigate(`/pod/${pod.id}`);
-        } catch {
-            setCreatePodError("Failed to create pod. Try again.");
         }
     };
 
@@ -106,28 +90,6 @@ export default function PlayerSettingsTab({ player }: PlayerSettingsTabProps): R
                         </Button>
                     </Box>
                 ))}
-            </Box>
-
-            <Divider sx={{ my: 2 }} />
-
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-                <Typography variant="h6">Create New Pod</Typography>
-                <Box sx={{ display: "flex", gap: 1 }}>
-                    <TextField
-                        label="Pod Name"
-                        value={newPodName}
-                        onChange={(e) => setNewPodName(e.target.value)}
-                        size="small"
-                    />
-                    <Button
-                        variant="contained"
-                        onClick={handleCreatePod}
-                        disabled={!newPodName.trim()}
-                    >
-                        Create
-                    </Button>
-                </Box>
-                {createPodError && <Typography color="error" variant="body2">{createPodError}</Typography>}
             </Box>
 
             <Dialog open={leaveConfirmPodId !== null} onClose={() => setLeaveConfirmPodId(null)}>

@@ -6,10 +6,13 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 
+	"github.com/m-sharp/edh-tracker/lib"
 	"github.com/m-sharp/edh-tracker/lib/errs"
 	repos "github.com/m-sharp/edh-tracker/lib/repositories"
 	"github.com/m-sharp/edh-tracker/lib/repositories/playerPodRole"
+	"github.com/m-sharp/edh-tracker/lib/utils"
 )
 
 // maxInviteUses is the maximum number of times an invite code can be used.
@@ -46,15 +49,36 @@ func GetByPlayerID(podRepo repos.PodRepository) GetByPlayerIDFunc {
 	}
 }
 
-func Create(podRepo repos.PodRepository, roleRepo repos.PlayerPodRoleRepository) CreateFunc {
+func Create(podRepo repos.PodRepository, roleRepo repos.PlayerPodRoleRepository, client *lib.DBClient) CreateFunc {
 	return func(ctx context.Context, name string, creatorPlayerID int) (int, error) {
-		podID, err := podRepo.Add(ctx, name)
-		if err != nil {
-			return 0, fmt.Errorf("failed to add pod: %w", err)
-		}
+		var podID int
+		err := client.GormDb.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+			podRepo.StartTX(tx)
+			defer podRepo.EndTX()
+			roleRepo.StartTX(tx)
+			defer roleRepo.EndTX()
 
-		if err = roleRepo.SetRole(ctx, podID, creatorPlayerID, playerPodRole.RoleManager); err != nil {
-			return 0, fmt.Errorf("failed to set creator as manager: %w", err)
+			// Step 1: insert pod
+			id, err := podRepo.Add(ctx, name)
+			if err != nil {
+				return fmt.Errorf("failed to insert pod in Create: %w", err)
+			}
+			podID = id
+
+			// Step 2: insert player_pod
+			if err = podRepo.AddPlayerToPod(ctx, id, creatorPlayerID); err != nil {
+				return fmt.Errorf("failed to insert player_pod in Create: %w", err)
+			}
+
+			// Step 3: insert player_pod_role
+			if err = roleRepo.SetRole(ctx, id, creatorPlayerID, playerPodRole.RoleManager); err != nil {
+				return fmt.Errorf("failed to insert player_pod_role in Create: %w", err)
+			}
+
+			return nil
+		})
+		if err != nil {
+			return 0, fmt.Errorf("failed to create pod: %w", err)
 		}
 
 		return podID, nil
@@ -200,7 +224,7 @@ func GetMembersWithRoles(roleRepo repos.PlayerPodRoleRepository) GetMembersWithR
 		for _, m := range models {
 			result = append(result, PlayerWithRole{
 				PlayerID: m.PlayerID,
-				Role:     m.Role,
+				Role:     utils.TitleCase(m.Role),
 			})
 		}
 		return result, nil

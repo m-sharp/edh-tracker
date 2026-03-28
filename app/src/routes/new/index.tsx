@@ -1,5 +1,5 @@
 import { ReactElement, useState } from "react";
-import { Form, redirect, useLoaderData, useParams, useSubmit } from "react-router-dom";
+import { Form, Link, redirect, useLoaderData, useParams, useSubmit } from "react-router-dom";
 import { LoaderFunctionArgs } from "@remix-run/router/utils";
 import {
     Autocomplete,
@@ -203,17 +203,26 @@ export default function View(): ReactElement {
                         Add Deck
                     </Button>
 
-                    <Button
-                        variant="contained"
-                        size="large"
-                        startIcon={<PublishIcon />}
-                        sx={{ mt: 2, minHeight: 48 }}
-                        fullWidth
-                        onClick={handleSubmit}
-                        disabled={!isSubmittable}
-                    >
-                        Submit Game
-                    </Button>
+                    <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
+                        <Button
+                            variant="outlined"
+                            component={Link}
+                            to={`/pod/${podId}`}
+                            sx={{ minHeight: 48, flex: 1 }}
+                        >
+                            Discard
+                        </Button>
+                        <Button
+                            variant="contained"
+                            size="large"
+                            startIcon={<PublishIcon />}
+                            sx={{ minHeight: 48, flex: 2 }}
+                            onClick={handleSubmit}
+                            disabled={!isSubmittable}
+                        >
+                            Submit Game
+                        </Button>
+                    </Box>
                 </Box>
             </Form>
         </Box>

@@ -9,23 +9,24 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/m-sharp/edh-tracker/lib"
+	"github.com/m-sharp/edh-tracker/lib/repositories/base"
 )
 
 type Repository struct {
-	db *gorm.DB
+	*base.Repo
 }
 
 func NewRepository(client *lib.DBClient) *Repository {
-	return &Repository{db: client.GormDb}
+	return &Repository{Repo: base.NewRepo(client.GormDb)}
 }
 
 func NewRepositoryFromDB(db *gorm.DB) *Repository {
-	return &Repository{db: db}
+	return &Repository{Repo: base.NewRepo(db)}
 }
 
 func (r *Repository) GetByCode(ctx context.Context, code string) (*Model, error) {
 	var m Model
-	err := r.db.WithContext(ctx).Where("invite_code = ?", code).First(&m).Error
+	err := r.DB().WithContext(ctx).Where("invite_code = ?", code).First(&m).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, nil
 	}
@@ -42,14 +43,14 @@ func (r *Repository) Add(ctx context.Context, podID, createdByPlayerID int, code
 		CreatedByPlayerID: createdByPlayerID,
 		ExpiresAt:         expiresAt,
 	}
-	if err := r.db.WithContext(ctx).Create(&m).Error; err != nil {
+	if err := r.DB().WithContext(ctx).Create(&m).Error; err != nil {
 		return fmt.Errorf("failed to insert pod invite: %w", err)
 	}
 	return nil
 }
 
 func (r *Repository) IncrementUsedCount(ctx context.Context, code string) error {
-	result := r.db.WithContext(ctx).Model(&Model{}).
+	result := r.DB().WithContext(ctx).Model(&Model{}).
 		Where("invite_code = ?", code).
 		Update("used_count", gorm.Expr("used_count + 1"))
 	if result.Error != nil {

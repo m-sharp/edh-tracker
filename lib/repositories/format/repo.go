@@ -8,23 +8,24 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/m-sharp/edh-tracker/lib"
+	"github.com/m-sharp/edh-tracker/lib/repositories/base"
 )
 
 type Repository struct {
-	db *gorm.DB
+	*base.Repo
 }
 
 func NewRepository(client *lib.DBClient) *Repository {
-	return &Repository{db: client.GormDb}
+	return &Repository{Repo: base.NewRepo(client.GormDb)}
 }
 
 func NewRepositoryFromDB(db *gorm.DB) *Repository {
-	return &Repository{db: db}
+	return &Repository{Repo: base.NewRepo(db)}
 }
 
 func (r *Repository) GetAll(ctx context.Context) ([]Model, error) {
 	var formats []Model
-	if err := r.db.WithContext(ctx).Find(&formats).Error; err != nil {
+	if err := r.DB().WithContext(ctx).Find(&formats).Error; err != nil {
 		return nil, fmt.Errorf("failed to get Format records: %w", err)
 	}
 	if formats == nil {
@@ -35,7 +36,7 @@ func (r *Repository) GetAll(ctx context.Context) ([]Model, error) {
 
 func (r *Repository) GetById(ctx context.Context, id int) (*Model, error) {
 	var m Model
-	err := r.db.WithContext(ctx).First(&m, id).Error
+	err := r.DB().WithContext(ctx).First(&m, id).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, nil
 	}
@@ -47,7 +48,7 @@ func (r *Repository) GetById(ctx context.Context, id int) (*Model, error) {
 
 func (r *Repository) GetByName(ctx context.Context, name string) (*Model, error) {
 	var m Model
-	err := r.db.WithContext(ctx).Where("name = ?", name).First(&m).Error
+	err := r.DB().WithContext(ctx).Where("name = ?", name).First(&m).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, nil
 	}

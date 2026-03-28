@@ -55,7 +55,9 @@ func TestCreate_OtherFormat_SkipsDeckFormatCheck(t *testing.T) {
 		{DeckID: testDeck.ID, Place: 1, Kills: 0},
 	}
 
-	fn := Create(zap.NewNop(), nil, nil, deckRepo, getFormat, client)
+	gameRepo := gamerepo.NewRepository(client)
+	gameResultRepo := gameresultrepo.NewRepository(client)
+	fn := Create(gameRepo, gameResultRepo, deckRepo, getFormat, client)
 	_, err := fn(context.Background(), "Game", podID, otherFormatID, inputs)
 	require.NoError(t, err)
 	assert.False(t, deckRepo.GetByIdCalled, "deck repo should not be called for other format")
@@ -83,7 +85,9 @@ func TestCreate_MatchingFormat_Success(t *testing.T) {
 		{DeckID: testDeck.ID, Place: 1, Kills: 2},
 	}
 
-	fn := Create(zap.NewNop(), nil, nil, deckRepo, getFormat, client)
+	gameRepo := gamerepo.NewRepository(client)
+	gameResultRepo := gameresultrepo.NewRepository(client)
+	fn := Create(gameRepo, gameResultRepo, deckRepo, getFormat, client)
 	_, err := fn(context.Background(), "Game", podID, formatID, inputs)
 	require.NoError(t, err)
 }
@@ -106,7 +110,7 @@ func TestCreate_FormatMismatch_Error(t *testing.T) {
 	}
 
 	// nil client is safe here because the function returns before reaching the transaction.
-	fn := Create(zap.NewNop(), gameRepo, gameResultRepo, deckRepo, getFormat, nil)
+	fn := Create(gameRepo, gameResultRepo, deckRepo, getFormat, nil)
 	_, err := fn(context.Background(), "Game", 1, 1, inputs)
 	assert.ErrorContains(t, err, "format does not match")
 }
@@ -124,7 +128,7 @@ func TestCreate_FormatNotFound_Error(t *testing.T) {
 	}
 
 	// nil client is safe here because the function returns before reaching the transaction.
-	fn := Create(zap.NewNop(), gameRepo, gameResultRepo, deckRepo, getFormat, nil)
+	fn := Create(gameRepo, gameResultRepo, deckRepo, getFormat, nil)
 	_, err := fn(context.Background(), "Game", 1, 99, inputs)
 	assert.Error(t, err)
 }
@@ -143,7 +147,7 @@ func TestCreate_InvalidInput_Error(t *testing.T) {
 	}
 
 	// nil client is safe here because the function returns before reaching the transaction.
-	fn := Create(zap.NewNop(), gameRepo, gameResultRepo, deckRepo, getFormat, nil)
+	fn := Create(gameRepo, gameResultRepo, deckRepo, getFormat, nil)
 	_, err := fn(context.Background(), "Game", 1, 1, inputs)
 	assert.ErrorContains(t, err, "deck_id is required")
 }

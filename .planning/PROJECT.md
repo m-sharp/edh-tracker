@@ -24,46 +24,46 @@ A pod can sit down, record a game in under a minute, and immediately see accurat
 ### Active
 
 **Frontend design overhaul (highest priority):**
-- [ ] Define and apply an overarching visual design language for the app (mobile-first, MUI conventions solidified)
+- [x] Define and apply an overarching visual design language for the app (mobile-first, MUI conventions solidified) — Validated in Phase 2: Design Language
 - [ ] Mobile-friendly layout and interaction patterns across all views — app must work at the table on a phone
 - [x] Refactor large route files into per-view subdirectories (`pod/`, `player/`, `deck/`, `game/` under `app/src/routes/`) — Validated in Phase 3: Frontend Structure
 - [x] Shared tab component with query-string-persisted active tab, shared loading/error handling — Validated in Phase 3: Frontend Structure
 - [x] Shared tooltip icon and tooltip icon button components — Validated in Phase 3: Frontend Structure
 - [x] Fix: page refresh causes blank white screen (React Router client-side routing issue) — Validated in Phase 3: Frontend Structure
 - [x] Fix: "No pods yet" flash before data loads on HomeView — Validated in Phase 3: Frontend Structure
-- [ ] Move pod creation out of player settings and into the pod page
-- [ ] New user onboarding: clear path and UX for a user with no pods yet
+- [x] Move pod creation out of player settings and into the pod page — Validated in Phase 5: pod-deck-ux
+- [x] New user onboarding: clear path and UX for a user with no pods yet — Validated in Phase 5: pod-deck-ux
 - [ ] Rebuild CLAUDE.md context section on frontend patterns (after refactor settles)
 
 **Game model change:**
-- [ ] Remove player requirement from game entry — games track decks only (player is implicit via deck ownership)
-- [ ] Deck picker in game form displays owner name (e.g., "Rakdos, Lord of Riots (Mike)")
-- [ ] Remove/hide player field from game creation and result forms
+- [x] Remove player requirement from game entry — games track decks only (player is implicit via deck ownership) — Validated in Phase 4: Game Model Change
+- [x] Deck picker in game form displays owner name (e.g., "Rakdos, Lord of Riots (Mike)") — Validated in Phase 4: Game Model Change
+- [x] Remove/hide player field from game creation and result forms — Validated in Phase 4: Game Model Change
 
 **Functional gaps:**
-- [ ] Player can create new decks via the UI
-- [ ] Pod → Decks tab sorted by record by default
-- [ ] Pod → Players view shows player records and points within the pod
-- [ ] New game form complete redesign (currently "looks terrible")
-- [ ] Record renderer supports any number of places (currently hardcoded to 4)
-- [ ] Tooltip on deck commander update: "This is for changing an existing deck's commander. To add a new deck, use the Add Deck button instead."
-- [ ] Investigate and define retired deck behavior across all views (pod, player, game)
+- [x] Player can create new decks via the UI — Validated in Phase 5: pod-deck-ux
+- [x] Pod → Decks tab sorted by record by default — Validated in Phase 5: pod-deck-ux
+- [x] Pod → Players view shows player records and points within the pod — Validated in Phase 5: pod-deck-ux
+- [x] New game form complete redesign (currently "looks terrible") — Validated in Phase 4: Game Model Change
+- [x] Record renderer supports any number of places (currently hardcoded to 4) — Validated in Phase 5: pod-deck-ux
+- [x] Tooltip on deck commander update: "This is for changing an existing deck's commander. To add a new deck, use the Add Deck button instead." — Validated in Phase 5: Pod & Deck UX
+- [x] Investigate and define retired deck behavior across all views (pod, player, game) — Validated in Phase 5: Pod & Deck UX
 
 **Auth and session:**
 - [ ] 401 interceptor in `http.ts`: call `logout()` from auth context on any 401 response, redirect to `/login`
 
 **Backend correctness:**
-- [ ] Add pod-membership check on `POST /api/game` (currently any authenticated user can create a game in any pod)
-- [ ] Add `player_id`-from-context ownership check in `DeckCreate` (currently accepts `player_id` from body)
-- [ ] Wrap game creation in a DB transaction (orphaned game rows if result insert fails)
-- [ ] Fix `PromotePlayer`/`KickPlayer` returning 403 for all errors including DB errors
-- [ ] Add startup check rejecting JWT secrets shorter than 32 bytes
-- [ ] Validate `used_count` against a max on pod invite join (currently only expiry is checked)
-- [ ] Add input length validation on string fields (names, titles) — return 400 not 500
+- [x] Add pod-membership check on `POST /api/game` (currently any authenticated user can create a game in any pod) — Validated in Phase 1: Backend Hardening
+- [x] Add `player_id`-from-context ownership check in `DeckCreate` (currently accepts `player_id` from body) — Validated in Phase 1: Backend Hardening
+- [x] Wrap game creation in a DB transaction (orphaned game rows if result insert fails) — Validated in Phase 1: Backend Hardening
+- [x] Fix `PromotePlayer`/`KickPlayer` returning 403 for all errors including DB errors — Validated in Phase 1: Backend Hardening
+- [x] Add startup check rejecting JWT secrets shorter than 32 bytes — Validated in Phase 1: Backend Hardening
+- [x] Validate `used_count` against a max on pod invite join (currently only expiry is checked) — Validated in Phase 1: Backend Hardening
+- [x] Add input length validation on string fields (names, titles) — return 400 not 500 — Validated in Phase 1: Backend Hardening
 
 **Performance:**
-- [ ] Batch deck stats queries — replace N+1 per-deck loop with single `WHERE deck_id IN (?)` query
-- [ ] Require at least one filter on `GET /api/decks`; remove or 404 the unfiltered path
+- [x] Batch deck stats queries — replace N+1 per-deck loop with single `WHERE deck_id IN (?)` query — Validated in Phase 1: Backend Hardening
+- [x] Require at least one filter on `GET /api/decks`; remove or 404 the unfiltered path — Validated in Phase 1: Backend Hardening
 
 **Test coverage:**
 - [ ] `commander.Repository.GetAll` tests (acknowledged TODO in repo)
@@ -109,10 +109,10 @@ A pod can sit down, record a game in under a minute, and immediately see accurat
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Games track decks only, not players | Player is implicit via deck ownership; requiring player on each game slot added friction without value | — Pending (needs API + UI implementation) |
-| Deck picker displays owner name | Multiple players may use similar commanders; owner context prevents mis-selection | — Pending |
+| Games track decks only, not players | Player is implicit via deck ownership; requiring player on each game slot added friction without value | — Implemented (Phase 4) |
+| Deck picker displays owner name | Multiple players may use similar commanders; owner context prevents mis-selection | — Implemented (Phase 4) |
 | Soft launch before full polish | Friend group provides real feedback; better to iterate on real usage than over-engineer before first user | — Pending |
-| Frontend design language to be defined before implementation | Retrofitting a design system is harder than building to one; define first, implement per-phase | — Pending |
+| Frontend design language to be defined before implementation | Retrofitting a design system is harder than building to one; define first, implement per-phase | — Implemented (Phase 2) |
 
 ## Evolution
 
@@ -132,4 +132,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-24 after Phase 03 (frontend-structure) completion*
+*Last updated: 2026-03-27 after Phase 05 (pod-deck-ux) completion*

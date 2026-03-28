@@ -4,6 +4,8 @@ import (
 	"context"
 	"time"
 
+	"gorm.io/gorm"
+
 	"github.com/m-sharp/edh-tracker/lib/repositories/commander"
 	"github.com/m-sharp/edh-tracker/lib/repositories/deck"
 	"github.com/m-sharp/edh-tracker/lib/repositories/deckCommander"
@@ -17,7 +19,14 @@ import (
 	"github.com/m-sharp/edh-tracker/lib/repositories/user"
 )
 
+type BaseRepository interface {
+	StartTX(tx *gorm.DB)
+	EndTX()
+	DB() *gorm.DB
+}
+
 type PlayerRepository interface {
+	BaseRepository
 	GetAll(ctx context.Context) ([]player.Model, error)
 	GetById(ctx context.Context, playerID int) (*player.Model, error)
 	GetByName(ctx context.Context, name string) (*player.Model, error)
@@ -29,6 +38,7 @@ type PlayerRepository interface {
 }
 
 type DeckRepository interface {
+	BaseRepository
 	GetAll(ctx context.Context) ([]deck.Model, error)
 	GetAllForPlayer(ctx context.Context, playerID int) ([]deck.Model, error)
 	GetAllByPlayerIDs(ctx context.Context, playerIDs []int) ([]deck.Model, error)
@@ -44,6 +54,7 @@ type DeckRepository interface {
 }
 
 type GameRepository interface {
+	BaseRepository
 	GetAllByPod(ctx context.Context, podID int) ([]game.Model, error)
 	GetAllByDeck(ctx context.Context, deckID int) ([]game.Model, error)
 	GetAllByPlayerID(ctx context.Context, playerID int) ([]game.Model, error)
@@ -58,11 +69,13 @@ type GameRepository interface {
 }
 
 type GameResultRepository interface {
+	BaseRepository
 	GetByGameID(ctx context.Context, gameID int) ([]gameResult.Model, error)
 	GetByID(ctx context.Context, resultID int) (*gameResult.Model, error)
 	GetStatsForPlayer(ctx context.Context, playerID int) (*gameResult.Aggregate, error)
 	GetStatsForDeck(ctx context.Context, deckID int) (*gameResult.Aggregate, error)
 	GetStatsForDecks(ctx context.Context, deckIDs []int) (map[int]*gameResult.Aggregate, error)
+	GetStatsForPlayersInPod(ctx context.Context, podID int, playerIDs []int) (map[int]*gameResult.Aggregate, error)
 	Add(ctx context.Context, m gameResult.Model) (int, error)
 	BulkAdd(ctx context.Context, results []gameResult.Model) error
 	Update(ctx context.Context, resultID, place, killCount, deckID int) error
@@ -70,6 +83,7 @@ type GameResultRepository interface {
 }
 
 type PodRepository interface {
+	BaseRepository
 	GetAll(ctx context.Context) ([]pod.Model, error)
 	GetByID(ctx context.Context, podID int) (*pod.Model, error)
 	GetByIDWithMembers(ctx context.Context, podID int) (*pod.Model, error)
@@ -86,6 +100,7 @@ type PodRepository interface {
 }
 
 type PlayerPodRoleRepository interface {
+	BaseRepository
 	GetRole(ctx context.Context, podID, playerID int) (*playerPodRole.Model, error)
 	SetRole(ctx context.Context, podID, playerID int, role string) error
 	GetMembersWithRoles(ctx context.Context, podID int) ([]playerPodRole.Model, error)
@@ -93,21 +108,20 @@ type PlayerPodRoleRepository interface {
 }
 
 type PodInviteRepository interface {
+	BaseRepository
 	GetByCode(ctx context.Context, code string) (*podInvite.Model, error)
 	Add(ctx context.Context, podID, createdByPlayerID int, code string, expiresAt *time.Time) error
 	IncrementUsedCount(ctx context.Context, code string) error
 }
 
 type UserRepository interface {
+	BaseRepository
 	GetByID(ctx context.Context, id int) (*user.Model, error)
 	GetByPlayerID(ctx context.Context, playerID int) (*user.Model, error)
 	GetByOAuth(ctx context.Context, provider, subject string) (*user.Model, error)
 	GetRoleByName(ctx context.Context, name string) (*user.RoleModel, error)
 	Add(ctx context.Context, playerID, roleID int) (int, error)
 	AddWithOAuth(ctx context.Context, playerID, roleID int, provider, subject, email, displayName, avatarURL string) (int, error)
-	// CreatePlayerAndUser atomically inserts a player row and a linked user row in one transaction.
-	// Returns the created user Model.
-	CreatePlayerAndUser(ctx context.Context, playerName string, roleID int, provider, subject, email, displayName, avatarURL string) (*user.Model, error)
 	BulkAdd(ctx context.Context, playerIDs []int, roleID int) error
 	SoftDelete(ctx context.Context, id int) error
 	GetByEmail(ctx context.Context, email string) (*user.Model, error)
@@ -116,12 +130,14 @@ type UserRepository interface {
 }
 
 type FormatRepository interface {
+	BaseRepository
 	GetAll(ctx context.Context) ([]format.Model, error)
 	GetById(ctx context.Context, id int) (*format.Model, error)
 	GetByName(ctx context.Context, name string) (*format.Model, error)
 }
 
 type CommanderRepository interface {
+	BaseRepository
 	GetAll(ctx context.Context) ([]commander.Model, error)
 	GetById(ctx context.Context, id int) (*commander.Model, error)
 	GetByName(ctx context.Context, name string) (*commander.Model, error)
@@ -131,6 +147,7 @@ type CommanderRepository interface {
 }
 
 type DeckCommanderRepository interface {
+	BaseRepository
 	GetByDeckId(ctx context.Context, deckID int) (*deckCommander.Model, error)
 	Add(ctx context.Context, deckID, commanderID int, partnerCommanderID *int) (int, error)
 	BulkAdd(ctx context.Context, entries []deckCommander.Model) error

@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Ready to plan
-stopped_at: Completed 04-05-PLAN.md
-last_updated: "2026-03-25T01:33:40.355Z"
+stopped_at: Completed 05-pod-deck-ux plan 08 (05-08-PLAN.md)
+last_updated: "2026-03-27T02:44:25.022Z"
 progress:
-  total_phases: 8
-  completed_phases: 4
-  total_plans: 22
-  completed_plans: 22
+  total_phases: 21
+  completed_phases: 5
+  total_plans: 30
+  completed_plans: 30
 ---
 
 # Project State
@@ -19,7 +19,7 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-22)
 
 **Core value:** A pod can sit down, record a game in under a minute, and immediately see accurate standings — on their phones.
-**Current focus:** Phase 04 — game-model-change
+**Current focus:** Phase 05 — pod-deck-ux
 
 ## Current Position
 
@@ -65,6 +65,12 @@ Plan: Not started
 | Phase 04-game-model-change P02 | 5min | 2 tasks | 2 files |
 | Phase 04 P04 | 2 | 1 tasks | 1 files |
 | Phase 04 P05 | 4min | 2 tasks | 3 files |
+| Phase 05-pod-deck-ux P02 | 7min | 2 tasks | 6 files |
+| Phase 05-pod-deck-ux P01 | 15min | 2 tasks | 8 files |
+| Phase 05-pod-deck-ux P04 | 7min | 1 tasks | 1 files |
+| Phase 05-pod-deck-ux P06 | 8min | 2 tasks | 3 files |
+| Phase 05 P07 | 2min | 2 tasks | 4 files |
+| Phase 05-pod-deck-ux P08 | 4min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -108,6 +114,14 @@ Recent decisions affecting current work:
 - [Phase 04]: inputProps bounds not added to EditResultModal — editing existing result lacks natural player count context per UAT scope
 - [Phase 04]: New Game button uses component={Link} on MUI Button in pod header — MUI styling with React Router navigation, no useNavigate needed
 - [Phase 04]: Card fields column uses flex: 1 to fill available width; remove button pinned top-right via alignItems: flex-start on outer row
+- [Phase 05]: Discard button uses component=Link pattern (established project convention) rather than useNavigate
+- [Phase 05]: Retired decks filtered client-side in PlayerDecksTab visibleRows — Is Retired column removed since hidden decks make it meaningless
+- [Phase 05-pod-deck-ux]: GetStatsForPlayersInPod batch query replaces N+1 per-player calls in GetAllByPod — single SQL with game.pod_id filter returns pod-scoped stats
+- [Phase 05-pod-deck-ux]: Pod/deck create endpoints return {id: N} JSON body with 201 — frontend can navigate to new resource without extra GET
+- [Phase 05-pod-deck-ux]: pod.Create writes all three rows (pod, player_pod, player_pod_role) directly against tx using inline structs — repo methods cannot participate in GORM transactions
+- [Phase 05]: CommanderCreate mirrors DeckCreate pattern: capture ID, set Content-Type, WriteHeader 201, encode JSON body
+- [Phase 05]: PostCommander mirrors PostDeck/PostPod: typed return, throw on non-ok, caller sites simplified to direct destructuring
+- [Phase 05-pod-deck-ux]: PlayerDecksTab retired filter via DataGrid initialState.filter instead of hard visibleRows filter — retired decks hidden by default but accessible via filter removal
 
 ### Roadmap Evolution
 
@@ -116,16 +130,25 @@ Recent decisions affecting current work:
 ### Pending Todos
 
 - Security review all API and frontend route authorization (api)
-- Make playing cards icon clickable to go home on mobile (ui)
 - Fix record display to default to four places (ui)
+- Handle API_BASE_URL for production in http.ts (api)
+- Restyle deck settings tab layout (ui)
+- Restyle player settings tab layout (ui)
 
 ### Blockers/Concerns
 
 - [Phase 7 risk]: CORS / cookie behavior in deployed environment is unverified — must be confirmed before launch
-- [Phase 4 risk]: Game model change (remove player field) requires both API and UI changes — coordinate carefully
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260326-x0y | Fix AppBar pod selector not updating after pod creation | 2026-03-27 | 0b0420b | [260326-x0y-fix-appbar-pod-selector-not-updating-aft](./quick/260326-x0y-fix-appbar-pod-selector-not-updating-aft/) |
+| 260327-sli | Update planning docs to reflect Phase 1-5 completions | 2026-03-28 | ca97023 | [260327-sli-update-planning-docs-to-reflect-phase-1-](./quick/260327-sli-update-planning-docs-to-reflect-phase-1-/) |
 
 ## Session Continuity
 
-Last session: 2026-03-24T20:48:48.498Z
-Stopped at: Completed 04-05-PLAN.md
+Last activity: 2026-03-28 - Completed quick task 260327-sli: Update planning docs to reflect Phase 1-5 completions
+Last session: 2026-03-27T02:35:21.245Z
+Stopped at: Completed 05-pod-deck-ux plan 08 (05-08-PLAN.md)
 Resume file: None

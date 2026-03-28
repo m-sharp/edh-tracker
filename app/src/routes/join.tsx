@@ -39,14 +39,6 @@ export default function JoinView(): ReactElement {
             });
     }, [loading, user, code]);
 
-    if (loading || joining) {
-        return (
-            <Box sx={{ display: "flex", justifyContent: "center", pt: 8 }}>
-                <CircularProgress />
-            </Box>
-        );
-    }
-
     if (!code) {
         return (
             <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", pt: 8, gap: 2 }}>
@@ -68,7 +60,6 @@ export default function JoinView(): ReactElement {
         );
     }
 
-    // TODO: This is weird ultimate return. Bad setup here with all these if checks
     return (
         <Box sx={{ display: "flex", justifyContent: "center", pt: 8 }}>
             <CircularProgress />

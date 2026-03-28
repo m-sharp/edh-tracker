@@ -12,6 +12,7 @@ import {
 } from "./http";
 import ErrorPage from "./routes/error"
 import DeckView from "./routes/deck";
+import NewDeckView, { newDeckLoader } from "./routes/deck/new";
 import GameView, { gameLoader } from "./routes/game";
 import HomeView from "./routes/home";
 import JoinView from "./routes/join";
@@ -57,6 +58,11 @@ const router = createBrowserRouter([
                 path: "pod/:podId/game/:gameId",
                 element: <RequireAuth><GameView /></RequireAuth>,
                 loader: gameLoader,
+            },
+            {
+                path: "deck/new",
+                element: <RequireAuth><NewDeckView /></RequireAuth>,
+                loader: newDeckLoader,
             },
             {
                 path: "player/:playerId",

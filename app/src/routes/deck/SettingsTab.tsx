@@ -4,6 +4,7 @@ import {
     Autocomplete,
     Box,
     Button,
+    createFilterOptions,
     Dialog,
     DialogActions,
     DialogContent,
@@ -23,8 +24,11 @@ import {
     GetCommanders,
     GetFormats,
     PatchDeck,
+    PostCommander,
 } from "../../http";
 import { Commander, Deck, Format } from "../../types";
+
+const filter = createFilterOptions<Commander>();
 
 interface DeckSettingsTabProps {
     deck: Deck;
@@ -47,6 +51,7 @@ export default function DeckSettingsTab({ deck }: DeckSettingsTabProps): ReactEl
         deck.commanders?.partner_commander_id ?? null
     );
     const [commanderError, setCommanderError] = useState<string | null>(null);
+    const [commanderCreateError, setCommanderCreateError] = useState<string | null>(null);
 
     const [retireConfirm, setRetireConfirm] = useState(false);
     const [deleteConfirm, setDeleteConfirm] = useState(false);
@@ -169,22 +174,77 @@ export default function DeckSettingsTab({ deck }: DeckSettingsTabProps): ReactEl
                     <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
                         <Autocomplete
                             options={commanders ?? []}
-                            getOptionLabel={(c: Commander) => c.name}
-                            getOptionKey={(c: Commander) => c.id}
+                            freeSolo
+                            getOptionLabel={(opt: Commander | string) => typeof opt === "string" ? opt : opt.name}
+                            filterOptions={(options, params) => {
+                                const cmdOptions = options.filter((o): o is Commander => typeof o !== "string");
+                                const filtered = filter(cmdOptions, params);
+                                const { inputValue } = params;
+                                const isExisting = cmdOptions.some((opt) => inputValue === opt.name);
+                                if (inputValue !== "" && !isExisting) {
+                                    filtered.push({ id: -1, name: `Create "${inputValue}"` } as Commander);
+                                }
+                                return filtered;
+                            }}
                             value={currentCommander}
-                            onChange={(_, value) => setCommanderId(value?.id ?? null)}
+                            onChange={async (_, value) => {
+                                setCommanderCreateError(null);
+                                if (value === null || typeof value === "undefined") {
+                                    setCommanderId(null);
+                                    return;
+                                }
+                                if (typeof value === "string" || (typeof value === "object" && value.id === -1)) {
+                                    const newName = typeof value === "string" ? value : value.name.replace(/^Create "/, "").replace(/"$/, "");
+                                    try {
+                                        const { id } = await PostCommander(newName);
+                                        setCommanderId(id);
+                                    } catch {
+                                        setCommanderCreateError("Failed to create commander. Try again.");
+                                    }
+                                    return;
+                                }
+                                setCommanderId(value.id);
+                            }}
                             renderInput={(params) => <TextField {...params} label="Commander" size="small" />}
                             fullWidth
                         />
                         <Autocomplete
                             options={commanders ?? []}
-                            getOptionLabel={(c: Commander) => c.name}
-                            getOptionKey={(c: Commander) => c.id}
+                            freeSolo
+                            getOptionLabel={(opt: Commander | string) => typeof opt === "string" ? opt : opt.name}
+                            filterOptions={(options, params) => {
+                                const cmdOptions = options.filter((o): o is Commander => typeof o !== "string");
+                                const filtered = filter(cmdOptions, params);
+                                const { inputValue } = params;
+                                const isExisting = cmdOptions.some((opt) => inputValue === opt.name);
+                                if (inputValue !== "" && !isExisting) {
+                                    filtered.push({ id: -1, name: `Create "${inputValue}"` } as Commander);
+                                }
+                                return filtered;
+                            }}
                             value={currentPartner}
-                            onChange={(_, value) => setPartnerCommanderId(value?.id ?? null)}
+                            onChange={async (_, value) => {
+                                setCommanderCreateError(null);
+                                if (value === null || typeof value === "undefined") {
+                                    setPartnerCommanderId(null);
+                                    return;
+                                }
+                                if (typeof value === "string" || (typeof value === "object" && value.id === -1)) {
+                                    const newName = typeof value === "string" ? value : value.name.replace(/^Create "/, "").replace(/"$/, "");
+                                    try {
+                                        const { id } = await PostCommander(newName);
+                                        setPartnerCommanderId(id);
+                                    } catch {
+                                        setCommanderCreateError("Failed to create commander. Try again.");
+                                    }
+                                    return;
+                                }
+                                setPartnerCommanderId(value.id);
+                            }}
                             renderInput={(params) => <TextField {...params} label="Partner (optional)" size="small" />}
                             fullWidth
                         />
+                        {commanderCreateError && <Typography color="error" variant="body2">{commanderCreateError}</Typography>}
                         <Button variant="contained" onClick={handleSaveCommanders} sx={{ width: "fit-content" }}>
                             Save Commanders
                         </Button>

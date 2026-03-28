@@ -1,7 +1,9 @@
 import { ReactElement } from "react";
-import { Box, Skeleton, Typography } from "@mui/material";
+import { Link } from "react-router-dom";
+import { Box, Button, Skeleton, Typography } from "@mui/material";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 
+import { useAuth } from "../../auth";
 import { AsyncComponentHelper } from "../../components/common";
 import { GetDecksForPlayer } from "../../http";
 import { CommanderColumn, StatColumns } from "../../components/stats";
@@ -12,6 +14,8 @@ interface PlayerDecksTabProps {
 
 export default function PlayerDecksTab({ playerId }: PlayerDecksTabProps): ReactElement {
     const { data, loading, error } = AsyncComponentHelper(GetDecksForPlayer(playerId));
+    const { user } = useAuth();
+    const isOwner = user?.player_id === playerId;
 
     if (loading) {
         return <Skeleton variant="rounded" animation="wave" height={750} />;
@@ -26,8 +30,15 @@ export default function PlayerDecksTab({ playerId }: PlayerDecksTabProps): React
 
     if (data && data.length === 0) {
         return (
-            <Box sx={{ p: 2 }}>
-                <Typography variant="body2" color="text.secondary">No decks yet.</Typography>
+            <Box sx={{ p: 2, display: "flex", flexDirection: "column", gap: 2 }}>
+                <Typography variant="body2" color="text.secondary">
+                    {isOwner ? "No decks yet. Add a deck to get started." : "No decks yet."}
+                </Typography>
+                {isOwner && (
+                    <Button variant="outlined" component={Link} to="/deck/new">
+                        Add Deck
+                    </Button>
+                )}
             </Box>
         );
     }
@@ -39,13 +50,29 @@ export default function PlayerDecksTab({ playerId }: PlayerDecksTabProps): React
     ];
 
     return (
-        <Box style={{ height: 750, width: "100%" }}>
-            <DataGrid
-                rows={data}
-                columns={columns}
-                slots={{ toolbar: GridToolbar }}
-                initialState={{ sorting: { sortModel: [{ field: "name", sort: "asc" }] } }}
-            />
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            {isOwner && (
+                <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                    <Button variant="outlined" component={Link} to="/deck/new">
+                        Add Deck
+                    </Button>
+                </Box>
+            )}
+            <Box style={{ height: 750, width: "100%" }}>
+                <DataGrid
+                    rows={data ?? []}
+                    columns={columns}
+                    slots={{ toolbar: GridToolbar }}
+                    initialState={{
+                        filter: {
+                            filterModel: {
+                                items: [{ field: "retired", operator: "is", value: "false" }],
+                            },
+                        },
+                        sorting: { sortModel: [{ field: "name", sort: "asc" }] },
+                    }}
+                />
+            </Box>
         </Box>
     );
 }

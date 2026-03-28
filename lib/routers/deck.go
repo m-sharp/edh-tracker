@@ -195,12 +195,17 @@ func (d *DeckRouter) DeckCreate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Info("Saving new Deck record")
-	if _, err = d.decks.Create(ctx, callerPlayerID, req.Name, req.FormatID, req.CommanderID, req.PartnerCommanderID); err != nil {
+	deckID, err := d.decks.Create(ctx, callerPlayerID, req.Name, req.FormatID, req.CommanderID, req.PartnerCommanderID)
+	if err != nil {
 		trackerHttp.WriteError(log, w, http.StatusInternalServerError, err, "Failed to create Deck record", errMsg)
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(struct {
+		ID int `json:"id"`
+	}{ID: deckID})
 }
 
 type updateDeckRequest struct {

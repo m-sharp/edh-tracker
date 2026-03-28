@@ -177,12 +177,17 @@ func (p *PodRouter) PodCreate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Info("Saving new Pod record")
-	if _, err = p.pods.Create(ctx, e.Name, callerID); err != nil {
+	podID, err := p.pods.Create(ctx, e.Name, callerID)
+	if err != nil {
 		trackerHttp.WriteError(log, w, http.StatusInternalServerError, err, "Failed to add Pod record", errMsg)
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(struct {
+		ID int `json:"id"`
+	}{ID: podID})
 }
 
 func (p *PodRouter) UpdatePod(w http.ResponseWriter, r *http.Request) {

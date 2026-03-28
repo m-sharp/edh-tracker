@@ -95,7 +95,6 @@ func GetByID(
 }
 
 func Create(
-	log *zap.Logger,
 	gameRepo repos.GameRepository,
 	gameResultRepo repos.GameResultRepository,
 	deckRepo repos.DeckRepository,
@@ -117,6 +116,7 @@ func Create(
 			return 0, fmt.Errorf("format %d not found", formatID)
 		}
 
+		// If this isn't an "other" game, assert all the decks are of the same format
 		if f.Name != "other" {
 			for _, input := range inputs {
 				d, err := deckRepo.GetById(ctx, input.DeckID)
@@ -134,10 +134,12 @@ func Create(
 
 		var createdGameID int
 		err = client.GormDb.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-			txGameRepo := gameRepository.NewRepositoryFromDB(tx)
-			txGameResultRepo := gameResultRepository.NewRepositoryFromDB(tx)
+			gameRepo.StartTX(tx)
+			defer gameRepo.EndTX()
+			gameResultRepo.StartTX(tx)
+			defer gameResultRepo.EndTX()
 
-			gameID, err := txGameRepo.Add(ctx, description, podID, formatID)
+			gameID, err := gameRepo.Add(ctx, description, podID, formatID)
 			if err != nil {
 				return fmt.Errorf("failed to create game: %w", err)
 			}
@@ -153,7 +155,7 @@ func Create(
 				})
 			}
 
-			if err := txGameResultRepo.BulkAdd(ctx, results); err != nil {
+			if err = gameResultRepo.BulkAdd(ctx, results); err != nil {
 				return fmt.Errorf("failed to create game results: %w", err)
 			}
 
