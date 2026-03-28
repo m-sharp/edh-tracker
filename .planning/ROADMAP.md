@@ -12,8 +12,8 @@ The backend is mature and auth is complete, but several correctness gaps (missin
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Backend Hardening** - Close authorization, transaction, validation, and performance gaps in the API
-- [ ] **Phase 2: Design Language** - Define and apply the visual design system before any UI work begins
+- [x] **Phase 1: Backend Hardening** - Close authorization, transaction, validation, and performance gaps in the API (completed 2026-03-23)
+- [x] **Phase 2: Design Language** - Define and apply the visual design system before any UI work begins (completed 2026-03-23)
 - [x] **Phase 3: Frontend Structure** - Refactor route files, build shared components, and fix routing bugs (completed 2026-03-24)
 - [x] **Phase 4: Game Model Change** - Remove player field from game entry and redesign the game form (completed 2026-03-24)
 - [x] **Phase 5: Pod & Deck UX** - Complete pod and deck feature gaps and onboarding flow (completed 2026-03-27)
@@ -140,30 +140,28 @@ Plans:
   2. The React app can reach the API in production — either via nginx reverse proxy (relative URLs) or a build-time env var — with no hardcoded localhost references
 **Plans**: TBD
 
-## Progress
-
-**Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
-
-| Phase | Plans Complete | Status | Completed |
-|-------|----------------|--------|-----------|
-| 1. Backend Hardening | 5/5 | Complete | ✓ |
-| 2. Design Language | 3/3 | Complete | ✓ |
-| 3. Frontend Structure | 8/8 | Complete   | 2026-03-24 |
-| 4. Game Model Change | 5/5 | Complete   | 2026-03-24 |
-| 5. Pod & Deck UX | 8/8 | Complete   | 2026-03-27 |
-| 6. Auth, Session & Test Coverage | 0/? | Not started | - |
-| 7. Production Readiness | 0/? | Not started | - |
-
 ### Phase 8: User testing and iterative feedback resolution
 
 **Goal:** [To be planned]
 **Requirements**: TBD
 **Depends on:** Phase 7
-**Plans:** 0 plans
+**Plans**: TBD
 
-Plans:
-- [ ] TBD (run /gsd:plan-phase 8 to break down)
+## Progress
+
+**Execution Order:**
+Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
+
+| Phase                                             | Plans Complete | Status      | Completed  |
+|---------------------------------------------------|----------------|-------------|------------|
+| 1. Backend Hardening                              | 5/5            | Complete    | ✓          |
+| 2. Design Language                                | 3/3            | Complete    | ✓          |
+| 3. Frontend Structure                             | 8/8            | Complete    | 2026-03-24 |
+| 4. Game Model Change                              | 5/5            | Complete    | 2026-03-24 |
+| 5. Pod & Deck UX                                  | 8/8            | Complete    | 2026-03-27 |
+| 6. Auth, Session & Test Coverage                  | 0/?            | Not started | -          |
+| 7. Production Readiness                           | 0/?            | Not started | -          |
+| 8. User testing and iterative feedback resolution | 0/?            | Not started | -          |
 
 ## Backlog
 
