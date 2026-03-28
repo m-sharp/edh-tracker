@@ -55,8 +55,8 @@ func Create(podRepo repos.PodRepository, roleRepo repos.PlayerPodRoleRepository,
 		err := client.GormDb.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 			podRepo.StartTX(tx)
 			defer podRepo.EndTX()
-
-			txPodRoleRepo := playerPodRole.NewRepositoryFromDB(tx)
+			roleRepo.StartTX(tx)
+			defer roleRepo.EndTX()
 
 			// Step 1: insert pod
 			id, err := podRepo.Add(ctx, name)
@@ -71,7 +71,7 @@ func Create(podRepo repos.PodRepository, roleRepo repos.PlayerPodRoleRepository,
 			}
 
 			// Step 3: insert player_pod_role
-			if err = txPodRoleRepo.SetRole(ctx, id, creatorPlayerID, playerPodRole.RoleManager); err != nil {
+			if err = roleRepo.SetRole(ctx, id, creatorPlayerID, playerPodRole.RoleManager); err != nil {
 				return fmt.Errorf("failed to insert player_pod_role in Create: %w", err)
 			}
 

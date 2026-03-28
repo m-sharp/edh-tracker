@@ -12,7 +12,7 @@ import (
 )
 
 type Repository struct {
-	*base.Repo // TODO: Apply this new pattern to all current repositories
+	*base.Repo
 }
 
 func NewRepository(client *lib.DBClient) *Repository {

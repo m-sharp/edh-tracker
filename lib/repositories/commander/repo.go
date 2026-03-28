@@ -8,23 +8,24 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/m-sharp/edh-tracker/lib"
+	"github.com/m-sharp/edh-tracker/lib/repositories/base"
 )
 
 type Repository struct {
-	db *gorm.DB
+	*base.Repo
 }
 
 func NewRepository(client *lib.DBClient) *Repository {
-	return &Repository{db: client.GormDb}
+	return &Repository{Repo: base.NewRepo(client.GormDb)}
 }
 
 func NewRepositoryFromDB(db *gorm.DB) *Repository {
-	return &Repository{db: db}
+	return &Repository{Repo: base.NewRepo(db)}
 }
 
 func (r *Repository) GetById(ctx context.Context, id int) (*Model, error) {
 	var m Model
-	err := r.db.WithContext(ctx).First(&m, id).Error
+	err := r.DB().WithContext(ctx).First(&m, id).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, nil
 	}
@@ -36,7 +37,7 @@ func (r *Repository) GetById(ctx context.Context, id int) (*Model, error) {
 
 func (r *Repository) GetByName(ctx context.Context, name string) (*Model, error) {
 	var m Model
-	err := r.db.WithContext(ctx).Where("name = ?", name).First(&m).Error
+	err := r.DB().WithContext(ctx).Where("name = ?", name).First(&m).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, nil
 	}
@@ -51,7 +52,7 @@ func (r *Repository) GetByNames(ctx context.Context, names []string) ([]Model, e
 		return []Model{}, nil
 	}
 	var commanders []Model
-	if err := r.db.WithContext(ctx).Where("name IN ?", names).Find(&commanders).Error; err != nil {
+	if err := r.DB().WithContext(ctx).Where("name IN ?", names).Find(&commanders).Error; err != nil {
 		return nil, fmt.Errorf("failed to get Commander records by names: %w", err)
 	}
 	return commanders, nil
@@ -60,7 +61,7 @@ func (r *Repository) GetByNames(ctx context.Context, names []string) ([]Model, e
 // TODO: Should have tests
 func (r *Repository) GetAll(ctx context.Context) ([]Model, error) {
 	var models []Model
-	if err := r.db.WithContext(ctx).Find(&models).Error; err != nil {
+	if err := r.DB().WithContext(ctx).Find(&models).Error; err != nil {
 		return nil, fmt.Errorf("failed to get all Commander records: %w", err)
 	}
 	return models, nil
@@ -68,7 +69,7 @@ func (r *Repository) GetAll(ctx context.Context) ([]Model, error) {
 
 func (r *Repository) Add(ctx context.Context, name string) (int, error) {
 	m := Model{Name: name}
-	if err := r.db.WithContext(ctx).Create(&m).Error; err != nil {
+	if err := r.DB().WithContext(ctx).Create(&m).Error; err != nil {
 		return 0, fmt.Errorf("failed to insert Commander record: %w", err)
 	}
 	return m.ID, nil
@@ -82,7 +83,7 @@ func (r *Repository) BulkAdd(ctx context.Context, names []string) ([]Model, erro
 	for i, n := range names {
 		models[i] = Model{Name: n}
 	}
-	if err := r.db.WithContext(ctx).CreateInBatches(&models, 100).Error; err != nil {
+	if err := r.DB().WithContext(ctx).CreateInBatches(&models, 100).Error; err != nil {
 		return nil, fmt.Errorf("failed to bulk insert Commander records: %w", err)
 	}
 	return r.GetByNames(ctx, names)

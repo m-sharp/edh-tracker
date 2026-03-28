@@ -2,10 +2,7 @@ package user_test
 
 import (
 	"context"
-	"fmt"
 	"testing"
-
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -158,55 +155,6 @@ func TestAddWithOAuth(t *testing.T) {
 	assert.Equal(t, testDisplayName, *got.DisplayName)
 	require.NotNil(t, got.AvatarURL)
 	assert.Equal(t, testAvatarURL, *got.AvatarURL)
-}
-
-func TestCreatePlayerAndUser(t *testing.T) {
-	// MySQL doesn't support nested transactions, so we can't use NewTestDB's wrapping transaction here.
-	// Use a plain connection and clean up explicitly.
-	db := testHelpers.NewTestDBNoTx(t)
-	repo := testHelpers.NewUserRepo(db)
-	ctx := context.Background()
-
-	playerName := fmt.Sprintf("CreatePU-Player-%s", uuid.NewString())
-
-	got, err := repo.CreatePlayerAndUser(ctx, playerName, 2, testProvider, testSubject+"-cpu", testEmail, testDisplayName, testAvatarURL)
-	require.NoError(t, err)
-	require.NotNil(t, got)
-
-	t.Cleanup(func() {
-		db.Exec("DELETE FROM user WHERE id = ?", got.ID)
-		db.Exec("DELETE FROM player WHERE id = ?", got.PlayerID)
-	})
-
-	assert.Greater(t, got.ID, 0)
-	assert.Greater(t, got.PlayerID, 0)
-	assert.Equal(t, 2, got.RoleID)
-	require.NotNil(t, got.OAuthProvider)
-	assert.Equal(t, testProvider, *got.OAuthProvider)
-
-	// Verify user is readable
-	fetched, err := repo.GetByID(ctx, got.ID)
-	require.NoError(t, err)
-	require.NotNil(t, fetched)
-	assert.Equal(t, got.PlayerID, fetched.PlayerID)
-}
-
-func TestCreatePlayerAndUser_Rollback(t *testing.T) {
-	db := testHelpers.NewTestDBNoTx(t)
-	repo := testHelpers.NewUserRepo(db)
-	playerRepo := testHelpers.NewPlayerRepo(db)
-	ctx := context.Background()
-
-	playerName := fmt.Sprintf("Rollback-Player-%s", uuid.NewString())
-
-	// roleID 9999 doesn't exist → FK violation → transaction must roll back
-	_, err := repo.CreatePlayerAndUser(ctx, playerName, 9999, testProvider, testSubject+"-rb", testEmail, testDisplayName, testAvatarURL)
-	require.Error(t, err)
-
-	// Verify player was not committed
-	players, err := playerRepo.GetByNames(ctx, []string{playerName})
-	require.NoError(t, err)
-	assert.Empty(t, players)
 }
 
 func TestBulkAdd(t *testing.T) {

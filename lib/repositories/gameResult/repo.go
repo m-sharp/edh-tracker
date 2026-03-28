@@ -8,6 +8,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/m-sharp/edh-tracker/lib"
+	"github.com/m-sharp/edh-tracker/lib/repositories/base"
 )
 
 const (
@@ -52,20 +53,20 @@ const (
 )
 
 type Repository struct {
-	db *gorm.DB
+	*base.Repo
 }
 
 func NewRepository(client *lib.DBClient) *Repository {
-	return &Repository{db: client.GormDb}
+	return &Repository{Repo: base.NewRepo(client.GormDb)}
 }
 
 func NewRepositoryFromDB(db *gorm.DB) *Repository {
-	return &Repository{db: db}
+	return &Repository{Repo: base.NewRepo(db)}
 }
 
 func (r *Repository) GetByGameID(ctx context.Context, gameID int) ([]Model, error) {
 	var results []Model
-	err := r.db.WithContext(ctx).
+	err := r.DB().WithContext(ctx).
 		Preload("Deck.Commander.Commander").
 		Preload("Deck.Commander.PartnerCommander").
 		Preload("Deck.Player").
@@ -79,7 +80,7 @@ func (r *Repository) GetByGameID(ctx context.Context, gameID int) ([]Model, erro
 
 func (r *Repository) GetByID(ctx context.Context, resultID int) (*Model, error) {
 	var m Model
-	err := r.db.WithContext(ctx).First(&m, resultID).Error
+	err := r.DB().WithContext(ctx).First(&m, resultID).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, nil
 	}
@@ -90,7 +91,7 @@ func (r *Repository) GetByID(ctx context.Context, resultID int) (*Model, error) 
 }
 
 func (r *Repository) Add(ctx context.Context, m Model) (int, error) {
-	if err := r.db.WithContext(ctx).Create(&m).Error; err != nil {
+	if err := r.DB().WithContext(ctx).Create(&m).Error; err != nil {
 		return 0, fmt.Errorf("failed to insert GameResult record: %w", err)
 	}
 	return m.ID, nil
@@ -100,14 +101,14 @@ func (r *Repository) BulkAdd(ctx context.Context, results []Model) error {
 	if len(results) == 0 {
 		return nil
 	}
-	if err := r.db.WithContext(ctx).CreateInBatches(&results, 100).Error; err != nil {
+	if err := r.DB().WithContext(ctx).CreateInBatches(&results, 100).Error; err != nil {
 		return fmt.Errorf("failed to bulk insert GameResult records: %w", err)
 	}
 	return nil
 }
 
 func (r *Repository) Update(ctx context.Context, resultID, place, killCount, deckID int) error {
-	result := r.db.WithContext(ctx).Model(&Model{}).Where("id = ?", resultID).Updates(Model{
+	result := r.DB().WithContext(ctx).Model(&Model{}).Where("id = ?", resultID).Updates(Model{
 		Place:     place,
 		KillCount: killCount,
 		DeckID:    deckID,
@@ -122,7 +123,7 @@ func (r *Repository) Update(ctx context.Context, resultID, place, killCount, dec
 }
 
 func (r *Repository) SoftDelete(ctx context.Context, id int) error {
-	if err := r.db.WithContext(ctx).Delete(&Model{}, id).Error; err != nil {
+	if err := r.DB().WithContext(ctx).Delete(&Model{}, id).Error; err != nil {
 		return fmt.Errorf("failed to soft-delete GameResult record: %w", err)
 	}
 	return nil
@@ -130,7 +131,7 @@ func (r *Repository) SoftDelete(ctx context.Context, id int) error {
 
 func (r *Repository) GetStatsForPlayer(ctx context.Context, playerID int) (*Aggregate, error) {
 	var stats gameStats
-	if err := r.db.WithContext(ctx).Raw(getStatsForPlayer, playerID).Scan(&stats).Error; err != nil {
+	if err := r.DB().WithContext(ctx).Raw(getStatsForPlayer, playerID).Scan(&stats).Error; err != nil {
 		return nil, fmt.Errorf("failed to get stats for player %d: %w", playerID, err)
 	}
 	agg := stats.toAggregate()
@@ -139,7 +140,7 @@ func (r *Repository) GetStatsForPlayer(ctx context.Context, playerID int) (*Aggr
 
 func (r *Repository) GetStatsForDeck(ctx context.Context, deckID int) (*Aggregate, error) {
 	var stats gameStats
-	if err := r.db.WithContext(ctx).Raw(getStatsForDeck, deckID).Scan(&stats).Error; err != nil {
+	if err := r.DB().WithContext(ctx).Raw(getStatsForDeck, deckID).Scan(&stats).Error; err != nil {
 		return nil, fmt.Errorf("failed to get stats for deck %d: %w", deckID, err)
 	}
 	agg := stats.toAggregate()
@@ -153,7 +154,7 @@ func (r *Repository) GetStatsForDecks(ctx context.Context, deckIDs []int) (map[i
 	}
 
 	var rows []gameStatWithDeck
-	if err := r.db.WithContext(ctx).Raw(getStatsForDecks, deckIDs).Scan(&rows).Error; err != nil {
+	if err := r.DB().WithContext(ctx).Raw(getStatsForDecks, deckIDs).Scan(&rows).Error; err != nil {
 		return nil, fmt.Errorf("failed to get batch stats for decks: %w", err)
 	}
 
@@ -181,6 +182,7 @@ func (r *Repository) GetStatsForDecks(ctx context.Context, deckIDs []int) (map[i
 
 	return result, nil
 }
+
 func (r *Repository) GetStatsForPlayersInPod(ctx context.Context, podID int, playerIDs []int) (map[int]*Aggregate, error) {
 	result := make(map[int]*Aggregate, len(playerIDs))
 	if len(playerIDs) == 0 {
@@ -188,7 +190,7 @@ func (r *Repository) GetStatsForPlayersInPod(ctx context.Context, podID int, pla
 	}
 
 	var rows []gameStatWithPlayer
-	if err := r.db.WithContext(ctx).Raw(getStatsForPlayersInPod, podID, playerIDs).Scan(&rows).Error; err != nil {
+	if err := r.DB().WithContext(ctx).Raw(getStatsForPlayersInPod, podID, playerIDs).Scan(&rows).Error; err != nil {
 		return nil, fmt.Errorf("failed to get batch stats for players in pod %d: %w", podID, err)
 	}
 

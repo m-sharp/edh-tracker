@@ -4,6 +4,8 @@ import (
 	"context"
 	"time"
 
+	"gorm.io/gorm"
+
 	repos "github.com/m-sharp/edh-tracker/lib/repositories"
 	deckRepo "github.com/m-sharp/edh-tracker/lib/repositories/deck"
 	deckCommanderRepo "github.com/m-sharp/edh-tracker/lib/repositories/deckCommander"
@@ -105,6 +107,9 @@ func (m *MockGameResultRepo) SoftDelete(ctx context.Context, id int) error {
 	}
 	panic("unexpected call to SoftDelete")
 }
+func (m *MockGameResultRepo) StartTX(_ *gorm.DB) {}
+func (m *MockGameResultRepo) EndTX()              {}
+func (m *MockGameResultRepo) DB() *gorm.DB        { return nil }
 
 // MockDeckRepo implements repos.DeckRepository.
 // GetByIdCalled is set to true whenever GetById is invoked (exported tracking flag).
@@ -189,6 +194,9 @@ func (m *MockDeckRepo) SoftDelete(ctx context.Context, id int) error {
 	}
 	panic("unexpected call to SoftDelete")
 }
+func (m *MockDeckRepo) StartTX(_ *gorm.DB) {}
+func (m *MockDeckRepo) EndTX()             {}
+func (m *MockDeckRepo) DB() *gorm.DB       { return nil }
 
 // MockDeckCommanderRepo implements repos.DeckCommanderRepository.
 // AddCalled is set to true whenever Add is invoked (exported tracking flag).
@@ -221,6 +229,9 @@ func (m *MockDeckCommanderRepo) DeleteByDeckID(ctx context.Context, deckID int) 
 	}
 	panic("unexpected call to DeleteByDeckID")
 }
+func (m *MockDeckCommanderRepo) StartTX(_ *gorm.DB) {}
+func (m *MockDeckCommanderRepo) EndTX()             {}
+func (m *MockDeckCommanderRepo) DB() *gorm.DB       { return nil }
 
 // MockPodRepo implements repos.PodRepository.
 type MockPodRepo struct {
@@ -301,6 +312,9 @@ func (m *MockPodRepo) RemovePlayer(ctx context.Context, podID, playerID int) err
 	}
 	panic("unexpected call to RemovePlayer")
 }
+func (m *MockPodRepo) StartTX(_ *gorm.DB) {}
+func (m *MockPodRepo) EndTX()             {}
+func (m *MockPodRepo) DB() *gorm.DB       { return nil }
 
 // MockPlayerRepo implements repos.PlayerRepository.
 type MockPlayerRepo struct {
@@ -346,6 +360,9 @@ func (m *MockPlayerRepo) Update(ctx context.Context, playerID int, name string) 
 func (m *MockPlayerRepo) SoftDelete(ctx context.Context, id int) error {
 	panic("unexpected call to SoftDelete")
 }
+func (m *MockPlayerRepo) StartTX(_ *gorm.DB) {}
+func (m *MockPlayerRepo) EndTX()             {}
+func (m *MockPlayerRepo) DB() *gorm.DB       { return nil }
 
 // MockPlayerPodRoleRepo implements repos.PlayerPodRoleRepository.
 type MockPlayerPodRoleRepo struct {
@@ -375,6 +392,9 @@ func (m *MockPlayerPodRoleRepo) GetMembersWithRoles(ctx context.Context, podID i
 func (m *MockPlayerPodRoleRepo) BulkAdd(ctx context.Context, podID int, playerIDs []int, role string) error {
 	panic("unexpected call to BulkAdd")
 }
+func (m *MockPlayerPodRoleRepo) StartTX(_ *gorm.DB) {}
+func (m *MockPlayerPodRoleRepo) EndTX()             {}
+func (m *MockPlayerPodRoleRepo) DB() *gorm.DB       { return nil }
 
 // MockPodInviteRepo implements repos.PodInviteRepository.
 type MockPodInviteRepo struct {
@@ -401,6 +421,9 @@ func (m *MockPodInviteRepo) IncrementUsedCount(ctx context.Context, code string)
 	}
 	panic("unexpected call to IncrementUsedCount")
 }
+func (m *MockPodInviteRepo) StartTX(_ *gorm.DB) {}
+func (m *MockPodInviteRepo) EndTX()             {}
+func (m *MockPodInviteRepo) DB() *gorm.DB       { return nil }
 
 // MockGameRepo implements repos.GameRepository.
 type MockGameRepo struct {
@@ -479,6 +502,9 @@ func (m *MockGameRepo) SoftDelete(ctx context.Context, id int) error {
 	}
 	panic("unexpected call to SoftDelete")
 }
+func (m *MockGameRepo) StartTX(_ *gorm.DB) {}
+func (m *MockGameRepo) EndTX()             {}
+func (m *MockGameRepo) DB() *gorm.DB       { return nil }
 
 // MockFormatRepo implements repos.FormatRepository.
 type MockFormatRepo struct {
@@ -505,6 +531,9 @@ func (m *MockFormatRepo) GetByName(ctx context.Context, name string) (*formatRep
 	}
 	panic("unexpected call to GetByName")
 }
+func (m *MockFormatRepo) StartTX(_ *gorm.DB) {}
+func (m *MockFormatRepo) EndTX()             {}
+func (m *MockFormatRepo) DB() *gorm.DB       { return nil }
 
 // MockUserRepo implements repos.UserRepository.
 type MockUserRepo struct {
@@ -514,7 +543,6 @@ type MockUserRepo struct {
 	GetRoleByNameFn        func(ctx context.Context, name string) (*userRepo.RoleModel, error)
 	AddFn                  func(ctx context.Context, playerID, roleID int) (int, error)
 	AddWithOAuthFn         func(ctx context.Context, playerID, roleID int, provider, subject, email, displayName, avatarURL string) (int, error)
-	CreatePlayerAndUserFn  func(ctx context.Context, playerName string, roleID int, provider, subject, email, displayName, avatarURL string) (*userRepo.Model, error)
 	BulkAddFn              func(ctx context.Context, playerIDs []int, roleID int) error
 	SoftDeleteFn           func(ctx context.Context, id int) error
 	GetByEmailFn           func(ctx context.Context, email string) (*userRepo.Model, error)
@@ -558,12 +586,6 @@ func (m *MockUserRepo) AddWithOAuth(ctx context.Context, playerID, roleID int, p
 	}
 	panic("unexpected call to AddWithOAuth")
 }
-func (m *MockUserRepo) CreatePlayerAndUser(ctx context.Context, playerName string, roleID int, provider, subject, email, displayName, avatarURL string) (*userRepo.Model, error) {
-	if m.CreatePlayerAndUserFn != nil {
-		return m.CreatePlayerAndUserFn(ctx, playerName, roleID, provider, subject, email, displayName, avatarURL)
-	}
-	panic("unexpected call to CreatePlayerAndUser")
-}
 func (m *MockUserRepo) BulkAdd(ctx context.Context, playerIDs []int, roleID int) error {
 	if m.BulkAddFn != nil {
 		return m.BulkAddFn(ctx, playerIDs, roleID)
@@ -594,3 +616,6 @@ func (m *MockUserRepo) SetEmail(ctx context.Context, playerID int, email string)
 	}
 	panic("unexpected call to SetEmail")
 }
+func (m *MockUserRepo) StartTX(_ *gorm.DB) {}
+func (m *MockUserRepo) EndTX()             {}
+func (m *MockUserRepo) DB() *gorm.DB       { return nil }

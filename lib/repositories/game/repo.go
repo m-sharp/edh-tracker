@@ -8,18 +8,19 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/m-sharp/edh-tracker/lib"
+	"github.com/m-sharp/edh-tracker/lib/repositories/base"
 )
 
 type Repository struct {
-	db *gorm.DB
+	*base.Repo
 }
 
 func NewRepository(client *lib.DBClient) *Repository {
-	return &Repository{db: client.GormDb}
+	return &Repository{Repo: base.NewRepo(client.GormDb)}
 }
 
 func NewRepositoryFromDB(db *gorm.DB) *Repository {
-	return &Repository{db: db}
+	return &Repository{Repo: base.NewRepo(db)}
 }
 
 func (r *Repository) preloadAll(db *gorm.DB) *gorm.DB {
@@ -31,7 +32,7 @@ func (r *Repository) preloadAll(db *gorm.DB) *gorm.DB {
 
 func (r *Repository) GetAllByPod(ctx context.Context, podID int) ([]Model, error) {
 	var games []Model
-	err := r.preloadAll(r.db.WithContext(ctx)).
+	err := r.preloadAll(r.DB().WithContext(ctx)).
 		Where("pod_id = ?", podID).
 		Find(&games).Error
 	if err != nil {
@@ -45,12 +46,12 @@ func (r *Repository) GetAllByPod(ctx context.Context, podID int) ([]Model, error
 
 func (r *Repository) GetAllByPodPaginated(ctx context.Context, podID, limit, offset int) ([]Model, int, error) {
 	var total int64
-	if err := r.db.WithContext(ctx).Model(&Model{}).Where("pod_id = ?", podID).Count(&total).Error; err != nil {
+	if err := r.DB().WithContext(ctx).Model(&Model{}).Where("pod_id = ?", podID).Count(&total).Error; err != nil {
 		return nil, 0, fmt.Errorf("failed to count Game records for pod %d: %w", podID, err)
 	}
 
 	var games []Model
-	err := r.preloadAll(r.db.WithContext(ctx)).
+	err := r.preloadAll(r.DB().WithContext(ctx)).
 		Where("pod_id = ?", podID).
 		Limit(limit).Offset(offset).
 		Find(&games).Error
@@ -65,7 +66,7 @@ func (r *Repository) GetAllByPodPaginated(ctx context.Context, podID, limit, off
 
 func (r *Repository) GetAllByDeck(ctx context.Context, deckID int) ([]Model, error) {
 	var games []Model
-	err := r.preloadAll(r.db.WithContext(ctx)).
+	err := r.preloadAll(r.DB().WithContext(ctx)).
 		Joins("INNER JOIN game_result ON game.id = game_result.game_id").
 		Where("game_result.deck_id = ? AND game_result.deleted_at IS NULL", deckID).
 		Find(&games).Error
@@ -80,7 +81,7 @@ func (r *Repository) GetAllByDeck(ctx context.Context, deckID int) ([]Model, err
 
 func (r *Repository) GetAllByDeckPaginated(ctx context.Context, deckID, limit, offset int) ([]Model, int, error) {
 	var total int64
-	if err := r.db.WithContext(ctx).Model(&Model{}).
+	if err := r.DB().WithContext(ctx).Model(&Model{}).
 		Joins("INNER JOIN game_result ON game.id = game_result.game_id").
 		Where("game_result.deck_id = ? AND game_result.deleted_at IS NULL", deckID).
 		Count(&total).Error; err != nil {
@@ -88,7 +89,7 @@ func (r *Repository) GetAllByDeckPaginated(ctx context.Context, deckID, limit, o
 	}
 
 	var games []Model
-	err := r.preloadAll(r.db.WithContext(ctx)).
+	err := r.preloadAll(r.DB().WithContext(ctx)).
 		Joins("INNER JOIN game_result ON game.id = game_result.game_id").
 		Where("game_result.deck_id = ? AND game_result.deleted_at IS NULL", deckID).
 		Limit(limit).Offset(offset).
@@ -104,7 +105,7 @@ func (r *Repository) GetAllByDeckPaginated(ctx context.Context, deckID, limit, o
 
 func (r *Repository) GetAllByPlayerID(ctx context.Context, playerID int) ([]Model, error) {
 	var games []Model
-	err := r.preloadAll(r.db.WithContext(ctx)).
+	err := r.preloadAll(r.DB().WithContext(ctx)).
 		Select("game.*").
 		Joins("INNER JOIN game_result ON game.id = game_result.game_id").
 		Joins("INNER JOIN deck ON game_result.deck_id = deck.id").
@@ -122,7 +123,7 @@ func (r *Repository) GetAllByPlayerID(ctx context.Context, playerID int) ([]Mode
 
 func (r *Repository) GetAllByPlayerIDPaginated(ctx context.Context, playerID, limit, offset int) ([]Model, int, error) {
 	var total int64
-	if err := r.db.WithContext(ctx).Model(&Model{}).
+	if err := r.DB().WithContext(ctx).Model(&Model{}).
 		Select("game.*").
 		Joins("INNER JOIN game_result ON game.id = game_result.game_id").
 		Joins("INNER JOIN deck ON game_result.deck_id = deck.id").
@@ -133,7 +134,7 @@ func (r *Repository) GetAllByPlayerIDPaginated(ctx context.Context, playerID, li
 	}
 
 	var games []Model
-	err := r.preloadAll(r.db.WithContext(ctx)).
+	err := r.preloadAll(r.DB().WithContext(ctx)).
 		Select("game.*").
 		Joins("INNER JOIN game_result ON game.id = game_result.game_id").
 		Joins("INNER JOIN deck ON game_result.deck_id = deck.id").
@@ -152,7 +153,7 @@ func (r *Repository) GetAllByPlayerIDPaginated(ctx context.Context, playerID, li
 
 func (r *Repository) GetByID(ctx context.Context, gameID int) (*Model, error) {
 	var m Model
-	err := r.preloadAll(r.db.WithContext(ctx)).First(&m, gameID).Error
+	err := r.preloadAll(r.DB().WithContext(ctx)).First(&m, gameID).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, nil
 	}
@@ -164,7 +165,7 @@ func (r *Repository) GetByID(ctx context.Context, gameID int) (*Model, error) {
 
 func (r *Repository) Add(ctx context.Context, description string, podID, formatID int) (int, error) {
 	m := Model{Description: description, PodID: podID, FormatID: formatID}
-	if err := r.db.WithContext(ctx).Create(&m).Error; err != nil {
+	if err := r.DB().WithContext(ctx).Create(&m).Error; err != nil {
 		return 0, fmt.Errorf("failed to insert Game record: %w", err)
 	}
 	return m.ID, nil
@@ -174,7 +175,7 @@ func (r *Repository) BulkAdd(ctx context.Context, games []Model) ([]int, error) 
 	if len(games) == 0 {
 		return []int{}, nil
 	}
-	if err := r.db.WithContext(ctx).CreateInBatches(&games, 100).Error; err != nil {
+	if err := r.DB().WithContext(ctx).CreateInBatches(&games, 100).Error; err != nil {
 		return nil, fmt.Errorf("failed to bulk insert Game records: %w", err)
 	}
 	ids := make([]int, len(games))
@@ -185,7 +186,7 @@ func (r *Repository) BulkAdd(ctx context.Context, games []Model) ([]int, error) 
 }
 
 func (r *Repository) Update(ctx context.Context, gameID int, description string) error {
-	result := r.db.WithContext(ctx).Model(&Model{}).Where("id = ?", gameID).Update("description", description)
+	result := r.DB().WithContext(ctx).Model(&Model{}).Where("id = ?", gameID).Update("description", description)
 	if result.Error != nil {
 		return fmt.Errorf("failed to update Game record: %w", result.Error)
 	}
@@ -198,7 +199,7 @@ func (r *Repository) Update(ctx context.Context, gameID int, description string)
 func (r *Repository) SoftDelete(ctx context.Context, id int) error {
 	m := Model{}
 	m.ID = id
-	if err := r.db.WithContext(ctx).Delete(&m).Error; err != nil {
+	if err := r.DB().WithContext(ctx).Delete(&m).Error; err != nil {
 		return fmt.Errorf("failed to soft-delete Game record: %w", err)
 	}
 	return nil

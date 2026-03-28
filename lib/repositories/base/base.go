@@ -1,6 +1,7 @@
 package base
 
 import (
+	"sync"
 	"time"
 
 	"gorm.io/gorm"
@@ -17,6 +18,7 @@ type GormModelBase struct {
 type Repo struct {
 	db *gorm.DB
 	tx *gorm.DB
+	mu sync.RWMutex
 }
 
 func NewRepo(db *gorm.DB) *Repo {
@@ -25,16 +27,22 @@ func NewRepo(db *gorm.DB) *Repo {
 
 // StartTX sets the underlying gorm.DB to a passed transaction wrapped gorm.DB. Always defer EndTX after calling.
 func (r *Repo) StartTX(tx *gorm.DB) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
 	r.tx = tx
 }
 
 // EndTX should be deferred after calling StartTX. Unsets the underlying gorm.DB so that the regular connection is used.
 func (r *Repo) EndTX() {
+	r.mu.Lock()
+	defer r.mu.Unlock()
 	r.tx = nil
 }
 
 // DB returns the underlying gorm.DB.
 func (r *Repo) DB() *gorm.DB {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
 	if r.tx != nil {
 		return r.tx
 	}
